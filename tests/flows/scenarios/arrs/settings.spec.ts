@@ -28,6 +28,13 @@ import {
 	syncConfig,
 	syncSection
 } from '$flows/helpers/sync/sync.ts';
+import {
+	addDefaultFilter,
+	openUpgrades,
+	saveUpgrades,
+	setUpgradeCore,
+	upgradesData
+} from '$flows/helpers/sync/upgrades.ts';
 
 const NAME = 'Flow Radarr';
 const OTHER_NAME = 'Second Radarr';
@@ -367,18 +374,21 @@ test('refuses a name or address another instance has', async ({ page, fakeRadarr
  * Flow:
  * 1. The user syncs Delay Profiles, then sets Library Refresh and turns on
  *    Cleanup.
- * 2. The test waits until no job is running.
- * 3. On the Settings tab, the user clicks Delete and confirms "Delete" in the
+ * 2. On the Upgrades tab, the user turns upgrades on with a Default filter
+ *    and saves.
+ * 3. The test waits until no job is running.
+ * 4. On the Settings tab, the user clicks Delete and confirms "Delete" in the
  *    "Delete Instance" dialog.
- * 4. The user adds an instance with the same name and URL.
+ * 5. The user adds an instance with the same name and URL.
  *
  * Expects:
  * - the page lands on `/arr`, and neither the API nor the sidebar lists the
  *   instance; its Sync page answers 404
- * - Settings › Jobs lists nothing for the instance
+ * - Settings › Jobs lists nothing for the instance, `arr.upgrade:{id}`
+ *   included
  * - the earlier sync run is still in run history
  * - the fake gets no requests after the delete
- * - the new instance starts with nothing configured
+ * - the new instance starts with nothing configured, upgrades included
  */
 test('deleting an instance removes its settings and jobs', async ({ page, fakeRadarr }) => {
 	const name = `Fake ${fakeRadarr.target.label}`;
@@ -389,6 +399,14 @@ test('deleting an instance removes its settings and jobs', async ({ page, fakeRa
 	await syncSection(page, 'Delay Profiles');
 	const synced = await waitForJobRun(page, 'arr.sync.delayProfiles', { after: started });
 	await editArr(page, name, { libraryRefresh: 'Every hour', cleanup: true });
+	await openUpgrades(page, name);
+	await setUpgradeCore(page, { enabled: true });
+	await addDefaultFilter(page);
+	await saveUpgrades(page);
+	expect(
+		(await scheduledJobs(page)).map((job) => job.description),
+		'Saving upgrades should schedule the upgrade job'
+	).toContain(`arr.upgrade:${id}`);
 
 	await waitForIdleJobs(page);
 	const requestsBefore = fakeRadarr.requests.length;
@@ -406,8 +424,13 @@ test('deleting an instance removes its settings and jobs', async ({ page, fakeRa
 		(await page.request.get(`/arr/${id}/sync`)).status(),
 		'The Sync page should answer 404'
 	).toBe(404);
+	const jobsAfter = await scheduledJobs(page);
 	expect(
-		(await scheduledJobs(page)).filter((job) => job.description.endsWith(`:${id}`)),
+		jobsAfter.map((job) => job.description),
+		'Settings › Jobs should drop the upgrade job'
+	).not.toContain(`arr.upgrade:${id}`);
+	expect(
+		jobsAfter.filter((job) => job.description.endsWith(`:${id}`)),
 		'Settings › Jobs should list nothing for the instance'
 	).toEqual([]);
 	expect(
@@ -425,6 +448,10 @@ test('deleting an instance removes its settings and jobs', async ({ page, fakeRa
 	expect(
 		(await arrSettings(page, added.id)).cleanupSettings,
 		'The new instance should have no cleanup settings'
+	).toBeNull();
+	expect(
+		(await upgradesData(page, added.id)).config,
+		'The new instance should have no upgrade config'
 	).toBeNull();
 	expect(
 		(await syncConfig(page, added.id)).syncData,
