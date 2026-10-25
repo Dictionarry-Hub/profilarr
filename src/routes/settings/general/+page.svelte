@@ -128,7 +128,7 @@
 		enabled: true,
 		file_logging: true,
 		console_logging: true,
-		min_level: 'INFO' as const,
+		min_level: 'DEBUG' as const,
 		retention_days: 30
 	};
 

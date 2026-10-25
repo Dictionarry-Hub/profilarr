@@ -46,7 +46,7 @@ Settings live in the `log_settings` table (singleton row, `id = 1`):
 `LogSettingsManager` (`settings.ts`) caches these values in memory and exposes a
 `reload()` method that the settings UI calls after saving. If the database is
 unavailable (e.g. during early startup), the manager falls back to hardcoded
-defaults: INFO level, both outputs enabled, 30-day retention.
+defaults: DEBUG level, both outputs enabled, 30-day retention.
 
 ## Output Formats
 

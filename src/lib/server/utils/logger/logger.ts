@@ -20,7 +20,7 @@ class Logger {
 			enabled: config?.enabled ?? true,
 			fileLogging: config?.fileLogging ?? true,
 			consoleLogging: config?.consoleLogging ?? true,
-			minLevel: config?.minLevel ?? 'INFO'
+			minLevel: config?.minLevel ?? 'DEBUG'
 		};
 	}
 
