@@ -722,6 +722,9 @@
 									}}
 								/>
 							</div>
+						{:else}
+							<!-- The field is hidden while logging is off; keep the stored retention -->
+							<input type="hidden" name="log_retention_days" value={logRetentionDays} />
 						{/if}
 					</div>
 					<input type="hidden" name="log_file_logging" value={logFileLogging ? 'on' : ''} />
