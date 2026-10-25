@@ -12,6 +12,7 @@
 import { test, expect } from '$flows/helpers/core/test.ts';
 import { saveForm } from '$flows/helpers/core/forms.ts';
 import { openTab } from '$flows/helpers/core/nav.ts';
+import { unflatten } from '$flows/helpers/core/pageData.ts';
 import { addArr, arrInstance, arrSettings, editArr, openArr } from '$flows/helpers/sync/arrs.ts';
 import { chooseDelayProfile, syncSection } from '$flows/helpers/sync/sync.ts';
 
@@ -112,4 +113,42 @@ test('a new URL drops saved Basic Auth unless it is entered again', async ({ pag
 		b.requests.filter((request) => request.headers.authorization !== undefined),
 		'B should never see an Authorization header'
 	).toEqual([]);
+});
+
+/**
+ * Flow:
+ * 1. Start fakes A and B. The user adds an instance on A.
+ * 2. Post the Settings tab's update action straight to the server with B's
+ *    URL and no API key, skipping the page.
+ *
+ * Expects:
+ * - the action fails with a 400 and "Enter the API key to change the URL."
+ * - the stored URL is still A
+ * - B gets no requests
+ */
+test('the server refuses a new URL sent without the API key', async ({ page, startArr }) => {
+	const [a, b] = [await startArr('radarr-6'), await startArr('radarr-6')];
+	await addArr(page, { name: NAME, fake: a });
+	const { id } = await arrInstance(page, NAME);
+
+	const response = await page.request.post(`/arr/${id}/settings?/update`, {
+		form: { name: NAME, url: b.url, api_key: '' },
+		headers: {
+			// SvelteKit refuses form posts from another origin before the action runs
+			origin: new URL(page.url()).origin,
+			'x-sveltekit-action': 'true',
+			accept: 'application/json'
+		}
+	});
+	const result = (await response.json()) as { type: string; status: number; data: string };
+	expect(result.type, 'The action should fail').toBe('failure');
+	expect(result.status, 'The action should answer 400').toBe(400);
+	expect(unflatten(JSON.parse(result.data)), `The action should say "${KEY_NEEDED}."`).toEqual({
+		error: `${KEY_NEEDED}.`
+	});
+
+	expect((await arrSettings(page, id)).instance.url, 'The stored URL should still be A').toBe(
+		a.url
+	);
+	expect(b.requests, 'B should get no requests').toEqual([]);
 });
