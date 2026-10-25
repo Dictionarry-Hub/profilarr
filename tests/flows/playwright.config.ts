@@ -1,4 +1,5 @@
 import { defineConfig } from '@playwright/test';
+import { TEST_IGNORE } from '$flows/harness/specFiles.ts';
 import { SCREENS } from '$flows/helpers/core/screen.ts';
 
 const workersOverride = process.env.FLOWS_WORKERS;
@@ -13,13 +14,8 @@ export default defineConfig({
 	// Every *.spec.ts is a test file: scenarios under scenarios/, and each
 	// helper's own spec next to it under helpers/. Folders group the output.
 	testDir: '.',
-	testIgnore: [
-		'data/**',
-		'test-results*/**',
-		'playwright-report/**',
-		'blob-report/**',
-		'.services/**'
-	],
+	// Shared with `deno task flows --deal`, which lists spec files the same way
+	testIgnore: TEST_IGNORE,
 
 	// Builds the seeded "golden" data folder once, before any test runs.
 	globalSetup: './global-setup.ts',

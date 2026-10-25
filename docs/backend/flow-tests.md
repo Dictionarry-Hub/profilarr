@@ -28,6 +28,7 @@ deno task flows --ui               # Playwright UI mode at http://localhost:8080
 deno task flows --build            # rebuild the app first
 deno task flows --online           # give the container network, so @online tests run too
 deno task flows --quiet            # print only the end-of-run summary, no line per test
+deno task flows --deal=2/4         # every 4th spec file from the 2nd, as CI shard 2 runs
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are
@@ -38,8 +39,13 @@ records a full-size video of each test. The trace viewer then plays the video
 in place of its small screencast frames. Recording slows runs, so leave it off
 unless you want to watch.
 
-On CI, the suite is split across four `Flow Tests (n/4)` jobs. Each one runs a
-quarter of the tests with `--shard=n/4` and `--online`. The first shard also
+On CI, the suite is split across four `Flow Tests (n/4)` jobs. Each one runs
+with `--deal=n/4` and `--online`. A deal sorts the spec files by path and takes
+every fourth one, starting at the n-th. Files in one area sit next to each
+other, so a slow area spreads across the shards. Playwright's `--shard` cuts
+even blocks and would put it on one. The deal and the Playwright config skip the
+same folders (`harness/specFiles.ts`). An empty deal is an error, because
+Playwright given no file runs the whole suite. The first shard also
 type-checks the suite with `deno check tests/flows`. On CI the config adds
 Playwright's blob reporter. Each shard uploads its blob report. The `Flow Tests`
 job merges them and prints every result in one list. If any shard failed, the

@@ -310,7 +310,8 @@ jobs:
       - name: Run integration tests
         run: deno task test integration
 
-  # The suite is split across four runners, each running a quarter of the tests
+  # The suite is split across four runners. Each runs every fourth spec file
+  # (`--deal`), so a slow area's files spread across them.
   flows:
     name: Flow Tests (${{ matrix.shard }}/4)
     needs: [ci-scope, build]
@@ -398,7 +399,7 @@ jobs:
       # gives the container network, so the tests tagged @online, which link a
       # real database from GitHub, run here too.
       - name: Run flow tests
-        run: deno task flows --online --shard=${{ matrix.shard }}/4
+        run: deno task flows --online --deal=${{ matrix.shard }}/4
 
       # The blob report holds every result and its traces. Flow Tests merges them.
       - name: Upload blob report
