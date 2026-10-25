@@ -14,6 +14,12 @@ import { NtfyNotifier } from './notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from './notifiers/webhook/WebhookNotifier.ts';
 import { TelegramNotifier } from './notifiers/telegram/TelegramNotifier.ts';
 
+/** The outcome of one send, as recorded in history */
+export interface SendResult {
+	success: boolean;
+	error?: string;
+}
+
 /**
  * Central notification manager
  * Orchestrates sending notifications to all enabled services
@@ -62,9 +68,9 @@ export class NotificationManager {
 
 	/**
 	 * Send a notification to a specific service, bypassing the enabled_types filter.
-	 * Used for test notifications from the UI.
+	 * Used for test notifications from the UI, which report the result.
 	 */
-	async sendToService(serviceId: string, notification: Notification): Promise<void> {
+	async sendToService(serviceId: string, notification: Notification): Promise<SendResult> {
 		try {
 			const service = notificationServicesQueries.getById(serviceId);
 
@@ -73,36 +79,39 @@ export class NotificationManager {
 					source: 'NotificationManager',
 					meta: { serviceId }
 				});
-				return;
+				return { success: false, error: 'Service not found' };
 			}
 
-			await this.sendToServiceInternal(
+			return await this.sendToServiceInternal(
 				service.id,
 				service.service_type,
 				service.config,
 				notification
 			);
 		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : String(error);
 			await logger.error('Error in direct send', {
 				source: 'NotificationManager',
 				meta: {
 					serviceId,
-					error: error instanceof Error ? error.message : String(error),
+					error: errorMessage,
 					type: notification.type
 				}
 			});
+			return { success: false, error: errorMessage };
 		}
 	}
 
 	/**
-	 * Internal: send notification to a specific service and record history
+	 * Internal: send notification to a specific service, record history, and
+	 * return the outcome
 	 */
 	private async sendToServiceInternal(
 		serviceId: string,
 		serviceType: string,
 		configJson: string,
 		notification: Notification
-	): Promise<void> {
+	): Promise<SendResult> {
 		let success = false;
 		let errorMessage: string | undefined;
 
@@ -115,11 +124,10 @@ export class NotificationManager {
 					source: 'NotificationManager',
 					meta: { serviceId, serviceType }
 				});
-				return;
+			} else {
+				await notifier.notify(notification);
+				success = true;
 			}
-
-			await notifier.notify(notification);
-			success = true;
 		} catch (error) {
 			errorMessage = error instanceof Error ? error.message : String(error);
 			await logger.error('Failed to send notification to service', {
@@ -150,6 +158,8 @@ export class NotificationManager {
 				});
 			}
 		}
+
+		return { success, error: errorMessage };
 	}
 
 	/**

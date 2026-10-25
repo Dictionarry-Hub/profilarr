@@ -170,8 +170,9 @@ The only way notifications get sent. On `notify(notification)`:
 5. Record success/failure in `notification_history`
 
 `sendToService(serviceId, notification)` bypasses the type filter for test
-notifications from the UI. Every send attempt is recorded in history regardless
-of outcome.
+notifications from the UI. It returns `{ success, error }`, and the test action
+answers 502 with the error when the send fails. Every send attempt is recorded
+in history regardless of outcome.
 
 ## Notifiers
 
