@@ -55,6 +55,8 @@ import {
 } from '$flows/helpers/sync/upgrades.ts';
 
 const TAG = 'flow-tag';
+/** Only spaces: the save drops it, so the filter is stored with no tag */
+const BLANK_TAG = '   ';
 const NO_FILTER_ENABLED = 'Add and enable at least one filter before running';
 const DISABLED_HINT = 'Enable upgrades to configure filters and view run history.';
 /** The cooldown tag a filter named "Filter" gets */
@@ -108,12 +110,16 @@ const rule = (field: string, operator: string, value: FilterRule['value']): Filt
  * 3. The user adds a Default filter with Method Oldest, Count 3, Cutoff %
  *    80 and Cooldown Tag "flow-tag".
  * 4. The user adds a second Default filter and disables it.
- * 5. The user saves and reloads.
+ * 5. The user adds a third Default filter and types only spaces as its
+ *    Cooldown Tag.
+ * 6. The user saves and reloads.
  *
  * Expects:
  * - the config is on, every 30 minutes, Random Shuffle, at filter index 0
  * - the first filter holds the settings and the Radarr default rules, and
  *   the second is disabled
+ * - the second and third filters are stored with no tag: the second's field
+ *   was left empty, and the third's held only spaces
  * - the next run is at most 30 minutes away, there is no last run, and
  *   Settings › Jobs lists `arr.upgrade:{id}` at that time
  * - after the reload the controls show the same values and Save is off
@@ -127,6 +133,8 @@ test('settings, the schedule and filters survive a reload', async ({ page, fakeR
 	await editFilter(page, 'Filter', { method: 'Oldest', count: 3, cutoff: 80, tag: TAG });
 	await addDefaultFilter(page);
 	await editFilter(page, 'Filter 2', { enabled: false });
+	await addDefaultFilter(page);
+	await editFilter(page, 'Filter 3', { tag: BLANK_TAG });
 	await clearOfScheduleMark(30);
 	const saved = Date.now();
 	await saveUpgrades(page);
@@ -159,6 +167,15 @@ test('settings, the schedule and filters survive a reload', async ({ page, fakeR
 			id: expect.any(String),
 			name: 'Filter 2',
 			enabled: false,
+			group: defaultGroup('radarr'),
+			selector: 'random',
+			count: 2,
+			cutoff: 100
+		},
+		{
+			id: expect.any(String),
+			name: 'Filter 3',
+			enabled: true,
 			group: defaultGroup('radarr'),
 			selector: 'random',
 			count: 2,
