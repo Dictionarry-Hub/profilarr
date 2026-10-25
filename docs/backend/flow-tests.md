@@ -38,9 +38,13 @@ records a full-size video of each test. The trace viewer then plays the video
 in place of its small screencast frames. Recording slows runs, so leave it off
 unless you want to watch.
 
-On CI, the `Flow Tests` job type-checks the suite with `deno check tests/flows`
-and runs it with `--online`. When the job fails, it uploads the report and
-traces.
+On CI, the suite is split across four `Flow Tests (n/4)` jobs. Each one runs a
+quarter of the tests with `--shard=n/4` and `--online`. The first shard also
+type-checks the suite with `deno check tests/flows`. On CI the config adds
+Playwright's blob reporter. Each shard uploads its blob report. The `Flow Tests`
+job merges them and prints every result in one list. If any shard failed, the
+job uploads the merged HTML report with traces. Then it fails. The `develop`
+ruleset requires only this check.
 
 ## Layout
 

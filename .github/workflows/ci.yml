@@ -310,11 +310,16 @@ jobs:
       - name: Run integration tests
         run: deno task test integration
 
+  # The suite is split across four runners, each running a quarter of the tests
   flows:
-    name: Flow Tests
+    name: Flow Tests (${{ matrix.shard }}/4)
     needs: [ci-scope, build]
     if: ${{ needs.ci-scope.outputs.full_ci == 'true' }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -334,8 +339,9 @@ jobs:
       - run: deno ci
 
       # Playwright strips types without checking them, and `deno task check`
-      # covers src/ only, so the flow suite is type-checked here.
+      # covers src/ only, so the flow suite is type-checked here, on one shard.
       - name: Type check the flow suite
+        if: ${{ matrix.shard == 1 }}
         run: deno check --quiet tests/flows
 
       # `deno task flows` mounts this cache into the test container, so the
@@ -392,14 +398,72 @@ jobs:
       # gives the container network, so the tests tagged @online, which link a
       # real database from GitHub, run here too.
       - name: Run flow tests
-        run: deno task flows --online
+        run: deno task flows --online --shard=${{ matrix.shard }}/4
+
+      # The blob report holds every result and its traces. Flow Tests merges them.
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: flow-blob-${{ matrix.shard }}
+          path: tests/flows/blob-report/
+          retention-days: 1
+
+  # The develop ruleset requires this check, not the shards. It merges the
+  # shards' reports into one and fails if any shard failed. Docs-only changes
+  # skip the shards and pass here.
+  flows-report:
+    name: Flow Tests
+    needs: [ci-scope, flows]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    env:
+      SHARDS_RAN: ${{ needs.flows.result == 'success' || needs.flows.result == 'failure' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: ${{ env.SHARDS_RAN == 'true' }}
+
+      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
+        if: ${{ env.SHARDS_RAN == 'true' }}
+        with:
+          deno-version-file: .tool-versions
+
+      - name: Cache deps
+        if: ${{ env.SHARDS_RAN == 'true' }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/deno
+            node_modules
+          key: deno-${{ runner.os }}-${{ hashFiles('deno.lock') }}
+          restore-keys: deno-${{ runner.os }}-
+
+      - if: ${{ env.SHARDS_RAN == 'true' }}
+        run: deno ci
+
+      - name: Download blob reports
+        if: ${{ env.SHARDS_RAN == 'true' }}
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: flow-blob-*
+          merge-multiple: true
+          path: flow-blobs
+
+      # Prints the whole suite's results in one place, as a single run would
+      - name: Merge reports
+        if: ${{ env.SHARDS_RAN == 'true' }}
+        run: node node_modules/playwright/cli.js merge-reports --reporter=./tests/flows/reporter.ts,html flow-blobs
 
       - name: Upload flow report
-        if: failure()
+        if: ${{ !cancelled() && needs.flows.result == 'failure' }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: flow-report
-          path: |
-            tests/flows/playwright-report/
-            tests/flows/test-results/
+          path: playwright-report/
           retention-days: 7
+
+      - name: Check every shard passed
+        if: ${{ !cancelled() && needs.ci-scope.outputs.full_ci == 'true' && needs.flows.result != 'success' }}
+        run: |
+          echo "A flow test shard ended with: ${{ needs.flows.result }}"
+          exit 1
