@@ -43,7 +43,7 @@ const SIX_HOURS_IN_MINUTES = 360;
  * - after the second reload, the token field is empty, the author fields keep
  *   their values, and the dropdowns show Local Ops Only on and ask
  */
-test('keeps every setting after a reload', async ({ page }) => {
+test('keeps every database setting after a reload', async ({ page }) => {
 	const database = (await databasesApi.list(page.request)).find((db) => db.name === FIXTURES_NAME);
 	if (!database) throw new Error(`GET /api/v1/databases lists no ${FIXTURES_NAME}`);
 	const { id } = database;
