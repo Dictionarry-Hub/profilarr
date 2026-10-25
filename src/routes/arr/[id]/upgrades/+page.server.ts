@@ -67,7 +67,11 @@ export const actions: Actions = {
 			const cron = (formData.get('cron') as string) || '0 */6 * * *';
 			const filterMode = (formData.get('filterMode') as FilterMode) || 'round_robin';
 			const filtersJson = formData.get('filters') as string;
-			const filters: FilterConfig[] = filtersJson ? JSON.parse(filtersJson) : [];
+			const posted: FilterConfig[] = filtersJson ? JSON.parse(filtersJson) : [];
+			// A blank cooldown tag means none, so the filter is stored without one
+			const filters: FilterConfig[] = posted.map(({ tag, ...filter }) =>
+				tag?.trim() ? { ...filter, tag } : filter
+			);
 
 			// Validate cron expression
 			const minInterval = searchRateLimits[instance.type]?.minIntervalMinutes ?? 10;
