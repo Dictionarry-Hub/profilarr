@@ -424,7 +424,12 @@
 							</span>
 							<!-- svelte-ignore a11y_no_static_element_interactions a11y_click_events_have_key_events -->
 							<div on:click|stopPropagation>
-								<Button icon={Pencil} size="xs" on:click={() => startEditing(row)} />
+								<Button
+									icon={Pencil}
+									size="xs"
+									ariaLabel="Rename filter"
+									on:click={() => startEditing(row)}
+								/>
 							</div>
 							{#if !row.enabled}
 								<span
@@ -590,15 +595,12 @@
 						</p>
 					</div>
 					<div data-onboarding="upgrades-cooldown" class="lg:col-span-2">
-						<label
-							for="tag-{row.id}"
-							class="block text-sm font-medium text-neutral-600 dark:text-neutral-400"
-						>
+						<span class="block text-sm font-medium text-neutral-600 dark:text-neutral-400">
 							Cooldown Tag
-						</label>
+						</span>
 						<div class="mt-1">
 							<FormInput
-								label="Cooldown tag"
+								label="Cooldown Tag"
 								hideLabel
 								lowercase
 								name="tag-{row.id}"
