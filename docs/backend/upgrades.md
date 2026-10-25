@@ -275,12 +275,12 @@ Core logging functions in `logger.ts`:
 Upgrade runs emit one of four notification types via the
 [notification system](./notifications.md):
 
-| Type              | Severity | When                          |
-| ----------------- | -------- | ----------------------------- |
-| `upgrade.success` | success  | Searches completed, no errors |
-| `upgrade.partial` | warning  | Some searches, some errors    |
-| `upgrade.failed`  | error    | All searches failed           |
-| `upgrade.skipped` | success  | Nothing to search             |
+| Type              | Severity | When                                                   |
+| ----------------- | -------- | ------------------------------------------------------ |
+| `upgrade.success` | success  | Searches completed, no errors                          |
+| `upgrade.partial` | warning  | Some searches, some errors                             |
+| `upgrade.failed`  | error    | All searches failed or the run failed before searching |
+| `upgrade.skipped` | success  | Nothing to search                                      |
 
 Notifications are not sent for dry runs. Each notification includes the
 filter name, selector method, funnel breakdown (total -> filtered ->

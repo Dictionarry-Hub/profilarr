@@ -195,13 +195,17 @@ export function upgrade({ log, manual = false }: UpgradeNotificationParams): Not
 	const title = `${getTitle(log, manual)} - ${log.instanceName}`;
 	const message = buildGenericMessage(log);
 
-	// No items searched
+	// No items searched, or the run failed before searching
 	if (log.selection.items.length === 0) {
+		const failed = log.status === 'failed';
+		const error = log.results.errors.join('; ') || 'Unknown error';
 		return {
 			type: `upgrade.${log.status}`,
 			severity,
 			title,
-			message: `No items to search for ${log.instanceName}`,
+			message: failed
+				? `Upgrade failed for ${log.instanceName}: ${error}`
+				: `No items to search for ${log.instanceName}`,
 			blocks: [
 				{ kind: 'field', label: 'Filter', value: log.filter.name || 'Unknown', inline: true },
 				{
@@ -213,7 +217,9 @@ export function upgrade({ log, manual = false }: UpgradeNotificationParams): Not
 				...(log.config.dryRun
 					? [{ kind: 'field' as const, label: 'Mode', value: 'Dry Run', inline: true }]
 					: []),
-				{ kind: 'field', label: 'Status', value: 'No items to search' }
+				failed
+					? { kind: 'field' as const, label: 'Error', value: error }
+					: { kind: 'field' as const, label: 'Status', value: 'No items to search' }
 			]
 		};
 	}
