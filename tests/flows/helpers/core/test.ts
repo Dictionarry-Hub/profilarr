@@ -4,8 +4,9 @@
  * reaches that test's own app. `startArr` starts a fake for any target in
  * helpers/sync/targets.ts, such as "sonarr-5"; `fakeRadarr` and `fakeSonarr`
  * start each app's default target. `consumer` starts a second app that shares
- * the first one's upstream. Like every fixture, they only start when a test
- * asks for them.
+ * the first one's upstream. `fakeWebhook` starts a webhook receiver for
+ * notification services (helpers/settings/fakeWebhook.ts). Like every
+ * fixture, they only start when a test asks for them.
  *
  * Options a spec sets with `test.use()`:
  * - `appEnv`: environment applied over the defaults, e.g. `{ AUTH: 'on' }`
@@ -36,6 +37,7 @@ import {
 } from '$flows/helpers/proxy/proxies.ts';
 import { startFakeArr, type FakeArr, type FakeArrOptions } from '$flows/helpers/sync/fakeArr.ts';
 import { defaultTarget } from '$flows/helpers/sync/targets.ts';
+import { startFakeWebhook, type FakeWebhook } from '$flows/helpers/settings/fakeWebhook.ts';
 
 /** Attach a service's logs to a test that didn't end as expected */
 async function attachServiceLogs(
@@ -72,6 +74,8 @@ export const test = base.extend<{
 	startArr: (targetId: string, options?: FakeArrOptions) => Promise<FakeArr>;
 	fakeRadarr: FakeArr;
 	fakeSonarr: FakeArr;
+	/** A webhook receiver for notification services, stopped after the test */
+	fakeWebhook: FakeWebhook;
 }>({
 	appEnv: [{}, { option: true }],
 	ssoProvider: [undefined, { option: true }],
@@ -157,9 +161,12 @@ export const test = base.extend<{
 		await use(appProxy?.tls === true || providerTls);
 	},
 	// Alerts default to the top centre for 8 seconds, where they cover the tab
-	// bar and delay clicks on it. Tests put them at the bottom right instead.
+	// bar and delay clicks on it. Tests put them at the bottom right instead,
+	// only while nothing is stored, so a test's own saved choice survives a
+	// reload.
 	page: async ({ page }, use) => {
 		await page.addInitScript(() => {
+			if (localStorage.getItem('alertSettings') !== null) return;
 			localStorage.setItem(
 				'alertSettings',
 				JSON.stringify({ position: 'bottom-right', durationMs: 8000 })
@@ -181,6 +188,11 @@ export const test = base.extend<{
 	},
 	fakeSonarr: async ({ startArr }, use) => {
 		await use(await startArr(defaultTarget('sonarr').id));
+	},
+	fakeWebhook: async ({}, use) => {
+		const webhook = await startFakeWebhook();
+		await use(webhook);
+		await webhook.stop();
 	}
 });
 
