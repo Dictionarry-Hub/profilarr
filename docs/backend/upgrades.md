@@ -58,12 +58,12 @@ immediately after command completion.
 
 ### Status
 
-| Status    | Meaning                                       |
-| --------- | --------------------------------------------- |
-| `success` | Searches triggered, no errors                 |
-| `partial` | Some searches succeeded, some failed          |
-| `failed`  | All searches failed or a fatal error occurred |
-| `skipped` | No items to search (filtered to zero)         |
+| Status    | Meaning                                                 |
+| --------- | ------------------------------------------------------- |
+| `success` | Searches triggered with no errors, or nothing to search |
+| `partial` | Some searches succeeded, some failed                    |
+| `failed`  | All searches failed or a fatal error occurred           |
+| `skipped` | No enabled filter to run; not stored in run history     |
 
 ## Filters
 
@@ -275,12 +275,12 @@ Core logging functions in `logger.ts`:
 Upgrade runs emit one of four notification types via the
 [notification system](./notifications.md):
 
-| Type              | Severity | When                          |
-| ----------------- | -------- | ----------------------------- |
-| `upgrade.success` | success  | Searches completed, no errors |
-| `upgrade.partial` | warning  | Some searches, some errors    |
-| `upgrade.failed`  | error    | All searches failed           |
-| `upgrade.skipped` | success  | Nothing to search             |
+| Type              | Severity | When                                                   |
+| ----------------- | -------- | ------------------------------------------------------ |
+| `upgrade.success` | success  | Searches completed, no errors                          |
+| `upgrade.partial` | warning  | Some searches, some errors                             |
+| `upgrade.failed`  | error    | All searches failed or the run failed before searching |
+| `upgrade.skipped` | success  | Nothing to search                                      |
 
 Notifications are not sent for dry runs. Each notification includes the
 filter name, selector method, funnel breakdown (total -> filtered ->

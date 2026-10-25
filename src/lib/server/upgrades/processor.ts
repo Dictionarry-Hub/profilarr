@@ -225,10 +225,10 @@ function mergeSonarrQueueItem(
 }
 
 /**
- * Send upgrade notification
+ * Send upgrade notification when items were searched or the run failed
  */
 async function sendUpgradeNotification(log: UpgradeJobLog, manual: boolean): Promise<void> {
-	if (log.selection.actualCount > 0) {
+	if (log.selection.actualCount > 0 || log.status === 'failed') {
 		await notificationManager.notify(notifications.upgrade({ log, manual }));
 	}
 }
@@ -851,6 +851,9 @@ export async function processUpgradeConfig(
 		log.config.selectedFilter = filter?.name ?? '';
 		log.filter.id = filter?.id ?? '';
 		log.filter.name = filter?.name ?? '';
+
+		await logUpgradeRun(log);
+		await sendUpgradeNotification(log, manual);
 
 		return log;
 	}

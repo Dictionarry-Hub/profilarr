@@ -1,3 +1,7 @@
+<script context="module" lang="ts">
+	let nextGroupId = 0;
+</script>
+
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
 	import X from '@lucide/svelte/icons/x';
@@ -35,6 +39,10 @@
 	export let dynamicFilterOptionsVersion: number = 0;
 	export let onRemove: (() => void) | null = null;
 	export let depth: number = 0;
+
+	// Rule value ids are unique per rule across every group and filter on the page
+	const groupId = nextGroupId++;
+	const valueId = (childIndex: number) => `filter-${groupId}-value-${childIndex}`;
 
 	$: fields = getFilterFields(appType);
 	const dynamicStringOperators = [
@@ -195,7 +203,7 @@
 			<span class="text-xs text-neutral-500 dark:text-neutral-400">of the following rules</span>
 		</div>
 		{#if onRemove}
-			<Button icon={X} variant="ghost" size="xs" on:click={onRemove} />
+			<Button icon={X} variant="ghost" size="xs" ariaLabel="Remove group" on:click={onRemove} />
 		{/if}
 	</div>
 
@@ -313,7 +321,7 @@
 													<FormInput
 														label="Value"
 														hideLabel
-														name="filter-value-{childIndex}"
+														name={valueId(childIndex)}
 														value={child.value as string}
 														responsive
 														autoWidth
@@ -328,7 +336,7 @@
 											<div class={valueWidthClass}>
 												<NumberInput
 													ariaLabel="Value"
-													name="value-{childIndex}"
+													name={valueId(childIndex)}
 													on:change={(e) => {
 														if (e.detail !== undefined) child.value = e.detail;
 														notifyChange();
@@ -345,7 +353,7 @@
 													<div class="min-w-0 flex-1">
 														<NumberInput
 															ariaLabel="Value"
-															name="value-{childIndex}"
+															name={valueId(childIndex)}
 															value={child.value as number}
 															on:change={(e) => {
 																if (e.detail !== undefined) child.value = e.detail;
@@ -364,7 +372,7 @@
 													<DateInput
 														label="Date"
 														hideLabel
-														name="value-{childIndex}"
+														name={valueId(childIndex)}
 														value={child.value as string}
 														fullWidth
 														responsive
@@ -388,6 +396,7 @@
 									icon={X}
 									variant="ghost"
 									size="xs"
+									ariaLabel="Remove rule"
 									on:click={() => removeChild(childIndex)}
 								/>
 							</div>
