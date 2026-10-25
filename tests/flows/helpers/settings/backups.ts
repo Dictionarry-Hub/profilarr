@@ -16,6 +16,7 @@ import type { App } from '$flows/harness/app.ts';
 import { saveForm, waitForAction, type ActionResult } from '$flows/helpers/core/forms.ts';
 import { waitForJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
 import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
+import { retentionField } from '$flows/helpers/settings/general.ts';
 
 /** A row of GET /api/v1/backups */
 export interface BackupFile {
@@ -314,11 +315,8 @@ export async function setBackupRetention(page: Page, days: number): Promise<void
 		`Set the backup retention period to ${days} days`,
 		async () => {
 			await openSidebarPage(page, 'General');
-			const main = page.getByRole('main');
-			// Logging has a field with the same label, so pick the backup one by its form name
-			const retention = main
-				.getByRole('spinbutton', { name: 'Retention Period (days)' })
-				.and(page.locator('[name="backup_retention_days"]'));
+			// Logging has a field with the same label
+			const retention = retentionField(page, 'backup');
 			await expect(retention, 'General should show the backup retention field').toBeVisible();
 			await retention.fill(String(days));
 			await saveForm(page, { action: 'save' });
