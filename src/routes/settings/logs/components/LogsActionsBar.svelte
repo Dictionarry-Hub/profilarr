@@ -57,7 +57,7 @@
 	<SearchAction {searchStore} placeholder="Search logs..." responsive />
 
 	<!-- Log File Selector -->
-	<ActionButton icon={FileText} hasDropdown={true} dropdownPosition="right">
+	<ActionButton icon={FileText} ariaLabel="Log Files" hasDropdown={true} dropdownPosition="right">
 		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="16rem">
 				<DropdownHeader label="Log Files" />
@@ -79,7 +79,7 @@
 	<ActionButton icon={Download} tooltip="Download" tooltipAlign="middle" on:click={onDownload} />
 
 	<!-- Level Filter -->
-	<ActionButton icon={Filter} hasDropdown={true} dropdownPosition="right">
+	<ActionButton icon={Filter} ariaLabel="Level" hasDropdown={true} dropdownPosition="right">
 		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="8rem">
 				<DropdownHeader label="Level" />
@@ -96,7 +96,7 @@
 	</ActionButton>
 
 	<!-- Source Filter -->
-	<ActionButton icon={Layers} hasDropdown={true} dropdownPosition="right">
+	<ActionButton icon={Layers} ariaLabel="Source" hasDropdown={true} dropdownPosition="right">
 		<svelte:fragment slot="dropdown" let:dropdownPosition>
 			<Dropdown position={dropdownPosition} minWidth="12rem">
 				<DropdownHeader label="Source" />
