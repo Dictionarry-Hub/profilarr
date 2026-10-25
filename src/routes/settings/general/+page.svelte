@@ -62,6 +62,8 @@
 
 	// TMDB
 	let tmdbApiKey = '';
+	// Set by Reset while a token is stored, so the save removes it
+	let tmdbClearToken = false;
 	let tmdbTesting = false;
 
 	// Behavior
@@ -126,7 +128,7 @@
 		enabled: true,
 		file_logging: true,
 		console_logging: true,
-		min_level: 'INFO' as const,
+		min_level: 'DEBUG' as const,
 		retention_days: 30
 	};
 
@@ -158,6 +160,7 @@
 			backup_schedule: backupSchedule,
 			backup_retention_days: backupRetentionDays,
 			tmdb_api_key: tmdbApiKey,
+			tmdb_clear_api_key: tmdbClearToken,
 			arr_apply_default_delay_profiles: arrApplyDefaultDelayProfiles,
 			fail_on_referenced_delete: failOnReferencedDelete,
 			sync_prompt_enabled: syncPromptEnabled,
@@ -224,6 +227,9 @@
 	function resetTMDBDefaults() {
 		tmdbApiKey = TMDB_DEFAULTS.api_key;
 		update('tmdb_api_key', tmdbApiKey);
+		// A blank field keeps the stored token, so Reset marks it for removal instead
+		tmdbClearToken = data.tmdbSettings.hasApiKey;
+		update('tmdb_clear_api_key', tmdbClearToken);
 	}
 
 	// --- TMDB test ---
@@ -274,6 +280,7 @@
 				alertSettingsStore.setSettings({ position: uiAlertPosition, durationMs });
 				dateFormatStore.set(dateFormat);
 				fontStore.setFonts({ sans: uiFontSans, mono: uiFontMono });
+				tmdbClearToken = false;
 
 				// Reset dirty tracking
 				resetFromServer(buildSnapshot());
@@ -607,6 +614,9 @@
 								}}
 							/>
 						</div>
+					{:else}
+						<!-- The field is hidden while backups are off; keep the stored retention -->
+						<input type="hidden" name="backup_retention_days" value={backupRetentionDays} />
 					{/if}
 					<input type="hidden" name="backup_schedule" value={backupSchedule} />
 				</div>
@@ -719,6 +729,9 @@
 									}}
 								/>
 							</div>
+						{:else}
+							<!-- The field is hidden while logging is off; keep the stored retention -->
+							<input type="hidden" name="log_retention_days" value={logRetentionDays} />
 						{/if}
 					</div>
 					<input type="hidden" name="log_file_logging" value={logFileLogging ? 'on' : ''} />
@@ -755,15 +768,23 @@
 						value={tmdbApiKey}
 						private_
 						mono
-						placeholder={data.tmdbSettings.hasApiKey ? '••••••••••••••••' : ''}
-						description={data.tmdbSettings.hasApiKey
-							? 'Leave blank to keep existing key'
-							: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
+						placeholder={data.tmdbSettings.hasApiKey && !tmdbClearToken ? '••••••••••••••••' : ''}
+						description={tmdbClearToken
+							? 'Token will be removed on save'
+							: data.tmdbSettings.hasApiKey
+								? 'Leave blank to keep existing key'
+								: 'Use the API Read Access Token (not API Key) from themoviedb.org'}
 						on:input={(e) => {
 							tmdbApiKey = e.detail;
 							update('tmdb_api_key', e.detail);
+							// A typed token replaces the stored one, so it no longer needs removing
+							if (tmdbClearToken) {
+								tmdbClearToken = false;
+								update('tmdb_clear_api_key', false);
+							}
 						}}
 					/>
+					<input type="hidden" name="tmdb_clear_api_key" value={tmdbClearToken ? 'on' : ''} />
 				</div>
 			</ExpandableCard>
 

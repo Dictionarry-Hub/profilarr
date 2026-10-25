@@ -7,7 +7,7 @@
  * use the app's bcrypt library, which only runs in Deno.
  */
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from '@playwright/test';
 import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
 import { openPage, sidebar, waitForHydration } from '$flows/helpers/core/nav.ts';
 
@@ -109,6 +109,28 @@ export async function signOut(page: Page): Promise<void> {
 				(url) => url.pathname === '/auth/login'
 			);
 			await waitForHydration(page);
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Sign in from a second browser: a new context with no cookies, like another
+ * device. Returns its page, already signed in. Close it with
+ * `page.context().close()` once done.
+ */
+export async function signInElsewhere(
+	browser: Browser,
+	baseURL: string,
+	user: LocalUser = FLOWS_USER
+): Promise<Page> {
+	return await test.step(
+		`Sign in as ${user.username} from another browser`,
+		async () => {
+			const context = await browser.newContext({ baseURL });
+			const page = await context.newPage();
+			await signIn(page, user);
+			return page;
 		},
 		{ box: true }
 	);

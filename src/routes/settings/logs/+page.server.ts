@@ -9,8 +9,20 @@ export const load = async ({ url }: { url: URL }) => {
 	// Get all log files
 	const logFiles = await getLogFilesList();
 
-	// Get selected file from query param, default to newest (first in list)
-	const selectedFile = url.searchParams.get('file') || logFiles[0]?.filename || '';
+	const newest = logFiles[0]?.filename || '';
+
+	// Only open a file the logs list holds; anything else, such as a path, falls
+	// back to the newest log
+	const requested = url.searchParams.get('file') || null;
+	const rejectedFile = requested !== null && !logFiles.some((file) => file.filename === requested);
+	if (rejectedFile) {
+		await logger.warn(`Refused to open "${requested}": not in the logs list`, {
+			source: 'settings/logs',
+			meta: { file: requested }
+		});
+	}
+
+	const selectedFile = (!rejectedFile && requested) || newest;
 
 	// Load logs from selected file or all files if no file selected
 	const logs = selectedFile ? await readLogsFromFile(selectedFile) : await readLastLogs();
@@ -18,7 +30,8 @@ export const load = async ({ url }: { url: URL }) => {
 	return {
 		logs,
 		logFiles,
-		selectedFile
+		selectedFile,
+		rejectedFile
 	};
 };
 

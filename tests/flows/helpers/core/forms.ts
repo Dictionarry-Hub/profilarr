@@ -255,3 +255,24 @@ export async function chooseOption(
 		{ box: true }
 	);
 }
+
+/**
+ * Turn the switch named `name` inside `scope` on or off, clicking it only
+ * when it isn't already, then wait until `aria-checked` shows the new state.
+ */
+export async function setSwitch(scope: Locator, name: string, on: boolean): Promise<void> {
+	await test.step(
+		`Turn ${name} ${on ? 'on' : 'off'}`,
+		async () => {
+			const toggle = scope.getByRole('switch', { name, exact: true });
+			await expect(toggle, `The ${name} switch should be shown`).toBeVisible();
+			const checked = String(on);
+			if ((await toggle.getAttribute('aria-checked')) !== checked) await toggle.click();
+			await expect(toggle, `${name} should be ${on ? 'on' : 'off'}`).toHaveAttribute(
+				'aria-checked',
+				checked
+			);
+		},
+		{ box: true }
+	);
+}

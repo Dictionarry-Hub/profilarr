@@ -139,9 +139,11 @@ export const actions: Actions = {
 			}
 		}
 
-		// --- TMDB settings (preserve existing key if empty) ---
+		// --- TMDB settings (preserve existing key if empty, unless Reset cleared it) ---
 		const tmdbApiKeyInput = formData.get('tmdb_api_key') as string;
-		const tmdbApiKey = tmdbApiKeyInput || tmdbSettingsQueries.get()?.api_key || '';
+		const tmdbClearApiKey = formData.get('tmdb_clear_api_key') === 'on';
+		const tmdbApiKey =
+			tmdbApiKeyInput || (tmdbClearApiKey ? '' : tmdbSettingsQueries.get()?.api_key || '');
 
 		// --- Interface ---
 		const dateFormat = formData.get('date_format') as DateFormat;

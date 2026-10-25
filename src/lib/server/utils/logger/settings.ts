@@ -42,7 +42,7 @@ class LogSettingsManager {
 			return {
 				id: 1,
 				retention_days: 30,
-				min_level: 'INFO',
+				min_level: 'DEBUG',
 				enabled: 1,
 				file_logging: 1,
 				console_logging: 1,

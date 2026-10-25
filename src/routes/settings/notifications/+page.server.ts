@@ -110,7 +110,12 @@ export const actions: Actions = {
 			const { notificationManager } = await import('$notifications/NotificationManager.ts');
 			const { test } = await import('$notifications/definitions/test.ts');
 
-			await notificationManager.sendToService(id, test());
+			const result = await notificationManager.sendToService(id, test());
+			if (!result.success) {
+				return fail(502, {
+					error: `Test notification failed: ${result.error ?? 'Unknown error'}`
+				});
+			}
 
 			return { success: true };
 		} catch (err) {

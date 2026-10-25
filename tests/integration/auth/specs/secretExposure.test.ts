@@ -345,7 +345,9 @@ test('failed send history does not expose the Telegram bot token', async () => {
 		{ id: notificationServiceIds.telegram },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 200, 'test notification action should complete');
+	assertEquals(res.status, 502, 'a failed test notification should answer 502');
+	// The send error goes back to the browser, so it must not carry the token either
+	assertNotExposed(await res.text(), TELEGRAM_BOT_TOKEN, 'Telegram bot token in the 502 response');
 
 	const rows = queryDb(
 		getDbPath(PORT),

@@ -21,9 +21,23 @@
 	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
 	import { refreshAll } from '$app/navigation';
 	import type { PageData } from './$types';
-	import type { Component } from 'svelte';
+	import { onMount, type Component } from 'svelte';
 
 	export let data: PageData;
+
+	const REJECTED_FILE_MESSAGES = [
+		"Nice try. That's not a log file, so here's the latest log instead.",
+		"That file isn't a log. Logs are all this page will show you.",
+		'🕵️ Not a log. Showing the latest log instead.'
+	];
+
+	// A ?file= outside the logs list was refused, and the newest log shows instead
+	onMount(() => {
+		if (!data.rejectedFile) return;
+		const message =
+			REJECTED_FILE_MESSAGES[Math.floor(Math.random() * REJECTED_FILE_MESSAGES.length)];
+		alertStore.add('warning', message);
+	});
 
 	interface LogEntry {
 		timestamp: string;
