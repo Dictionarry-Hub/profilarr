@@ -1,21 +1,38 @@
 /**
- * Database helpers: linking, developer access, the conflict strategy,
- * pulling and publishing. Each works through the UI the way a user would and
- * waits for the app to finish, so a scenario continues once the app has.
+ * Database helpers: linking, unlinking, developer access, the conflict
+ * strategy, pulling and publishing. Each works through the UI the way a user
+ * would and waits for the app to finish, so a scenario continues once the app
+ * has. `databasesApi` reads the stored rows, and `databaseFolders` the clones
+ * on disk.
  *
  * Git reaches the test's local upstream for the fixtures GitHub URL
  * (helpers/git/upstream.ts), unless the spec turns that rewrite off.
  */
 
-import { expect, test, type Page } from '@playwright/test';
-import { FIXTURES_NAME, FLOWS_TOKEN } from '$flows/harness/seed.ts';
+import * as fs from 'node:fs/promises';
+import { join } from 'node:path';
+import {
+	expect,
+	test,
+	type APIRequestContext,
+	type APIResponse,
+	type Page
+} from '@playwright/test';
+import type { components } from '$api/v1.d.ts';
+import type { App } from '$flows/harness/app.ts';
+import { FIXTURES_NAME, FLOWS_TOKEN, fixturesRepo as seededRepo } from '$flows/harness/seed.ts';
 import {
 	chooseOption,
 	saveForm,
 	waitForAction,
 	type ActionResult
 } from '$flows/helpers/core/forms.ts';
-import { openDatabase, openPage, openTab } from '$flows/helpers/core/nav.ts';
+import type { ScheduledJob } from '$flows/helpers/core/jobs.ts';
+import { openDatabase, openPage, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
+import { pageData } from '$flows/helpers/core/pageData.ts';
+
+/** The token whose pushes reach the local upstream, for tests that type one in */
+export { FLOWS_TOKEN };
 
 /** How long a link job may take: a clone from GitHub, the import and the compile */
 const LINK_TIMEOUT_MS = 30_000;
@@ -55,6 +72,125 @@ export async function linkDatabase(page: Page, options: LinkOptions): Promise<vo
 				card,
 				`The Databases page should list ${name} once the link job finishes`
 			).toBeVisible({ timeout: LINK_TIMEOUT_MS });
+		},
+		{ box: true }
+	);
+}
+
+/** A database as `/api/v1/databases` returns it (docs/api/v1/schemas/databases.yaml) */
+export type DatabaseInstance = components['schemas']['DatabaseInstance'];
+
+/** A database read by id: the response, so a test can check its status, and the row when found */
+export interface DatabaseRead {
+	response: APIResponse;
+	database: DatabaseInstance | null;
+}
+
+/** Typed readers for `/api/v1/databases` */
+export const databasesApi = {
+	/** Every linked database */
+	async list(request: APIRequestContext): Promise<DatabaseInstance[]> {
+		return await test.step(
+			'Read the linked databases',
+			async () => {
+				const response = await request.get('/api/v1/databases');
+				expect(response.ok(), 'GET /api/v1/databases should answer').toBe(true);
+				return (await response.json()) as DatabaseInstance[];
+			},
+			{ box: true }
+		);
+	},
+
+	/** One database by id. `database` is null unless the API answered 200. */
+	async get(request: APIRequestContext, id: number): Promise<DatabaseRead> {
+		return await test.step(
+			`Read database ${id}`,
+			async () => {
+				const response = await request.get(`/api/v1/databases/${id}`);
+				const database = response.ok() ? ((await response.json()) as DatabaseInstance) : null;
+				return { response, database };
+			},
+			{ box: true }
+		);
+	}
+};
+
+/** The seeded fixtures database's clone in an app's data folder */
+export function fixturesRepo(app: App): string {
+	return seededRepo(app.dir);
+}
+
+/** The entry names in an app's `data/databases`, one clone per linked database, sorted */
+export async function databaseFolders(app: App): Promise<string[]> {
+	return (await fs.readdir(join(app.dir, 'data/databases'))).sort();
+}
+
+/** Where `unlinkDatabase` clicks Unlink */
+export type UnlinkFrom = 'cards' | 'settings';
+
+export interface UnlinkOptions {
+	/**
+	 * `cards`: the card's Unlink database button on the Databases page.
+	 * `settings`: Unlink on the database's Settings tab.
+	 */
+	from: UnlinkFrom;
+	/** The database to unlink. Default the fixtures database. */
+	name?: string;
+}
+
+/**
+ * Unlink a database the way a user does: click Unlink where `from` says,
+ * confirm the Unlink Database dialog, and wait for the delete action, the
+ * redirect to the Databases page and the card's removal. First waits until no
+ * `pcd.sync` job for the database is running: unlinking during one crashes
+ * the server.
+ */
+export async function unlinkDatabase(page: Page, options: UnlinkOptions): Promise<void> {
+	const { from, name = FIXTURES_NAME } = options;
+	await test.step(
+		`Unlink ${name} from the ${from}`,
+		async () => {
+			const database = (await databasesApi.list(page.request)).find((db) => db.name === name);
+			if (!database) throw new Error(`GET /api/v1/databases lists no database named "${name}"`);
+			await expect
+				.poll(
+					async () => {
+						const { jobs } = await pageData<{ jobs: ScheduledJob[] }>(page, '/settings/jobs');
+						return jobs.some(
+							(job) => job.description === `pcd.sync:${database.id}` && job.status === 'running'
+						);
+					},
+					{ message: `No pcd.sync job for ${name} should be running`, timeout: 30_000 }
+				)
+				.toBe(false);
+
+			const main = page.getByRole('main');
+			const card = main
+				.getByRole('link')
+				.filter({ has: page.getByRole('heading', { name, exact: true }) });
+			if (from === 'settings') {
+				await openDatabase(page, name);
+				await openTab(page, 'Settings');
+				await main.getByRole('button', { name: 'Unlink', exact: true }).click();
+			} else {
+				await openSidebarPage(page, 'Databases');
+				await expect(card, `The Databases page should list ${name}`).toBeVisible();
+				await card.getByRole('button', { name: 'Unlink database', exact: true }).click();
+			}
+
+			const dialog = page.getByRole('dialog', { name: 'Unlink Database' });
+			await expect(dialog, 'The Unlink Database dialog should open').toBeVisible();
+			const deleted = waitForAction(page, 'delete');
+			await dialog.getByRole('button', { name: 'Unlink', exact: true }).click();
+			const result = await deleted;
+			expect(
+				{ type: result.type, location: result.location },
+				`Unlinking should redirect to the Databases page: ${JSON.stringify(result.data)}`
+			).toEqual({ type: 'redirect', location: '/databases' });
+			await expect(page, 'Unlinking should land on the Databases page').toHaveURL(
+				(url) => url.pathname === '/databases'
+			);
+			await expect(card, `The Databases page should no longer list ${name}`).toHaveCount(0);
 		},
 		{ box: true }
 	);
