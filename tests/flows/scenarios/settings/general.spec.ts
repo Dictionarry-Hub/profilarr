@@ -116,7 +116,7 @@ async function expectNotOnPage(page: Page, path: string, secret: string): Promis
  * - the layout's date format is the saved one
  * - `/` opens Delay Profiles
  */
-test('keeps every setting after a reload', async ({ page }) => {
+test('keeps every General setting after a reload', async ({ page }) => {
 	await openSidebarPage(page, 'General');
 	const before = await generalSettings(page);
 	const main = page.getByRole('main');
