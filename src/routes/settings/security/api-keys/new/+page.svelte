@@ -150,7 +150,15 @@
 			<div class="space-y-3 md:px-4">
 				<div class="flex items-center gap-2">
 					<div class="flex-1">
-						<FormInput label="API key" hideLabel value={created.key} readonly mono />
+						<!-- FormInput sets the input's id from name, which the hidden label points at -->
+						<FormInput
+							label="API key"
+							name="created_api_key"
+							hideLabel
+							value={created.key}
+							readonly
+							mono
+						/>
 					</div>
 					<Button
 						icon={copied ? Check : Copy}
