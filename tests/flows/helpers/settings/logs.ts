@@ -5,6 +5,8 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
+import type { App } from '$flows/harness/app.ts';
+import { writeLogFile } from '$flows/harness/settings.ts';
 import { waitForAction } from '$flows/helpers/core/forms.ts';
 import { waitForJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
 import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
@@ -58,4 +60,13 @@ export async function runLogCleanup(page: Page): Promise<JobRun> {
 		},
 		{ box: true }
 	);
+}
+
+/**
+ * Put an empty log file in the app's logs folder and return its path. A daily
+ * file, named YYYY-MM-DD.log, is dated that day, so it never counts as the
+ * newest log.
+ */
+export async function plantLogFile(app: App, name: string): Promise<string> {
+	return await writeLogFile(app.dir, name);
 }

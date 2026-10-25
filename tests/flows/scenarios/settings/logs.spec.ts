@@ -7,11 +7,10 @@
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { test, expect } from '$flows/helpers/core/test.ts';
-import { plantLogFile } from '$flows/harness/settings.ts';
 import { saveForm } from '$flows/helpers/core/forms.ts';
 import { openSidebarPage } from '$flows/helpers/core/nav.ts';
 import { generalSettings, retentionField } from '$flows/helpers/settings/general.ts';
-import { logFiles, runLogCleanup } from '$flows/helpers/settings/logs.ts';
+import { logFiles, plantLogFile, runLogCleanup } from '$flows/helpers/settings/logs.ts';
 
 const RETENTION_DAYS = 1;
 const OLD_LOG = '2020-01-01.log';
@@ -50,7 +49,7 @@ test('cleanup deletes log files past the saved retention', async ({ app, page })
 		'The saved retention should be 1 day, with file logging on'
 	).toEqual({ retention: RETENTION_DAYS, fileLogging: true });
 
-	const planted = await plantLogFile(app.dir, OLD_LOG);
+	const planted = await plantLogFile(app, OLD_LOG);
 	const before = (await logFiles(page)).map((file) => file.filename);
 	expect(before, 'control: the Logs page should list the planted file').toContain(OLD_LOG);
 	const kept = before.filter((filename) => filename !== OLD_LOG);

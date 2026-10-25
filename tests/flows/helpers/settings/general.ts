@@ -7,6 +7,8 @@
  */
 
 import { test, type Locator, type Page } from '@playwright/test';
+import type { App } from '$flows/harness/app.ts';
+import { readTmdbToken } from '$flows/harness/settings.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
 
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
@@ -90,4 +92,12 @@ export function retentionField(page: Page, card: 'backup' | 'log'): Locator {
 		.getByRole('main')
 		.getByRole('spinbutton', { name: 'Retention Period (days)' })
 		.and(page.locator(`[name="${card}_retention_days"]`));
+}
+
+/**
+ * The stored TMDB token, read from the app database. The page never shows it,
+ * so a scenario that checks which token is kept reads it here.
+ */
+export function storedTmdbToken(app: App): string {
+	return readTmdbToken(app.dir);
 }

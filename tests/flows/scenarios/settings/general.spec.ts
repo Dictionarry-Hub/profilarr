@@ -10,12 +10,16 @@
  */
 import type { Page } from '@playwright/test';
 import { test, expect } from '$flows/helpers/core/test.ts';
-import { storedTmdbToken } from '$flows/harness/settings.ts';
 import { chooseOption, fillField, saveForm, setSwitch } from '$flows/helpers/core/forms.ts';
 import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
 import { addArr } from '$flows/helpers/sync/arrs.ts';
-import { generalSettings, retentionField, uiPreferences } from '$flows/helpers/settings/general.ts';
+import {
+	generalSettings,
+	retentionField,
+	storedTmdbToken,
+	uiPreferences
+} from '$flows/helpers/settings/general.ts';
 
 const ALERT_POSITION = { label: 'Bottom left', value: 'bottom-left' };
 const ALERT_SECONDS = 3;
@@ -345,11 +349,11 @@ test('the TMDB token stays on the server', async ({ app, page }) => {
 
 	await chooseOption(page.getByRole('main'), 'Date Format', OTHER_DATE_FORMAT);
 	await saveForm(page, { action: 'save' });
-	expect(storedTmdbToken(app.dir), 'A blank field should keep the first token').toBe(TMDB_TOKEN);
+	expect(storedTmdbToken(app), 'A blank field should keep the first token').toBe(TMDB_TOKEN);
 
 	await tmdbField(page).fill(TMDB_TOKEN_2);
 	await saveForm(page, { action: 'save' });
-	expect(storedTmdbToken(app.dir), 'A typed token should replace the stored one').toBe(
+	expect(storedTmdbToken(app), 'A typed token should replace the stored one').toBe(
 		TMDB_TOKEN_2
 	);
 	await expectNotOnPage(page, '/settings/general', TMDB_TOKEN_2);
@@ -372,7 +376,7 @@ test('TMDB Reset removes a stored token', async ({ app, page }) => {
 	await saveForm(page, { action: 'save' });
 	await page.reload();
 	await waitForHydration(page);
-	expect(storedTmdbToken(app.dir), 'control: the token should be stored').toBe(TMDB_TOKEN);
+	expect(storedTmdbToken(app), 'control: the token should be stored').toBe(TMDB_TOKEN);
 
 	await resetButton(page, 'TMDB Configuration').click();
 	await expect(
@@ -389,7 +393,7 @@ test('TMDB Reset removes a stored token', async ({ app, page }) => {
 		(await generalSettings(page)).tmdbSettings.hasApiKey,
 		'The page data should say no token is stored'
 	).toBe(false);
-	expect(storedTmdbToken(app.dir), 'Reset should remove the stored token').toBe('');
+	expect(storedTmdbToken(app), 'Reset should remove the stored token').toBe('');
 });
 
 /**
