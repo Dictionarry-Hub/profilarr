@@ -607,6 +607,9 @@
 								}}
 							/>
 						</div>
+					{:else}
+						<!-- The field is hidden while backups are off; keep the stored retention -->
+						<input type="hidden" name="backup_retention_days" value={backupRetentionDays} />
 					{/if}
 					<input type="hidden" name="backup_schedule" value={backupSchedule} />
 				</div>
