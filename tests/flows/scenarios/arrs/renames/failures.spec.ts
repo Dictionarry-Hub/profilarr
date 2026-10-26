@@ -4,8 +4,8 @@
  *   with nothing to rename.
  * - A failed command stops later batches. What earlier batches renamed
  *   stays, and the run is partial.
- * - Known bugs are pinned with `test.fixme()`: failed previews, a command
- *   that renames nothing, and the folder move's wait for its command.
+ * - Known bugs are pinned with `test.fixme()`: a command that renames
+ *   nothing, and the folder move's wait for its command.
  * - Radarr only, except the batch tests, which use Sonarr's smaller batches.
  */
 import type { Page } from '@playwright/test';
@@ -242,8 +242,7 @@ function failingPreviewTitles(fake: FakeArr): RenameTitle[] {
  * - A and B are renamed
  * - the run records C's error and is partial
  */
-// C4: a live run treats a failed preview as nothing to rename
-test.fixme('a failed preview in a live run is recorded', async ({ page, fakeRadarr: fake }) => {
+test('a failed preview in a live run is recorded', async ({ page, fakeRadarr: fake }) => {
 	const titles = failingPreviewTitles(fake);
 	const [a, b, c] = titles;
 	const id = await setUp(page, fake, titles);
@@ -270,8 +269,7 @@ test.fixme('a failed preview in a live run is recorded', async ({ page, fakeRada
  * Expects:
  * - the run is partial, lists A and B, and records C's error
  */
-// C3: a dry run with any failed preview is stored as failed
-test.fixme('a dry run with a failed preview is partial', async ({ page, fakeRadarr: fake }) => {
+test('a dry run with a failed preview is partial', async ({ page, fakeRadarr: fake }) => {
 	const titles = failingPreviewTitles(fake);
 	const [a, b, c] = titles;
 	const id = await setUp(page, fake, titles);
