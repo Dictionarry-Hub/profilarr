@@ -434,17 +434,7 @@ export async function processRenameConfig(
 		// Log and persist
 		await logRenameRun(log);
 
-		// Send notification (not for dry runs)
-		if (!dryRun) {
-			try {
-				await sendRenameNotification(log, settings.summaryNotifications);
-			} catch (err) {
-				await logger.error('Failed to send rename notification', {
-					source: SOURCE,
-					meta: { error: err }
-				});
-			}
-		}
+		await notifyLiveRun(log, settings.summaryNotifications);
 	} catch (err) {
 		log.status = 'failed';
 		log.completedAt = new Date().toISOString();
@@ -452,7 +442,22 @@ export async function processRenameConfig(
 
 		await logRenameError(instance.id, instance.name, String(err));
 		await logRenameRun(log);
+		// A run that fails early, e.g. on an unreachable Arr, still tells the user
+		await notifyLiveRun(log, settings.summaryNotifications);
 	}
 
 	return log;
+}
+
+/** Send the run's notification, unless it was a dry run */
+async function notifyLiveRun(log: RenameJobLog, summaryNotifications: boolean): Promise<void> {
+	if (log.config.dryRun) return;
+	try {
+		await sendRenameNotification(log, summaryNotifications);
+	} catch (err) {
+		await logger.error('Failed to send rename notification', {
+			source: SOURCE,
+			meta: { error: err }
+		});
+	}
 }

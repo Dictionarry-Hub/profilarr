@@ -40,14 +40,19 @@ const renameRunHandler: JobHandler = async (job) => {
 		const nextRunAt = calculateNextRun(settings.cron);
 		if (nextRunAt) arrRenameSettingsQueries.updateNextRunAt(instanceId, nextRunAt);
 
+		const { filesNeedingRename, filesRenamed, foldersRenamed } = log.results;
+		const folders = `${foldersRenamed} folder${foldersRenamed === 1 ? '' : 's'}`;
 		const output = dryRun
-			? `${log.results.filesNeedingRename} files would be renamed`
-			: `${log.results.filesRenamed}/${log.results.filesNeedingRename} files renamed`;
+			? `${filesNeedingRename} files would be renamed`
+			: settings.renameFolders
+				? `${filesRenamed}/${filesNeedingRename} files, ${folders} renamed`
+				: `${filesRenamed}/${filesNeedingRename} files renamed`;
 
+		// A run that renamed only folders did work, so it counts as done
 		const status =
 			log.status === 'failed'
 				? 'failure'
-				: log.results.filesNeedingRename === 0
+				: filesNeedingRename === 0 && foldersRenamed === 0
 					? 'skipped'
 					: 'success';
 		return {

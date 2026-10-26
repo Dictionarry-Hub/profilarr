@@ -137,7 +137,7 @@
 				text="Save"
 				icon={Save}
 				iconColor="text-blue-600 dark:text-blue-400"
-				disabled={saving || running || !$isDirty}
+				disabled={saving || running || (!isNewConfig && !$isDirty)}
 				on:click={() => {
 					const saveForm = document.getElementById('save-form');
 					if (saveForm instanceof HTMLFormElement) {

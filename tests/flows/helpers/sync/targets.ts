@@ -37,14 +37,61 @@ export type Resource =
 	 * POST `path` stores a command with the next id and answers it as queued.
 	 * The first GET `path/{id}` answers it with its outcome, completed unless a
 	 * test set another, and adds the outcome's queue records to GET `queue`.
-	 * GET `path` lists every stored command.
+	 * GET `path` lists every stored command. A completed command named in
+	 * `renames` does its work: see `RenameCommand`.
 	 */
-	| { kind: 'command'; path: string; queue: string }
+	| { kind: 'command'; path: string; queue: string; renames?: RenameCommand[] }
 	/**
 	 * A bulk editor: PUT `path` applies `applyTags` (add, remove or replace)
-	 * with `tags` to every item of `collection` whose id is in the body's `ids`
+	 * with `tags` to every item of `collection` whose id is in the body's `ids`.
+	 * With `move`, a body with `rootFolderPath` and `moveFiles: true` moves
+	 * the items' folders instead: see `FolderMove`.
 	 */
-	| { kind: 'editor'; path: string; collection: string; ids: string };
+	| { kind: 'editor'; path: string; collection: string; ids: string; move?: FolderMove }
+	/**
+	 * Rename previews: GET `path?{query}={id}` lists the item's files whose
+	 * fake-only `renameTo` differs from their `relativePath`, one source per
+	 * app. A file with a `seasonNumber` (Sonarr) also gets its episode numbers,
+	 * read from the `E01` parts of its name.
+	 */
+	| { kind: 'preview'; path: string; sources: PreviewSource[] };
+
+/**
+ * A rename command, e.g. `RenameMovie { movieIds }`: once completed, each file
+ * of `files` whose `by` field is one of the command's `ids` takes its
+ * fake-only `renameTo` as its `relativePath`. File ids stay the same.
+ */
+export interface RenameCommand {
+	command: string;
+	ids: string;
+	files: string;
+	by: string;
+}
+
+/**
+ * A folder move through an editor: each listed item's `path` becomes
+ * `rootFolderPath/{folderTo}`, an item without the fake-only `folderTo` keeps
+ * its path, and the Arr adds a completed `command` (shown as `label`) whose
+ * body lists `{ [itemId], sourcePath }` under `list`. The editor answers
+ * `status`.
+ */
+export interface FolderMove {
+	command: string;
+	label: string;
+	list: string;
+	itemId: string;
+	status: number;
+}
+
+/** Where rename previews for one app come from, e.g. `movieId` over `moviefile` */
+export interface PreviewSource {
+	/** The query parameter, also the file field naming the item, e.g. "movieId" */
+	query: string;
+	/** The file collection, e.g. "moviefile" */
+	files: string;
+	/** The preview field holding the file id, e.g. "movieFileId" */
+	fileId: string;
+}
 
 export interface Target {
 	/** App and API version, e.g. "sonarr-5"; also its folder under data/arr/ */
@@ -106,16 +153,58 @@ const ARR_V3 = {
 		{ kind: 'collection', path: 'series' },
 		{ kind: 'collection', path: 'moviefile', filterBy: 'movieId' },
 		{ kind: 'collection', path: 'episodefile', filterBy: 'seriesId' },
-		{ kind: 'editor', path: 'series/editor', collection: 'series', ids: 'seriesIds' },
+		// Folder moves as seen on Radarr 6 and Sonarr 5. Sonarr 4 is assumed to
+		// answer the same, unchecked.
+		{
+			kind: 'editor',
+			path: 'movie/editor',
+			collection: 'movie',
+			ids: 'movieIds',
+			move: {
+				command: 'BulkMoveMovie',
+				label: 'Bulk Move Movie',
+				list: 'movies',
+				itemId: 'movieId',
+				status: 202
+			}
+		},
+		{
+			kind: 'editor',
+			path: 'series/editor',
+			collection: 'series',
+			ids: 'seriesIds',
+			move: {
+				command: 'BulkMoveSeries',
+				label: 'Bulk Move Series',
+				list: 'series',
+				itemId: 'seriesId',
+				status: 200
+			}
+		},
+		{
+			kind: 'preview',
+			path: 'rename',
+			sources: [
+				{ query: 'movieId', files: 'moviefile', fileId: 'movieFileId' },
+				{ query: 'seriesId', files: 'episodefile', fileId: 'episodeFileId' }
+			]
+		},
 		{ kind: 'singleton', path: 'config/naming' },
 		{ kind: 'singleton', path: 'config/mediamanagement' },
 		{ kind: 'bulk', path: 'qualitydefinition', update: 'qualitydefinition/update' },
-		{ kind: 'command', path: 'command', queue: 'queue' }
+		{
+			kind: 'command',
+			path: 'command',
+			queue: 'queue',
+			renames: [
+				{ command: 'RenameMovie', ids: 'movieIds', files: 'moviefile', by: 'movieId' },
+				{ command: 'RenameSeries', ids: 'seriesIds', files: 'episodefile', by: 'seriesId' }
+			]
+		}
 	],
 	// Empty answers for the rest of the library, so background jobs get valid answers
 	stubs: {
 		episode: [],
-		rename: [],
 		release: [],
 		'log/file': [],
 		log: EMPTY_PAGE

@@ -15,10 +15,15 @@
  *   (`edit`, `remove`, `seed`), including the movie and series library
  * - set a fixed answer for one path, e.g. health messages, or an answer per
  *   request, e.g. releases per movie (`answer`)
- * - make a path fail or reject one item (`fail`, `reject`)
+ * - make a path fail, for every request or one query such as one item's
+ *   id, or reject one item (`fail`, `reject`)
  * - run commands: each is queued, then completes on its first status check,
  *   or ends as the test set with `commandOutcome`, adding queue records the
  *   way a search that grabbed releases does
+ * - rename files and move folders from seeded state: a file's fake-only
+ *   `renameTo` and an item's `folderTo` are the names the Arr's naming
+ *   config would give them. Previews list the difference, rename commands
+ *   and folder moves apply it. Neither field appears in an answer.
  */
 
 import {
@@ -31,7 +36,12 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { ARR_DATA_DIR } from '$flows/harness/paths.ts';
 import { freePort } from '$flows/harness/ports.ts';
-import { recordingName, target as findTarget, type Target } from '$flows/helpers/sync/targets.ts';
+import {
+	recordingName,
+	target as findTarget,
+	type FolderMove,
+	type Target
+} from '$flows/helpers/sync/targets.ts';
 
 export type ArrType = Target['app'];
 
@@ -60,6 +70,18 @@ function matches(request: { method: string; path: string }, method: string, path
 	return typeof path === 'string' ? request.path === path : path.test(request.path);
 }
 
+/** Whether a request carries every one of these query parameters, e.g. `{ movieId: '3' }` */
+function hasQuery(request: { query: URLSearchParams }, query: Record<string, string> = {}) {
+	return Object.entries(query).every(([name, value]) => request.query.get(name) === value);
+}
+
+/** Fields only the fake knows: the names the Arr's naming config would give */
+const FAKE_ONLY = new Set(['renameTo', 'folderTo']);
+
+/** The episode numbers in a file name, e.g. [1, 2] for "Show - S01E01E02.mkv" */
+const episodeNumbers = (name: string) =>
+	[...name.matchAll(/E(\d+)/gi)].map((match) => Number(match[1]));
+
 /** Credentials a reverse proxy in front of the Arr would ask for */
 export interface BasicAuth {
 	username: string;
@@ -86,7 +108,12 @@ export interface CommandOutcome {
 	message?: string;
 	/** Records GET queue lists once the command has ended */
 	queue?: Record<string, unknown>[];
+	/** Complete without doing the work, e.g. a rename command that renames no file */
+	noEffect?: boolean;
 }
+
+/** One outcome for every command of a name, or one per command, e.g. by the ids it lists */
+export type CommandOutcomes = CommandOutcome | ((command: Resource) => CommandOutcome);
 
 /** A fixed answer, or one worked out from each request, e.g. releases per movie */
 export type Answer = unknown | ((request: RecordedRequest) => unknown);
@@ -144,8 +171,12 @@ export interface FakeArr {
 	waitFor(method: string, path: PathMatch, timeoutMs?: number): Promise<RecordedRequest>;
 	/** Answer creating or updating `name` in a collection with a validation error */
 	reject(collection: string, name: string, status?: number): void;
-	/** Answer every request to this method and path, or paths matching a pattern, with `status` */
-	fail(method: string, path: PathMatch, status: number): void;
+	/**
+	 * Answer every request to this method and path, or paths matching a
+	 * pattern, with `status`. With `query`, only requests carrying those
+	 * parameters fail, e.g. `{ movieId: '3' }` for one movie's previews.
+	 */
+	fail(method: string, path: PathMatch, status: number, query?: Record<string, string>): void;
 	/**
 	 * Answer every request to this method and path with `value` and 200, e.g.
 	 * `answer('GET', 'health', items)`. `value` can be a function of the
@@ -153,10 +184,25 @@ export interface FakeArr {
 	 * path without a leading slash is relative to the API base.
 	 */
 	answer(method: string, path: PathMatch, value: Answer): void;
-	/** End every later command named `name` this way, e.g. `MoviesSearch` failing */
-	commandOutcome(name: string, outcome: CommandOutcome): void;
+	/**
+	 * End every later command named `name` this way, e.g. `MoviesSearch`
+	 * failing, or pick an outcome per command, e.g. failing the batch that
+	 * lists series 11
+	 */
+	commandOutcome(name: string, outcome: CommandOutcomes): void;
 	/** The bodies of every command posted, oldest first */
 	commands(): Record<string, unknown>[];
+	/**
+	 * Every command GET command lists, oldest first, with its id and status:
+	 * the posted ones and those the Arr started itself, such as a folder move
+	 */
+	listedCommands(): Resource[];
+	/**
+	 * With each later folder move, also start a RefreshMonitoredDownloads in
+	 * the same moment, as the Arr's minute refresh can. It completes on its
+	 * first status check.
+	 */
+	strayCommandWithMove(): void;
 	/**
 	 * Change items the way a user editing in the Arr would, without recording a
 	 * request. `select` picks items of a collection or bulk resource, or must
@@ -217,9 +263,15 @@ export async function startFakeArr(
 	const waiters: (() => void)[] = [];
 	const unhandled: RecordedRequest[] = [];
 	const rejections: { collection: string; name: string; status: number }[] = [];
-	const failures: { method: string; path: PathMatch; status: number }[] = [];
+	const failures: {
+		method: string;
+		path: PathMatch;
+		status: number;
+		query?: Record<string, string>;
+	}[] = [];
 	const answers: { method: string; path: PathMatch; value: Answer }[] = [];
-	const outcomes = new Map<string, CommandOutcome>();
+	const outcomes = new Map<string, CommandOutcomes>();
+	let strayWithMove = false;
 	// Commands as posted, and as GET command lists them
 	const posted: Record<string, unknown>[] = [];
 	const commandList: Resource[] = [];
@@ -267,13 +319,54 @@ export async function startFakeArr(
 			: null;
 	};
 
-	/** End a queued command with its outcome, adding the outcome's queue records */
+	const renameCommands = target.resources.flatMap((resource) =>
+		resource.kind === 'command' ? (resource.renames ?? []) : []
+	);
+
+	/** Rename the files a completed rename command lists to their `renameTo` */
+	function applyRenames(command: Resource): void {
+		for (const rename of renameCommands.filter((r) => r.command === command.name)) {
+			const ids = (command[rename.ids] as number[] | undefined) ?? [];
+			for (const file of lists.get(rename.files) ?? []) {
+				if (!ids.includes(Number(file[rename.by]))) continue;
+				if (typeof file.renameTo === 'string') file.relativePath = file.renameTo;
+			}
+		}
+	}
+
+	/** End a queued or started command with its outcome, adding the outcome's queue records */
 	function finish(command: Resource): void {
-		if (command.status !== 'queued') return;
-		const outcome = outcomes.get(String(command.name)) ?? { status: 'completed' };
+		if (command.status !== 'queued' && command.status !== 'started') return;
+		const set = outcomes.get(String(command.name));
+		const outcome = (typeof set === 'function' ? set(command) : set) ?? { status: 'completed' };
 		command.status = outcome.status;
 		if (outcome.message !== undefined) command.message = outcome.message;
 		queue.push(...(outcome.queue ?? []));
+		if (outcome.status === 'completed' && !outcome.noEffect) applyRenames(command);
+	}
+
+	/** Move the folders an editor lists and add the move command the Arr starts */
+	function moveFolders(move: FolderMove, items: Resource[], rootFolderPath: string): void {
+		const moved = items.map((item) => {
+			const sourcePath = item.path;
+			if (typeof item.folderTo === 'string') item.path = `${rootFolderPath}/${item.folderTo}`;
+			return { [move.itemId]: item.id, sourcePath };
+		});
+		commandList.push({
+			id: commandList.length + 1,
+			name: move.command,
+			commandName: move.label,
+			status: 'completed',
+			body: { [move.list]: moved, destinationRootFolder: rootFolderPath }
+		});
+		if (strayWithMove) {
+			commandList.push({
+				id: commandList.length + 1,
+				name: 'RefreshMonitoredDownloads',
+				commandName: 'Refresh Monitored Downloads',
+				status: 'started'
+			});
+		}
 	}
 
 	/** Route a request; null means no route */
@@ -375,12 +468,41 @@ export async function startFakeArr(
 				return [200, command];
 			}
 
+			if (resource.kind === 'preview' && path === base) {
+				if (method !== 'GET') return null;
+				const source = resource.sources.find((s) => query.has(s.query));
+				if (!source) return [200, []];
+				const id = Number(query.get(source.query));
+				const previews = (lists.get(source.files) ?? [])
+					.filter((file) => file[source.query] === id)
+					.filter((file) => typeof file.renameTo === 'string')
+					.filter((file) => file.renameTo !== file.relativePath)
+					.map((file) => ({
+						[source.query]: id,
+						...(file.seasonNumber === undefined
+							? {}
+							: {
+									seasonNumber: file.seasonNumber,
+									episodeNumbers: episodeNumbers(String(file.relativePath))
+								}),
+						[source.fileId]: file.id,
+						existingPath: file.relativePath,
+						newPath: file.renameTo
+					}));
+				return [200, previews];
+			}
+
 			if (resource.kind === 'editor' && path === base) {
 				if (method !== 'PUT') return null;
 				const edit = (body as Record<string, unknown> | null) ?? {};
 				const ids = new Set((edit[resource.ids] as number[] | undefined) ?? []);
 				const tags = (edit.tags as number[] | undefined) ?? [];
 				const store = lists.get(resource.collection) ?? [];
+				if (resource.move && edit.moveFiles === true && typeof edit.rootFolderPath === 'string') {
+					const items = store.filter((item) => ids.has(item.id));
+					moveFolders(resource.move, items, edit.rootFolderPath);
+					return [resource.move.status, items];
+				}
 				for (const item of store) {
 					if (!ids.has(item.id) || edit.tags === undefined) continue;
 					const current = (item.tags as number[] | undefined) ?? [];
@@ -416,7 +538,9 @@ export async function startFakeArr(
 		let payload: unknown;
 		const key =
 			req.headers[target.auth.header.toLowerCase()] ?? url.searchParams.get(target.auth.query);
-		const failure = failures.find((f) => matches(entry, f.method, f.path));
+		const failure = failures.find(
+			(f) => matches(entry, f.method, f.path) && hasQuery(entry, f.query)
+		);
 		// The newest answer wins, so a test can replace one
 		const answered = [...answers].reverse().find((a) => matches(entry, a.method, a.path));
 		const allowed =
@@ -435,7 +559,7 @@ export async function startFakeArr(
 
 		entry.status = status;
 		res.writeHead(status, { 'Content-Type': 'application/json' });
-		res.end(JSON.stringify(payload));
+		res.end(JSON.stringify(payload, (field, value) => (FAKE_ONLY.has(field) ? undefined : value)));
 		for (const wake of [...waiters]) wake();
 	}
 
@@ -492,10 +616,14 @@ export async function startFakeArr(
 				waiters.push(wake);
 			}),
 		reject: (collection, name, status = 400) => void rejections.push({ collection, name, status }),
-		fail: (method, path, status) => void failures.push({ method, path, status }),
+		fail: (method, path, status, query) => void failures.push({ method, path, status, query }),
 		answer: (method, path, value) => void answers.push({ method, path: resolvePath(path), value }),
 		commandOutcome: (name, outcome) => void outcomes.set(name, outcome),
 		commands: () => [...posted],
+		listedCommands: () => commandList.map((command) => ({ ...command })),
+		strayCommandWithMove: () => {
+			strayWithMove = true;
+		},
 		edit: (path, select, patch) => {
 			const change = (item: Resource): Resource => {
 				if (typeof patch === 'function') {
