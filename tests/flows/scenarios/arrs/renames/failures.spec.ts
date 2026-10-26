@@ -4,8 +4,6 @@
  *   with nothing to rename.
  * - A failed command stops later batches. What earlier batches renamed
  *   stays, and the run is partial.
- * - A known bug is pinned with `test.fixme()`: a command that renames
- *   nothing.
  * - Radarr only, except the batch tests, which use Sonarr's smaller batches.
  */
 import type { Page } from '@playwright/test';
@@ -297,8 +295,7 @@ test('a dry run with a failed preview is partial', async ({ page, fakeRadarr: fa
  * - the run keeps 1 file needing rename and renamed 0
  * - it failed, with an error pointing at the Arr's logs
  */
-// C8: a live run overwrites the preview's count with what changed
-test.fixme('a completed command that renamed nothing fails the run', async ({
+test('a completed command that renamed nothing fails the run', async ({
 	page,
 	fakeRadarr: fake
 }) => {
