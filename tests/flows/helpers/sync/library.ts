@@ -6,6 +6,11 @@
  * Builders take tag and custom format names, the way a user sees them.
  * `seedLibrary` writes the items and files into the fake, creating each tag
  * and custom format the fake doesn't have yet, so its ids line up.
+ *
+ * For renames, an item can carry `folderTo` and a file `renameTo`: the
+ * folder and file names the Arr's naming config would give them. The fake
+ * keeps them to itself and builds previews, renames and folder moves from
+ * them.
  */
 
 import { test } from '@playwright/test';
@@ -54,9 +59,15 @@ export interface MovieOptions {
 	sizeGb?: number;
 	popularity?: number;
 	studio?: string;
+	/** Where it lives; default `{rootFolderPath}/{title}` */
+	path?: string;
+	/** Its root folder; default /movies */
+	rootFolderPath?: string;
+	/** The folder name a move would give it, fake-only */
+	folderTo?: string;
 }
 
-/** A Radarr movie with the fields upgrade filters read */
+/** A Radarr movie with the fields upgrade filters and renames read */
 export function radarrMovie(options: MovieOptions): LibraryEntry {
 	const { id, title } = options;
 	return {
@@ -77,8 +88,21 @@ export function radarrMovie(options: MovieOptions): LibraryEntry {
 		popularity: options.popularity ?? 0,
 		studio: options.studio ?? '',
 		originalLanguage: { id: 1, name: 'English' },
-		path: `/movies/${title}`,
+		...placement(options, '/movies'),
 		images: []
+	};
+}
+
+/** An item's folder and root folder, plus the folder a move would give it */
+function placement(
+	options: { title: string; path?: string; rootFolderPath?: string; folderTo?: string },
+	defaultRoot: string
+) {
+	const rootFolderPath = options.rootFolderPath ?? defaultRoot;
+	return {
+		path: options.path ?? `${rootFolderPath}/${options.title}`,
+		rootFolderPath,
+		...(options.folderTo !== undefined ? { folderTo: options.folderTo } : {})
 	};
 }
 
@@ -108,6 +132,12 @@ export interface SeriesOptions {
 	/** When the first episode aired, an ISO timestamp */
 	firstAired?: string;
 	sizeGb?: number;
+	/** Where it lives; default `{rootFolderPath}/{title}` */
+	path?: string;
+	/** Its root folder; default /tv */
+	rootFolderPath?: string;
+	/** The folder name a move would give it, fake-only */
+	folderTo?: string;
 }
 
 /** A Sonarr series with per-season monitoring and statistics */
@@ -145,7 +175,7 @@ export function sonarrSeries(options: SeriesOptions): LibraryEntry {
 		firstAired: options.firstAired ?? '2020-01-01T00:00:00Z',
 		originalLanguage: { id: 1, name: 'English' },
 		ratings: { value: 0, votes: 0 },
-		path: `/tv/${title}`,
+		...placement(options, '/tv'),
 		images: [],
 		seasons,
 		statistics: {
@@ -159,12 +189,33 @@ export function sonarrSeries(options: SeriesOptions): LibraryEntry {
 	};
 }
 
+/** A file's name in its item's folder, and the name a rename would give it */
+export interface FileNames {
+	/** Relative to the item's folder, e.g. "alpha.mkv" or "Season 01/Show - S01E01.mkv" */
+	relativePath?: string;
+	/** The name the Arr's naming config would give it, fake-only */
+	renameTo?: string;
+}
+
+/** A file's names, leaving `renameTo` out when it has none */
+function names(file: FileNames, relativePath: string) {
+	return {
+		relativePath: file.relativePath ?? relativePath,
+		...(file.renameTo !== undefined ? { renameTo: file.renameTo } : {})
+	};
+}
+
 /** A movie's file, with its custom format score and the formats it matched */
-export function movieFile(movieId: number, score: number, formats: string[] = []): FileEntry {
+export function movieFile(
+	movieId: number,
+	score: number,
+	formats: string[] = [],
+	fileNames: FileNames = {}
+): FileEntry {
 	return {
 		collection: 'moviefile',
 		movieId,
-		relativePath: `Movie ${movieId}.mkv`,
+		...names(fileNames, `Movie ${movieId}.mkv`),
 		size: GB,
 		quality: { quality: { id: 7, name: 'Bluray-1080p' } },
 		releaseGroup: 'FLOW',
@@ -174,12 +225,17 @@ export function movieFile(movieId: number, score: number, formats: string[] = []
 }
 
 /** An episode file of a series' season, with its custom format score */
-export function episodeFile(seriesId: number, seasonNumber: number, score: number): FileEntry {
+export function episodeFile(
+	seriesId: number,
+	seasonNumber: number,
+	score: number,
+	fileNames: FileNames = {}
+): FileEntry {
 	return {
 		collection: 'episodefile',
 		seriesId,
 		seasonNumber,
-		relativePath: `Season ${seasonNumber}/Series ${seriesId} S${seasonNumber}.mkv`,
+		...names(fileNames, `Season ${seasonNumber}/Series ${seriesId} S${seasonNumber}.mkv`),
 		size: GB,
 		quality: { quality: { id: 7, name: 'Bluray-1080p' } },
 		customFormatScore: score,
