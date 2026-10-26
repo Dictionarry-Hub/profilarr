@@ -155,7 +155,11 @@ export async function getItemsNeedingFileRename(
 				try {
 					const previews = await adapter.getRenamePreview(item.id);
 					return { item, count: previews.length };
-				} catch {
+				} catch (err) {
+					// Record it like a dry run does, so the run doesn't read as nothing to rename
+					log.results.errors.push(
+						`Preview failed for "${item.title}": ${err instanceof Error ? err.message : String(err)}`
+					);
 					return { item, count: 0 };
 				}
 			})

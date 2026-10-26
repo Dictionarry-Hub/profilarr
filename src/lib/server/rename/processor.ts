@@ -418,8 +418,11 @@ export async function processRenameConfig(
 
 		// Determine final status
 		if (log.results.errors.length > 0) {
-			log.status =
-				log.results.filesRenamed > 0 || log.results.foldersRenamed > 0 ? 'partial' : 'failed';
+			// A dry run renames nothing, so its work is the renames its previews found
+			const didWork = dryRun
+				? log.results.filesNeedingRename > 0
+				: log.results.filesRenamed > 0 || log.results.foldersRenamed > 0;
+			log.status = didWork ? 'partial' : 'failed';
 
 			for (const error of log.results.errors) {
 				await logger.warn(`Rename error: ${error}`, {

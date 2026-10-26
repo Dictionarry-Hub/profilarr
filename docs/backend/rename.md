@@ -79,6 +79,7 @@ tooltip on a blocked button.
 
 1. **Preview filter** -- calls the preview endpoint (concurrency 10) to find
    items that actually need file renames. Items with empty previews are dropped.
+   A failed preview is recorded as an error. Its item gets no file rename.
 2. **Before snapshot** -- captures each entity's folder path and file relative
    paths so the processor can diff after renaming.
 3. **File rename** -- batches item IDs and calls the Arr rename endpoint.
@@ -102,6 +103,9 @@ tooltip on a blocked button.
 | `partial` | Some renames completed, but errors occurred            |
 | `failed`  | Errors occurred and nothing was renamed                |
 | `skipped` | The ignore tag filtered out every item, so nothing ran |
+
+A dry run renames nothing. It is `partial` when some previews failed while others
+found renames.
 
 The `arr.rename` job run counts files and folders. It is `failure` for a
 failed run, `skipped` when no file needed renaming and no folder moved, and
