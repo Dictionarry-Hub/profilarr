@@ -53,6 +53,13 @@ import { notificationManager } from '$notifications/NotificationManager.ts';
  */
 const dryRunExclusions = new Map<number, { items: Set<number>; timestamp: number }>();
 const DRY_RUN_EXCLUSION_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/**
+ * In-memory shuffle rounds for Random Shuffle mode
+ * Map<instanceId, { order: filter IDs in shuffled order, position: index of the next filter }>
+ * A restart or a change to the enabled filters starts a new round
+ */
+const shuffleRounds = new Map<number, { order: string[]; position: number }>();
 const UPGRADE_QUEUE_POLL_INTERVAL_MS = 3000;
 const UPGRADE_QUEUE_GRACE_MS = 3 * 60 * 1000;
 const UPGRADE_COMMAND_TIMEOUT_MS = 60 * 60 * 1000;
@@ -101,6 +108,47 @@ export function clearDryRunExclusions(instanceId: number): number[] {
 	const clearedIds = entry ? Array.from(entry.items) : [];
 	dryRunExclusions.delete(instanceId);
 	return clearedIds;
+}
+
+/**
+ * Get an instance's shuffle round, starting a new one when the round is used up
+ * or the enabled filters changed
+ */
+function getShuffleRound(
+	instanceId: number,
+	enabledFilters: FilterConfig[]
+): { order: string[]; position: number } {
+	const ids = enabledFilters.map((f) => f.id);
+	const round = shuffleRounds.get(instanceId);
+	const sameFilters =
+		round !== undefined &&
+		round.order.length === ids.length &&
+		ids.every((id) => round.order.includes(id));
+
+	if (round && sameFilters && round.position < round.order.length) {
+		return round;
+	}
+
+	// Fisher-Yates shuffle
+	const order = [...ids];
+	for (let i = order.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[order[i], order[j]] = [order[j], order[i]];
+	}
+
+	const fresh = { order, position: 0 };
+	shuffleRounds.set(instanceId, fresh);
+	return fresh;
+}
+
+/**
+ * Move an instance's shuffle round on to its next filter
+ */
+export function advanceShuffleRound(instanceId: number): void {
+	const round = shuffleRounds.get(instanceId);
+	if (round) {
+		round.position++;
+	}
 }
 
 function sleep(ms: number): Promise<void> {
@@ -244,8 +292,9 @@ function getNextFilter(config: UpgradeConfig): FilterConfig | null {
 	}
 
 	if (config.filterMode === 'random') {
-		const randomIndex = Math.floor(Math.random() * enabledFilters.length);
-		return enabledFilters[randomIndex];
+		const round = getShuffleRound(config.arrInstanceId, enabledFilters);
+		const id = round.order[round.position];
+		return enabledFilters.find((f) => f.id === id) ?? null;
 	}
 
 	// Round robin
