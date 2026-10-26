@@ -375,10 +375,11 @@ Per section:
 
 **Handler:** `arrUpgrade.ts`
 
-Runs the upgrade engine for Radarr instances: evaluates filter rules against
-the library, selects items for search, and triggers interactive or live
-searches. Supports round-robin and random filter modes. Rotates the filter
-index after each run.
+Runs the upgrade engine for Radarr and Sonarr instances: evaluates filter rules
+against the library, selects items for search, and triggers interactive or live
+searches. Supports round-robin and random filter modes. After each run that
+doesn't fail, round robin moves the stored filter index on. Random Shuffle
+moves its in-memory round on.
 
 ### Arr Rename
 

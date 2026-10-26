@@ -195,7 +195,8 @@ Each run picks **one filter** from the enabled list:
 - **Round robin** -- cycles through filters in order. `currentFilterIndex`
   increments after each non-failed run and wraps around.
 - **Random** -- shuffles the enabled filters and cycles through all of them
-  before reshuffling.
+  before reshuffling. The round advances after each non-failed run. It is held
+  in memory. A restart or a change to the enabled filters starts a new round.
 
 The [job system](./jobs.md) manages dispatch via `nextRunAt` / `lastRunAt`.
 After each run, the handler calculates the next cron occurrence and updates

@@ -689,8 +689,7 @@ test('round robin runs each enabled filter in turn', async ({ page, fakeRadarr: 
  * Expects:
  * - each round of five runs uses every filter exactly once
  */
-// Random Shuffle picks at random each run. It should be a shuffle bag. Fixed in its own PR.
-test.fixme('Random Shuffle runs each filter once per round', async ({ page, fakeRadarr: fake }) => {
+test('Random Shuffle runs each filter once per round', async ({ page, fakeRadarr: fake }) => {
 	const names = ['One', 'Two', 'Three', 'Four', 'Five'];
 	const id = await setUp(page, fake, twoTitles(fake));
 	await setUpgradeCore(page, { mode: 'Random Shuffle' });

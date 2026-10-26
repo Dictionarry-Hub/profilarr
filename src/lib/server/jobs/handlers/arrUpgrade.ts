@@ -3,7 +3,7 @@ import type { JobHandler } from '../queueTypes.ts';
 import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
 import type { FilterConfig } from '$shared/upgrades/filters.ts';
-import { processUpgradeConfig } from '#lib/server/upgrades/processor.ts';
+import { advanceShuffleRound, processUpgradeConfig } from '#lib/server/upgrades/processor.ts';
 import { calculateNextRun } from '../scheduleUtils.ts';
 import { logger } from '$logger/logger.ts';
 
@@ -39,9 +39,12 @@ const upgradeRunHandler: JobHandler = async (job) => {
 	try {
 		const log = await processUpgradeConfig(config, instance, job.source === 'manual', dryRun);
 
-		// Update filter index for round-robin mode after successful processing
+		// Move on to the next filter after successful processing
 		if (log.status !== 'failed' && config.filterMode === 'round_robin') {
 			upgradeConfigsQueries.incrementFilterIndex(config.arrInstanceId);
+		}
+		if (log.status !== 'failed' && config.filterMode === 'random') {
+			advanceShuffleRound(config.arrInstanceId);
 		}
 
 		// Update last run timestamp
