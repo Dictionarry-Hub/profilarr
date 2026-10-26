@@ -21,7 +21,11 @@ export async function logRenameRun(log: RenameJobLog): Promise<void> {
 	if (log.config.manual) parts.unshift('manual');
 	const mode = parts.join(' ');
 
-	const summary = `Completed Job: ${mode} for "${log.instanceName}": ${log.results.filesRenamed} files, ${log.results.foldersRenamed} folders renamed across ${log.renamedItems.length} entities (${duration}ms)`;
+	// A dry run renames nothing, so it reports what its previews found
+	const counts = log.config.dryRun
+		? `${log.results.filesNeedingRename} files would be renamed`
+		: `${log.results.filesRenamed} files, ${log.results.foldersRenamed} folders renamed`;
+	const summary = `Completed Job: ${mode} for "${log.instanceName}": ${counts} across ${log.renamedItems.length} entities (${duration}ms)`;
 
 	await logger.info(summary, {
 		source: SOURCE,
