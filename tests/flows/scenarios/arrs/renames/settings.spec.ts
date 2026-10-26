@@ -29,7 +29,7 @@ import {
 	titleA,
 	titleB,
 	type RenameChanges
-} from '$flows/helpers/sync/rename.ts';
+} from '$flows/helpers/sync/renames.ts';
 import { clearOfScheduleMark } from '$flows/helpers/sync/upgrades.ts';
 
 const SAVE_FIRST = 'Save the config first';

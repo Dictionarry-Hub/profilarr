@@ -38,7 +38,7 @@ import {
 	type RenameChanges,
 	type RenameRun,
 	type RenameTitle
-} from '$flows/helpers/sync/rename.ts';
+} from '$flows/helpers/sync/renames.ts';
 
 const IGNORE_TAG = 'no-rename';
 /** The folder a move gives title A */

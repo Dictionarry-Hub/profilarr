@@ -28,7 +28,7 @@ import {
 	titleB,
 	type RenameChanges,
 	type RenameTitle
-} from '$flows/helpers/sync/rename.ts';
+} from '$flows/helpers/sync/renames.ts';
 
 const HOOK = '/hooks/renames';
 const RENAME_TYPES = ['Rename Completed (Success)', 'Rename Completed (Partial)', 'Rename Failed'];

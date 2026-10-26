@@ -31,7 +31,7 @@ import {
 	type RenameChanges,
 	type RenameRun,
 	type RenameTitle
-} from '$flows/helpers/sync/rename.ts';
+} from '$flows/helpers/sync/renames.ts';
 
 const DISK_FULL = 'Disk full';
 /** The error the client gives a 404 */
