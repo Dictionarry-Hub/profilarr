@@ -316,6 +316,42 @@ test('a completed command that renamed nothing fails the run', async ({
 
 /**
  * Flow:
+ * 1. Sonarr has 11 series to rename. Series 11 has two episode files. The
+ *    second rename command, for series 11, completes without renaming them.
+ * 2. The user runs Run Now.
+ *
+ * Expects:
+ * - the run is partial, with the first batch's 10 files renamed
+ * - its error counts both of series 11's files and points at Sonarr's logs
+ */
+test('a later batch that renamed nothing is partial', async ({ page, fakeSonarr: fake }) => {
+	fake.commandOutcome('RenameSeries', (command) =>
+		lists(command, 11) ? { status: 'completed', noEffect: true } : { status: 'completed' }
+	);
+	const titles = numberedTitles(fake.type, 11);
+	const last = titles[10];
+	last.files = [
+		...last.files,
+		{
+			from: `Season 01/${last.title} - S01E02 - TBA.mkv`,
+			to: `Season 01/${last.title} - S01E02 - Second.mkv`,
+			season: 1
+		}
+	];
+	const id = await setUp(page, fake, titles);
+
+	await runNow(page);
+
+	const run = await newestRun(page, id);
+	expect(
+		[run.status, run.results.filesNeedingRename, run.results.filesRenamed, run.results.errors],
+		"The run should be partial with series 11's two files missing"
+	).toEqual(['partial', 12, 10, ["2 files weren't renamed. Check Sonarr's logs."]]);
+	expect(fake.unhandled).toEqual([]);
+});
+
+/**
+ * Flow:
  * 1. A needs renaming and its folder is due to change. With the folder
  *    move, a RefreshMonitoredDownloads starts in the same moment.
  * 2. The user saves with Folders on and runs Run Now.
