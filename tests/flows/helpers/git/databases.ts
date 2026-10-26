@@ -10,7 +10,7 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
 	expect,
 	test,
@@ -32,7 +32,7 @@ import type { ScheduledJob } from '$flows/helpers/core/jobs.ts';
 import { openDatabase, openPage, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
 
-/** The token whose pushes reach the local upstream, for tests that type one in */
+/** The token tests save to publish, for tests that type one in */
 export { FLOWS_TOKEN };
 
 /** How long a link job may take: a clone from GitHub, the import and the compile */
@@ -147,6 +147,27 @@ export async function clonedRemote(repo: string): Promise<ClonedRemote> {
 }
 
 /**
+ * The files under a clone, `.git` included, whose content holds `text`, as
+ * paths relative to the clone. Git's objects are compressed, so this finds
+ * what git saved as plain text: config, FETCH_HEAD, logs and working files.
+ */
+export async function cloneFilesHolding(repo: string, text: string): Promise<string[]> {
+	return await test.step(
+		`Find files in ${repo} holding "${text}"`,
+		async () => {
+			const found: string[] = [];
+			for (const entry of await fs.readdir(repo, { recursive: true, withFileTypes: true })) {
+				if (!entry.isFile()) continue;
+				const path = join(entry.parentPath, entry.name);
+				if ((await fs.readFile(path)).includes(text)) found.push(relative(repo, path));
+			}
+			return found.sort();
+		},
+		{ box: true }
+	);
+}
+
+/**
  * Save `url` as a clone's origin, the way older versions saved one with the
  * token in it. With `create`, an empty clone is made first where none is,
  * e.g. a dependency clone under deps/.
@@ -253,8 +274,7 @@ export interface DeveloperOptions {
 /**
  * Give a database developer access, as its developer would: save a personal
  * access token and a git author on its Settings tab. Edits then become base
- * drafts that can be published from Changes. The token is FLOWS_TOKEN, the
- * only one whose pushes reach the local upstream.
+ * drafts that can be published from Changes. The token is FLOWS_TOKEN.
  */
 export async function setDeveloperAccess(
 	page: Page,
