@@ -607,20 +607,26 @@ test("the reset run's picks get the tag again", async ({ page, fakeRadarr: fake 
 /**
  * Flow:
  * 1. A and B match and both carry the filter's tag.
- * 2. The user saves a filter and clicks Dry Run.
+ * 2. The user saves a filter with Oldest and count 1, then clicks Dry Run.
  *
  * Expects:
  * - no tag removal is sent, and A and B keep their tags
+ * - the dry run previews the pool as if reset: it picks A of 2
  */
 test('a dry run on an exhausted pool changes nothing', async ({ page, fakeRadarr: fake }) => {
-	const id = await setUp(page, fake, twoTitles(fake, [FILTER_TAG]));
+	const id = await setUp(page, fake, twoTitles(fake, [FILTER_TAG]), { method: 'Oldest', count: 1 });
 	const from = fake.requests.length;
 
 	await dryRun(page);
 
 	expect(writes(fake, from), 'A dry run should send no tag removal').toEqual([]);
 	expect(taggedIds(fake, FILTER_TAG), 'A and B should keep their tags').toEqual([1, 2]);
-	expect((await newestRun(page, id)).config.dryRun, 'The dry run should be stored').toBe(true);
+	const run = await newestRun(page, id);
+	expect(run.config.dryRun, 'The dry run should be stored').toBe(true);
+	expect(
+		[pickedIds(run), run.filter.afterCooldown],
+		'The dry run should preview the pool as if reset and pick A of 2'
+	).toEqual([[1], 2]);
 	expect(fake.unhandled).toEqual([]);
 });
 
