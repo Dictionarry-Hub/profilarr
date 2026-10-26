@@ -96,12 +96,19 @@ tooltip on a blocked button.
 
 ### Status
 
-| Status    | Meaning                                        |
-| --------- | ---------------------------------------------- |
-| `success` | At least one rename completed, no errors       |
-| `partial` | Some renames completed, but errors occurred    |
-| `failed`  | Errors occurred and nothing was renamed        |
-| `skipped` | No items needed renaming (or filtered to zero) |
+| Status    | Meaning                                                |
+| --------- | ------------------------------------------------------ |
+| `success` | No errors, including a run with nothing to rename      |
+| `partial` | Some renames completed, but errors occurred            |
+| `failed`  | Errors occurred and nothing was renamed                |
+| `skipped` | The ignore tag filtered out every item, so nothing ran |
+
+The `arr.rename` job run counts files and folders. It is `failure` for a
+failed run, `skipped` when no file needed renaming and no folder moved, and
+`success` otherwise, partial runs included. A live run's output gives files
+renamed out of files needing rename, plus folders renamed when Folders is on,
+e.g. "0/0 files, 1 folder renamed". A dry run's output gives the files it
+would rename.
 
 ## Configuration
 
@@ -144,16 +151,18 @@ Three logging functions in `logger.ts`:
 
 ## Notifications
 
-Rename runs emit one of four notification types via the
+Rename runs emit one of three notification types via the
 [notification system](./notifications.md):
 
-| Type             | Severity | When                        |
-| ---------------- | -------- | --------------------------- |
-| `rename.success` | success  | Files renamed, no errors    |
-| `rename.partial` | warning  | Some renames, some errors   |
-| `rename.failed`  | error    | No renames, errors occurred |
-| `rename.skipped` | success  | Nothing needed renaming     |
+| Type             | Severity | When                                                            |
+| ---------------- | -------- | --------------------------------------------------------------- |
+| `rename.success` | success  | No errors, with "No files needed renaming" when nothing changed |
+| `rename.partial` | warning  | Some renames, some errors                                       |
+| `rename.failed`  | error    | No renames, errors occurred                                     |
 
+A run the ignore tag skipped sends nothing. A failed run's message gives its
+first error, "Rename failed for <instance>: <error>". That includes a run that
+fails before renaming anything, such as when the Arr can't list its library.
 Notifications are not sent for dry runs.
 
 The `summaryNotifications` setting controls detail level. **Summary mode**
