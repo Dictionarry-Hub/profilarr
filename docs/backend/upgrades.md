@@ -242,7 +242,9 @@ An in-memory exclusion cache (1-hour TTL, keyed by instance ID) tracks items
 selected in previous dry runs so the same items aren't re-picked on repeated
 manual runs. The cache can be cleared from the UI.
 
-In dry-run mode, cooldown tags are **not** applied to items.
+In dry-run mode, cooldown tags are **not** applied to items. A dry run on an
+exhausted filter doesn't reset its cooldown either. It previews the pool as if
+it were reset. Every tag stays in the Arr.
 
 ## Logging
 

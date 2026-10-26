@@ -446,25 +446,32 @@ export async function processUpgradeConfig(
 		const tagLabel = resolveTagLabel(filter);
 
 		if (isFilterExhausted(matchedItems, tags, tagLabel)) {
-			const resetResult = await resetFilterCooldown(
-				client as RadarrClient & SonarrClient,
-				tagLabel
-			);
-			if (resetResult.reset > 0) {
-				const updatedTags = await client.getTags();
-				tags.length = 0;
-				tags.push(...updatedTags);
+			let filterTagId: number | undefined;
 
-				// Also strip the tag from local items so filterByFilterTag sees them as available,
-				// and from the raw copy the tagging step reads, so this run's picks get tagged again
-				const filterTagId = updatedTags.find(
-					(t) => t.label.toLowerCase() === tagLabel.toLowerCase()
-				)?.id;
-				if (filterTagId !== undefined) {
-					for (const item of matchedItems) {
-						item._tags = item._tags.filter((id) => id !== filterTagId);
-						item._raw.tags = (item._raw.tags ?? []).filter((id) => id !== filterTagId);
-					}
+			if (dryRun) {
+				// A dry run previews the pool as if it were reset, without untagging anything in the Arr
+				filterTagId = tags.find((t) => t.label.toLowerCase() === tagLabel.toLowerCase())?.id;
+			} else {
+				const resetResult = await resetFilterCooldown(
+					client as RadarrClient & SonarrClient,
+					tagLabel
+				);
+				if (resetResult.reset > 0) {
+					const updatedTags = await client.getTags();
+					tags.length = 0;
+					tags.push(...updatedTags);
+					filterTagId = updatedTags.find(
+						(t) => t.label.toLowerCase() === tagLabel.toLowerCase()
+					)?.id;
+				}
+			}
+
+			// Strip the tag from local items so filterByFilterTag sees them as available,
+			// and from the raw copy the tagging step reads, so this run's picks get tagged again
+			if (filterTagId !== undefined) {
+				for (const item of matchedItems) {
+					item._tags = item._tags.filter((id) => id !== filterTagId);
+					item._raw.tags = (item._raw.tags ?? []).filter((id) => id !== filterTagId);
 				}
 			}
 		}

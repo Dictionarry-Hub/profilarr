@@ -612,8 +612,7 @@ test("the reset run's picks get the tag again", async ({ page, fakeRadarr: fake 
  * Expects:
  * - no tag removal is sent, and A and B keep their tags
  */
-// A dry run on an exhausted pool strips every cooldown tag. Fixed in the cooldown fix PR.
-test.fixme('a dry run on an exhausted pool changes nothing', async ({ page, fakeRadarr: fake }) => {
+test('a dry run on an exhausted pool changes nothing', async ({ page, fakeRadarr: fake }) => {
 	const id = await setUp(page, fake, twoTitles(fake, [FILTER_TAG]));
 	const from = fake.requests.length;
 
