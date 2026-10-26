@@ -312,44 +312,26 @@ export async function syncInstance(instanceId: number): Promise<InstanceSyncResu
 // =============================================================================
 
 /**
- * Trigger syncs for configs matching the event type
- * Called from manager.ts after database git pull completes
+ * Trigger syncs for sections matching the event type.
+ * Called from manager.ts after a database git pull completes. With a
+ * database id, only sections that use that database are queued.
  */
 export async function triggerSyncs(context: TriggerContext): Promise<void> {
-	const instanceIds = arrSyncQueries.getInstanceIdsForTrigger(context.event);
+	const sections = arrSyncQueries.getSectionsForTrigger(context.event, context.databaseId);
 
-	for (const instanceId of instanceIds) {
-		const status = arrSyncQueries.getSyncConfigStatus(instanceId);
-
-		if (status.qualityProfiles.trigger === context.event) {
-			arrSyncQueries.setQualityProfilesStatusPending(instanceId);
-			upsertScheduledJob({
-				jobType: 'arr.sync.qualityProfiles',
-				runAt: new Date().toISOString(),
-				payload: { instanceId },
-				source: 'system',
-				dedupeKey: `arr.sync.qualityProfiles:event:${instanceId}`
-			});
-		}
-		if (status.delayProfiles.trigger === context.event) {
-			arrSyncQueries.setDelayProfilesStatusPending(instanceId);
-			upsertScheduledJob({
-				jobType: 'arr.sync.delayProfiles',
-				runAt: new Date().toISOString(),
-				payload: { instanceId },
-				source: 'system',
-				dedupeKey: `arr.sync.delayProfiles:event:${instanceId}`
-			});
-		}
-		if (status.mediaManagement.trigger === context.event) {
-			arrSyncQueries.setMediaManagementStatusPending(instanceId);
-			upsertScheduledJob({
-				jobType: 'arr.sync.mediaManagement',
-				runAt: new Date().toISOString(),
-				payload: { instanceId },
-				source: 'system',
-				dedupeKey: `arr.sync.mediaManagement:event:${instanceId}`
-			});
-		}
+	for (const { instanceId, section } of sections) {
+		const setPending = {
+			qualityProfiles: arrSyncQueries.setQualityProfilesStatusPending,
+			delayProfiles: arrSyncQueries.setDelayProfilesStatusPending,
+			mediaManagement: arrSyncQueries.setMediaManagementStatusPending
+		}[section];
+		setPending(instanceId);
+		upsertScheduledJob({
+			jobType: `arr.sync.${section}`,
+			runAt: new Date().toISOString(),
+			payload: { instanceId },
+			source: 'system',
+			dedupeKey: `arr.sync.${section}:event:${instanceId}`
+		});
 	}
 }

@@ -4,6 +4,11 @@ import { toUTC } from '$shared/utils/dates.ts';
 // Types
 export type SyncTrigger = 'manual' | 'on_pull' | 'schedule';
 
+export interface TriggeredSection {
+	instanceId: number;
+	section: 'qualityProfiles' | 'delayProfiles' | 'mediaManagement';
+}
+
 export interface ProfileSelection {
 	databaseId: number;
 	profileName: string;
@@ -1032,18 +1037,44 @@ export const arrSyncQueries = {
 		);
 	},
 
-	getInstanceIdsForTrigger(trigger: SyncTrigger): number[] {
-		const rows = db.query<{ instance_id: number }>(
-			`SELECT instance_id FROM arr_sync_quality_profiles_config WHERE trigger = ?
-			 UNION
-			 SELECT instance_id FROM arr_sync_delay_profiles_config WHERE trigger = ?
-			 UNION
-			 SELECT instance_id FROM arr_sync_media_management WHERE trigger = ?`,
+	/**
+	 * Sections whose trigger matches, one row per instance and section. With a
+	 * database id, a section counts only when it uses that database: a selected
+	 * quality profile from it, its delay profile, or any of its media
+	 * management configs.
+	 */
+	getSectionsForTrigger(trigger: SyncTrigger, databaseId?: number): TriggeredSection[] {
+		const any = databaseId === undefined ? 1 : 0;
+		const id = databaseId ?? null;
+		const rows = db.query<{ instance_id: number; section: TriggeredSection['section'] }>(
+			`SELECT c.instance_id, 'qualityProfiles' AS section
+			 FROM arr_sync_quality_profiles_config c
+			 WHERE c.trigger = ? AND (? = 1 OR EXISTS (
+				SELECT 1 FROM arr_sync_quality_profiles p
+				WHERE p.instance_id = c.instance_id AND p.database_id = ?
+			 ))
+			 UNION ALL
+			 SELECT instance_id, 'delayProfiles'
+			 FROM arr_sync_delay_profiles_config
+			 WHERE trigger = ? AND (? = 1 OR database_id = ?)
+			 UNION ALL
+			 SELECT instance_id, 'mediaManagement'
+			 FROM arr_sync_media_management
+			 WHERE trigger = ? AND (? = 1 OR ? IN (
+				naming_database_id, quality_definitions_database_id, media_settings_database_id
+			 ))
+			 ORDER BY 1`,
 			trigger,
+			any,
+			id,
 			trigger,
-			trigger
+			any,
+			id,
+			trigger,
+			any,
+			id
 		);
 
-		return rows.map((row) => row.instance_id);
+		return rows.map((row) => ({ instanceId: row.instance_id, section: row.section }));
 	}
 };
