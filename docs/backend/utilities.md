@@ -216,13 +216,14 @@ place `marked` is imported; see
 
 ## Git
 
-**Source:** `utils/git/` (exec.ts, read.ts, write.ts, types.ts)
+**Source:** `utils/git/` (exec.ts, auth.ts, read.ts, write.ts, types.ts)
 
 Three layers for Git repository operations:
 
 **exec.ts** -- runs git commands in a sandboxed environment. Sets
 `GIT_TERMINAL_PROMPT=0` to prevent interactive prompts, applies configurable
-timeouts, and captures stdout/stderr.
+timeouts, and captures stdout/stderr. A call can pass a GitHub personal access
+token, which `auth.ts` turns into config for that one command.
 
 **read.ts** -- read-only operations:
 
@@ -238,8 +239,24 @@ timeouts, and captures stdout/stderr.
 
 **write.ts** -- mutating operations (clone, fetch, pull, push, commit) with
 GitHub API integration. Handles rate limiting, authentication failures, and
-private repository detection. Credentials are injected into remote URLs for
-authenticated operations.
+private repository detection.
+
+**Tokens.** A token reaches git as an `Authorization: Basic` header
+(`x-access-token:<token>`), set as `http.https://github.com/.extraHeader`
+through `GIT_CONFIG_COUNT`, `GIT_CONFIG_KEY_n` and `GIT_CONFIG_VALUE_n`, after
+`GIT_ENV`'s own entries. Only requests to `https://github.com/` get it. It is
+never in an argument, so it doesn't show in a process list, and never in a
+URL, so clones save only the plain URL as `origin`. Every caller that fetches,
+pulls, pushes or clones passes the database's stored token, and the exporter
+fetches and pushes to the plain `repository_url`. A token in the URL also
+fails on libcurl 8.23 and later, which strips it from the URL git compares
+against, so git treats the request as redirected and goes on without it.
+
+Older versions saved the token in each clone's `origin`. At startup
+`PCDManager.initialize()` calls `removeSavedTokens()` (`pcd/git/remotes.ts`),
+which resets such an `origin` to the stored `repository_url`, and a dependency
+clone's under `deps/` to its URL without credentials. It logs each database it
+changes, without the URL; a failure is logged and startup continues.
 
 Used by the PCD manager for all repository operations: linking databases,
 pulling updates, pushing exports, and displaying branch/commit info in the UI.
