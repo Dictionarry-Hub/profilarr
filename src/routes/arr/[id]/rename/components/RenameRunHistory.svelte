@@ -229,11 +229,9 @@
 							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results
 								.filesRenamed !== 1
 								? 's'
-								: ''}
+								: ''}{#if row.results.foldersRenamed > 0},{/if}
 						{/if}
 						{#if row.results.foldersRenamed > 0}
-							{#if row.results.filesRenamed > 0},
-							{/if}
 							<span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results
 								.foldersRenamed !== 1
 								? 's'
@@ -321,9 +319,9 @@
 							<span class="font-mono">{row.results.filesRenamed}</span> file{row.results
 								.filesRenamed !== 1
 								? 's'
-								: ''} renamed
+								: ''} renamed{#if row.results.foldersRenamed > 0},{/if}
 							{#if row.results.foldersRenamed > 0}
-								, <span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results
+								<span class="font-mono">{row.results.foldersRenamed}</span> folder{row.results
 									.foldersRenamed !== 1
 									? 's'
 									: ''} renamed
