@@ -55,6 +55,12 @@ Manual syncs process all configured sections regardless of the `should_sync`
 flag. Schedule and on_pull mark individual sections as pending and enqueue
 section-specific jobs. See [jobs.md](./jobs.md) for dispatch mechanics.
 
+An on_pull trigger queues only the sections that use the pulled database
+(`getSectionsForTrigger`). Quality Profiles counts when any selected profile
+comes from it, Delay Profiles when its profile does, and Media Management when
+its naming, quality definitions or media settings config does. A pull of one
+database never syncs a section that only reads another.
+
 ### Processor Flow
 
 ```mermaid
