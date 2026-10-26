@@ -455,13 +455,15 @@ export async function processUpgradeConfig(
 				tags.length = 0;
 				tags.push(...updatedTags);
 
-				// Also strip the tag from local items so filterByFilterTag sees them as available
+				// Also strip the tag from local items so filterByFilterTag sees them as available,
+				// and from the raw copy the tagging step reads, so this run's picks get tagged again
 				const filterTagId = updatedTags.find(
 					(t) => t.label.toLowerCase() === tagLabel.toLowerCase()
 				)?.id;
 				if (filterTagId !== undefined) {
 					for (const item of matchedItems) {
 						item._tags = item._tags.filter((id) => id !== filterTagId);
+						item._raw.tags = (item._raw.tags ?? []).filter((id) => id !== filterTagId);
 					}
 				}
 			}

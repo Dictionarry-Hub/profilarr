@@ -593,8 +593,7 @@ for (const targetId of ['radarr-6', 'sonarr-4']) {
  * Expects:
  * - after the third run, A carries the tag in the Arr and B doesn't
  */
-// Cooldown reset leaves the reset run's picks untagged (stale `_raw.tags`). Fixed in the cooldown fix PR.
-test.fixme("the reset run's picks get the tag again", async ({ page, fakeRadarr: fake }) => {
+test("the reset run's picks get the tag again", async ({ page, fakeRadarr: fake }) => {
 	const id = await setUp(page, fake, twoTitles(fake), { method: 'Oldest', count: 1 });
 	await twoCooldownRuns(page, id);
 
