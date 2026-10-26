@@ -3,6 +3,7 @@
  */
 
 import { runCommand } from '../command.ts';
+import { withGitAuth } from './auth.ts';
 
 const DEFAULT_TIMEOUT_MS = 60_000;
 
@@ -15,17 +16,25 @@ export const GIT_ENV = {
 	GIT_CONFIG_VALUE_0: ''
 };
 
+export interface ExecGitOptions {
+	/** Send SIGTERM after this many milliseconds */
+	timeoutMs?: number;
+	/** GitHub personal access token, sent to GitHub as an HTTP header (see auth.ts) */
+	token?: string | null;
+}
+
 /**
  * Execute a git command with sandboxed environment and timeout.
  */
 export async function execGit(
 	args: string[],
 	cwd?: string,
-	timeoutMs: number = DEFAULT_TIMEOUT_MS
+	options: ExecGitOptions = {}
 ): Promise<string> {
+	const { timeoutMs = DEFAULT_TIMEOUT_MS, token } = options;
 	const { code, signal, stdout, stderr } = await runCommand('git', args, {
 		cwd,
-		env: GIT_ENV,
+		env: withGitAuth(GIT_ENV, token),
 		timeoutMs
 	});
 
@@ -43,9 +52,13 @@ export async function execGit(
 /**
  * Execute a git command, returning null on failure instead of throwing
  */
-export async function execGitSafe(args: string[], cwd: string): Promise<string | null> {
+export async function execGitSafe(
+	args: string[],
+	cwd: string,
+	options: ExecGitOptions = {}
+): Promise<string | null> {
 	try {
-		return await execGit(args, cwd);
+		return await execGit(args, cwd, options);
 	} catch {
 		return null;
 	}

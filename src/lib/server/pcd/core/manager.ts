@@ -228,7 +228,7 @@ class PCDManager {
 
 		try {
 			// Check for updates first
-			const updateInfo = await checkForUpdates(instance.local_path);
+			const updateInfo = await checkForUpdates(instance.local_path, instance.personal_access_token);
 			summary.commits = {
 				from: updateInfo.currentLocalCommit,
 				to: updateInfo.latestRemoteCommit,
@@ -256,7 +256,7 @@ class PCDManager {
 			const schemaVersionBefore = await readSchemaVersion(instance.local_path);
 
 			// Pull updates
-			await pull(instance.local_path);
+			await pull(instance.local_path, instance.personal_access_token);
 
 			// Get commit messages for the pulled commits
 			const commitMessages = await getCommitMessagesBetween(instance.local_path, oldHead, 'HEAD');
@@ -399,7 +399,7 @@ class PCDManager {
 			throw new Error(`Database instance ${id} not found`);
 		}
 
-		return await checkForUpdates(instance.local_path);
+		return await checkForUpdates(instance.local_path, instance.personal_access_token);
 	}
 
 	/**
@@ -424,7 +424,7 @@ class PCDManager {
 		}
 
 		await checkout(instance.local_path, branch);
-		await pull(instance.local_path);
+		await pull(instance.local_path, instance.personal_access_token);
 		try {
 			await importBaseOps(id, instance.local_path);
 		} catch (error) {

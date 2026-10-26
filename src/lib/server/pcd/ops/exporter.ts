@@ -252,20 +252,16 @@ function buildChangeMaps(databaseId: number) {
 	return { changes, changeByKey, changeByOpId, groupMap };
 }
 
-function buildRemoteUrl(repositoryUrl: string, personalAccessToken?: string | null): string {
-	if (!personalAccessToken) return repositoryUrl;
-	if (!repositoryUrl.startsWith('https://github.com')) return repositoryUrl;
-	return repositoryUrl.replace('https://github.com', `https://${personalAccessToken}@github.com`);
-}
-
 async function fetchRemoteBranch(
 	repoPath: string,
 	remoteUrl: string,
-	branch: string
+	branch: string,
+	personalAccessToken: string | null
 ): Promise<void> {
 	await execGit(
 		['fetch', '--quiet', remoteUrl, `${branch}:refs/remotes/origin/${branch}`],
-		repoPath
+		repoPath,
+		{ token: personalAccessToken }
 	);
 }
 
@@ -347,8 +343,12 @@ async function runPreflight(databaseId: number): Promise<ExportPreflight> {
 		if (!branch) {
 			errors.push('Repository is not on a branch.');
 		} else {
-			const remoteUrl = buildRemoteUrl(database.repository_url, database.personal_access_token);
-			await fetchRemoteBranch(database.local_path, remoteUrl, branch);
+			await fetchRemoteBranch(
+				database.local_path,
+				database.repository_url,
+				branch,
+				database.personal_access_token
+			);
 			checks.remoteReachable = true;
 
 			status = await getStatus(database.local_path);
@@ -518,8 +518,14 @@ async function cloneForExport(
 	await execGit(['clone', '--quiet', sourcePath, targetPath], workdir);
 }
 
-async function pushHeadToBranch(repoPath: string, branch: string): Promise<void> {
-	await execGit(['push', 'origin', `HEAD:refs/heads/${branch}`], repoPath);
+async function pushHeadToBranch(
+	repoPath: string,
+	branch: string,
+	personalAccessToken: string | null
+): Promise<void> {
+	await execGit(['push', 'origin', `HEAD:refs/heads/${branch}`], repoPath, {
+		token: personalAccessToken
+	});
 }
 
 export async function previewDraftOps(
@@ -669,7 +675,6 @@ export async function exportDraftOps(
 	try {
 		const tempDir = await fs.mkdtemp(join(tmpdir(), 'profilarr-export-'));
 		const repoDir = `${tempDir}/repo`;
-		const authUrl = buildRemoteUrl(database.repository_url, database.personal_access_token);
 		let sourcePath = database.local_path;
 		try {
 			sourcePath = await fs.realpath(database.local_path);
@@ -679,7 +684,7 @@ export async function exportDraftOps(
 
 		try {
 			await cloneForExport(sourcePath, repoDir, tempDir);
-			await execGit(['remote', 'set-url', 'origin', authUrl], repoDir);
+			await execGit(['remote', 'set-url', 'origin', database.repository_url], repoDir);
 
 			const toStage: string[] = [];
 
@@ -729,7 +734,7 @@ export async function exportDraftOps(
 			await stage(repoDir, toStage);
 			await configureIdentity(repoDir, gitUserName, gitUserEmail);
 			await commit(repoDir, trimmedMessage);
-			await pushHeadToBranch(repoDir, branch);
+			await pushHeadToBranch(repoDir, branch, database.personal_access_token);
 		} finally {
 			try {
 				await fs.rm(tempDir, { recursive: true });
@@ -764,7 +769,9 @@ export async function exportDraftOps(
 					}
 				}
 			}
-			await execGit(['pull', '--ff-only'], database.local_path);
+			await execGit(['pull', '--ff-only'], database.local_path, {
+				token: database.personal_access_token
+			});
 		} catch (error) {
 			await logger.warn('Failed to update local repo after export', {
 				source: 'PCDExporter',

@@ -191,29 +191,23 @@ async function validateRepository(
 /**
  * Clone a git repository
  * Returns true if private, false if public
+ *
+ * The clone's `origin` is the plain URL. A token is sent as a header for the
+ * clone only (see auth.ts), so it is never saved in `.git/config`.
  */
 export async function clone(
 	repositoryUrl: string,
 	targetPath: string,
 	branch?: string,
-	personalAccessToken?: string
+	personalAccessToken?: string | null
 ): Promise<boolean> {
-	const isPrivate = await validateRepository(repositoryUrl, personalAccessToken);
+	const isPrivate = await validateRepository(repositoryUrl, personalAccessToken ?? undefined);
 
 	const args = ['clone'];
 	if (branch) args.push('--branch', branch);
+	args.push(repositoryUrl, targetPath);
 
-	let authUrl = repositoryUrl;
-	if (personalAccessToken) {
-		authUrl = repositoryUrl.replace(
-			'https://github.com',
-			`https://${personalAccessToken}@github.com`
-		);
-	}
-
-	args.push(authUrl, targetPath);
-
-	await execGit(args);
+	await execGit(args, undefined, { token: personalAccessToken });
 
 	return isPrivate;
 }
@@ -221,29 +215,32 @@ export async function clone(
 /**
  * Fetch from remote (silent)
  */
-export async function fetch(repoPath: string): Promise<void> {
-	await execGitSafe(['fetch', '--quiet'], repoPath);
+export async function fetch(repoPath: string, personalAccessToken?: string | null): Promise<void> {
+	await execGitSafe(['fetch', '--quiet'], repoPath, { token: personalAccessToken });
 }
 
 /**
  * Fetch tags from remote
  */
-export async function fetchTags(repoPath: string): Promise<void> {
-	await execGitSafe(['fetch', '--tags', '--quiet'], repoPath);
+export async function fetchTags(
+	repoPath: string,
+	personalAccessToken?: string | null
+): Promise<void> {
+	await execGitSafe(['fetch', '--tags', '--quiet'], repoPath, { token: personalAccessToken });
 }
 
 /**
  * Pull from remote
  */
-export async function pull(repoPath: string): Promise<void> {
-	await execGit(['pull'], repoPath);
+export async function pull(repoPath: string, personalAccessToken?: string | null): Promise<void> {
+	await execGit(['pull'], repoPath, { token: personalAccessToken });
 }
 
 /**
  * Push to remote
  */
-export async function push(repoPath: string): Promise<void> {
-	await execGit(['push'], repoPath);
+export async function push(repoPath: string, personalAccessToken?: string | null): Promise<void> {
+	await execGit(['push'], repoPath, { token: personalAccessToken });
 }
 
 /**

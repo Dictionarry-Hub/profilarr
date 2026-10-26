@@ -94,7 +94,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	// Fetch data for everyone
 	const [status, incomingChanges, branches, repoInfo] = await Promise.all([
 		getStatus(database.local_path),
-		getIncomingChanges(database.local_path),
+		getIncomingChanges(database.local_path, database.personal_access_token),
 		getBranches(database.local_path),
 		getRepoInfo(database.repository_url, database.personal_access_token)
 	]);

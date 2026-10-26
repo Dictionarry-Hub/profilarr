@@ -29,6 +29,8 @@ export async function getBranch(repoPath: string): Promise<string> {
 export interface GetStatusOptions {
 	/** Whether to fetch from remote first (slower but accurate ahead/behind) */
 	fetch?: boolean;
+	/** GitHub personal access token for the fetch */
+	personalAccessToken?: string | null;
 }
 
 /**
@@ -42,7 +44,7 @@ export async function getStatus(
 
 	// Optionally fetch to get accurate ahead/behind
 	if (options.fetch) {
-		await fetch(repoPath);
+		await fetch(repoPath, options.personalAccessToken);
 	}
 
 	// Get ahead/behind
@@ -95,8 +97,11 @@ export async function getStatus(
 /**
  * Check for updates from remote
  */
-export async function checkForUpdates(repoPath: string): Promise<UpdateInfo> {
-	await fetch(repoPath);
+export async function checkForUpdates(
+	repoPath: string,
+	personalAccessToken?: string | null
+): Promise<UpdateInfo> {
+	await fetch(repoPath, personalAccessToken);
 
 	const branch = await getBranch(repoPath);
 	const remoteBranch = `origin/${branch}`;
@@ -269,8 +274,11 @@ export async function countCommits(repoPath: string, ref: string): Promise<numbe
 /**
  * Get incoming changes (commits available to pull from remote)
  */
-export async function getIncomingChanges(repoPath: string): Promise<IncomingChanges> {
-	await fetch(repoPath);
+export async function getIncomingChanges(
+	repoPath: string,
+	personalAccessToken?: string | null
+): Promise<IncomingChanges> {
+	await fetch(repoPath, personalAccessToken);
 
 	const branch = await getBranch(repoPath);
 	const remoteBranch = `origin/${branch}`;
