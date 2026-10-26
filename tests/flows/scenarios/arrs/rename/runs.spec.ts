@@ -252,8 +252,9 @@ for (const targetId of ['radarr-6', 'sonarr-4']) {
 	 * - the dialog adds "Folders will be renamed too."
 	 * - one editor request per root folder, after the rename command
 	 * - A's folder is the new one in the Arr
-	 * - the stored run counts 1 folder, and the history row says "N files,
-	 *   1 folder renamed"
+	 * - the stored run counts 1 folder, the history row says "N files,
+	 *   1 folder renamed", and its details "N files renamed, 1 folder
+	 *   renamed"
 	 */
 	test(`renames folders when Folders is on (${targetId})`, async ({ page, startArr }) => {
 		const fake = await startArr(targetId);
@@ -293,6 +294,10 @@ for (const targetId of ['radarr-6', 'sonarr-4']) {
 		await expect(runRow(page, 1), 'The history row should count the file and folder').toContainText(
 			`${files(renamesOf(a).length)}, 1 folder renamed`
 		);
+		await expect(
+			await expandRun(page, 1),
+			'The details should count the file and folder'
+		).toContainText(`${files(renamesOf(a).length)} renamed, 1 folder renamed`);
 		expect(fake.unhandled).toEqual([]);
 	});
 
