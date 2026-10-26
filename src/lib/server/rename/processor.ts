@@ -420,10 +420,20 @@ export async function processRenameConfig(
 				});
 			}
 
-			// Override counts with actual diff results
+			// Count what actually changed, but keep the preview's count of files needing a
+			// rename. The Arr can complete a rename command without renaming a file, e.g.
+			// when it can't write to the folder, and that must not read as nothing to rename.
 			log.results.filesRenamed = totalFilesRenamed;
-			log.results.filesNeedingRename = totalFilesRenamed;
 			log.results.foldersRenamed = totalFoldersRenamed;
+			const notRenamed = log.results.filesNeedingRename - totalFilesRenamed;
+			if (notRenamed > 0 && log.results.commandsFailed === 0) {
+				const app = instance.type === 'sonarr' ? 'Sonarr' : 'Radarr';
+				log.results.errors.push(
+					notRenamed === 1
+						? `1 file wasn't renamed. Check ${app}'s logs.`
+						: `${notRenamed} files weren't renamed. Check ${app}'s logs.`
+				);
+			}
 
 			await logger.debug(
 				`Diff: ${totalFilesRenamed} files, ${totalFoldersRenamed} folders across ${diff.length} entities`,

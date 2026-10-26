@@ -4,8 +4,6 @@
  *   with nothing to rename.
  * - A failed command stops later batches. What earlier batches renamed
  *   stays, and the run is partial.
- * - A known bug is pinned with `test.fixme()`: a command that renames
- *   nothing.
  * - Radarr only, except the batch tests, which use Sonarr's smaller batches.
  */
 import type { Page } from '@playwright/test';
@@ -297,8 +295,7 @@ test('a dry run with a failed preview is partial', async ({ page, fakeRadarr: fa
  * - the run keeps 1 file needing rename and renamed 0
  * - it failed, with an error pointing at the Arr's logs
  */
-// C8: a live run overwrites the preview's count with what changed
-test.fixme('a completed command that renamed nothing fails the run', async ({
+test('a completed command that renamed nothing fails the run', async ({
 	page,
 	fakeRadarr: fake
 }) => {
@@ -314,6 +311,42 @@ test.fixme('a completed command that renamed nothing fails the run', async ({
 		'The run should keep the count and fail'
 	).toEqual([renamesOf(a).length, 0, 'failed']);
 	expect(run.results.errors[0], "The error should point at the Arr's logs").toContain('logs');
+	expect(fake.unhandled).toEqual([]);
+});
+
+/**
+ * Flow:
+ * 1. Sonarr has 11 series to rename. Series 11 has two episode files. The
+ *    second rename command, for series 11, completes without renaming them.
+ * 2. The user runs Run Now.
+ *
+ * Expects:
+ * - the run is partial, with the first batch's 10 files renamed
+ * - its error counts both of series 11's files and points at Sonarr's logs
+ */
+test('a later batch that renamed nothing is partial', async ({ page, fakeSonarr: fake }) => {
+	fake.commandOutcome('RenameSeries', (command) =>
+		lists(command, 11) ? { status: 'completed', noEffect: true } : { status: 'completed' }
+	);
+	const titles = numberedTitles(fake.type, 11);
+	const last = titles[10];
+	last.files = [
+		...last.files,
+		{
+			from: `Season 01/${last.title} - S01E02 - TBA.mkv`,
+			to: `Season 01/${last.title} - S01E02 - Second.mkv`,
+			season: 1
+		}
+	];
+	const id = await setUp(page, fake, titles);
+
+	await runNow(page);
+
+	const run = await newestRun(page, id);
+	expect(
+		[run.status, run.results.filesNeedingRename, run.results.filesRenamed, run.results.errors],
+		"The run should be partial with series 11's two files missing"
+	).toEqual(['partial', 12, 10, ["2 files weren't renamed. Check Sonarr's logs."]]);
 	expect(fake.unhandled).toEqual([]);
 });
 

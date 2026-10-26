@@ -95,8 +95,10 @@ tooltip on a blocked button.
 5. **After snapshot** -- captures the same entities again.
 6. **Diff** -- `diffSnapshots()` compares before/after by entity ID. Folder
    path changes and file relative path changes (matched by file ID) are
-   recorded as the source of truth for what actually changed, overriding
-   preview counts.
+   recorded as the source of truth for what actually changed. Files needing
+   rename keeps the preview's count. When fewer files changed and no command
+   failed, the run records an error pointing at the Arr's logs. An Arr can
+   complete a rename command without renaming a file it can't write.
 
 ### Status
 
