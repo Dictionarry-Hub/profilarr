@@ -169,16 +169,20 @@ export async function scheduledJobs(page: Page): Promise<ScheduledJob[]> {
 /**
  * Wait until no job is running, as `/api/v1/status` reports it. Deleting an
  * Arr instance while one of its jobs runs crashes the server, so a scenario
- * waits for this before a delete.
+ * waits for this before a delete, and before a restart. It asks the app the
+ * page is on, so a second install open in its own tab works too.
  */
 export async function waitForIdleJobs(page: Page, timeout = 30_000): Promise<void> {
+	const url = page.url().startsWith('http')
+		? new URL('/api/v1/status', page.url()).href
+		: '/api/v1/status';
 	await test.step(
 		'Wait until no job is running',
 		async () => {
 			await expect
 				.poll(
 					async () => {
-						const response = await page.request.get('/api/v1/status');
+						const response = await page.request.get(url);
 						const status = (await response.json()) as { jobs: { active: number } };
 						return status.jobs.active;
 					},

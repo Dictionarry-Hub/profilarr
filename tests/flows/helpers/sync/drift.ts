@@ -10,7 +10,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
-import { waitForJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
+import { latestJobRunId, waitForNextJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
 import { openTab, waitForHydration } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
 
@@ -77,21 +77,23 @@ export async function enableDrift(page: Page): Promise<void> {
 
 /**
  * Click Run Now on the open Arr's Drift tab, wait for the `arr.drift` run it
- * queues, then reload the tab so it shows the result. Returns the run.
+ * queues, then reload the tab so it shows the result. Returns the run. The
+ * run is told apart by id, so a drift run a sync chained in the same second
+ * doesn't pass for it.
  */
 export async function runDriftCheck(page: Page): Promise<JobRun> {
 	return await test.step(
 		'Run a drift check',
 		async () => {
 			await onDrift(page);
-			const after = Date.now();
+			const lastRun = await latestJobRunId(page, 'arr.drift');
 			const queued = waitForAction(page, 'run');
 			await page.getByRole('main').getByRole('button', { name: 'Run Now', exact: true }).click();
 			const result = await queued;
 			expect(result.type, `The drift check should be queued: ${JSON.stringify(result.data)}`).toBe(
 				'success'
 			);
-			const run = await waitForJobRun(page, 'arr.drift', { after });
+			const run = await waitForNextJobRun(page, 'arr.drift', { afterId: lastRun });
 			await page.reload();
 			await waitForHydration(page);
 			return run;
