@@ -110,6 +110,18 @@ export function rename({
 	const title = `${getTitle(log)} - ${log.instanceName}`;
 	const isSonarr = log.instanceType === 'sonarr';
 
+	// Nothing renamed because the run failed: give the error
+	if (log.renamedItems.length === 0 && log.status === 'failed') {
+		const error = log.results.errors[0] ?? 'Unknown error';
+		return {
+			type: `rename.${log.status}`,
+			severity,
+			title,
+			message: `Rename failed for ${log.instanceName}: ${error}`,
+			blocks: [{ kind: 'field', label: 'Error', value: error }]
+		};
+	}
+
 	// No files to rename
 	if (log.renamedItems.length === 0) {
 		return {
