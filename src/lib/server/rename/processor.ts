@@ -10,6 +10,7 @@
 
 import { arrClientOptionsFromInstance, createArrClient } from '#lib/server/utils/arr/factory.ts';
 import type { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
+import type { ArrCommand } from '#lib/server/utils/arr/types.ts';
 import type { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
 import type { RenameSettings } from '$db/queries/arrRenameSettings.ts';
 import type { ArrInstance } from '$db/queries/arrInstances.ts';
@@ -48,26 +49,48 @@ const SOURCE = 'RenameProcessor';
 // Command monitoring
 // =========================================================================
 
+/** The move command an editor request starts: its name and the ids it moves */
+interface SpawnedMove {
+	name: 'BulkMoveMovie' | 'BulkMoveSeries';
+	ids: number[];
+}
+
+/** The item ids a move command's body lists */
+function movedIds(command: ArrCommand): number[] {
+	return [
+		...(command.body?.movies ?? []).map((m) => m.movieId),
+		...(command.body?.series ?? []).map((s) => s.seriesId)
+	];
+}
+
 /**
  * After calling an editor endpoint (movie/editor, series/editor), find the
  * spawned background command (Bulk Move) and wait for it to complete.
- * Looks for any new command with id > maxIdBefore.
+ * Looks for a new command with id > maxIdBefore, the move's name and one of
+ * its ids. The Arr runs other commands at the same time, such as Refresh
+ * Monitored Downloads every minute, so any new command isn't enough.
  */
 async function waitForSpawnedCommand(
 	client: {
-		getCommands(): Promise<{ id: number; status: string }[]>;
+		getCommands(): Promise<ArrCommand[]>;
 		waitForCommand(id: number): Promise<unknown>;
 	},
 	maxIdBefore: number,
-	label: string
+	label: string,
+	move: SpawnedMove
 ): Promise<void> {
+	const isMove = (c: ArrCommand) =>
+		c.id > maxIdBefore &&
+		c.name === move.name &&
+		movedIds(c).some((id) => move.ids.includes(id));
+
 	// Poll for the new command to appear (may take a moment)
 	for (let attempt = 0; attempt < 30; attempt++) {
 		await new Promise((r) => setTimeout(r, 1000));
 
 		const commands = await client.getCommands();
 		const newCmd = commands.find(
-			(c) => c.id > maxIdBefore && (c.status === 'queued' || c.status === 'started')
+			(c) => isMove(c) && (c.status === 'queued' || c.status === 'started')
 		);
 
 		if (newCmd) {
@@ -80,7 +103,7 @@ async function waitForSpawnedCommand(
 		}
 
 		// Check if a new command already completed
-		const completed = commands.find((c) => c.id > maxIdBefore && c.status === 'completed');
+		const completed = commands.find((c) => isMove(c) && c.status === 'completed');
 		if (completed) {
 			await logger.debug(`Spawned command ${completed.id} for ${label} already completed`, {
 				source: SOURCE,
@@ -126,7 +149,8 @@ function createRadarrAdapter(client: RadarrClient): RenameAdapter {
 				await waitForSpawnedCommand(
 					client,
 					maxId,
-					`Radarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`
+					`Radarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`,
+					{ name: 'BulkMoveMovie', ids: batch }
 				);
 			}
 		},
@@ -182,7 +206,8 @@ function createSonarrAdapter(client: SonarrClient): RenameAdapter {
 				await waitForSpawnedCommand(
 					client,
 					maxId,
-					`Sonarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`
+					`Sonarr folder rename batch ${Math.floor(i / BATCH_SIZE) + 1}`,
+					{ name: 'BulkMoveSeries', ids: batch }
 				);
 			}
 		},

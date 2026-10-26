@@ -4,8 +4,8 @@
  *   with nothing to rename.
  * - A failed command stops later batches. What earlier batches renamed
  *   stays, and the run is partial.
- * - Known bugs are pinned with `test.fixme()`: a command that renames
- *   nothing, and the folder move's wait for its command.
+ * - A known bug is pinned with `test.fixme()`: a command that renames
+ *   nothing.
  * - Radarr only, except the batch tests, which use Sonarr's smaller batches.
  */
 import type { Page } from '@playwright/test';
@@ -327,8 +327,7 @@ test.fixme('a completed command that renamed nothing fails the run', async ({
  * - Profilarr waits on the move command, never polling the stray one
  * - the run counts A's folder
  */
-// C11: the folder move waits for any new command, not its own
-test.fixme('the folder move waits for its own command', async ({ page, fakeRadarr: fake }) => {
+test('the folder move waits for its own command', async ({ page, fakeRadarr: fake }) => {
 	fake.strayCommandWithMove();
 	const a = { ...titleA(fake.type), folderTo: A_FOLDER };
 	const id = await setUp(page, fake, [a], { folders: true });
