@@ -2,8 +2,8 @@
  * Database helpers: linking, unlinking, developer access, the conflict
  * strategy, pulling and publishing. Each works through the UI the way a user
  * would and waits for the app to finish, so a scenario continues once the app
- * has. `databasesApi` reads the stored rows, and `databaseFolders` the clones
- * on disk.
+ * has. `databasesApi` reads the stored rows, `databaseFolders` the clones on
+ * disk, and `clonedRemote` what a clone's `.git/config` saved.
  *
  * Git reaches the test's local upstream for the fixtures GitHub URL
  * (helpers/git/upstream.ts), unless the spec turns that rewrite off.
@@ -20,6 +20,7 @@ import {
 } from '@playwright/test';
 import type { components } from '$api/v1.d.ts';
 import type { App } from '$flows/harness/app.ts';
+import { git } from '$flows/harness/git.ts';
 import { FIXTURES_NAME, FLOWS_TOKEN, fixturesRepo as seededRepo } from '$flows/harness/seed.ts';
 import {
 	chooseOption,
@@ -123,6 +124,51 @@ export function fixturesRepo(app: App): string {
 /** The entry names in an app's `data/databases`, one clone per linked database, sorted */
 export async function databaseFolders(app: App): Promise<string[]> {
 	return (await fs.readdir(join(app.dir, 'data/databases'))).sort();
+}
+
+/** What a clone's `.git/config` saved about its remote */
+export interface ClonedRemote {
+	/** `remote.origin.url` as saved, before any `insteadOf` rewrite */
+	origin: string;
+	/** The whole `.git/config` */
+	config: string;
+}
+
+/** Read what a clone saved about its remote, e.g. to check it holds no token */
+export async function clonedRemote(repo: string): Promise<ClonedRemote> {
+	return await test.step(
+		`Read the remote saved in ${repo}`,
+		async () => ({
+			origin: git(['config', '--local', '--get', 'remote.origin.url'], repo),
+			config: await fs.readFile(join(repo, '.git/config'), 'utf8')
+		}),
+		{ box: true }
+	);
+}
+
+/**
+ * Save `url` as a clone's origin, the way older versions saved one with the
+ * token in it. With `create`, an empty clone is made first where none is,
+ * e.g. a dependency clone under deps/.
+ */
+export async function setClonedOrigin(
+	repo: string,
+	url: string,
+	options: { create?: boolean } = {}
+): Promise<void> {
+	await test.step(
+		`Save the origin of ${repo}`,
+		async () => {
+			if (options.create) {
+				await fs.mkdir(repo, { recursive: true });
+				git(['init', '--quiet'], repo);
+				git(['remote', 'add', 'origin', url], repo);
+			} else {
+				git(['remote', 'set-url', 'origin', url], repo);
+			}
+		},
+		{ box: true }
+	);
 }
 
 /** Where `unlinkDatabase` clicks Unlink */

@@ -1,7 +1,15 @@
+import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { publishChanges, pullDatabase, setDeveloperAccess } from '$flows/helpers/git/databases.ts';
+import { fixture, fixturesSource } from '$flows/helpers/core/fixtureData.ts';
+import {
+	clonedRemote,
+	fixturesRepo,
+	publishChanges,
+	pullDatabase,
+	setClonedOrigin,
+	setDeveloperAccess
+} from '$flows/helpers/git/databases.ts';
 import { saveForm } from '$flows/helpers/core/forms.ts';
 import { openDatabase, openEntity } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
@@ -34,6 +42,28 @@ async function editRegex(page: Page, description: string): Promise<void> {
 
 /** The Changes tab once nothing is waiting to pull or publish */
 const NOTHING_LEFT = /No changes to pull or publish right now|Nothing to ship/;
+
+test.describe('clonedRemote', () => {
+	test("reads the seeded clone's GitHub URL", async ({ app }) => {
+		const remote = await clonedRemote(fixturesRepo(app));
+		expect(remote.origin).toBe(fixturesSource.fixtures.repository);
+		expect(remote.config).toContain('[remote "origin"]');
+		expect(remote.config).toContain(fixturesSource.fixtures.repository);
+	});
+});
+
+test.describe('setClonedOrigin', () => {
+	test("changes a clone's origin", async ({ app }) => {
+		await setClonedOrigin(fixturesRepo(app), 'https://example.com/changed');
+		expect((await clonedRemote(fixturesRepo(app))).origin).toBe('https://example.com/changed');
+	});
+
+	test('makes a clone with that origin where none is', async ({ app }) => {
+		const repo = join(fixturesRepo(app), 'deps/made');
+		await setClonedOrigin(repo, 'https://example.com/made', { create: true });
+		expect((await clonedRemote(repo)).origin).toBe('https://example.com/made');
+	});
+});
 
 test.describe('setDeveloperAccess', () => {
 	test('saves a token and a git author', async ({ page }) => {
