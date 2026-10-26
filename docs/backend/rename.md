@@ -88,7 +88,10 @@ tooltip on a blocked button.
 4. **Folder rename** (if `renameFolders` is enabled) -- groups items by root
    folder and calls the Arr editor endpoint per group. Folder renames spawn a
    background "Bulk Move" command; `waitForSpawnedCommand` polls `getCommands`
-   every second for up to 30 seconds to find and await it.
+   every second for up to 30 seconds to find and await it. It matches the
+   command by name (`BulkMoveMovie` or `BulkMoveSeries`) and by the batch's ids
+   in its body. The Arr runs other commands at the same time. Refresh Monitored
+   Downloads starts about every minute.
 5. **After snapshot** -- captures the same entities again.
 6. **Diff** -- `diffSnapshots()` compares before/after by entity ID. Folder
    path changes and file relative path changes (matched by file ID) are

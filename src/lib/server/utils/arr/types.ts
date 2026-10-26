@@ -196,6 +196,10 @@ export interface ArrCommand {
 	body?: {
 		movieIds?: number[];
 		seriesIds?: number[];
+		/** BulkMoveMovie: the movies it moves */
+		movies?: { movieId: number; sourcePath?: string }[];
+		/** BulkMoveSeries: the series it moves */
+		series?: { seriesId: number; sourcePath?: string }[];
 		sendUpdatesToClient?: boolean;
 	};
 }
