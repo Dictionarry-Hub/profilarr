@@ -127,7 +127,7 @@ async function storedTitleMatch(
  *   leaves Radarr alone, until drift finds it and a sync puts it right
  * - the password works after both restarts
  */
-test('a new user keeps radarr in line through a restart and a restore', async ({
+test("a new user's Radarr sync survives a restart and a restore", async ({
 	app,
 	page,
 	fakeRadarr

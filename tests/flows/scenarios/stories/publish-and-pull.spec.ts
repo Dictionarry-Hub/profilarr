@@ -119,7 +119,7 @@ async function storedScores(page: Page, scoringPath: string) {
  * - the scores and the On Pull trigger survive the restart, nothing is left
  *   to pull, and Home Radarr gets no writes from it
  */
-test("a developer's published change reaches a second install's radarr", async ({
+test("a developer's published change reaches a second install's Radarr", async ({
 	app,
 	consumer,
 	page,

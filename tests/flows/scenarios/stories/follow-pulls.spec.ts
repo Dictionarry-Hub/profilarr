@@ -158,9 +158,9 @@ async function pullAndSync(
  * - the conflict, sync settings and drift setting survive the restart, and
  *   Sonarr gets no writes from it
  * - resolving changes Profilarr only, drift finds Sonarr behind, and a sync
- *   brings it in line
+ *   sends the kept edit to Sonarr
  */
-test('a sonarr user follows pulls and settles a conflict', async ({ app, page, startArr }) => {
+test('a Sonarr user follows pulls and settles a conflict', async ({ app, page, startArr }) => {
 	test.setTimeout(120_000);
 	const fake = await startArr('sonarr-5');
 	let id = 0;
