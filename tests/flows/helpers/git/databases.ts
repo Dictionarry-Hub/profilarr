@@ -2,15 +2,15 @@
  * Database helpers: linking, unlinking, developer access, the conflict
  * strategy, pulling and publishing. Each works through the UI the way a user
  * would and waits for the app to finish, so a scenario continues once the app
- * has. `databasesApi` reads the stored rows, and `databaseFolders` the clones
- * on disk.
+ * has. `databasesApi` reads the stored rows, `databaseFolders` the clones on
+ * disk, and `clonedRemote` what a clone's `.git/config` saved.
  *
  * Git reaches the test's local upstream for the fixtures GitHub URL
  * (helpers/git/upstream.ts), unless the spec turns that rewrite off.
  */
 
 import * as fs from 'node:fs/promises';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import {
 	expect,
 	test,
@@ -20,6 +20,7 @@ import {
 } from '@playwright/test';
 import type { components } from '$api/v1.d.ts';
 import type { App } from '$flows/harness/app.ts';
+import { git } from '$flows/harness/git.ts';
 import { FIXTURES_NAME, FLOWS_TOKEN, fixturesRepo as seededRepo } from '$flows/harness/seed.ts';
 import {
 	chooseOption,
@@ -31,7 +32,7 @@ import type { ScheduledJob } from '$flows/helpers/core/jobs.ts';
 import { openDatabase, openPage, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
 import { pageData } from '$flows/helpers/core/pageData.ts';
 
-/** The token whose pushes reach the local upstream, for tests that type one in */
+/** The token tests save to publish, for tests that type one in */
 export { FLOWS_TOKEN };
 
 /** How long a link job may take: a clone from GitHub, the import and the compile */
@@ -125,6 +126,72 @@ export async function databaseFolders(app: App): Promise<string[]> {
 	return (await fs.readdir(join(app.dir, 'data/databases'))).sort();
 }
 
+/** What a clone's `.git/config` saved about its remote */
+export interface ClonedRemote {
+	/** `remote.origin.url` as saved, before any `insteadOf` rewrite */
+	origin: string;
+	/** The whole `.git/config` */
+	config: string;
+}
+
+/** Read what a clone saved about its remote, e.g. to check it holds no token */
+export async function clonedRemote(repo: string): Promise<ClonedRemote> {
+	return await test.step(
+		`Read the remote saved in ${repo}`,
+		async () => ({
+			origin: git(['config', '--local', '--get', 'remote.origin.url'], repo),
+			config: await fs.readFile(join(repo, '.git/config'), 'utf8')
+		}),
+		{ box: true }
+	);
+}
+
+/**
+ * The files under a clone, `.git` included, whose content holds `text`, as
+ * paths relative to the clone. Git's objects are compressed, so this finds
+ * what git saved as plain text: config, FETCH_HEAD, logs and working files.
+ */
+export async function cloneFilesHolding(repo: string, text: string): Promise<string[]> {
+	return await test.step(
+		`Find files in ${repo} holding "${text}"`,
+		async () => {
+			const found: string[] = [];
+			for (const entry of await fs.readdir(repo, { recursive: true, withFileTypes: true })) {
+				if (!entry.isFile()) continue;
+				const path = join(entry.parentPath, entry.name);
+				if ((await fs.readFile(path)).includes(text)) found.push(relative(repo, path));
+			}
+			return found.sort();
+		},
+		{ box: true }
+	);
+}
+
+/**
+ * Save `url` as a clone's origin, the way older versions saved one with the
+ * token in it. With `create`, an empty clone is made first where none is,
+ * e.g. a dependency clone under deps/.
+ */
+export async function setClonedOrigin(
+	repo: string,
+	url: string,
+	options: { create?: boolean } = {}
+): Promise<void> {
+	await test.step(
+		`Save the origin of ${repo}`,
+		async () => {
+			if (options.create) {
+				await fs.mkdir(repo, { recursive: true });
+				git(['init', '--quiet'], repo);
+				git(['remote', 'add', 'origin', url], repo);
+			} else {
+				git(['remote', 'set-url', 'origin', url], repo);
+			}
+		},
+		{ box: true }
+	);
+}
+
 /** Where `unlinkDatabase` clicks Unlink */
 export type UnlinkFrom = 'cards' | 'settings';
 
@@ -207,8 +274,7 @@ export interface DeveloperOptions {
 /**
  * Give a database developer access, as its developer would: save a personal
  * access token and a git author on its Settings tab. Edits then become base
- * drafts that can be published from Changes. The token is FLOWS_TOKEN, the
- * only one whose pushes reach the local upstream.
+ * drafts that can be published from Changes. The token is FLOWS_TOKEN.
  */
 export async function setDeveloperAccess(
 	page: Page,

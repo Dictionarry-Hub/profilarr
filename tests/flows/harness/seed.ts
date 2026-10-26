@@ -28,10 +28,10 @@ const FIXTURES_UUID = 'fixtures';
 const BRANCH = 'main';
 
 /**
- * The personal access token tests save to publish. The app puts a token into
- * the GitHub URL it pushes to, and only this token's URL is rewritten to the
- * local upstream. Any other token sends the push to the real GitHub, which
- * fails offline.
+ * The personal access token tests save to publish. The app sends it to git as
+ * a header, never in a URL, so only the plain GitHub URL is rewritten to the
+ * local upstream. A push to a URL holding the token would reach the real
+ * GitHub instead, and fail offline.
  */
 export const FLOWS_TOKEN = 'flows-token';
 
@@ -59,12 +59,7 @@ export async function writeGitConfig(
 	upstream = upstreamRepo(dataDir)
 ): Promise<void> {
 	const url = await fixturesUrl();
-	// The same rewrite the app does when it pushes with a token
-	const withToken = url.replace('https://github.com', `https://${FLOWS_TOKEN}@github.com`);
-	await fs.writeFile(
-		gitConfigPath(dataDir),
-		`[url "${upstream}"]\n\tinsteadOf = ${url}\n\tinsteadOf = ${withToken}\n`
-	);
+	await fs.writeFile(gitConfigPath(dataDir), `[url "${upstream}"]\n\tinsteadOf = ${url}\n`);
 }
 
 /**

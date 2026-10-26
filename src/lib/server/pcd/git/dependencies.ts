@@ -88,8 +88,12 @@ async function getInstalledVersion(pcdPath: string, repoName: string): Promise<s
 /**
  * Update a dependency to a new version using fetch + checkout
  */
-async function updateDependency(depPath: string, version: string): Promise<void> {
-	await fetchTags(depPath);
+async function updateDependency(
+	depPath: string,
+	version: string,
+	personalAccessToken?: string
+): Promise<void> {
+	await fetchTags(depPath, personalAccessToken);
 	await checkout(depPath, version);
 }
 
@@ -161,7 +165,7 @@ export async function syncDependencies(
 
 		if (hasGitFolder) {
 			// Fetch tags and checkout new version
-			await updateDependency(depPath, requiredVersion);
+			await updateDependency(depPath, requiredVersion, personalAccessToken);
 			await logger.info(
 				`Updated dependency ${repoName}: ${installedVersion} -> ${requiredVersion}`,
 				{

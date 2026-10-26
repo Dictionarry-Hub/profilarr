@@ -22,6 +22,7 @@ import {
 	syncDependencies,
 	validateDependencies
 } from '../git/dependencies.ts';
+import { removeSavedTokens } from '../git/remotes.ts';
 import { compile, invalidate } from '../database/compiler.ts';
 import { getCache } from '../database/registry.ts';
 import { logger } from '$logger/logger.ts';
@@ -228,7 +229,7 @@ class PCDManager {
 
 		try {
 			// Check for updates first
-			const updateInfo = await checkForUpdates(instance.local_path);
+			const updateInfo = await checkForUpdates(instance.local_path, instance.personal_access_token);
 			summary.commits = {
 				from: updateInfo.currentLocalCommit,
 				to: updateInfo.latestRemoteCommit,
@@ -256,7 +257,7 @@ class PCDManager {
 			const schemaVersionBefore = await readSchemaVersion(instance.local_path);
 
 			// Pull updates
-			await pull(instance.local_path);
+			await pull(instance.local_path, instance.personal_access_token);
 
 			// Get commit messages for the pulled commits
 			const commitMessages = await getCommitMessagesBetween(instance.local_path, oldHead, 'HEAD');
@@ -399,7 +400,7 @@ class PCDManager {
 			throw new Error(`Database instance ${id} not found`);
 		}
 
-		return await checkForUpdates(instance.local_path);
+		return await checkForUpdates(instance.local_path, instance.personal_access_token);
 	}
 
 	/**
@@ -424,7 +425,7 @@ class PCDManager {
 		}
 
 		await checkout(instance.local_path, branch);
-		await pull(instance.local_path);
+		await pull(instance.local_path, instance.personal_access_token);
 		try {
 			await importBaseOps(id, instance.local_path);
 		} catch (error) {
@@ -500,6 +501,11 @@ class PCDManager {
 
 		const instances = databaseInstancesQueries.getAll();
 		const enabledInstances = instances.filter((instance) => instance.enabled);
+
+		// Older versions saved the token in each clone's origin URL
+		for (const instance of instances) {
+			await this.clearSavedTokens(instance);
+		}
 
 		// Validate dependencies for all instances first
 		for (const instance of enabledInstances) {
@@ -583,6 +589,32 @@ class PCDManager {
 				timing: `${timing}ms`
 			}
 		});
+	}
+
+	/**
+	 * Reset a clone's origin, and its dependency clones' origins, where an
+	 * older version saved the token in the URL. Logs the database it changed,
+	 * without the URL. A failure is logged and doesn't stop startup.
+	 */
+	private async clearSavedTokens(instance: DatabaseInstance): Promise<void> {
+		try {
+			const removed = await removeSavedTokens(instance.local_path, instance.repository_url);
+			if (removed.repository || removed.dependencies.length > 0) {
+				await logger.info(`Removed saved token from "${instance.name}"`, {
+					source: 'PCDManager',
+					meta: {
+						databaseId: instance.id,
+						repository: removed.repository,
+						dependencies: removed.dependencies
+					}
+				});
+			}
+		} catch (error) {
+			await logger.error(`Failed to remove saved token from "${instance.name}"`, {
+				source: 'PCDManager',
+				meta: { error: String(error), databaseId: instance.id }
+			});
+		}
 	}
 
 	/**

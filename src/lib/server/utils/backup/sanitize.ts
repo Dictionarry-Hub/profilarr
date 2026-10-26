@@ -19,7 +19,9 @@
  * - database_instances PATs are nulled but the rows stay (PCD repos remain
  *   linked to the user post-restore).
  * - Git remote URLs in cloned PCD repos are kept, but any embedded HTTP(S)
- *   credentials are removed from `.git/config`.
+ *   credentials are removed from `.git/config`. Clones no longer save the
+ *   token there (utils/git/auth.ts), so this guards backups from older
+ *   versions.
  * - ai_settings / tmdb_settings api keys nulled (rows stay).
  * - api_keys rows deleted. Backups from before migration 072 keep the key
  *   in auth_settings.api_key instead, which is nulled. See `stripApiKeys`.

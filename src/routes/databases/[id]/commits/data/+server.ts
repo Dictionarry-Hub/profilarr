@@ -21,7 +21,10 @@ export const GET: RequestHandler = async ({ params, url }) => {
 		DEFAULT_PAGE_SIZE;
 	const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, rawPageSize));
 
-	const status = await getStatus(database.local_path, { fetch: true });
+	const status = await getStatus(database.local_path, {
+		fetch: true,
+		personalAccessToken: database.personal_access_token
+	});
 	const branch = status.branch;
 
 	const availableRef = branch ? `HEAD..origin/${branch}` : null;
