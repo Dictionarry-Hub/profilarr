@@ -80,9 +80,7 @@ async function waitForSpawnedCommand(
 	move: SpawnedMove
 ): Promise<void> {
 	const isMove = (c: ArrCommand) =>
-		c.id > maxIdBefore &&
-		c.name === move.name &&
-		movedIds(c).some((id) => move.ids.includes(id));
+		c.id > maxIdBefore && c.name === move.name && movedIds(c).some((id) => move.ids.includes(id));
 
 	// Poll for the new command to appear (may take a moment)
 	for (let attempt = 0; attempt < 30; attempt++) {
