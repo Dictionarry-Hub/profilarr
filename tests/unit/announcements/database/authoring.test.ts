@@ -75,6 +75,50 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			assertEquals(result.parsed[0].title, 'Updated title');
 		});
 
+		this.test('writeAnnouncement writes the expected file', async (ctx) => {
+			const id = generateAnnouncementId();
+			await writeAnnouncement(ctx.tempDir, id, baseInput());
+
+			const content = await Deno.readTextFile(`${ctx.tempDir}/announcements/${id}.md`);
+			assertEquals(
+				content,
+				`---
+title: Migration to v2
+severity: warning
+published_at: '2026-04-20T10:00:00Z'
+expires_at: '2026-05-20T10:00:00Z'
+link: https://example.com/migration
+---
+
+# Heading
+
+Body content.
+`
+			);
+		});
+
+		this.test('writeAnnouncement quotes titles that would read as another type', async (ctx) => {
+			const id = generateAnnouncementId();
+			await writeAnnouncement(ctx.tempDir, id, {
+				...baseInput(),
+				title: '2026-04-20',
+				expiresAt: null,
+				link: null,
+				body: ''
+			});
+
+			const content = await Deno.readTextFile(`${ctx.tempDir}/announcements/${id}.md`);
+			assertEquals(
+				content,
+				`---
+title: '2026-04-20'
+severity: warning
+published_at: '2026-04-20T10:00:00Z'
+---
+`
+			);
+		});
+
 		// ─── round-trip with parser ──────────────────────────────────────────
 
 		this.test('write then parse yields the same data', async (ctx) => {

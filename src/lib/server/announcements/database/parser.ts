@@ -12,11 +12,16 @@
 
 import type { Dirent } from 'node:fs';
 import * as fs from 'node:fs/promises';
-import { parse as parseYaml } from '@std/yaml';
+import { CORE_SCHEMA, load as parseYaml, mergeTag, timestampTag } from 'js-yaml';
 import type { AnnouncementSeverity, DatabaseAnnouncementParsed } from './types.ts';
 import { isNotFound } from '$utils/fs.ts';
 
 const ANNOUNCEMENTS_SUBDIR = 'announcements';
+
+// js-yaml's default schema leaves timestamps as strings. Adding the timestamp
+// and merge tags reads frontmatter the way @std/yaml did: `2026-04-20 10:00:00`
+// becomes a Date, and `yes` stays a string.
+const YAML_SCHEMA = CORE_SCHEMA.withTags(timestampTag, mergeTag);
 const SEVERITIES: readonly AnnouncementSeverity[] = ['info', 'warning', 'critical'];
 
 export interface ParseError {
@@ -110,7 +115,7 @@ function parseFile(
 
 	let raw: unknown;
 	try {
-		raw = parseYaml(split.yaml);
+		raw = parseYaml(split.yaml, { schema: YAML_SCHEMA });
 	} catch (error) {
 		return { error: `YAML parse error: ${describe(error)}` };
 	}

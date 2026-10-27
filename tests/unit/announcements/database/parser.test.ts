@@ -182,6 +182,43 @@ Body.
 			assertEquals(result.errors.length, 1);
 		});
 
+		this.test('timestamps written with a space or as a date are normalized', async (ctx) => {
+			const spaced = `---
+title: Spaced date
+severity: info
+published_at: 2026-04-20 10:00:00
+expires_at: 2026-05-20
+---
+Body.
+`;
+			await this.writeAnnouncement(ctx.tempDir, 'spaced.md', spaced);
+			const result = await parseAnnouncementsDir(ctx.tempDir);
+			assertEquals(result.errors, []);
+			assertEquals(result.parsed[0].published_at, '2026-04-20T10:00:00Z');
+			assertEquals(result.parsed[0].expires_at, '2026-05-20T00:00:00Z');
+		});
+
+		this.test('unquoted yes stays a string title', async (ctx) => {
+			const yes = `---
+title: yes
+severity: info
+published_at: 2026-04-20T10:00:00Z
+---
+Body.
+`;
+			await this.writeAnnouncement(ctx.tempDir, 'yes.md', yes);
+			const result = await parseAnnouncementsDir(ctx.tempDir);
+			assertEquals(result.errors, []);
+			assertEquals(result.parsed[0].title, 'yes');
+		});
+
+		this.test('empty frontmatter is reported and skipped', async (ctx) => {
+			await this.writeAnnouncement(ctx.tempDir, 'empty.md', '---\n---\nBody.\n');
+			const result = await parseAnnouncementsDir(ctx.tempDir);
+			assertEquals(result.parsed, []);
+			assertEquals(result.errors.length, 1);
+		});
+
 		this.test('malformed YAML frontmatter is reported and skipped', async (ctx) => {
 			const broken = `---
 title: "unclosed quote
