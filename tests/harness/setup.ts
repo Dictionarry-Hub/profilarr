@@ -4,7 +4,7 @@
 
 import { TestClient } from '$test-harness/client.ts';
 import { openDb } from '$test-harness/db.ts';
-import { hash } from '@felix/bcrypt';
+import { bcryptHash } from '$auth/bcrypt.ts';
 import { log } from '$test-harness/log.ts';
 
 /**
@@ -61,7 +61,7 @@ export async function createUserDirect(
 	password: string
 ): Promise<void> {
 	log.setup(`Creating user "${username}" directly in DB`);
-	const passwordHash = await hash(password);
+	const passwordHash = await bcryptHash(password);
 	const db = openDb(dbPath);
 	try {
 		db.exec('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, passwordHash]);
@@ -90,7 +90,7 @@ export async function setApiKey(
 ): Promise<void> {
 	const name = options.name ?? `test-${apiKey.slice(-4)}`;
 	log.setup(`Adding API key "${name}" in DB`);
-	const hashed = await hash(apiKey);
+	const hashed = await bcryptHash(apiKey);
 	const db = openDb(dbPath);
 	try {
 		db.exec(

@@ -31,7 +31,7 @@ import { createUserDirect, login } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
-import { hash } from '@felix/bcrypt';
+import { bcryptHash } from '$auth/bcrypt.ts';
 
 const PORT = PORTS.backups.backupSecrets;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -112,7 +112,7 @@ async function seedSecrets(dbPath: string) {
 		}
 
 		// Profilarr API key (bcrypt-hashed)
-		profilarrApiKeyHash = await hash(PROFILARR_API_KEY);
+		profilarrApiKeyHash = await bcryptHash(PROFILARR_API_KEY);
 		db.exec(
 			`INSERT INTO api_keys (name, key_hash, key_hint, permissions) VALUES ('Backup Test', ?, ?, '"all"')`,
 			[profilarrApiKeyHash, PROFILARR_API_KEY.slice(-4)]

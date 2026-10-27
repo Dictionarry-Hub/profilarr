@@ -256,27 +256,6 @@ jobs:
 
       - run: deno ci
 
-      # Dedicated cache for the FFI plug binary (bcrypt). The main
-      # `Cache deps` covers ~/.cache/deno but is shared across jobs and gets
-      # overwritten by Build (which never populates plug). This cache uses a
-      # separate key so it survives independently. Without this, the 30+
-      # parallel integration spec processes race to download plug binaries
-      # into the same path on a cold cache and corrupt each other.
-      - name: Cache FFI plug
-        id: plug-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/deno/plug
-          key: deno-plug-${{ runner.os }}-${{ hashFiles('deno.lock') }}-v1
-
-      - name: Pre-warm FFI plug
-        if: steps.plug-cache.outputs.cache-hit != 'true'
-        run: |
-          deno eval --ext=ts '
-            import { hash } from "@felix/bcrypt";
-            await hash("warmup");
-          '
-
       - name: Download build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
@@ -342,23 +321,6 @@ jobs:
       - name: Type check the flow suite
         if: ${{ matrix.shard == 1 }}
         run: deno check --quiet tests/flows
-
-      # `deno task flows` mounts this cache into the test container, so the
-      # app never downloads its bcrypt library during a run.
-      - name: Cache FFI plug
-        id: plug-cache
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/deno/plug
-          key: deno-plug-${{ runner.os }}-${{ hashFiles('deno.lock') }}-v1
-
-      - name: Pre-warm FFI plug
-        if: steps.plug-cache.outputs.cache-hit != 'true'
-        run: |
-          deno eval --ext=ts '
-            import { hash } from "@felix/bcrypt";
-            await hash("warmup");
-          '
 
       - name: Download build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
