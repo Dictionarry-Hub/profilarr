@@ -8,7 +8,7 @@
  *   deno task flows --build          rebuild the app first (otherwise only when missing)
  *   deno task flows --online         give the container network, so @online tests run too
  *   deno task flows --quiet          print only the end-of-run summary, no line per test
- *   deno task flows --deal=2/4       run every 4th spec file from the 2nd, as CI shard 2 does
+ *   deno task flows --deal=2/4       run the 2nd of 4 sets of spec files split by run time, as CI shard 2 does
  *
  * FLOWS_WORKERS overrides how many scenarios run at once. FLOWS_VIDEO=1 records
  * a full-size video of every test for the trace viewer to play.
@@ -23,6 +23,7 @@ import { dealSpecFiles, listSpecFiles } from '$flows/harness/specFiles.ts';
 const APP_BINARY = 'dist/build/profilarr';
 const FLOWS_DIR = 'tests/flows';
 const CONFIG = `${FLOWS_DIR}/playwright.config.ts`;
+const TIMINGS = `${FLOWS_DIR}/harness/timings.json`;
 const UI_PORT = 8080;
 const DOCKER_SOCKET = '/var/run/docker.sock';
 
@@ -44,9 +45,9 @@ const playwrightArgs = args.filter(
 // The reporter reads FLOWS_QUIET, forwarded into the container below
 if (quiet) process.env.FLOWS_QUIET = '1';
 
-// --deal=n/total runs every total-th spec file, starting at the n-th. Each CI
-// shard takes one deal, so a slow area's files spread across the shards
-// instead of filling one, as Playwright's --shard does with its even blocks.
+// --deal=n/total runs the n-th of `total` sets of spec files, split by their
+// recorded run times so every set takes about as long. Each CI shard takes
+// one deal. Playwright's --shard cuts even blocks by count instead.
 if (deal) {
 	const match = deal.match(/^--deal=(\d+)\/(\d+)$/);
 	const shard = Number(match?.[1]);
@@ -55,7 +56,11 @@ if (deal) {
 		console.error(`Invalid ${deal}: use --deal=n/total, with n from 1 to total`);
 		process.exit(2);
 	}
-	const files = dealSpecFiles(listSpecFiles(FLOWS_DIR), shard, total);
+	// Seconds per spec file, recorded by `deno task flows:timings`
+	const timings = existsSync(TIMINGS)
+		? (JSON.parse(readFileSync(TIMINGS, 'utf8')) as { files: Record<string, number> }).files
+		: {};
+	const files = dealSpecFiles(listSpecFiles(FLOWS_DIR), shard, total, timings);
 	// Playwright given no file runs the whole suite, so an empty deal is an error
 	if (files.length === 0) {
 		console.error(`${deal} has no spec files`);

@@ -48,10 +48,31 @@ export function listSpecFiles(root: string): string[] {
 }
 
 /**
- * Deal spec files to `total` shards like cards: the first file to shard 1, the
- * second to shard 2, and so on. Neighbouring files often share an area and its
- * cost, so slow areas spread across the shards instead of filling one.
+ * Deal spec files to `total` shards by run time: the slowest file first, each
+ * to the shard with the least time so far, so every shard ends up with about
+ * the same time. `timings` holds seconds per file (`harness/timings.json`). A
+ * file with no recorded time counts as the average file. With no timings at
+ * all every file weighs the same, and the deal goes round like cards.
  */
-export function dealSpecFiles(files: string[], shard: number, total: number): string[] {
-	return files.filter((_, index) => index % total === shard - 1);
+export function dealSpecFiles(
+	files: string[],
+	shard: number,
+	total: number,
+	timings: Record<string, number> = {}
+): string[] {
+	const known = files.map((file) => timings[file]).filter((time) => time !== undefined);
+	const average = known.length ? known.reduce((sum, time) => sum + time, 0) / known.length : 1;
+	const weighted = files
+		.map((file) => ({ file, time: timings[file] ?? average }))
+		.sort((a, b) => b.time - a.time || a.file.localeCompare(b.file));
+
+	const loads = Array.from({ length: total }, () => 0);
+	const dealt: string[] = [];
+	for (const { file, time } of weighted) {
+		// The shard with the least time so far, the lowest number on a tie
+		const least = loads.indexOf(Math.min(...loads));
+		loads[least] += time;
+		if (least === shard - 1) dealt.push(file);
+	}
+	return dealt.sort();
 }
