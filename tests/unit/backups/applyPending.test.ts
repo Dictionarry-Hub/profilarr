@@ -22,7 +22,7 @@ import { BaseTest, type TestContext } from '../base/BaseTest.ts';
 import { assertEquals, assertRejects } from '@std/assert';
 import { applyPendingRestore } from '../../../src/lib/server/utils/backup/applyPending.ts';
 import { config } from '../../../src/lib/server/utils/config/config.ts';
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';

@@ -76,7 +76,7 @@ if (rebuild || !existsSync(APP_BINARY)) {
 	if (code !== 0) process.exit(code);
 }
 
-// The app loads SQLite and bcrypt from libraries it downloads on first use.
+// The app loads bcrypt from a library it downloads on first use.
 // Tests run offline, so fetch them here into Deno's cache (a no-op once
 // cached) and mount that cache into the container. CI does the same.
 const PLUG_CACHE = `${process.env.HOME}/.cache/deno/plug`;
@@ -84,9 +84,7 @@ const warmup = run('deno', [
 	'eval',
 	'--ext=ts',
 	`import { hash } from '@felix/bcrypt';
-	import { Database } from '@db/sqlite';
-	await hash('warmup');
-	new Database(':memory:').close();`
+	await hash('warmup');`
 ]);
 if (warmup !== 0) process.exit(warmup);
 

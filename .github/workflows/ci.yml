@@ -256,7 +256,7 @@ jobs:
 
       - run: deno ci
 
-      # Dedicated cache for the FFI plug binaries (sqlite, bcrypt). The main
+      # Dedicated cache for the FFI plug binary (bcrypt). The main
       # `Cache deps` covers ~/.cache/deno but is shared across jobs and gets
       # overwritten by Build (which never populates plug). This cache uses a
       # separate key so it survives independently. Without this, the 30+
@@ -274,9 +274,7 @@ jobs:
         run: |
           deno eval --ext=ts '
             import { hash } from "@felix/bcrypt";
-            import { Database } from "@db/sqlite";
             await hash("warmup");
-            new Database(":memory:").close();
           '
 
       - name: Download build artifact
@@ -346,7 +344,7 @@ jobs:
         run: deno check --quiet tests/flows
 
       # `deno task flows` mounts this cache into the test container, so the
-      # app never downloads its SQLite and bcrypt libraries during a run.
+      # app never downloads its bcrypt library during a run.
       - name: Cache FFI plug
         id: plug-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -359,9 +357,7 @@ jobs:
         run: |
           deno eval --ext=ts '
             import { hash } from "@felix/bcrypt";
-            import { Database } from "@db/sqlite";
             await hash("warmup");
-            new Database(":memory:").close();
           '
 
       - name: Download build artifact

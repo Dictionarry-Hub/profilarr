@@ -2,7 +2,7 @@
  * Open a SQLite connection from a test harness with the same pragma
  * configuration the server uses (src/lib/server/db/db.ts).
  *
- * Critical: busy_timeout = 5000. Without it the @db/sqlite default is 0,
+ * Critical: busy_timeout = 5000. Without it the SQLite default is 0,
  * so the test connection fails with SQLITE_BUSY the moment the server
  * writer holds the lock (e.g. announcements.fetch firing on startup).
  *
@@ -10,7 +10,7 @@
  * synchronous is per-connection but only affects crash safety, not concurrency.
  */
 
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 
 export function openDb(dbPath: string): Database {
 	const db = new Database(dbPath);

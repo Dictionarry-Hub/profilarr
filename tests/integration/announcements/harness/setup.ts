@@ -1,6 +1,6 @@
 /**
  * Helpers for the database-announcements integration suite. Inserts rows
- * directly into a real, migrated SQLite database via `@db/sqlite`, so
+ * directly into a real, migrated SQLite database via `$db/sqlite.ts`, so
  * each spec exercises the full migration pipeline alongside the FK
  * constraints under test.
  */

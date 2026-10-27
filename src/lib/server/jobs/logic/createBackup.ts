@@ -14,7 +14,7 @@
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import * as fs from 'node:fs/promises';
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 import { db } from '$db/db.ts';
 import { migrationRunner } from '$db/migrations.ts';
 import { logger } from '$logger/logger.ts';
@@ -104,9 +104,9 @@ export async function createBackup(
 					}
 				}
 
+				await db.getDatabase().backupTo(dbPath);
 				const dest = new Database(dbPath);
 				try {
-					db.getDatabase().backup(dest);
 					dest.exec('PRAGMA wal_checkpoint(TRUNCATE)');
 					dest.exec('PRAGMA journal_mode = DELETE');
 

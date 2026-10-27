@@ -4,7 +4,7 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
 
 // --- validateNewLocalAccount ---

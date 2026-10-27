@@ -7,7 +7,7 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { config } from '$config';
 

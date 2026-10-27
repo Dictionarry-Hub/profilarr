@@ -157,7 +157,7 @@ published base ops.
 The cache (`database/cache.ts`) is an in-memory SQLite database. The build
 process:
 
-1. Create in-memory DB, block ATTACH, enable foreign keys, initialize Kysely.
+1. Create in-memory DB with ATTACH blocked, enable foreign keys, initialize Kysely.
 2. Register helper functions -- `qp()`, `cf()`, `dp()`, `tag()` -- that
    resolve entity names to auto-increment IDs at execution time.
 3. Execute each op via `db.exec(sql)`, tracking `db.totalChanges` before
@@ -168,18 +168,14 @@ process:
    (set when an op is force-dropped, requiring a clean rebuild).
 
 Op SQL comes from the linked repo and runs as written. The cache connection
-must not reach anything outside the cache. `database/hardening.ts` sets SQLite's
-attached-database limit to 0 before any op runs. Op SQL then can't ATTACH
-another database file, such as Profilarr's own database, or write a new file
-with VACUUM INTO. If the limit can't be set and verified, the build fails and
-the database instance is disabled. The exporter's validation connection gets
-the same limit.
-
-Because `@db/sqlite` doesn't bind `sqlite3_limit`, `hardening.ts` opens the
-same SQLite library itself. It checks that the library's source ID matches. In
-dev, the library path includes the `@db/sqlite` version. `DB_SQLITE_VERSION` in
-`hardening.ts` must therefore match the version in `deno.jsonc`. A mismatch
-stops databases from compiling.
+must not reach anything outside the cache. `openIsolatedDatabase()` in
+`$db/sqlite.ts` uses `node:sqlite`'s `limits` option to set SQLite's
+attached-database limit to 0. Op SQL then can't ATTACH another database file,
+such as Profilarr's own database, or write a new file with VACUUM INTO.
+`openIsolatedDatabase()` runs a probe ATTACH that must fail before it returns
+the connection. A runtime that ignores the limit therefore fails the build, and
+the database instance is disabled. The exporter's validation connection opens
+the same way.
 
 The cache powers all reads, validation, and sync payloads. It's held in a
 global registry (`database/registry.ts`) keyed by database instance ID and

@@ -35,7 +35,7 @@
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import * as fs from 'node:fs/promises';
-import { Database } from '@db/sqlite';
+import { Database } from '$db/sqlite.ts';
 import { runCommand } from '../command.ts';
 import { isNotFound } from '../fs.ts';
 

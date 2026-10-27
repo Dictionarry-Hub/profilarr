@@ -74,13 +74,7 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
     --node-modules-dir=none \
     --exclude-unused-npm \
     --no-check \
-    --allow-net \
-    --allow-read \
-    --allow-write \
-    --allow-env \
-    --allow-ffi \
-    --allow-run \
-    --allow-sys \
+    --allow-all \
     --target "$DENO_TARGET" \
     --output dist/build/profilarr \
     dist/build/mod.ts
@@ -102,7 +96,6 @@ LABEL org.opencontainers.image.licenses="AGPL-3.0"
 # - curl: Health checks
 # - su-exec: Drop privileges to non-root user (Alpine equivalent of gosu)
 # - ca-certificates: HTTPS connections
-# - sqlite-libs: SQLite shared library for FFI
 # - bash: Entrypoint uses bash
 # - shadow: Provides usermod/groupmod for PUID/PGID runtime changes
 # - tini: PID 1 init for signal forwarding and orphaned process reaping
@@ -112,7 +105,6 @@ RUN apk add --no-cache \
     curl \
     su-exec \
     ca-certificates \
-    sqlite-libs \
     bash \
     shadow \
     tini \
@@ -149,7 +141,6 @@ ENV HOST=0.0.0.0
 ENV APP_BASE_PATH=/config
 ENV TZ=UTC
 ENV DENO_DIR=/app/deno-cache
-ENV DENO_SQLITE_PATH=/usr/lib/libsqlite3.so.0
 ENV LD_LIBRARY_PATH=/usr/local/lib/glibc
 
 # Expose port
