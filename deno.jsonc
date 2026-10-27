@@ -28,11 +28,11 @@
 		"$flows/": "./tests/flows/",
 
 		// Runtime
-		"@lucide/svelte": "npm:@lucide/svelte@^1.57.0",
+		"@lucide/svelte": "npm:@lucide/svelte@^1.60.0",
 		"@sveltejs/kit": "npm:@sveltejs/kit@^3.1.0",
 		"bcryptjs": "npm:bcryptjs@^3.0.3",
 		"croner": "npm:croner@^10.0.1",
-		"jose": "npm:jose@^6.2.12",
+		"jose": "npm:jose@^6.2.13",
 		"js-yaml": "npm:js-yaml@^5.5.0",
 		"kysely": "npm:kysely@0.27.6",
 		"marked": "npm:marked@^18.1.1",
@@ -53,7 +53,7 @@
 		"prettier": "npm:prettier@3.9.10",
 		"prettier-plugin-svelte": "npm:prettier-plugin-svelte@^4.1.1",
 		"prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",
-		"svelte-check": "npm:svelte-check@^4.7.6",
+		"svelte-check": "npm:svelte-check@^4.7.7",
 		"tailwindcss": "npm:tailwindcss@^4.3.3",
 		"typescript": "npm:typescript@6.0.3",
 		"vite": "npm:vite@^8.3.4"
