@@ -1,5 +1,5 @@
 import { db } from '../db.ts';
-import { bcryptHash } from '$auth/bcrypt.ts';
+import { hash } from '$auth/bcrypt.ts';
 import { generateApiKey } from '$auth/apiKey.ts';
 import { toUTC } from '$shared/utils/dates.ts';
 import { parseApiKeyPermissions, type ApiKeyPermissions } from '$shared/apiKeys.ts';
@@ -99,7 +99,7 @@ export const apiKeysQueries = {
 	 */
 	async create(input: CreateApiKeyInput): Promise<{ apiKey: ApiKey; key: string }> {
 		const key = generateApiKey();
-		const keyHash = await bcryptHash(key);
+		const keyHash = await hash(key);
 
 		db.execute(
 			`INSERT INTO api_keys (name, key_hash, key_hint, permissions, expires_at, created_at)

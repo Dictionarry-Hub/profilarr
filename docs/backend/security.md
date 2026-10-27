@@ -260,7 +260,7 @@ request flow.
 - Key is bcrypt-hashed in the database; the plaintext is shown once at creation.
   The last 4 characters are stored so the UI can tell keys apart.
 - Keys carry no identifier, so an unknown key is checked against every stored
-  hash with async bcrypt `compare()`. Keys that have matched are remembered in
+  hash with async bcrypt `verify()`. Keys that have matched are remembered in
   memory by SHA-256, and their row is re-read on each request, so deletion and
   expiry take effect immediately.
 - `last_used_at` is updated at most once a minute per key.
@@ -420,7 +420,7 @@ flowchart TD
 Passwords and Profilarr API keys are both bcrypt-hashed. Passwords are hashed
 at account creation and password change. API keys are hashed at creation; the
 plaintext is returned once for the user to copy, then only the hash and the
-last 4 characters are persisted. Validation uses async bcrypt `compare()` in
+last 4 characters are persisted. Validation uses async bcrypt `verify()` in
 both cases.
 
 Hashing goes through `utils/auth/bcrypt.ts`, which uses `bcryptjs` (pure

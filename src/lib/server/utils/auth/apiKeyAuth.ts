@@ -9,7 +9,7 @@
  * immediately and expiry is always current.
  */
 
-import { bcryptVerify } from './bcrypt.ts';
+import { verify } from './bcrypt.ts';
 import { config } from '$config';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { ENV_API_KEY_NAME, isApiKeyExpired, type ApiKeyPermissions } from '$shared/apiKeys.ts';
@@ -109,7 +109,7 @@ export async function resolveApiKey(candidate: string): Promise<ApiKeyResolution
  */
 async function verifyHash(candidate: string, id: number, keyHash: string): Promise<boolean> {
 	try {
-		return await bcryptVerify(candidate, keyHash);
+		return await verify(candidate, keyHash);
 	} catch (error) {
 		if (!reportedBrokenHashes.has(id)) {
 			reportedBrokenHashes.add(id);

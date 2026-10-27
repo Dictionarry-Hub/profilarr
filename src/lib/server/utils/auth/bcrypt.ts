@@ -6,16 +6,16 @@
  * so hashes made by @felix/bcrypt verify unchanged.
  */
 
-import { compare, hash } from 'bcryptjs';
+import { compare, hash as bcryptjsHash } from 'bcryptjs';
 
 export const BCRYPT_COST = 12;
 
 /** Hash a secret at cost 12 */
-export function bcryptHash(secret: string): Promise<string> {
-	return hash(secret, BCRYPT_COST);
+export function hash(secret: string): Promise<string> {
+	return bcryptjsHash(secret, BCRYPT_COST);
 }
 
 /** Check a secret against a stored bcrypt hash */
-export function bcryptVerify(secret: string, storedHash: string): Promise<boolean> {
+export function verify(secret: string, storedHash: string): Promise<boolean> {
 	return compare(secret, storedHash);
 }
