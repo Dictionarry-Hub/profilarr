@@ -2,7 +2,7 @@
  * Password hashing utilities using bcrypt (see ./bcrypt.ts)
  */
 
-import { hash, verify } from './bcrypt.ts';
+import { hash, verify } from '$auth/bcrypt.ts';
 
 /**
  * Hash a password using bcrypt
