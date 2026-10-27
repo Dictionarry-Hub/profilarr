@@ -13,6 +13,13 @@
  * - `changes` and `totalChanges` read SQLite's own counters, so they also
  *   reflect `exec()` calls.
  *
+ * - Whole numbers bind as SQLite integers and decimals as reals, like
+ *   `@db/sqlite`. `node:sqlite` binds every JS number as a real, so a 5
+ *   would store as 5.0, or as '5.0' in a TEXT column.
+ * - Double-quoted string literals ("Foo") are accepted, as with
+ *   `@db/sqlite`. `node:sqlite` rejects them by default, which would break
+ *   PCD ops written that way.
+ *
  * Integers are returned as numbers. Values outside the safe integer range
  * throw instead of turning into a BigInt.
  */
@@ -40,14 +47,20 @@ export interface DatabaseOpenOptions {
 	limits?: { attach?: number };
 }
 
-// `limits` exists at runtime but is missing from the bundled Node type definitions
-type SyncOptionsWithLimits = DatabaseSyncOptions & { limits?: { attach?: number } };
+// `limits` and `enableDoubleQuotedStringLiterals` exist at runtime but may be
+// missing from the bundled Node type definitions
+type SyncOptionsWithLimits = DatabaseSyncOptions & {
+	limits?: { attach?: number };
+	enableDoubleQuotedStringLiterals?: boolean;
+};
 
 function toSqlValue(value: unknown): SQLInputValue {
 	if (value === null || value === undefined) return null;
 	switch (typeof value) {
-		case 'string':
 		case 'number':
+			// A BigInt binds as an integer; a JS number would bind as a real
+			return Number.isSafeInteger(value) ? BigInt(value) : value;
+		case 'string':
 		case 'bigint':
 			return value;
 		case 'boolean':
@@ -122,7 +135,10 @@ export class Database {
 	#counters: Partial<Record<CounterName, StatementSync>> = {};
 
 	constructor(path: string, options: DatabaseOpenOptions = {}) {
-		const syncOptions: SyncOptionsWithLimits = { readOnly: options.readonly ?? false };
+		const syncOptions: SyncOptionsWithLimits = {
+			readOnly: options.readonly ?? false,
+			enableDoubleQuotedStringLiterals: true
+		};
 		if (options.limits) syncOptions.limits = options.limits;
 		this.#db = new DatabaseSync(path, syncOptions);
 	}
@@ -173,10 +189,9 @@ export class Database {
 		fn: (...args: never[]) => unknown,
 		options: { deterministic?: boolean } = {}
 	): void {
-		this.#db.function(
-			name,
-			{ deterministic: options.deterministic ?? false },
-			fn as (...args: SQLInputValue[]) => SQLInputValue
+		const call = fn as (...args: SQLInputValue[]) => unknown;
+		this.#db.function(name, { deterministic: options.deterministic ?? false }, (...args) =>
+			toSqlValue(call(...args))
 		);
 	}
 
