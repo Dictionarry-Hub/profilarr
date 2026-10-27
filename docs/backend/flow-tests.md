@@ -28,7 +28,7 @@ deno task flows --ui               # Playwright UI mode at http://localhost:8080
 deno task flows --build            # rebuild the app first
 deno task flows --online           # give the container network, so @online tests run too
 deno task flows --quiet            # print only the end-of-run summary, no line per test
-deno task flows --deal=2/4         # every 4th spec file from the 2nd, as CI shard 2 runs
+deno task flows --deal=2/4         # the 2nd of 4 sets of spec files, as CI shard 2 runs
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are
@@ -40,11 +40,17 @@ in place of its small screencast frames. Recording slows runs, so leave it off
 unless you want to watch.
 
 On CI, the suite is split across four `Flow Tests (n/4)` jobs. Each one runs
-with `--deal=n/4` and `--online`. A deal sorts the spec files by path and takes
-every fourth one, starting at the n-th. Files in one area sit next to each
-other, so a slow area spreads across the shards. Playwright's `--shard` cuts
-even blocks and would put it on one. The deal and the Playwright config skip the
-same folders (`harness/specFiles.ts`). An empty deal is an error, because
+with `--deal=n/4` and `--online`. A deal splits the spec files by their recorded
+run times in `harness/timings.json`. The slowest file goes first, each to the
+shard with the least time so far, so every shard takes about as long. A file
+with no recorded time counts as the average one. Playwright's `--shard` cuts
+even blocks by count instead. The deal and the Playwright config skip the same
+folders (`harness/specFiles.ts`).
+
+`deno task flows:timings [dir]` rewrites the timings from Playwright blob
+reports. CI's are the `flow-blob-*` artifacts of a run, kept for a day:
+`gh run download <run> --pattern 'flow-blob-*' --dir <dir>`. Refresh them when
+the shards drift apart, e.g. after a big new area. An empty deal is an error, because
 Playwright given no file runs the whole suite. The first shard also
 type-checks the suite with `deno check tests/flows`. On CI the config adds
 Playwright's blob reporter. Each shard uploads its blob report. The `Flow Tests`
