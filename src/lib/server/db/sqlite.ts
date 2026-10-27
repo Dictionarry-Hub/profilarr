@@ -190,9 +190,11 @@ export class Database {
 		options: { deterministic?: boolean } = {}
 	): void {
 		const call = fn as (...args: SQLInputValue[]) => unknown;
-		this.#db.function(name, { deterministic: options.deterministic ?? false }, (...args) =>
-			toSqlValue(call(...args))
-		);
+		const wrapped = (...args: SQLInputValue[]) => toSqlValue(call(...args));
+		// node:sqlite takes the SQL function's argument count from `length`, which a
+		// rest parameter sets to 0. Keep the original's, so qp('x') still takes one.
+		Object.defineProperty(wrapped, 'length', { value: fn.length });
+		this.#db.function(name, { deterministic: options.deterministic ?? false }, wrapped);
 	}
 
 	/** Online copy of this database to a new file */

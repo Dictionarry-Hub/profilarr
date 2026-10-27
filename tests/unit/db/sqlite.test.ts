@@ -36,6 +36,13 @@ Deno.test('SQLite wrapper: SQL functions return whole numbers as integers', () =
 	});
 });
 
+Deno.test('SQLite wrapper: SQL functions keep their argument count', () => {
+	withDatabase((db) => {
+		db.function('nameLength', (name: string) => name.length);
+		assertEquals(db.prepare("SELECT nameLength('abc') AS n").get(), { n: 3 });
+	});
+});
+
 Deno.test('SQLite wrapper: double-quoted text is accepted, as with @db/sqlite', () => {
 	withDatabase((db) => {
 		db.exec('CREATE TABLE t (name TEXT)');
