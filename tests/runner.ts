@@ -185,7 +185,6 @@ async function runUnit(target?: string): Promise<number> {
 			'--allow-write',
 			'--allow-env',
 			'--allow-run',
-			'--allow-ffi',
 			'--allow-net'
 		],
 		env: { ...Deno.env.toObject(), APP_BASE_PATH: './dist/test' },
