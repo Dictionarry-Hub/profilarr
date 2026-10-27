@@ -50,3 +50,48 @@ Deno.test('SQLite wrapper: double-quoted text is accepted, as with @db/sqlite', 
 		assertEquals(db.prepare('SELECT name FROM t').get(), { name: 'Foo' });
 	});
 });
+
+Deno.test('SQLite wrapper: booleans bind as 1 and 0', () => {
+	withDatabase((db) => {
+		assertEquals(db.prepare('SELECT ? AS yes, ? AS no').get(true, false), { yes: 1, no: 0 });
+	});
+});
+
+Deno.test('SQLite wrapper: dates bind as ISO text', () => {
+	withDatabase((db) => {
+		const date = new Date('2026-10-28T01:22:00.000Z');
+		assertEquals(db.prepare('SELECT ? AS d').get(date), { d: '2026-10-28T01:22:00.000Z' });
+	});
+});
+
+Deno.test('SQLite wrapper: objects and lists bind as JSON text', () => {
+	withDatabase((db) => {
+		// An object or list in the first position holds the parameters, so they go later
+		assertEquals(db.prepare('SELECT ? AS s, ? AS o, ? AS l').get('first', { a: 1 }, ['x', 2]), {
+			s: 'first',
+			o: '{"a":1}',
+			l: '["x",2]'
+		});
+	});
+});
+
+Deno.test('SQLite wrapper: undefined binds as NULL', () => {
+	withDatabase((db) => {
+		assertEquals(db.prepare('SELECT ? AS v').get(undefined), { v: null });
+	});
+});
+
+Deno.test('SQLite wrapper: a list in the first position holds the parameters', () => {
+	withDatabase((db) => {
+		assertEquals(db.prepare('SELECT ? AS a, ? AS b').get(['x', 2]), { a: 'x', b: 2 });
+	});
+});
+
+Deno.test('SQLite wrapper: an object in the first position holds named parameters', () => {
+	withDatabase((db) => {
+		assertEquals(db.prepare('SELECT :name AS n, :count AS c').get({ name: 'x', count: 2 }), {
+			n: 'x',
+			c: 2
+		});
+	});
+});
