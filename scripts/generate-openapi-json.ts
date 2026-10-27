@@ -1,4 +1,4 @@
-import { parse } from '@std/yaml';
+import { load as parse } from 'js-yaml';
 
 const OPENAPI_ROOT_URL = new URL('../docs/api/v1/openapi.yaml', import.meta.url);
 const OUTPUT_URL = new URL('../src/lib/api/v1.openapi.json', import.meta.url);
