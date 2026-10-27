@@ -15,7 +15,13 @@ Deno.test('Spec deal: without timings, files go round like cards', () => {
 });
 
 Deno.test('Spec deal: the slowest files go to the shard with the least time', () => {
-	const timings = { 'a.spec.ts': 10, 'b.spec.ts': 9, 'c.spec.ts': 2, 'd.spec.ts': 2, 'e.spec.ts': 1 };
+	const timings = {
+		'a.spec.ts': 10,
+		'b.spec.ts': 9,
+		'c.spec.ts': 2,
+		'd.spec.ts': 2,
+		'e.spec.ts': 1
+	};
 	// a 10 + d 2 = 12 against b 9 + c 2 + e 1 = 12
 	assertEquals(deal(timings), [
 		['a.spec.ts', 'd.spec.ts'],
