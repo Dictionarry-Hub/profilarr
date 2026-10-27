@@ -4,7 +4,7 @@
 
 import { TestClient } from '$test-harness/client.ts';
 import { openDb } from '$test-harness/db.ts';
-import { hash } from '@felix/bcrypt';
+import { hash } from '$auth/bcrypt.ts';
 import { log } from '$test-harness/log.ts';
 
 /**

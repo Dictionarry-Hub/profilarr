@@ -53,7 +53,7 @@ import { createUserDirect, login, queryDb } from '$test-harness/setup.ts';
 import { setup, teardown, test, run } from '$test-harness/runner.ts';
 import { PORTS } from '$test-harness/ports.ts';
 import { openDb } from '$test-harness/db.ts';
-import { hash } from '@felix/bcrypt';
+import { hash } from '$auth/bcrypt.ts';
 
 const PORT = PORTS.auth.secretExposure;
 const ORIGIN = `http://localhost:${PORT}`;

@@ -1,5 +1,5 @@
 import { db } from '../db.ts';
-import { hash } from '@felix/bcrypt';
+import { hash } from '$auth/bcrypt.ts';
 import { generateApiKey } from '$auth/apiKey.ts';
 import { toUTC } from '$shared/utils/dates.ts';
 import { parseApiKeyPermissions, type ApiKeyPermissions } from '$shared/apiKeys.ts';

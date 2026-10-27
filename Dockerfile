@@ -61,8 +61,6 @@ EOF
 
 ENV APP_BASE_PATH=/build/dist/build
 RUN deno run -A vite build
-RUN DENO_DIR=/tmp/profilarr-deno-cache \
-    deno eval "import { hash } from '@felix/bcrypt'; await hash('profilarr')"
 # --node-modules-dir=none + --exclude-unused-npm embed only what the server
 # reaches instead of the whole node_modules tree (build tooling included).
 # See docs/ARCHITECTURE.md#runtime-and-memory.
@@ -117,7 +115,6 @@ WORKDIR /app
 COPY --from=builder /build/dist/build/profilarr /app/profilarr
 COPY --from=builder /build/dist/build/server.js /app/server.js
 COPY --from=builder /build/dist/build/static /app/static
-COPY --from=builder /tmp/profilarr-deno-cache/plug /app/deno-cache/plug
 
 # Copy entrypoint script
 COPY scripts/entrypoint.sh /entrypoint.sh
@@ -140,7 +137,6 @@ ENV PORT=6868
 ENV HOST=0.0.0.0
 ENV APP_BASE_PATH=/config
 ENV TZ=UTC
-ENV DENO_DIR=/app/deno-cache
 ENV LD_LIBRARY_PATH=/usr/local/lib/glibc
 
 # Expose port

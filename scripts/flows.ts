@@ -76,18 +76,6 @@ if (rebuild || !existsSync(APP_BINARY)) {
 	if (code !== 0) process.exit(code);
 }
 
-// The app loads bcrypt from a library it downloads on first use.
-// Tests run offline, so fetch them here into Deno's cache (a no-op once
-// cached) and mount that cache into the container. CI does the same.
-const PLUG_CACHE = `${process.env.HOME}/.cache/deno/plug`;
-const warmup = run('deno', [
-	'eval',
-	'--ext=ts',
-	`import { hash } from '@felix/bcrypt';
-	await hash('warmup');`
-]);
-if (warmup !== 0) process.exit(warmup);
-
 // The image's browsers must match the installed Playwright exactly
 const { version } = JSON.parse(readFileSync('node_modules/@playwright/test/package.json', 'utf8'));
 const image = `mcr.microsoft.com/playwright:v${version}-noble`;
@@ -114,8 +102,6 @@ const docker = [
 	'FLOWS_QUIET',
 	'-v',
 	`${process.cwd()}:/work`,
-	'-v',
-	`${PLUG_CACHE}:/tmp/.cache/deno/plug:ro`,
 	'-w',
 	'/work'
 ];

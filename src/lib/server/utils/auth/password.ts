@@ -1,9 +1,8 @@
 /**
- * Password hashing utilities using bcrypt via @felix/bcrypt
- * Uses Rust bcrypt via Deno FFI
+ * Password hashing utilities using bcrypt (see ./bcrypt.ts)
  */
 
-import { hash, verify } from '@felix/bcrypt';
+import { hash, verify } from './bcrypt.ts';
 
 /**
  * Hash a password using bcrypt

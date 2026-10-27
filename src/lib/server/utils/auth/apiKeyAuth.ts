@@ -9,7 +9,7 @@
  * immediately and expiry is always current.
  */
 
-import { verify } from '@felix/bcrypt';
+import { verify } from './bcrypt.ts';
 import { config } from '$config';
 import { apiKeysQueries } from '$db/queries/apiKeys.ts';
 import { ENV_API_KEY_NAME, isApiKeyExpired, type ApiKeyPermissions } from '$shared/apiKeys.ts';
