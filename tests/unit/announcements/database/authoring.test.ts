@@ -3,6 +3,7 @@
  * Verifies write / delete / round-trip with the parser.
  */
 
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { BaseTest } from '../../base/BaseTest.ts';
 import { assertEquals, assertExists } from '@std/assert';
 import {
@@ -47,11 +48,11 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			const id = generateAnnouncementId();
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
-			const stat = await Deno.stat(`${ctx.tempDir}/announcements`);
-			assertEquals(stat.isDirectory, true);
+			const dirStat = await stat(`${ctx.tempDir}/announcements`);
+			assertEquals(dirStat.isDirectory(), true);
 
-			const fileStat = await Deno.stat(`${ctx.tempDir}/announcements/${id}.md`);
-			assertEquals(fileStat.isFile, true);
+			const fileStat = await stat(`${ctx.tempDir}/announcements/${id}.md`);
+			assertEquals(fileStat.isFile(), true);
 		});
 
 		this.test('writeAnnouncement leaves no temp file behind after success', async (ctx) => {
@@ -59,8 +60,8 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
 			const entries: string[] = [];
-			for await (const entry of Deno.readDir(`${ctx.tempDir}/announcements`)) {
-				entries.push(entry.name);
+			for (const name of await readdir(`${ctx.tempDir}/announcements`)) {
+				entries.push(name);
 			}
 			assertEquals(entries, [`${id}.md`]);
 		});
@@ -79,7 +80,7 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			const id = generateAnnouncementId();
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
-			const content = await Deno.readTextFile(`${ctx.tempDir}/announcements/${id}.md`);
+			const content = await readFile(`${ctx.tempDir}/announcements/${id}.md`, 'utf8');
 			assertEquals(
 				content,
 				`---
@@ -107,7 +108,7 @@ Body content.
 				body: ''
 			});
 
-			const content = await Deno.readTextFile(`${ctx.tempDir}/announcements/${id}.md`);
+			const content = await readFile(`${ctx.tempDir}/announcements/${id}.md`, 'utf8');
 			assertEquals(
 				content,
 				`---
@@ -212,8 +213,8 @@ published_at: '2026-04-20T10:00:00Z'
 			const id = generateAnnouncementId();
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
-			const stat = await Deno.stat(`${ctx.tempDir}/announcements/${id}.md`);
-			assertExists(stat);
+			const fileStat = await stat(`${ctx.tempDir}/announcements/${id}.md`);
+			assertExists(fileStat);
 		});
 	}
 }

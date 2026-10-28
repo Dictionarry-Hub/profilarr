@@ -42,7 +42,7 @@
 		// Tooling
 		"@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.4",
 		"@playwright/test": "npm:@playwright/test@^1.64.1",
-		"@std/assert": "jsr:@std/assert@^1.0.19",
+		"@std/assert": "npm:@jsr/std__assert@^1.0.19",
 		"@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.3.1",
 		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
 		"@types/deno": "npm:@types/deno@^2.7.0",
@@ -56,7 +56,8 @@
 		"svelte-check": "npm:svelte-check@^4.7.6",
 		"tailwindcss": "npm:tailwindcss@^4.3.3",
 		"typescript": "npm:typescript@6.0.3",
-		"vite": "npm:vite@^8.3.4"
+		"vite": "npm:vite@^8.3.4",
+		"vitest": "npm:vitest@^5.0.5"
 	},
 	"tasks": {
 		"dev": "deno run -A scripts/dev.ts",

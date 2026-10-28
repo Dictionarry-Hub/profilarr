@@ -6,6 +6,7 @@
  * keep rendering as before.
  */
 
+import { test } from 'vitest';
 import { assertEquals, assertMatch, assertNotMatch } from '@std/assert';
 import { renderMarkdown } from '$shared/utils/markdown.ts';
 
@@ -14,28 +15,28 @@ const ESCAPED_PAYLOAD = '&lt;img src=x onerror=window.xssFired++&gt;';
 
 // --- Raw HTML becomes text ---
 
-Deno.test('renderMarkdown: raw HTML on its own line is escaped', () => {
+test('renderMarkdown: raw HTML on its own line is escaped', () => {
 	const result = renderMarkdown(PAYLOAD);
 	assertEquals(result.includes(ESCAPED_PAYLOAD), true, result);
 	assertNotMatch(result, /<img/);
 });
 
-Deno.test('renderMarkdown: raw HTML inside a paragraph is escaped', () => {
+test('renderMarkdown: raw HTML inside a paragraph is escaped', () => {
 	const result = renderMarkdown(`Benign intro ${PAYLOAD} trailing text`);
 	assertEquals(result, `<p>Benign intro ${ESCAPED_PAYLOAD} trailing text</p>\n`);
 });
 
-Deno.test('renderMarkdown: raw HTML in inline mode is escaped', () => {
+test('renderMarkdown: raw HTML in inline mode is escaped', () => {
 	const result = renderMarkdown(`Benign intro ${PAYLOAD} trailing text`, { inline: true });
 	assertEquals(result, `Benign intro ${ESCAPED_PAYLOAD} trailing text`);
 });
 
-Deno.test('renderMarkdown: harmless raw tags are escaped too, markdown only', () => {
+test('renderMarkdown: harmless raw tags are escaped too, markdown only', () => {
 	const result = renderMarkdown('some <b>bold</b> text<br>next');
 	assertEquals(result, '<p>some &lt;b&gt;bold&lt;/b&gt; text&lt;br&gt;next</p>\n');
 });
 
-Deno.test('renderMarkdown: quoted handlers and script blocks are escaped', () => {
+test('renderMarkdown: quoted handlers and script blocks are escaped', () => {
 	for (const input of [
 		'<img src="x" onerror="alert(1)">',
 		'<script>alert(1)</script>',
@@ -49,17 +50,17 @@ Deno.test('renderMarkdown: quoted handlers and script blocks are escaped', () =>
 	}
 });
 
-Deno.test('renderMarkdown: angle brackets in prose are escaped', () => {
+test('renderMarkdown: angle brackets in prose are escaped', () => {
 	assertEquals(renderMarkdown('a < b > c'), '<p>a &lt; b &gt; c</p>\n');
 });
 
 // --- Link and image URLs ---
 
-Deno.test('renderMarkdown: javascript: link keeps the text and drops the link', () => {
+test('renderMarkdown: javascript: link keeps the text and drops the link', () => {
 	assertEquals(renderMarkdown('[click](javascript:alert(1))'), '<p>click</p>\n');
 });
 
-Deno.test('renderMarkdown: obfuscated javascript: link is dropped', () => {
+test('renderMarkdown: obfuscated javascript: link is dropped', () => {
 	for (const href of [
 		'JaVaScRiPt:alert(1)',
 		'java\tscript:alert(1)',
@@ -72,21 +73,21 @@ Deno.test('renderMarkdown: obfuscated javascript: link is dropped', () => {
 	}
 });
 
-Deno.test('renderMarkdown: https link is kept with its title', () => {
+test('renderMarkdown: https link is kept with its title', () => {
 	assertEquals(
 		renderMarkdown('[ok](https://example.com/a "Title")'),
 		'<p><a href="https://example.com/a" title="Title">ok</a></p>\n'
 	);
 });
 
-Deno.test('renderMarkdown: relative, fragment and mailto links are kept', () => {
+test('renderMarkdown: relative, fragment and mailto links are kept', () => {
 	for (const href of ['/docs/page', '#section', 'mailto:someone@example.com']) {
 		const result = renderMarkdown(`[x](${href})`);
 		assertEquals(result.includes(`href="${href}"`), true, result);
 	}
 });
 
-Deno.test('renderMarkdown: bare GFM autolink becomes a link', () => {
+test('renderMarkdown: bare GFM autolink becomes a link', () => {
 	const result = renderMarkdown('see https://example.com now');
 	assertEquals(
 		result.includes('<a href="https://example.com">https://example.com</a>'),
@@ -95,25 +96,25 @@ Deno.test('renderMarkdown: bare GFM autolink becomes a link', () => {
 	);
 });
 
-Deno.test('renderMarkdown: links false unwraps every link to text', () => {
+test('renderMarkdown: links false unwraps every link to text', () => {
 	const result = renderMarkdown('Uses the [**GPPI**](https://dictionarry.dev/wiki/gppi).', {
 		links: false
 	});
 	assertEquals(result, '<p>Uses the <strong>GPPI</strong>.</p>\n');
 });
 
-Deno.test('renderMarkdown: javascript: image keeps the alt text and drops the image', () => {
+test('renderMarkdown: javascript: image keeps the alt text and drops the image', () => {
 	assertEquals(renderMarkdown('![alt text](javascript:alert(1))'), '<p>alt text</p>\n');
 });
 
-Deno.test('renderMarkdown: https image is kept with alt and title', () => {
+test('renderMarkdown: https image is kept with alt and title', () => {
 	assertEquals(
 		renderMarkdown('![An image](https://example.com/i.png "T")'),
 		'<p><img src="https://example.com/i.png" alt="An image" title="T"></p>\n'
 	);
 });
 
-Deno.test('renderMarkdown: quotes in link text and titles are escaped', () => {
+test('renderMarkdown: quotes in link text and titles are escaped', () => {
 	const result = renderMarkdown('[a "b"](https://example.com "say \\"hi\\"")');
 	assertEquals(result.includes('title="say &quot;hi&quot;"'), true, result);
 	assertNotMatch(result, /title="[^"]*"[^>]*"/);
@@ -121,7 +122,7 @@ Deno.test('renderMarkdown: quotes in link text and titles are escaped', () => {
 
 // --- Ordinary markdown still renders ---
 
-Deno.test('renderMarkdown: GFM features render', () => {
+test('renderMarkdown: GFM features render', () => {
 	const md = [
 		'# Title',
 		'',
@@ -155,20 +156,20 @@ Deno.test('renderMarkdown: GFM features render', () => {
 	assertEquals(result.includes('&lt;not a tag&gt;'), true, result);
 });
 
-Deno.test('renderMarkdown: inline mode renders without a paragraph', () => {
+test('renderMarkdown: inline mode renders without a paragraph', () => {
 	assertEquals(
 		renderMarkdown('some **bold** text', { inline: true }),
 		'some <strong>bold</strong> text'
 	);
 });
 
-Deno.test('renderMarkdown: empty input renders nothing', () => {
+test('renderMarkdown: empty input renders nothing', () => {
 	assertEquals(renderMarkdown(''), '');
 	assertEquals(renderMarkdown(null), '');
 	assertEquals(renderMarkdown(undefined), '');
 });
 
-Deno.test('renderMarkdown: output never carries an event handler for report payloads', () => {
+test('renderMarkdown: output never carries an event handler for report payloads', () => {
 	const payloads = [
 		'<img src=x onerror=alert(1)>',
 		'<img src=x onerror =alert(1)>',

@@ -3,7 +3,10 @@
  * Extend this class to create test suites with automatic setup/teardown
  */
 
+import { test } from 'vitest';
+import { mkdir, readFile, rm, stat } from 'node:fs/promises';
 import { assertExists } from '@std/assert';
+import { isNotFound } from '$utils/fs.ts';
 
 export interface TestContext {
 	/** Unique temporary directory for this test */
@@ -61,7 +64,7 @@ export abstract class BaseTest {
 		const timestamp = Date.now();
 		const sanitizedName = testName.replace(/[^a-zA-Z0-9]/g, '_');
 		const tempDir = `/tmp/profilarr-tests/${sanitizedName}_${timestamp}_${counter}`;
-		await Deno.mkdir(tempDir, { recursive: true });
+		await mkdir(tempDir, { recursive: true });
 		return tempDir;
 	}
 
@@ -70,7 +73,7 @@ export abstract class BaseTest {
 	 */
 	protected async cleanupTempDir(tempDir: string): Promise<void> {
 		try {
-			await Deno.remove(tempDir, { recursive: true });
+			await rm(tempDir, { recursive: true });
 		} catch (error) {
 			// Ignore errors during cleanup
 			console.warn(`Failed to cleanup temp dir ${tempDir}:`, error);
@@ -82,8 +85,8 @@ export abstract class BaseTest {
 	 */
 	protected async assertFileExists(filePath: string, message?: string): Promise<void> {
 		try {
-			const stat = await Deno.stat(filePath);
-			assertExists(stat, message ?? `File should exist: ${filePath}`);
+			const info = await stat(filePath);
+			assertExists(info, message ?? `File should exist: ${filePath}`);
 		} catch (error) {
 			throw new Error(message ?? `Expected file to exist: ${filePath}, but got error: ${error}`);
 		}
@@ -94,10 +97,10 @@ export abstract class BaseTest {
 	 */
 	protected async assertFileNotExists(filePath: string, message?: string): Promise<void> {
 		try {
-			await Deno.stat(filePath);
+			await stat(filePath);
 			throw new Error(message ?? `Expected file to NOT exist: ${filePath}`);
 		} catch (error) {
-			if (!(error instanceof Deno.errors.NotFound)) {
+			if (!isNotFound(error)) {
 				throw error;
 			}
 			// File doesn't exist - this is what we want
@@ -112,7 +115,7 @@ export abstract class BaseTest {
 		expectedText: string,
 		message?: string
 	): Promise<void> {
-		const content = await Deno.readTextFile(filePath);
+		const content = await readFile(filePath, 'utf8');
 		if (!content.includes(expectedText)) {
 			throw new Error(
 				message ??
@@ -129,7 +132,7 @@ export abstract class BaseTest {
 		pattern: RegExp,
 		message?: string
 	): Promise<void> {
-		const content = await Deno.readTextFile(filePath);
+		const content = await readFile(filePath, 'utf8');
 		if (!pattern.test(content)) {
 			throw new Error(
 				message ??
@@ -142,7 +145,7 @@ export abstract class BaseTest {
 	 * Read and parse JSON log file
 	 */
 	protected async readJsonLines(filePath: string): Promise<unknown[]> {
-		const content = await Deno.readTextFile(filePath);
+		const content = await readFile(filePath, 'utf8');
 		const lines = content.split('\n').filter((line) => line.trim());
 		return lines.map((line) => JSON.parse(line));
 	}
@@ -171,7 +174,7 @@ export abstract class BaseTest {
 	protected async waitForFile(filePath: string, timeoutMs = 5000): Promise<void> {
 		await this.waitFor(async () => {
 			try {
-				await Deno.stat(filePath);
+				await stat(filePath);
 				return true;
 			} catch {
 				return false;
@@ -190,29 +193,26 @@ export abstract class BaseTest {
 	 * Register and run a test with automatic setup/teardown
 	 */
 	protected test(name: string, fn: (context: TestContext) => Promise<void> | void): void {
-		Deno.test({
-			name: `${this.constructor.name}: ${name}`,
-			fn: async () => {
-				// Create temp directory for this test
-				const tempDir = await this.createTempDir(name);
-				const context: TestContext = { tempDir, name };
-				this.context = context;
+		test(`${this.constructor.name}: ${name}`, async () => {
+			// Create temp directory for this test
+			const tempDir = await this.createTempDir(name);
+			const context: TestContext = { tempDir, name };
+			this.context = context;
 
-				try {
-					// Run beforeEach hook
-					await this.beforeEach(context);
+			try {
+				// Run beforeEach hook
+				await this.beforeEach(context);
 
-					// Run the actual test
-					await fn(context);
-				} finally {
-					// Run afterEach hook
-					await this.afterEach(context);
+				// Run the actual test
+				await fn(context);
+			} finally {
+				// Run afterEach hook
+				await this.afterEach(context);
 
-					// Cleanup temp directory
-					await this.cleanupTempDir(tempDir);
+				// Cleanup temp directory
+				await this.cleanupTempDir(tempDir);
 
-					this.context = null;
-				}
+				this.context = null;
 			}
 		});
 	}
@@ -226,10 +226,8 @@ export abstract class BaseTest {
 		await this.beforeAll();
 
 		// Tests are registered via this.test() calls in the subclass constructor or setup method
-		// Deno.test will handle running them
+		// Vitest will handle running them
 
-		// Note: afterAll will be called by the Deno test runner after all tests complete
-		// We can't easily hook into this without using the unstable API
-		// For now, tests should clean up in afterEach
+		// Note: afterAll is never called; tests should clean up in afterEach
 	}
 }

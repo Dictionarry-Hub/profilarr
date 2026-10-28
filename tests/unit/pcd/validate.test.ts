@@ -1,3 +1,4 @@
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { validateLinkInput } from '$pcd/core/validate.ts';
 
@@ -15,7 +16,7 @@ function branchFor(repositoryUrl: string, branch?: string): string | undefined {
 	return result.input.branch;
 }
 
-Deno.test('validateLinkInput defaults first-party database links to v2', () => {
+test('validateLinkInput defaults first-party database links to v2', () => {
 	const urls = [
 		'https://github.com/Dictionarry-Hub/database',
 		'https://github.com/Dictionarry-Hub/database.git',
@@ -28,10 +29,10 @@ Deno.test('validateLinkInput defaults first-party database links to v2', () => {
 	}
 });
 
-Deno.test('validateLinkInput keeps explicit branch for first-party database links', () => {
+test('validateLinkInput keeps explicit branch for first-party database links', () => {
 	assertEquals(branchFor('https://github.com/Dictionarry-Hub/database', 'main'), 'main');
 });
 
-Deno.test('validateLinkInput does not default other database links', () => {
+test('validateLinkInput does not default other database links', () => {
 	assertEquals(branchFor('https://github.com/TRaSH-Guides/Guides'), undefined);
 });

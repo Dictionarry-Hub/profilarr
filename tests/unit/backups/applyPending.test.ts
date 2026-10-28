@@ -23,6 +23,9 @@ import { assertEquals, assertRejects } from '@std/assert';
 import { applyPendingRestore } from '../../../src/lib/server/utils/backup/applyPending.ts';
 import { config } from '../../../src/lib/server/utils/config/config.ts';
 import { Database } from '$db/sqlite.ts';
+import { runCommand } from '$utils/command.ts';
+import { isNotFound } from '$utils/fs.ts';
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';
@@ -37,7 +40,7 @@ async function createValidArchive(
 	marker: string
 ): Promise<void> {
 	const stage = `${workDir}/_stage`;
-	await Deno.mkdir(`${stage}/data`, { recursive: true });
+	await mkdir(`${stage}/data`, { recursive: true });
 	const database = new Database(`${stage}/data/profilarr.db`);
 	try {
 		database.exec('CREATE TABLE restore_marker (value TEXT NOT NULL)');
@@ -45,49 +48,39 @@ async function createValidArchive(
 	} finally {
 		database.close();
 	}
-	await Deno.writeTextFile(
+	await writeFile(
 		`${stage}/data/INFO.json`,
 		JSON.stringify({ appVersion: 'test', schemaVersion: 0, sanitized: false })
 	);
 
-	const tar = new Deno.Command('tar', {
-		args: ['-czf', archivePath, '-C', stage, 'data'],
-		stdout: 'piped',
-		stderr: 'piped'
-	});
-	const { code } = await tar.output();
+	const { code } = await runCommand('tar', ['-czf', archivePath, '-C', stage, 'data']);
 	if (code !== 0) throw new Error(`createValidArchive: tar failed with exit ${code}`);
-	await Deno.remove(stage, { recursive: true });
+	await rm(stage, { recursive: true });
 }
 
 /** Build a tar.gz containing only `data/scratch.txt` (no profilarr.db). */
 async function createArchiveWithoutDb(workDir: string, archivePath: string): Promise<void> {
 	const stage = `${workDir}/_stage`;
-	await Deno.mkdir(`${stage}/data`, { recursive: true });
-	await Deno.writeTextFile(`${stage}/data/scratch.txt`, 'no db here');
+	await mkdir(`${stage}/data`, { recursive: true });
+	await writeFile(`${stage}/data/scratch.txt`, 'no db here');
 
-	const tar = new Deno.Command('tar', {
-		args: ['-czf', archivePath, '-C', stage, 'data'],
-		stdout: 'piped',
-		stderr: 'piped'
-	});
-	const { code } = await tar.output();
+	const { code } = await runCommand('tar', ['-czf', archivePath, '-C', stage, 'data']);
 	if (code !== 0) throw new Error(`createArchiveWithoutDb: tar failed with exit ${code}`);
-	await Deno.remove(stage, { recursive: true });
+	await rm(stage, { recursive: true });
 }
 
 async function exists(path: string): Promise<boolean> {
 	try {
-		await Deno.stat(path);
+		await stat(path);
 		return true;
 	} catch (err) {
-		if (err instanceof Deno.errors.NotFound) return false;
+		if (isNotFound(err)) return false;
 		throw err;
 	}
 }
 
 async function readText(path: string): Promise<string> {
-	return await Deno.readTextFile(path);
+	return await readFile(path, 'utf8');
 }
 
 function readMarker(dbPath: string): string {
@@ -107,12 +100,12 @@ class ApplyPendingTest extends BaseTest {
 		// Point config at the per-test temp dir, then create the data/
 		// subdirectory the same way config.init() would.
 		config.setBasePath(ctx.tempDir);
-		await Deno.mkdir(`${ctx.tempDir}/data`, { recursive: true });
+		await mkdir(`${ctx.tempDir}/data`, { recursive: true });
 	}
 
 	testNoSentinel(): void {
 		this.test('no sentinel: returns without error and does not touch data', async (ctx) => {
-			await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
+			await writeFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
 
 			await applyPendingRestore();
 
@@ -124,11 +117,8 @@ class ApplyPendingTest extends BaseTest {
 
 	testMissingArchive(): void {
 		this.test('sentinel pointing at missing archive: clears sentinel, leaves data', async (ctx) => {
-			await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
-			await Deno.writeTextFile(
-				`${ctx.tempDir}/${SENTINEL_NAME}`,
-				`${ctx.tempDir}/does-not-exist.tar.gz`
-			);
+			await writeFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
+			await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, `${ctx.tempDir}/does-not-exist.tar.gz`);
 
 			await applyPendingRestore();
 
@@ -141,11 +131,11 @@ class ApplyPendingTest extends BaseTest {
 		this.test(
 			'sentinel + corrupt archive: throws, sentinel preserved, data preserved',
 			async (ctx) => {
-				await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
+				await writeFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
 
 				const archivePath = `${ctx.tempDir}/junk.tar.gz`;
-				await Deno.writeFile(archivePath, new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff]));
-				await Deno.writeTextFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
+				await writeFile(archivePath, new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff]));
+				await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
 
 				await assertRejects(() => applyPendingRestore(), Error, 'Restore extraction failed');
 
@@ -158,11 +148,11 @@ class ApplyPendingTest extends BaseTest {
 
 	testArchiveMissingDb(): void {
 		this.test('sentinel + archive without profilarr.db: throws, data preserved', async (ctx) => {
-			await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
+			await writeFile(`${ctx.tempDir}/data/profilarr.db`, 'live');
 
 			const archivePath = `${ctx.tempDir}/no-db.tar.gz`;
 			await createArchiveWithoutDb(ctx.tempDir, archivePath);
-			await Deno.writeTextFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
+			await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
 
 			await assertRejects(() => applyPendingRestore(), Error, 'does not contain data/profilarr.db');
 
@@ -177,15 +167,15 @@ class ApplyPendingTest extends BaseTest {
 			'happy path: sidecars wiped, archive applied, sentinel and staging removed',
 			async (ctx) => {
 				// Live data: stale DB plus sidecars plus a databases/ subtree.
-				await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db`, 'live-OLD');
-				await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db-wal`, 'stale-wal');
-				await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db-shm`, 'stale-shm');
-				await Deno.mkdir(`${ctx.tempDir}/data/databases`);
-				await Deno.writeTextFile(`${ctx.tempDir}/data/databases/old.txt`, 'gone');
+				await writeFile(`${ctx.tempDir}/data/profilarr.db`, 'live-OLD');
+				await writeFile(`${ctx.tempDir}/data/profilarr.db-wal`, 'stale-wal');
+				await writeFile(`${ctx.tempDir}/data/profilarr.db-shm`, 'stale-shm');
+				await mkdir(`${ctx.tempDir}/data/databases`);
+				await writeFile(`${ctx.tempDir}/data/databases/old.txt`, 'gone');
 
 				const archivePath = `${ctx.tempDir}/backup.tar.gz`;
 				await createValidArchive(ctx.tempDir, archivePath, 'restored-NEW');
-				await Deno.writeTextFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
+				await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
 
 				await applyPendingRestore();
 
@@ -209,15 +199,15 @@ class ApplyPendingTest extends BaseTest {
 		this.test(
 			'pre-existing .restoring/ from a crashed apply is wiped before extract',
 			async (ctx) => {
-				await Deno.writeTextFile(`${ctx.tempDir}/data/profilarr.db`, 'live-OLD');
+				await writeFile(`${ctx.tempDir}/data/profilarr.db`, 'live-OLD');
 
 				// Simulate a crashed previous apply: a stale .restoring/ with junk in it.
-				await Deno.mkdir(`${ctx.tempDir}/${STAGING_NAME}/data`, { recursive: true });
-				await Deno.writeTextFile(`${ctx.tempDir}/${STAGING_NAME}/junk.txt`, 'leftover');
+				await mkdir(`${ctx.tempDir}/${STAGING_NAME}/data`, { recursive: true });
+				await writeFile(`${ctx.tempDir}/${STAGING_NAME}/junk.txt`, 'leftover');
 
 				const archivePath = `${ctx.tempDir}/backup.tar.gz`;
 				await createValidArchive(ctx.tempDir, archivePath, 'restored-NEW');
-				await Deno.writeTextFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
+				await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
 
 				await applyPendingRestore();
 

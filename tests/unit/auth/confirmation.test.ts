@@ -5,6 +5,7 @@
  * - evaluateReauth: the checks on an SSO re-authentication result
  */
 
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import {
 	CONFIRMATION_WINDOW_MINUTES,
@@ -18,31 +19,31 @@ const minutesAgo = (m: number) => new Date(NOW - m * 60_000).toISOString();
 
 // --- isRecentlyConfirmed ---
 
-Deno.test('isRecentlyConfirmed: null and undefined are not confirmed', () => {
+test('isRecentlyConfirmed: null and undefined are not confirmed', () => {
 	assertEquals(isRecentlyConfirmed(null, NOW), false);
 	assertEquals(isRecentlyConfirmed(undefined, NOW), false);
 });
 
-Deno.test('isRecentlyConfirmed: just now is confirmed', () => {
+test('isRecentlyConfirmed: just now is confirmed', () => {
 	assertEquals(isRecentlyConfirmed(minutesAgo(0), NOW), true);
 });
 
-Deno.test('isRecentlyConfirmed: one second inside the window is confirmed', () => {
+test('isRecentlyConfirmed: one second inside the window is confirmed', () => {
 	const inside = new Date(NOW - CONFIRMATION_WINDOW_MINUTES * 60_000 + 1000).toISOString();
 	assertEquals(isRecentlyConfirmed(inside, NOW), true);
 });
 
-Deno.test('isRecentlyConfirmed: one second past the window is not confirmed', () => {
+test('isRecentlyConfirmed: one second past the window is not confirmed', () => {
 	const past = new Date(NOW - CONFIRMATION_WINDOW_MINUTES * 60_000 - 1000).toISOString();
 	assertEquals(isRecentlyConfirmed(past, NOW), false);
 });
 
-Deno.test('isRecentlyConfirmed: a timestamp in the future counts as confirmed', () => {
+test('isRecentlyConfirmed: a timestamp in the future counts as confirmed', () => {
 	// Clock skew between writer and reader must not lock the person out
 	assertEquals(isRecentlyConfirmed(minutesAgo(-5), NOW), true);
 });
 
-Deno.test('isRecentlyConfirmed: SQLite format without timezone is read as UTC', () => {
+test('isRecentlyConfirmed: SQLite format without timezone is read as UTC', () => {
 	const sqlite = new Date(NOW - 60_000)
 		.toISOString()
 		.replace('T', ' ')
@@ -50,7 +51,7 @@ Deno.test('isRecentlyConfirmed: SQLite format without timezone is read as UTC', 
 	assertEquals(isRecentlyConfirmed(sqlite, NOW), true);
 });
 
-Deno.test('isRecentlyConfirmed: garbage is not confirmed', () => {
+test('isRecentlyConfirmed: garbage is not confirmed', () => {
 	assertEquals(isRecentlyConfirmed('not a date', NOW), false);
 	assertEquals(isRecentlyConfirmed('', NOW), false);
 });
@@ -66,16 +67,16 @@ const base = {
 };
 const secondsAfterStart = (s: number) => Math.floor((STARTED_AT + s * 1000) / 1000);
 
-Deno.test('evaluateReauth: fresh auth_time for the same account passes', () => {
+test('evaluateReauth: fresh auth_time for the same account passes', () => {
 	assertEquals(evaluateReauth({ ...base, authTime: secondsAfterStart(10) }), { ok: true });
 });
 
-Deno.test('evaluateReauth: auth_time inside the skew allowance passes', () => {
+test('evaluateReauth: auth_time inside the skew allowance passes', () => {
 	const withinSkew = secondsAfterStart(-(REAUTH_SKEW_SECONDS - 1));
 	assertEquals(evaluateReauth({ ...base, authTime: withinSkew }), { ok: true });
 });
 
-Deno.test('evaluateReauth: auth_time older than the skew allowance is stale', () => {
+test('evaluateReauth: auth_time older than the skew allowance is stale', () => {
 	const tooOld = secondsAfterStart(-(REAUTH_SKEW_SECONDS + 1));
 	assertEquals(evaluateReauth({ ...base, authTime: tooOld }), {
 		ok: false,
@@ -83,14 +84,14 @@ Deno.test('evaluateReauth: auth_time older than the skew allowance is stale', ()
 	});
 });
 
-Deno.test('evaluateReauth: missing auth_time fails closed', () => {
+test('evaluateReauth: missing auth_time fails closed', () => {
 	assertEquals(evaluateReauth({ ...base, authTime: undefined }), {
 		ok: false,
 		reason: 'no_auth_time'
 	});
 });
 
-Deno.test('evaluateReauth: non-numeric auth_time fails closed', () => {
+test('evaluateReauth: non-numeric auth_time fails closed', () => {
 	for (const bad of ['4102444800', NaN, Infinity, null, {}]) {
 		assertEquals(
 			evaluateReauth({ ...base, authTime: bad }),
@@ -100,21 +101,21 @@ Deno.test('evaluateReauth: non-numeric auth_time fails closed', () => {
 	}
 });
 
-Deno.test('evaluateReauth: a different account is rejected before auth_time is considered', () => {
+test('evaluateReauth: a different account is rejected before auth_time is considered', () => {
 	assertEquals(evaluateReauth({ ...base, sub: 'mallory', authTime: secondsAfterStart(10) }), {
 		ok: false,
 		reason: 'sub_mismatch'
 	});
 });
 
-Deno.test('evaluateReauth: a password account cannot be confirmed through SSO', () => {
+test('evaluateReauth: a password account cannot be confirmed through SSO', () => {
 	assertEquals(
 		evaluateReauth({ ...base, sessionUsername: 'admin', authTime: secondsAfterStart(10) }),
 		{ ok: false, reason: 'sub_mismatch' }
 	);
 });
 
-Deno.test('evaluateReauth: a start time that is not a number fails closed', () => {
+test('evaluateReauth: a start time that is not a number fails closed', () => {
 	for (const startedAt of [Number.NaN, Number.POSITIVE_INFINITY]) {
 		assertEquals(evaluateReauth({ ...base, startedAt, authTime: secondsAfterStart(10) }), {
 			ok: false,
@@ -123,7 +124,7 @@ Deno.test('evaluateReauth: a start time that is not a number fails closed', () =
 	}
 });
 
-Deno.test('evaluateReauth: sub comparison is exact', () => {
+test('evaluateReauth: sub comparison is exact', () => {
 	assertEquals(evaluateReauth({ ...base, sub: 'Alice', authTime: secondsAfterStart(10) }), {
 		ok: false,
 		reason: 'sub_mismatch'

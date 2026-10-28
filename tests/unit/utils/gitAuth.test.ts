@@ -2,6 +2,7 @@
  * Tests for the environment that sends a GitHub token to git as a header.
  */
 
+import { test } from 'vitest';
 import { assert, assertEquals, assertStrictEquals } from '@std/assert';
 import { Buffer } from 'node:buffer';
 import { GIT_ENV } from '$utils/git/exec.ts';
@@ -15,13 +16,13 @@ function decodeHeader(header: string): string {
 	return Buffer.from(header.slice(prefix.length), 'base64').toString('utf8');
 }
 
-Deno.test('githubAuthHeader: Basic header of x-access-token and the token', () => {
+test('githubAuthHeader: Basic header of x-access-token and the token', () => {
 	const header = githubAuthHeader(TOKEN);
 	assertEquals(header, `Authorization: Basic ${btoa(`x-access-token:${TOKEN}`)}`);
 	assertEquals(decodeHeader(header), `x-access-token:${TOKEN}`);
 });
 
-Deno.test('withGitAuth: scopes the header to https://github.com/', () => {
+test('withGitAuth: scopes the header to https://github.com/', () => {
 	const env = withGitAuth({}, TOKEN);
 	assertEquals(env, {
 		GIT_CONFIG_COUNT: '1',
@@ -30,7 +31,7 @@ Deno.test('withGitAuth: scopes the header to https://github.com/', () => {
 	});
 });
 
-Deno.test("withGitAuth: keeps GIT_ENV's credential.helper entry and takes the next index", () => {
+test("withGitAuth: keeps GIT_ENV's credential.helper entry and takes the next index", () => {
 	const env = withGitAuth(GIT_ENV, TOKEN);
 	assertEquals(env, {
 		...GIT_ENV,
@@ -42,7 +43,7 @@ Deno.test("withGitAuth: keeps GIT_ENV's credential.helper entry and takes the ne
 	});
 });
 
-Deno.test('withGitAuth: appends after any number of existing entries', () => {
+test('withGitAuth: appends after any number of existing entries', () => {
 	const base = {
 		GIT_CONFIG_COUNT: '3',
 		GIT_CONFIG_KEY_0: 'a.b',
@@ -59,20 +60,20 @@ Deno.test('withGitAuth: appends after any number of existing entries', () => {
 	assertEquals(env.GIT_CONFIG_VALUE_3, githubAuthHeader(TOKEN));
 });
 
-Deno.test('withGitAuth: adds no entries without a token', () => {
+test('withGitAuth: adds no entries without a token', () => {
 	assertStrictEquals(withGitAuth(GIT_ENV), GIT_ENV);
 	assertStrictEquals(withGitAuth(GIT_ENV, null), GIT_ENV);
 	assertStrictEquals(withGitAuth(GIT_ENV, ''), GIT_ENV);
 	assertEquals(GIT_ENV.GIT_CONFIG_COUNT, '1');
 });
 
-Deno.test('withGitAuth: leaves the base environment unchanged', () => {
+test('withGitAuth: leaves the base environment unchanged', () => {
 	const before = { ...GIT_ENV };
 	withGitAuth(GIT_ENV, TOKEN);
 	assertEquals(GIT_ENV, before);
 });
 
-Deno.test('withGitAuth: the token appears only in the header value', () => {
+test('withGitAuth: the token appears only in the header value', () => {
 	const env = withGitAuth(GIT_ENV, TOKEN);
 	for (const [key, value] of Object.entries(env)) {
 		assert(!key.includes(TOKEN), `${key} should not hold the token`);

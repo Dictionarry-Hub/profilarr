@@ -5,7 +5,7 @@
  *   deno task test [command] [target] [flags]
  *
  * Commands:
- *   unit            Run Deno unit tests (default when no command given)
+ *   unit            Run unit tests with Vitest (default when no command given)
  *   integration     Run auth integration specs (Docker + isolated servers)
  *   zap             Run OWASP ZAP security scan (requires build + Docker)
  *   semgrep         Run Semgrep static analysis scan
@@ -104,6 +104,10 @@ const UNIT_ALIASES: Record<string, string> = {
 	processor: 'tests/unit/rename/processor.test.ts'
 };
 
+// Unit tests of Deno scripts, run with `deno test` until the scripts move off
+// Deno. Everything else in tests/unit runs on Vitest (vitest.config.ts).
+const UNIT_DENO_PATHS = ['tests/unit/pr', 'tests/unit/release'];
+
 // ─── Arg Parsing ─────────────────────────────────────────────────────────────
 
 const COMMANDS = new Set(['unit', 'integration', 'zap', 'semgrep']);
@@ -177,22 +181,40 @@ async function runUnit(target?: string): Promise<number> {
 
 	console.log(`Running unit tests: ${testPath}\n`);
 
-	const cmd = new Deno.Command('deno', {
+	const env = { ...Deno.env.toObject(), APP_BASE_PATH: './dist/test' };
+	const denoPaths = UNIT_DENO_PATHS.filter(
+		(path) => !target || path.startsWith(testPath) || testPath.startsWith(path)
+	);
+	const insideDenoPath = UNIT_DENO_PATHS.some((path) => testPath.startsWith(path));
+
+	if (!insideDenoPath) {
+		const vitestArgs = ['node_modules/vitest/vitest.mjs', 'run'];
+		if (target) vitestArgs.push(testPath);
+		const { code } = await new Deno.Command('node', {
+			args: vitestArgs,
+			env,
+			stdout: 'inherit',
+			stderr: 'inherit'
+		}).output();
+		if (code !== 0) return code;
+	}
+
+	if (denoPaths.length === 0) return 0;
+
+	const { code } = await new Deno.Command('deno', {
 		args: [
 			'test',
-			testPath,
+			...(insideDenoPath ? [testPath] : denoPaths),
 			'--allow-read',
 			'--allow-write',
 			'--allow-env',
 			'--allow-run',
 			'--allow-net'
 		],
-		env: { ...Deno.env.toObject(), APP_BASE_PATH: './dist/test' },
+		env,
 		stdout: 'inherit',
 		stderr: 'inherit'
-	});
-
-	const { code } = await cmd.output();
+	}).output();
 	return code;
 }
 
@@ -605,7 +627,7 @@ function printHelp(): void {
 		'Usage: deno task test [command] [target] [flags]',
 		'',
 		'Commands:',
-		'  unit            Deno unit tests (default)',
+		'  unit            Unit tests with Vitest (default)',
 		'  integration     Auth integration specs',
 		'  zap             OWASP ZAP security scan (build + Docker)',
 		'  semgrep         Semgrep static analysis scan',
