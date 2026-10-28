@@ -126,6 +126,7 @@ Known improvement areas:
 - [backend/schema-bump.md](./backend/schema-bump.md): PCD schema evolution, safe vs unsafe changes
 - [backend/security.md](./backend/security.md): Auth modes, sessions, OIDC, API keys, security scans
 - [backend/sync.md](./backend/sync.md): Sync pipeline, transformation, section registry, cleanup
+- [backend/unit-tests.md](./backend/unit-tests.md): Unit test layout, test comments, assertions, builders and fakes
 - [backend/upgrades.md](./backend/upgrades.md): Upgrade pipeline, filters, selectors, cooldown, scheduling
 - [backend/utilities.md](./backend/utilities.md): HTTP client, outbound proxy, config, cache, markdown, Git, TMDB
 
