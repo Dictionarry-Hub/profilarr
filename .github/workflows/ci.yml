@@ -178,6 +178,9 @@ jobs:
 
       - run: deno ci
 
+      - name: Sync SvelteKit types
+        run: deno run -A npm:@sveltejs/kit sync
+
       - name: Run unit tests
         run: deno task test
 
