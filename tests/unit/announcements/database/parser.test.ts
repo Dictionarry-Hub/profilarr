@@ -4,6 +4,7 @@
  * behaviour. Pure filesystem operations, no DB.
  */
 
+import { mkdir, writeFile } from 'node:fs/promises';
 import { BaseTest } from '../../base/BaseTest.ts';
 import { assertEquals, assertExists } from '@std/assert';
 import { parseAnnouncementsDir } from '$announcements/database/parser.ts';
@@ -28,8 +29,8 @@ class DatabaseAnnouncementsParserTest extends BaseTest {
 		content: string
 	): Promise<void> {
 		const dir = `${tempDir}/announcements`;
-		await Deno.mkdir(dir, { recursive: true });
-		await Deno.writeTextFile(`${dir}/${filename}`, content);
+		await mkdir(dir, { recursive: true });
+		await writeFile(`${dir}/${filename}`, content);
 	}
 
 	runTests(): void {
@@ -42,7 +43,7 @@ class DatabaseAnnouncementsParserTest extends BaseTest {
 		});
 
 		this.test('empty announcements directory returns empty result', async (ctx) => {
-			await Deno.mkdir(`${ctx.tempDir}/announcements`, { recursive: true });
+			await mkdir(`${ctx.tempDir}/announcements`, { recursive: true });
 			const result = await parseAnnouncementsDir(ctx.tempDir);
 			assertEquals(result.parsed, []);
 			assertEquals(result.errors, []);
@@ -262,8 +263,8 @@ Body.
 		});
 
 		this.test('subdirectories inside announcements/ are ignored', async (ctx) => {
-			await Deno.mkdir(`${ctx.tempDir}/announcements/nested`, { recursive: true });
-			await Deno.writeTextFile(`${ctx.tempDir}/announcements/nested/x.md`, VALID);
+			await mkdir(`${ctx.tempDir}/announcements/nested`, { recursive: true });
+			await writeFile(`${ctx.tempDir}/announcements/nested/x.md`, VALID);
 			await this.writeAnnouncement(ctx.tempDir, 'top.md', VALID);
 			const result = await parseAnnouncementsDir(ctx.tempDir);
 			assertEquals(result.parsed.length, 1);

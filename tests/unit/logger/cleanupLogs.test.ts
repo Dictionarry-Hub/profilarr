@@ -3,6 +3,7 @@
  * Tests the cleanup of daily log files based on retention policy
  */
 
+import { writeFile } from 'node:fs/promises';
 import { BaseTest } from '../base/BaseTest.ts';
 import { cleanupLogs } from '../../../src/lib/server/jobs/logic/cleanupLogs.ts';
 import { assertEquals } from '@std/assert';
@@ -19,7 +20,7 @@ class CleanupLogsTest extends BaseTest {
 			oldDate.setDate(oldDate.getDate() - 35); // 35 days ago (older than 30 day retention)
 
 			const oldLogFile = `${context.tempDir}/${oldDate.toISOString().split('T')[0]}.log`;
-			await Deno.writeTextFile(oldLogFile, JSON.stringify({ test: 'old log' }) + '\n');
+			await writeFile(oldLogFile, JSON.stringify({ test: 'old log' }) + '\n');
 
 			// Assert old file exists before cleanup
 			await this.assertFileExists(oldLogFile);
@@ -48,7 +49,7 @@ class CleanupLogsTest extends BaseTest {
 			recentDate.setDate(recentDate.getDate() - 10); // 10 days ago (within 30 day retention)
 
 			const recentLogFile = `${context.tempDir}/${recentDate.toISOString().split('T')[0]}.log`;
-			await Deno.writeTextFile(recentLogFile, JSON.stringify({ test: 'recent log' }) + '\n');
+			await writeFile(recentLogFile, JSON.stringify({ test: 'recent log' }) + '\n');
 
 			// Assert recent file exists before cleanup
 			await this.assertFileExists(recentLogFile);
@@ -78,13 +79,13 @@ class CleanupLogsTest extends BaseTest {
 			const recentDate = new Date(today);
 			recentDate.setDate(recentDate.getDate() - 6);
 			const recentFile = `${context.tempDir}/${recentDate.toISOString().split('T')[0]}.log`;
-			await Deno.writeTextFile(recentFile, JSON.stringify({ test: 'recent' }) + '\n');
+			await writeFile(recentFile, JSON.stringify({ test: 'recent' }) + '\n');
 
 			// Old file (36 days old - should delete)
 			const oldDate = new Date(today);
 			oldDate.setDate(oldDate.getDate() - 36);
 			const oldFile = `${context.tempDir}/${oldDate.toISOString().split('T')[0]}.log`;
-			await Deno.writeTextFile(oldFile, JSON.stringify({ test: 'old' }) + '\n');
+			await writeFile(oldFile, JSON.stringify({ test: 'old' }) + '\n');
 
 			// Assert both files exist before cleanup
 			await this.assertFileExists(recentFile);
@@ -119,7 +120,7 @@ class CleanupLogsTest extends BaseTest {
 
 			// Create all invalid files
 			for (const file of invalidFiles) {
-				await Deno.writeTextFile(file, 'test content\n');
+				await writeFile(file, 'test content\n');
 			}
 
 			// Create one valid old file (36 days old - should be deleted)
@@ -127,7 +128,7 @@ class CleanupLogsTest extends BaseTest {
 			const oldDate = new Date(today);
 			oldDate.setDate(oldDate.getDate() - 36);
 			const validOldFile = `${context.tempDir}/${oldDate.toISOString().split('T')[0]}.log`;
-			await Deno.writeTextFile(validOldFile, JSON.stringify({ test: 'old' }) + '\n');
+			await writeFile(validOldFile, JSON.stringify({ test: 'old' }) + '\n');
 
 			// Assert all files exist before cleanup
 			for (const file of invalidFiles) {
@@ -207,7 +208,7 @@ class CleanupLogsTest extends BaseTest {
 			boundaryDate.setDate(boundaryDate.getDate() - 30); // Exactly 30 days ago
 
 			const boundaryFile = `${context.tempDir}/${boundaryDate.toISOString().split('T')[0]}.log`;
-			await Deno.writeTextFile(boundaryFile, JSON.stringify({ test: 'boundary log' }) + '\n');
+			await writeFile(boundaryFile, JSON.stringify({ test: 'boundary log' }) + '\n');
 
 			// Assert file exists before cleanup
 			await this.assertFileExists(boundaryFile);
@@ -239,10 +240,7 @@ class CleanupLogsTest extends BaseTest {
 				const oldDate = new Date(today);
 				oldDate.setDate(oldDate.getDate() - days);
 				const oldFile = `${context.tempDir}/${oldDate.toISOString().split('T')[0]}.log`;
-				await Deno.writeTextFile(
-					oldFile,
-					JSON.stringify({ test: `log from ${days} days ago` }) + '\n'
-				);
+				await writeFile(oldFile, JSON.stringify({ test: `log from ${days} days ago` }) + '\n');
 				oldFiles.push(oldFile);
 			}
 

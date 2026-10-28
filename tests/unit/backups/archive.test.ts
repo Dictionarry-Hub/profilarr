@@ -5,6 +5,8 @@
 import { assertEquals } from '@std/assert';
 import { BaseTest } from '../base/BaseTest.ts';
 import { validateArchiveEntries } from '../../../src/lib/server/utils/backup/archive.ts';
+import { runCommand } from '$utils/command.ts';
+import { mkdir, writeFile } from 'node:fs/promises';
 
 class ArchiveValidationTest extends BaseTest {
 	constructor() {
@@ -16,17 +18,12 @@ class ArchiveValidationTest extends BaseTest {
 		this.test('valid tar.gz with normal paths passes', async (ctx) => {
 			// Create a simple directory structure and tar it
 			const dataDir = `${ctx.tempDir}/data`;
-			await Deno.mkdir(dataDir, { recursive: true });
-			await Deno.writeTextFile(`${dataDir}/file.txt`, 'hello');
-			await Deno.writeTextFile(`${dataDir}/config.db`, 'dbdata');
+			await mkdir(dataDir, { recursive: true });
+			await writeFile(`${dataDir}/file.txt`, 'hello');
+			await writeFile(`${dataDir}/config.db`, 'dbdata');
 
 			const archivePath = `${ctx.tempDir}/backup-test.tar.gz`;
-			const cmd = new Deno.Command('tar', {
-				args: ['-czf', archivePath, '-C', ctx.tempDir, 'data'],
-				stdout: 'null',
-				stderr: 'null'
-			});
-			await cmd.output();
+			await runCommand('tar', ['-czf', archivePath, '-C', ctx.tempDir, 'data']);
 
 			const result = await validateArchiveEntries(archivePath);
 			assertEquals(result.valid, true);
@@ -36,24 +33,19 @@ class ArchiveValidationTest extends BaseTest {
 		this.test('tar with ../ path entry fails', async (ctx) => {
 			// Create a file, then tar it with a path traversal entry using --transform
 			const dataDir = `${ctx.tempDir}/data`;
-			await Deno.mkdir(dataDir, { recursive: true });
-			await Deno.writeTextFile(`${dataDir}/evil.txt`, 'malicious');
+			await mkdir(dataDir, { recursive: true });
+			await writeFile(`${dataDir}/evil.txt`, 'malicious');
 
 			const archivePath = `${ctx.tempDir}/evil.tar.gz`;
-			const cmd = new Deno.Command('tar', {
-				args: [
-					'-czf',
-					archivePath,
-					'--transform',
-					's|data/evil.txt|../../etc/evil.txt|',
-					'-C',
-					ctx.tempDir,
-					'data/evil.txt'
-				],
-				stdout: 'null',
-				stderr: 'null'
-			});
-			await cmd.output();
+			await runCommand('tar', [
+				'-czf',
+				archivePath,
+				'--transform',
+				's|data/evil.txt|../../etc/evil.txt|',
+				'-C',
+				ctx.tempDir,
+				'data/evil.txt'
+			]);
 
 			const result = await validateArchiveEntries(archivePath);
 			assertEquals(result.valid, false);
@@ -63,24 +55,19 @@ class ArchiveValidationTest extends BaseTest {
 		this.test('tar with absolute path entry fails', async (ctx) => {
 			// Create a file, then tar it with an absolute path using --transform
 			const dataDir = `${ctx.tempDir}/data`;
-			await Deno.mkdir(dataDir, { recursive: true });
-			await Deno.writeTextFile(`${dataDir}/abs.txt`, 'absolute');
+			await mkdir(dataDir, { recursive: true });
+			await writeFile(`${dataDir}/abs.txt`, 'absolute');
 
 			const archivePath = `${ctx.tempDir}/abs.tar.gz`;
-			const cmd = new Deno.Command('tar', {
-				args: [
-					'-czf',
-					archivePath,
-					'--transform',
-					's|data/abs.txt|/etc/passwd|',
-					'-C',
-					ctx.tempDir,
-					'data/abs.txt'
-				],
-				stdout: 'null',
-				stderr: 'null'
-			});
-			await cmd.output();
+			await runCommand('tar', [
+				'-czf',
+				archivePath,
+				'--transform',
+				's|data/abs.txt|/etc/passwd|',
+				'-C',
+				ctx.tempDir,
+				'data/abs.txt'
+			]);
 
 			const result = await validateArchiveEntries(archivePath);
 			assertEquals(result.valid, false);

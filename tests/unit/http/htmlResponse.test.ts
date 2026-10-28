@@ -4,6 +4,10 @@
  * so instead of failing to parse the page as JSON.
  */
 
+import { Buffer } from 'node:buffer';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { describe, test } from 'vitest';
 import { assert, assertEquals, assertInstanceOf, assertRejects } from '@std/assert';
 import { BaseArrClient } from '$arr/base.ts';
 import { BaseHttpClient } from '$http/client.ts';
@@ -19,11 +23,24 @@ async function withServer(
 	handler: (request: Request) => Response,
 	fn: (origin: string) => Promise<void>
 ): Promise<void> {
-	const server = Deno.serve({ port: 0, hostname: '127.0.0.1', onListen: () => {} }, handler);
+	const server = createServer(async (req, res) => {
+		const response = handler(
+			new Request(`http://${req.headers.host}${req.url}`, { method: req.method })
+		);
+		const headers: Record<string, string> = {};
+		response.headers.forEach((value, key) => (headers[key] = value));
+		res.writeHead(response.status, headers);
+		res.end(Buffer.from(await response.arrayBuffer()));
+	});
+	await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+	const { port } = server.address() as AddressInfo;
 	try {
-		await fn(`http://127.0.0.1:${server.addr.port}`);
+		await fn(`http://127.0.0.1:${port}`);
 	} finally {
-		await server.shutdown();
+		await new Promise<void>((resolve) => {
+			server.closeAllConnections();
+			server.close(() => resolve());
+		});
 	}
 }
 
@@ -31,8 +48,8 @@ async function withClient<T extends BaseHttpClient>(client: T, fn: (client: T) =
 	await fn(client);
 }
 
-Deno.test('HTML responses to JSON requests', async (t) => {
-	await t.step('a redirect to a login page names the host that answered', async () => {
+describe('HTML responses to JSON requests', () => {
+	test('a redirect to a login page names the host that answered', async () => {
 		await withServer(
 			() => html(LOGIN_PAGE),
 			(portal) =>
@@ -55,7 +72,7 @@ Deno.test('HTML responses to JSON requests', async (t) => {
 		);
 	});
 
-	await t.step('an HTML page without a redirect is still reported as a web page', async () => {
+	test('an HTML page without a redirect is still reported as a web page', async () => {
 		await withServer(
 			() => html(LOGIN_PAGE),
 			(origin) =>
@@ -66,7 +83,7 @@ Deno.test('HTML responses to JSON requests', async (t) => {
 		);
 	});
 
-	await t.step('an HTML error page reports the status, not a web page', async () => {
+	test('an HTML error page reports the status, not a web page', async () => {
 		await withServer(
 			() => html('<html>Not Found</html>', 404),
 			(origin) =>
@@ -79,7 +96,7 @@ Deno.test('HTML responses to JSON requests', async (t) => {
 		);
 	});
 
-	await t.step('a JSON response is parsed as before', async () => {
+	test('a JSON response is parsed as before', async () => {
 		await withServer(
 			() => Response.json({ ok: true }),
 			(origin) =>
@@ -89,7 +106,7 @@ Deno.test('HTML responses to JSON requests', async (t) => {
 		);
 	});
 
-	await t.step('detectVersion behind a proxy login rejects with the web page error', async () => {
+	test('detectVersion behind a proxy login rejects with the web page error', async () => {
 		await withServer(
 			() => html(LOGIN_PAGE),
 			(origin) =>

@@ -1,12 +1,13 @@
+import { test } from 'vitest';
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import { runCommand } from '$utils/command.ts';
 
-Deno.test('PROFILARR_API_KEY shorter than 32 characters fails config import', async () => {
-	const result = await new Deno.Command('deno', {
-		args: ['eval', "await import('./src/lib/server/utils/config/config.ts');"],
-		env: { ...Deno.env.toObject(), PROFILARR_API_KEY: 'too-short' },
-		stdout: 'piped',
-		stderr: 'piped'
-	}).output();
+test('PROFILARR_API_KEY shorter than 32 characters fails config import', async () => {
+	const result = await runCommand(
+		'deno',
+		['eval', "await import('./src/lib/server/utils/config/config.ts');"],
+		{ env: { PROFILARR_API_KEY: 'too-short' } }
+	);
 
 	assertEquals(result.code, 1);
 	const stderr = new TextDecoder().decode(result.stderr);

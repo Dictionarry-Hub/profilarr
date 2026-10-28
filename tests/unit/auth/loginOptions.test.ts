@@ -3,33 +3,34 @@
  * and when the first-run setup page is shown.
  */
 
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { getLoginOptions, getStartupAuthError, needsSetup } from '$auth/loginOptions.ts';
 
 // --- getLoginOptions ---
 
-Deno.test('getLoginOptions: password account, no SSO shows only the password form', () => {
+test('getLoginOptions: password account, no SSO shows only the password form', () => {
 	assertEquals(getLoginOptions({ oidcEnabled: false, hasLocalAccount: true }), {
 		password: true,
 		sso: false
 	});
 });
 
-Deno.test('getLoginOptions: SSO, no password account shows only the SSO button', () => {
+test('getLoginOptions: SSO, no password account shows only the SSO button', () => {
 	assertEquals(getLoginOptions({ oidcEnabled: true, hasLocalAccount: false }), {
 		password: false,
 		sso: true
 	});
 });
 
-Deno.test('getLoginOptions: SSO and a password account shows both', () => {
+test('getLoginOptions: SSO and a password account shows both', () => {
 	assertEquals(getLoginOptions({ oidcEnabled: true, hasLocalAccount: true }), {
 		password: true,
 		sso: true
 	});
 });
 
-Deno.test('getLoginOptions: neither shows nothing', () => {
+test('getLoginOptions: neither shows nothing', () => {
 	assertEquals(getLoginOptions({ oidcEnabled: false, hasLocalAccount: false }), {
 		password: false,
 		sso: false
@@ -56,12 +57,9 @@ const cases: {
 ];
 
 for (const { authMode, oidcEnabled, hasLocalAccount, expected } of cases) {
-	Deno.test(
-		`needsSetup: AUTH=${authMode}, SSO ${oidcEnabled ? 'on' : 'off'}, ${hasLocalAccount ? 'has' : 'no'} password account -> ${expected}`,
-		() => {
-			assertEquals(needsSetup({ authMode, oidcEnabled, hasLocalAccount }), expected);
-		}
-	);
+	test(`needsSetup: AUTH=${authMode}, SSO ${oidcEnabled ? 'on' : 'off'}, ${hasLocalAccount ? 'has' : 'no'} password account -> ${expected}`, () => {
+		assertEquals(needsSetup({ authMode, oidcEnabled, hasLocalAccount }), expected);
+	});
 }
 
 // --- getStartupAuthError ---
@@ -69,18 +67,15 @@ for (const { authMode, oidcEnabled, hasLocalAccount, expected } of cases) {
 const LOCKED_OUT =
 	"SSO accounts exist but the OIDC_* settings are missing, and there's no local password account.";
 
-Deno.test(
-	'getStartupAuthError: SSO accounts, SSO removed, no password account refuses startup',
-	() => {
-		const error = getStartupAuthError({
-			authMode: 'on',
-			oidcEnabled: false,
-			hasLocalAccount: false,
-			hasSsoAccounts: true
-		});
-		assertEquals(error?.startsWith(LOCKED_OUT), true, String(error));
-	}
-);
+test('getStartupAuthError: SSO accounts, SSO removed, no password account refuses startup', () => {
+	const error = getStartupAuthError({
+		authMode: 'on',
+		oidcEnabled: false,
+		hasLocalAccount: false,
+		hasSsoAccounts: true
+	});
+	assertEquals(error?.startsWith(LOCKED_OUT), true, String(error));
+});
 
 const startupOkCases: {
 	name: string;
@@ -120,7 +115,7 @@ const startupOkCases: {
 ];
 
 for (const { name, ...opts } of startupOkCases) {
-	Deno.test(`getStartupAuthError: ${name} starts normally`, () => {
+	test(`getStartupAuthError: ${name} starts normally`, () => {
 		assertEquals(getStartupAuthError(opts), null);
 	});
 }

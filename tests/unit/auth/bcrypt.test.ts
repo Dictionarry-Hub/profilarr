@@ -1,3 +1,4 @@
+import { test } from 'vitest';
 import { assert, assertEquals } from '@std/assert';
 import { BCRYPT_COST, hash, verify } from '$auth/bcrypt.ts';
 
@@ -6,12 +7,12 @@ import { BCRYPT_COST, hash, verify } from '$auth/bcrypt.ts';
 const NATIVE_HASH = '$2b$12$Ji1Al6Uk9OmcjThzIePDEehODWjO..hiVNY30ukZUmvN8SVwHbkye';
 const NATIVE_SECRET = 'profilarr-compat-check';
 
-Deno.test('bcrypt: a hash made by @felix/bcrypt verifies', async () => {
+test('bcrypt: a hash made by @felix/bcrypt verifies', async () => {
 	assert(await verify(NATIVE_SECRET, NATIVE_HASH));
 	assert(!(await verify('wrong-secret', NATIVE_HASH)));
 });
 
-Deno.test('bcrypt: new hashes use cost 12, like @felix/bcrypt', async () => {
+test('bcrypt: new hashes use cost 12, like @felix/bcrypt', async () => {
 	const hashed = await hash('a-new-secret');
 	assertEquals(hashed.slice(0, 7), `$2b$${BCRYPT_COST}$`);
 	assert(await verify('a-new-secret', hashed));

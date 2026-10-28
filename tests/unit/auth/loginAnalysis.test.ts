@@ -2,6 +2,7 @@
  * Tests for login analysis utilities
  */
 
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import {
 	isCommonAttackUsername,
@@ -13,7 +14,7 @@ import {
 
 // --- isCommonAttackUsername ---
 
-Deno.test('isCommonAttackUsername: detects common attack usernames', () => {
+test('isCommonAttackUsername: detects common attack usernames', () => {
 	assertEquals(isCommonAttackUsername('admin'), true);
 	assertEquals(isCommonAttackUsername('root'), true);
 	assertEquals(isCommonAttackUsername('test'), true);
@@ -21,13 +22,13 @@ Deno.test('isCommonAttackUsername: detects common attack usernames', () => {
 	assertEquals(isCommonAttackUsername('default'), true);
 });
 
-Deno.test('isCommonAttackUsername: case insensitive', () => {
+test('isCommonAttackUsername: case insensitive', () => {
 	assertEquals(isCommonAttackUsername('Admin'), true);
 	assertEquals(isCommonAttackUsername('ROOT'), true);
 	assertEquals(isCommonAttackUsername('AdMiNiStRaToR'), true);
 });
 
-Deno.test('isCommonAttackUsername: rejects normal usernames', () => {
+test('isCommonAttackUsername: rejects normal usernames', () => {
 	assertEquals(isCommonAttackUsername('santiago'), false);
 	assertEquals(isCommonAttackUsername('myuser123'), false);
 	assertEquals(isCommonAttackUsername('john.doe'), false);
@@ -35,59 +36,59 @@ Deno.test('isCommonAttackUsername: rejects normal usernames', () => {
 
 // --- findSimilarUsername ---
 
-Deno.test('findSimilarUsername: finds 1-edit typo', () => {
+test('findSimilarUsername: finds 1-edit typo', () => {
 	assertEquals(findSimilarUsername('santiag', ['santiago']), 'santiago');
 });
 
-Deno.test('findSimilarUsername: finds 2-edit typo', () => {
+test('findSimilarUsername: finds 2-edit typo', () => {
 	assertEquals(findSimilarUsername('santago', ['santiago']), 'santiago');
 });
 
-Deno.test('findSimilarUsername: rejects 3+ edit distance', () => {
+test('findSimilarUsername: rejects 3+ edit distance', () => {
 	assertEquals(findSimilarUsername('sant', ['santiago']), null);
 });
 
-Deno.test('findSimilarUsername: exact match returns null (distance 0)', () => {
+test('findSimilarUsername: exact match returns null (distance 0)', () => {
 	assertEquals(findSimilarUsername('santiago', ['santiago']), null);
 });
 
-Deno.test('findSimilarUsername: case insensitive matching', () => {
+test('findSimilarUsername: case insensitive matching', () => {
 	// 'Santiag' (capital S) lowercased to 'santiag' is 1 edit from 'santiago'
 	assertEquals(findSimilarUsername('Santiag', ['santiago']), 'santiago');
 });
 
-Deno.test('findSimilarUsername: no match in empty list', () => {
+test('findSimilarUsername: no match in empty list', () => {
 	assertEquals(findSimilarUsername('santiago', []), null);
 });
 
-Deno.test('findSimilarUsername: returns first match from multiple users', () => {
+test('findSimilarUsername: returns first match from multiple users', () => {
 	const result = findSimilarUsername('santiag', ['alice', 'santiago', 'bob']);
 	assertEquals(result, 'santiago');
 });
 
 // --- analyzeLoginFailure ---
 
-Deno.test('analyzeLoginFailure: user exists with wrong password', () => {
+test('analyzeLoginFailure: user exists with wrong password', () => {
 	const result = analyzeLoginFailure('santiago', ['santiago'], true);
 	assertEquals(result.reason, 'invalid_password');
 	assertEquals(result.similarUser, null);
 	assertEquals(result.isCommonAttack, false);
 });
 
-Deno.test('analyzeLoginFailure: unknown user with common attack name', () => {
+test('analyzeLoginFailure: unknown user with common attack name', () => {
 	const result = analyzeLoginFailure('admin', ['santiago'], false);
 	assertEquals(result.reason, 'user_not_found');
 	assertEquals(result.isCommonAttack, true);
 });
 
-Deno.test('analyzeLoginFailure: unknown user similar to existing', () => {
+test('analyzeLoginFailure: unknown user similar to existing', () => {
 	const result = analyzeLoginFailure('santiag', ['santiago'], false);
 	assertEquals(result.reason, 'user_not_found');
 	assertEquals(result.similarUser, 'santiago');
 	assertEquals(result.isCommonAttack, false);
 });
 
-Deno.test('analyzeLoginFailure: unknown user no match', () => {
+test('analyzeLoginFailure: unknown user no match', () => {
 	const result = analyzeLoginFailure('xyzabc', ['santiago'], false);
 	assertEquals(result.reason, 'user_not_found');
 	assertEquals(result.similarUser, null);
@@ -96,14 +97,14 @@ Deno.test('analyzeLoginFailure: unknown user no match', () => {
 
 // --- formatLoginFailure ---
 
-Deno.test('formatLoginFailure: invalid password', () => {
+test('formatLoginFailure: invalid password', () => {
 	assertEquals(
 		formatLoginFailure({ reason: 'invalid_password', similarUser: null, isCommonAttack: false }),
 		'invalid password'
 	);
 });
 
-Deno.test('formatLoginFailure: similar user', () => {
+test('formatLoginFailure: similar user', () => {
 	assertEquals(
 		formatLoginFailure({
 			reason: 'user_not_found',
@@ -114,14 +115,14 @@ Deno.test('formatLoginFailure: similar user', () => {
 	);
 });
 
-Deno.test('formatLoginFailure: common attack username', () => {
+test('formatLoginFailure: common attack username', () => {
 	assertEquals(
 		formatLoginFailure({ reason: 'user_not_found', similarUser: null, isCommonAttack: true }),
 		'unknown user (common attack username)'
 	);
 });
 
-Deno.test('formatLoginFailure: unknown user no match', () => {
+test('formatLoginFailure: unknown user no match', () => {
 	assertEquals(
 		formatLoginFailure({ reason: 'user_not_found', similarUser: null, isCommonAttack: false }),
 		'unknown user'
@@ -130,14 +131,14 @@ Deno.test('formatLoginFailure: unknown user no match', () => {
 
 // --- getAttemptCategory ---
 
-Deno.test('getAttemptCategory: invalid password is typo', () => {
+test('getAttemptCategory: invalid password is typo', () => {
 	assertEquals(
 		getAttemptCategory({ reason: 'invalid_password', similarUser: null, isCommonAttack: false }),
 		'typo'
 	);
 });
 
-Deno.test('getAttemptCategory: similar username is typo', () => {
+test('getAttemptCategory: similar username is typo', () => {
 	assertEquals(
 		getAttemptCategory({
 			reason: 'user_not_found',
@@ -148,14 +149,14 @@ Deno.test('getAttemptCategory: similar username is typo', () => {
 	);
 });
 
-Deno.test('getAttemptCategory: common attack username is suspicious', () => {
+test('getAttemptCategory: common attack username is suspicious', () => {
 	assertEquals(
 		getAttemptCategory({ reason: 'user_not_found', similarUser: null, isCommonAttack: true }),
 		'suspicious'
 	);
 });
 
-Deno.test('getAttemptCategory: unknown user no match is unknown', () => {
+test('getAttemptCategory: unknown user no match is unknown', () => {
 	assertEquals(
 		getAttemptCategory({ reason: 'user_not_found', similarUser: null, isCommonAttack: false }),
 		'unknown'

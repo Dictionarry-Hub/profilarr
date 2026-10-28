@@ -1,22 +1,28 @@
+import { test } from 'vitest';
+import { spawnSync } from 'node:child_process';
+import process from 'node:process';
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import type { CommandResult } from '$utils/command.ts';
 
-async function importConfig(env: Record<string, string>): Promise<Deno.CommandOutput> {
-	const base = Deno.env.toObject();
+function importConfig(env: Record<string, string>): CommandResult {
+	const base = { ...process.env };
 	delete base.AUTH;
 	delete base.OIDC_DISCOVERY_URL;
 	delete base.OIDC_CLIENT_ID;
 	delete base.OIDC_CLIENT_SECRET;
 
-	return await new Deno.Command('deno', {
-		args: ['eval', "await import('./src/lib/server/utils/config/config.ts');"],
-		env: { ...base, ...env },
-		clearEnv: true,
-		stdout: 'piped',
-		stderr: 'piped'
-	}).output();
+	// runCommand adds to the parent environment and can't unset variables, so
+	// spawn directly with the full environment
+	const child = spawnSync(
+		'deno',
+		['eval', "await import('./src/lib/server/utils/config/config.ts');"],
+		{ env: { ...base, ...env } }
+	);
+	if (child.error) throw child.error;
+	return { code: child.status, signal: child.signal, stdout: child.stdout, stderr: child.stderr };
 }
 
-Deno.test('partial OIDC settings fail config import and name the missing settings', async () => {
+test('partial OIDC settings fail config import and name the missing settings', async () => {
 	const result = await importConfig({
 		AUTH: 'on',
 		OIDC_DISCOVERY_URL: 'https://idp.example.com/.well-known/openid-configuration',
@@ -32,7 +38,7 @@ Deno.test('partial OIDC settings fail config import and name the missing setting
 	assert(!stderr.includes('Uncaught'), stderr);
 });
 
-Deno.test('partial OIDC settings with AUTH=off do not fail config import', async () => {
+test('partial OIDC settings with AUTH=off do not fail config import', async () => {
 	const result = await importConfig({ AUTH: 'off', OIDC_CLIENT_ID: 'profilarr' });
 	assertEquals(result.code, 0, new TextDecoder().decode(result.stderr));
 });

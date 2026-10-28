@@ -6,6 +6,8 @@
 import { BaseTest } from '../base/BaseTest.ts';
 import { createBackup } from '../../../src/lib/server/jobs/logic/createBackup.ts';
 import { assertEquals } from '@std/assert';
+import { runCommand } from '$utils/command.ts';
+import { mkdir, readFile, readdir, stat as statPath, writeFile } from 'node:fs/promises';
 
 class CreateBackupTest extends BaseTest {
 	/**
@@ -15,12 +17,12 @@ class CreateBackupTest extends BaseTest {
 		this.test('basic successful backup', async (context) => {
 			// Setup: Create source directory with test files
 			const sourceDir = `${context.tempDir}/source`;
-			await Deno.mkdir(sourceDir, { recursive: true });
+			await mkdir(sourceDir, { recursive: true });
 
 			// Create some test files
-			await Deno.writeTextFile(`${sourceDir}/file1.txt`, 'test content 1\n');
-			await Deno.writeTextFile(`${sourceDir}/file2.txt`, 'test content 2\n');
-			await Deno.writeTextFile(`${sourceDir}/file3.json`, JSON.stringify({ test: 'data' }) + '\n');
+			await writeFile(`${sourceDir}/file1.txt`, 'test content 1\n');
+			await writeFile(`${sourceDir}/file2.txt`, 'test content 2\n');
+			await writeFile(`${sourceDir}/file3.json`, JSON.stringify({ test: 'data' }) + '\n');
 
 			// Create backup directory
 			const backupDir = `${context.tempDir}/backups`;
@@ -50,8 +52,8 @@ class CreateBackupTest extends BaseTest {
 		this.test('backup filename format', async (context) => {
 			// Setup: Create source directory with test files
 			const sourceDir = `${context.tempDir}/source`;
-			await Deno.mkdir(sourceDir, { recursive: true });
-			await Deno.writeTextFile(`${sourceDir}/test.txt`, 'content\n');
+			await mkdir(sourceDir, { recursive: true });
+			await writeFile(`${sourceDir}/test.txt`, 'content\n');
 
 			const backupDir = `${context.tempDir}/backups`;
 
@@ -76,9 +78,9 @@ class CreateBackupTest extends BaseTest {
 		this.test('backup file exists and is valid', async (context) => {
 			// Setup: Create source directory with test files
 			const sourceDir = `${context.tempDir}/source`;
-			await Deno.mkdir(sourceDir, { recursive: true });
-			await Deno.writeTextFile(`${sourceDir}/file1.txt`, 'test content\n');
-			await Deno.writeTextFile(`${sourceDir}/file2.txt`, 'more content\n');
+			await mkdir(sourceDir, { recursive: true });
+			await writeFile(`${sourceDir}/file1.txt`, 'test content\n');
+			await writeFile(`${sourceDir}/file2.txt`, 'more content\n');
 
 			const backupDir = `${context.tempDir}/backups`;
 
@@ -95,7 +97,7 @@ class CreateBackupTest extends BaseTest {
 			await this.assertFileExists(backupFilePath);
 
 			// Get file stats and verify size
-			const stat = await Deno.stat(backupFilePath);
+			const stat = await statPath(backupFilePath);
 			assertEquals(stat.size > 0, true);
 
 			// Verify returned sizeBytes matches actual file size
@@ -110,15 +112,15 @@ class CreateBackupTest extends BaseTest {
 		this.test('backup contains expected files', async (context) => {
 			// Setup: Create source directory with specific test files
 			const sourceDir = `${context.tempDir}/source`;
-			await Deno.mkdir(sourceDir, { recursive: true });
+			await mkdir(sourceDir, { recursive: true });
 
 			const testContent1 = 'This is test file 1\n';
 			const testContent2 = 'This is test file 2\n';
 			const testContent3 = JSON.stringify({ key: 'value', data: [1, 2, 3] });
 
-			await Deno.writeTextFile(`${sourceDir}/file1.txt`, testContent1);
-			await Deno.writeTextFile(`${sourceDir}/file2.txt`, testContent2);
-			await Deno.writeTextFile(`${sourceDir}/data.json`, testContent3);
+			await writeFile(`${sourceDir}/file1.txt`, testContent1);
+			await writeFile(`${sourceDir}/file2.txt`, testContent2);
+			await writeFile(`${sourceDir}/data.json`, testContent3);
 
 			const backupDir = `${context.tempDir}/backups`;
 
@@ -130,18 +132,12 @@ class CreateBackupTest extends BaseTest {
 
 			// Extract backup to verify contents
 			const extractDir = `${context.tempDir}/extract`;
-			await Deno.mkdir(extractDir, { recursive: true });
+			await mkdir(extractDir, { recursive: true });
 
 			const backupFilePath = `${backupDir}/${result.filename}`;
 
 			// Extract tar.gz
-			const extractCommand = new Deno.Command('tar', {
-				args: ['-xzf', backupFilePath, '-C', extractDir],
-				stdout: 'piped',
-				stderr: 'piped'
-			});
-
-			const { code } = await extractCommand.output();
+			const { code } = await runCommand('tar', ['-xzf', backupFilePath, '-C', extractDir]);
 			assertEquals(code, 0);
 
 			// Verify extracted files exist and have correct content
@@ -151,9 +147,9 @@ class CreateBackupTest extends BaseTest {
 			await this.assertFileExists(`${extractedSourceDir}/data.json`);
 
 			// Verify file contents
-			const extractedContent1 = await Deno.readTextFile(`${extractedSourceDir}/file1.txt`);
-			const extractedContent2 = await Deno.readTextFile(`${extractedSourceDir}/file2.txt`);
-			const extractedContent3 = await Deno.readTextFile(`${extractedSourceDir}/data.json`);
+			const extractedContent1 = await readFile(`${extractedSourceDir}/file1.txt`, 'utf8');
+			const extractedContent2 = await readFile(`${extractedSourceDir}/file2.txt`, 'utf8');
+			const extractedContent3 = await readFile(`${extractedSourceDir}/data.json`, 'utf8');
 
 			assertEquals(extractedContent1, testContent1);
 			assertEquals(extractedContent2, testContent2);
@@ -195,7 +191,7 @@ class CreateBackupTest extends BaseTest {
 		this.test('source path is a file, not directory', async (context) => {
 			// Setup: Create a file instead of a directory
 			const sourcePath = `${context.tempDir}/somefile.txt`;
-			await Deno.writeTextFile(sourcePath, 'this is a file\n');
+			await writeFile(sourcePath, 'this is a file\n');
 
 			const backupDir = `${context.tempDir}/backups`;
 
@@ -224,7 +220,7 @@ class CreateBackupTest extends BaseTest {
 		this.test('empty source directory', async (context) => {
 			// Setup: Create an empty source directory
 			const sourceDir = `${context.tempDir}/empty-source`;
-			await Deno.mkdir(sourceDir, { recursive: true });
+			await mkdir(sourceDir, { recursive: true });
 
 			const backupDir = `${context.tempDir}/backups`;
 
@@ -247,15 +243,9 @@ class CreateBackupTest extends BaseTest {
 
 			// Extract and verify empty directory structure is preserved
 			const extractDir = `${context.tempDir}/extract`;
-			await Deno.mkdir(extractDir, { recursive: true });
+			await mkdir(extractDir, { recursive: true });
 
-			const extractCommand = new Deno.Command('tar', {
-				args: ['-xzf', backupFilePath, '-C', extractDir],
-				stdout: 'piped',
-				stderr: 'piped'
-			});
-
-			const { code } = await extractCommand.output();
+			const { code } = await runCommand('tar', ['-xzf', backupFilePath, '-C', extractDir]);
 			assertEquals(code, 0);
 
 			// Verify extracted directory exists and is empty
@@ -264,7 +254,7 @@ class CreateBackupTest extends BaseTest {
 
 			// Read directory to verify it's empty
 			const entries = [];
-			for await (const entry of Deno.readDir(extractedSourceDir)) {
+			for (const entry of await readdir(extractedSourceDir, { withFileTypes: true })) {
 				entries.push(entry);
 			}
 			assertEquals(entries.length, 0);

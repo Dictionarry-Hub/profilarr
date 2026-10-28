@@ -5,6 +5,7 @@
  * what every later version-dependent decision rests on.
  */
 
+import { describe, test } from 'vitest';
 import { assertEquals, assertRejects } from '@std/assert';
 import { BaseArrClient } from '$arr/base.ts';
 import { HttpError } from '$utils/http/types.ts';
@@ -39,8 +40,8 @@ async function detect(routes: Routes) {
 	return await client.detectVersion();
 }
 
-Deno.test('detectVersion', async (t) => {
-	await t.step('Sonarr v5 reports v5 as the current API', async () => {
+describe('detectVersion', () => {
+	test('Sonarr v5 reports v5 as the current API', async () => {
 		const info = await detect({
 			'/api/v3/system/status': status('Sonarr', '5.0.0.2569'),
 			'/api': { current: 'v5', deprecated: ['v3'] }
@@ -48,7 +49,7 @@ Deno.test('detectVersion', async (t) => {
 		assertEquals(info, { appName: 'Sonarr', version: '5.0.0.2569', currentApi: 'v5' });
 	});
 
-	await t.step('Sonarr v4 reports v3 as the current API', async () => {
+	test('Sonarr v4 reports v3 as the current API', async () => {
 		const info = await detect({
 			'/api/v3/system/status': status('Sonarr', '4.0.20.3014'),
 			'/api': { current: 'v3', deprecated: [] }
@@ -56,12 +57,12 @@ Deno.test('detectVersion', async (t) => {
 		assertEquals(info.currentApi, 'v3');
 	});
 
-	await t.step('a missing /api route is not an error', async () => {
+	test('a missing /api route is not an error', async () => {
 		const info = await detect({ '/api/v3/system/status': status('Sonarr', '5.0.0.2569') });
 		assertEquals(info, { appName: 'Sonarr', version: '5.0.0.2569', currentApi: null });
 	});
 
-	await t.step('an /api route that is not JSON is not an error', async () => {
+	test('an /api route that is not JSON is not an error', async () => {
 		const info = await detect({
 			'/api/v3/system/status': status('Radarr', '5.2.0.1'),
 			'/api': new HttpError('Unexpected token < in JSON', 0)
@@ -69,7 +70,7 @@ Deno.test('detectVersion', async (t) => {
 		assertEquals(info.currentApi, null);
 	});
 
-	await t.step('an /api answer without a current field is treated as unknown', async () => {
+	test('an /api answer without a current field is treated as unknown', async () => {
 		const info = await detect({
 			'/api/v3/system/status': status('Sonarr', '5.0.0.2569'),
 			'/api': { current: '', deprecated: [] }
@@ -77,13 +78,13 @@ Deno.test('detectVersion', async (t) => {
 		assertEquals(info.currentApi, null);
 	});
 
-	await t.step('an unreachable system/status throws', async () => {
+	test('an unreachable system/status throws', async () => {
 		await assertRejects(() => detect({ '/api': { current: 'v5', deprecated: [] } }), HttpError);
 	});
 });
 
-Deno.test('capabilities', async (t) => {
-	await t.step('versionMajor reads the leading number', () => {
+describe('capabilities', () => {
+	test('versionMajor reads the leading number', () => {
 		assertEquals(versionMajor('5.0.0.2569'), 5);
 		assertEquals(versionMajor('4.0.20.3014'), 4);
 		assertEquals(versionMajor('10.0.0.0'), 10);
@@ -92,28 +93,28 @@ Deno.test('capabilities', async (t) => {
 		assertEquals(versionMajor('v5'), null);
 	});
 
-	await t.step('apiGeneration reads v-prefixed generations only', () => {
+	test('apiGeneration reads v-prefixed generations only', () => {
 		assertEquals(apiGeneration('v5'), 5);
 		assertEquals(apiGeneration('V3'), 3);
 		assertEquals(apiGeneration('5'), null);
 		assertEquals(apiGeneration(null), null);
 	});
 
-	await t.step('Sonarr on API v5 keeps sizes per profile', () => {
+	test('Sonarr on API v5 keeps sizes per profile', () => {
 		assertEquals(
 			hasProfileItemSizes({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: 'v5' }),
 			true
 		);
 	});
 
-	await t.step('Sonarr on API v3 does not', () => {
+	test('Sonarr on API v3 does not', () => {
 		assertEquals(
 			hasProfileItemSizes({ type: 'sonarr', detected_version: '4.0.20.3014', detected_api: 'v3' }),
 			false
 		);
 	});
 
-	await t.step('the reported API wins over the version major', () => {
+	test('the reported API wins over the version major', () => {
 		// A source build reports 10.0.0.x but still says which API is current
 		assertEquals(
 			hasProfileItemSizes({ type: 'sonarr', detected_version: '10.0.0.0', detected_api: 'v3' }),
@@ -121,7 +122,7 @@ Deno.test('capabilities', async (t) => {
 		);
 	});
 
-	await t.step('the version major is the fallback without an /api answer', () => {
+	test('the version major is the fallback without an /api answer', () => {
 		assertEquals(
 			hasProfileItemSizes({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: null }),
 			true
@@ -132,21 +133,21 @@ Deno.test('capabilities', async (t) => {
 		);
 	});
 
-	await t.step('nothing detected yet means no capability', () => {
+	test('nothing detected yet means no capability', () => {
 		assertEquals(
 			hasProfileItemSizes({ type: 'sonarr', detected_version: null, detected_api: null }),
 			false
 		);
 	});
 
-	await t.step('Radarr never keeps sizes per profile today', () => {
+	test('Radarr never keeps sizes per profile today', () => {
 		assertEquals(
 			hasProfileItemSizes({ type: 'radarr', detected_version: '5.2.0.1', detected_api: 'v5' }),
 			false
 		);
 	});
 
-	await t.step('experimental matches the per-profile size model', () => {
+	test('experimental matches the per-profile size model', () => {
 		assertEquals(
 			isExperimentalVersion({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: 'v5' }),
 			true

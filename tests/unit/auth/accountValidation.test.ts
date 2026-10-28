@@ -3,39 +3,40 @@
  * security page, and for telling SSO accounts apart from password accounts.
  */
 
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { Database } from '$db/sqlite.ts';
 import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
 
 // --- validateNewLocalAccount ---
 
-Deno.test('validateNewLocalAccount: valid account passes', () => {
+test('validateNewLocalAccount: valid account passes', () => {
 	assertEquals(validateNewLocalAccount('admin', 'password123', 'password123'), null);
 });
 
-Deno.test('validateNewLocalAccount: username is required', () => {
+test('validateNewLocalAccount: username is required', () => {
 	assertEquals(validateNewLocalAccount('', 'password123', 'password123'), 'Username is required');
 });
 
-Deno.test('validateNewLocalAccount: username must be at least 3 characters', () => {
+test('validateNewLocalAccount: username must be at least 3 characters', () => {
 	assertEquals(
 		validateNewLocalAccount('ab', 'password123', 'password123'),
 		'Username must be at least 3 characters'
 	);
 });
 
-Deno.test('validateNewLocalAccount: password is required', () => {
+test('validateNewLocalAccount: password is required', () => {
 	assertEquals(validateNewLocalAccount('admin', '', ''), 'Password is required');
 });
 
-Deno.test('validateNewLocalAccount: password must be at least 8 characters', () => {
+test('validateNewLocalAccount: password must be at least 8 characters', () => {
 	assertEquals(
 		validateNewLocalAccount('admin', 'short', 'short'),
 		'Password must be at least 8 characters'
 	);
 });
 
-Deno.test('validateNewLocalAccount: passwords must match', () => {
+test('validateNewLocalAccount: passwords must match', () => {
 	assertEquals(
 		validateNewLocalAccount('admin', 'password123', 'password124'),
 		'Passwords do not match'
@@ -43,7 +44,7 @@ Deno.test('validateNewLocalAccount: passwords must match', () => {
 });
 
 for (const username of ['oidc:admin', 'OIDC:admin', 'Oidc:admin', 'oidc:']) {
-	Deno.test(`validateNewLocalAccount: rejects reserved username '${username}'`, () => {
+	test(`validateNewLocalAccount: rejects reserved username '${username}'`, () => {
 		assertEquals(
 			validateNewLocalAccount(username, 'password123', 'password123'),
 			"Usernames starting with 'oidc:' are reserved for SSO accounts"
@@ -51,7 +52,7 @@ for (const username of ['oidc:admin', 'OIDC:admin', 'Oidc:admin', 'oidc:']) {
 	});
 }
 
-Deno.test('validateNewLocalAccount: oidc without a colon is allowed', () => {
+test('validateNewLocalAccount: oidc without a colon is allowed', () => {
 	assertEquals(validateNewLocalAccount('oidcadmin', 'password123', 'password123'), null);
 });
 
@@ -69,14 +70,14 @@ const SAMPLES = [
 	' oidc:abc'
 ];
 
-Deno.test('isOidcUsername: matches the oidc: prefix ignoring case', () => {
+test('isOidcUsername: matches the oidc: prefix ignoring case', () => {
 	assertEquals(
 		SAMPLES.filter((name) => isOidcUsername(name)),
 		['oidc:abc', 'OIDC:abc', 'Oidc:abc', 'oidc:']
 	);
 });
 
-Deno.test('isOidcUsername agrees with the SQL used by usersQueries.existsLocal', () => {
+test('isOidcUsername agrees with the SQL used by usersQueries.existsLocal', () => {
 	// existsLocal() and getAllUsernames() treat rows matching NOT LIKE 'oidc:%'
 	// as password accounts. The app and SQL must agree on which is which.
 	const db = new Database(':memory:');

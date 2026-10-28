@@ -3,16 +3,17 @@
  * credentials must never make it into the output.
  */
 
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { getProxyEnv } from '$http/proxy.ts';
 
 const envOf = (vars: Record<string, string>) => (name: string) => vars[name];
 
-Deno.test('getProxyEnv: returns nothing when no proxy is set', () => {
+test('getProxyEnv: returns nothing when no proxy is set', () => {
 	assertEquals(getProxyEnv(envOf({})), { proxies: {}, noProxy: [] });
 });
 
-Deno.test('getProxyEnv: masks logins in proxy URLs', () => {
+test('getProxyEnv: masks logins in proxy URLs', () => {
 	const result = getProxyEnv(
 		envOf({
 			HTTPS_PROXY: 'http://user:p%40ss@gluetun:8888',
@@ -31,17 +32,17 @@ Deno.test('getProxyEnv: masks logins in proxy URLs', () => {
 	}
 });
 
-Deno.test('getProxyEnv: leaves proxies without a login unmasked', () => {
+test('getProxyEnv: leaves proxies without a login unmasked', () => {
 	const result = getProxyEnv(envOf({ HTTP_PROXY: 'http://proxy:3128' }));
 	assertEquals(result.proxies, { HTTP_PROXY: 'http://proxy:3128' });
 });
 
-Deno.test('getProxyEnv: assumes http:// when the scheme is missing', () => {
+test('getProxyEnv: assumes http:// when the scheme is missing', () => {
 	const result = getProxyEnv(envOf({ HTTPS_PROXY: 'user:pass@proxy:8080' }));
 	assertEquals(result.proxies, { HTTPS_PROXY: 'http://***@proxy:8080' });
 });
 
-Deno.test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
+test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
 	const result = getProxyEnv(
 		envOf({
 			HTTPS_PROXY: 'http://upper:8080',
@@ -56,14 +57,14 @@ Deno.test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
 	});
 });
 
-Deno.test('getProxyEnv: never returns the raw value of an invalid URL', () => {
+test('getProxyEnv: never returns the raw value of an invalid URL', () => {
 	const result = getProxyEnv(envOf({ HTTPS_PROXY: 'http://user:secret@[bad' }));
 
 	assertEquals(result.proxies, { HTTPS_PROXY: null });
 	assertEquals(JSON.stringify(result).includes('secret'), false);
 });
 
-Deno.test('getProxyEnv: splits and trims NO_PROXY', () => {
+test('getProxyEnv: splits and trims NO_PROXY', () => {
 	const result = getProxyEnv(
 		envOf({
 			HTTPS_PROXY: 'http://proxy:8080',

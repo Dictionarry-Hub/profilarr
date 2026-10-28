@@ -6,15 +6,20 @@
  * trigger are never queued.
  */
 
+import { afterAll, describe, test } from 'vitest';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import process from 'node:process';
 import { assertEquals } from '@std/assert';
 import type { SyncTrigger } from '$db/queries/arrSync.ts';
 
 type Section = 'qualityProfiles' | 'delayProfiles' | 'mediaManagement';
 
-Deno.test('on pull syncs only the sections that use the pulled database', async (t) => {
+describe('on pull syncs only the sections that use the pulled database', async () => {
 	// Point the app at a fresh folder before anything imports config
-	const baseDir = await Deno.makeTempDir({ prefix: 'profilarr-on-pull-' });
-	Deno.env.set('APP_BASE_PATH', baseDir);
+	const baseDir = await mkdtemp(join(tmpdir(), 'profilarr-on-pull-'));
+	process.env.APP_BASE_PATH = baseDir;
 
 	const { db } = await import('$db/db.ts');
 	const { runMigrations } = await import('$db/migrations.ts');
@@ -85,92 +90,92 @@ Deno.test('on pull syncs only the sections that use the pulled database', async 
 
 	const job = (section: Section, instanceId: number) => `arr.sync.${section}:${instanceId}`;
 
-	try {
-		await db.initialize();
-		await runMigrations();
-
-		for (const [id, name] of [
-			[A, 'Database A'],
-			[B, 'Database B']
-		] as const) {
-			db.execute(
-				`INSERT INTO database_instances (id, uuid, name, repository_url, local_path, enabled) VALUES (?, ?, ?, ?, ?, 1)`,
-				id,
-				`uuid-${id}`,
-				name,
-				`https://example.invalid/${id}.git`,
-				`/tmp/db-${id}`
-			);
-		}
-
-		const onA = instance('on-a', 'on_pull', {
-			profiles: [A],
-			delay: A,
-			naming: A,
-			definitions: A,
-			media: A
-		});
-		const onB = instance('on-b', 'on_pull', {
-			profiles: [B],
-			delay: B,
-			naming: B,
-			definitions: B,
-			media: B
-		});
-		const mixed = instance('mixed', 'on_pull', {
-			profiles: [B],
-			delay: A,
-			naming: B,
-			definitions: A,
-			media: B
-		});
-		const twoDatabases = instance('two-databases', 'on_pull', {
-			profiles: [B, A],
-			delay: B,
-			naming: B,
-			definitions: B,
-			media: A
-		});
-		instance('manual-a', 'manual', {
-			profiles: [A],
-			delay: A,
-			naming: A,
-			definitions: A,
-			media: A
-		});
-
-		await t.step('a pull of A queues only the sections that use A', async () => {
-			assertEquals(
-				await pull(A),
-				[
-					job('delayProfiles', mixed),
-					job('delayProfiles', onA),
-					job('mediaManagement', mixed),
-					job('mediaManagement', onA),
-					job('mediaManagement', twoDatabases),
-					job('qualityProfiles', onA),
-					job('qualityProfiles', twoDatabases)
-				].sort()
-			);
-		});
-
-		await t.step('only the queued sections are marked pending', () => {
-			const status = arrSyncQueries.getSyncConfigStatus(mixed);
-			assertEquals(status.qualityProfiles.syncStatus, 'idle');
-			assertEquals(status.delayProfiles.syncStatus, 'pending');
-			assertEquals(status.mediaManagement.syncStatus, 'pending');
-			assertEquals(arrSyncQueries.getSyncConfigStatus(onB).qualityProfiles.syncStatus, 'idle');
-		});
-
-		await t.step('a trigger without a database queues every on pull section', async () => {
-			const jobs = await pull();
-			assertEquals(jobs.length, 12);
-			assertEquals(jobs.includes(job('qualityProfiles', onB)), true);
-			assertEquals(jobs.includes(job('qualityProfiles', mixed)), true);
-		});
-	} finally {
+	afterAll(async () => {
 		jobDispatcher.stop();
 		db.close();
-		await Deno.remove(baseDir, { recursive: true });
+		await rm(baseDir, { recursive: true });
+	});
+
+	await db.initialize();
+	await runMigrations();
+
+	for (const [id, name] of [
+		[A, 'Database A'],
+		[B, 'Database B']
+	] as const) {
+		db.execute(
+			`INSERT INTO database_instances (id, uuid, name, repository_url, local_path, enabled) VALUES (?, ?, ?, ?, ?, 1)`,
+			id,
+			`uuid-${id}`,
+			name,
+			`https://example.invalid/${id}.git`,
+			`/tmp/db-${id}`
+		);
 	}
+
+	const onA = instance('on-a', 'on_pull', {
+		profiles: [A],
+		delay: A,
+		naming: A,
+		definitions: A,
+		media: A
+	});
+	const onB = instance('on-b', 'on_pull', {
+		profiles: [B],
+		delay: B,
+		naming: B,
+		definitions: B,
+		media: B
+	});
+	const mixed = instance('mixed', 'on_pull', {
+		profiles: [B],
+		delay: A,
+		naming: B,
+		definitions: A,
+		media: B
+	});
+	const twoDatabases = instance('two-databases', 'on_pull', {
+		profiles: [B, A],
+		delay: B,
+		naming: B,
+		definitions: B,
+		media: A
+	});
+	instance('manual-a', 'manual', {
+		profiles: [A],
+		delay: A,
+		naming: A,
+		definitions: A,
+		media: A
+	});
+
+	test('a pull of A queues only the sections that use A', async () => {
+		assertEquals(
+			await pull(A),
+			[
+				job('delayProfiles', mixed),
+				job('delayProfiles', onA),
+				job('mediaManagement', mixed),
+				job('mediaManagement', onA),
+				job('mediaManagement', twoDatabases),
+				job('qualityProfiles', onA),
+				job('qualityProfiles', twoDatabases)
+			].sort()
+		);
+	});
+
+	test('only the queued sections are marked pending', () => {
+		const status = arrSyncQueries.getSyncConfigStatus(mixed);
+		assertEquals(status.qualityProfiles.syncStatus, 'idle');
+		assertEquals(status.delayProfiles.syncStatus, 'pending');
+		assertEquals(status.mediaManagement.syncStatus, 'pending');
+		assertEquals(arrSyncQueries.getSyncConfigStatus(onB).qualityProfiles.syncStatus, 'idle');
+	});
+
+	test('a trigger without a database queues every on pull section', async () => {
+		const jobs = await pull();
+		assertEquals(jobs.length, 12);
+		assertEquals(jobs.includes(job('qualityProfiles', onB)), true);
+		assertEquals(jobs.includes(job('qualityProfiles', mixed)), true);
+	});
 });

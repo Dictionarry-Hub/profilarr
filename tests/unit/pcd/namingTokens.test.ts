@@ -1,3 +1,4 @@
+import { test } from 'vitest';
 import { assertEquals, assertFalse } from '@std/assert';
 import {
 	getRadarrTokenCategories,
@@ -26,19 +27,19 @@ function tokensFor(arrType: ArrType): string[] {
 	return categories.flatMap((category) => category.tokens.map((token) => token.token));
 }
 
-Deno.test('naming tokens validates every advertised Radarr token', () => {
+test('naming tokens validates every advertised Radarr token', () => {
 	for (const token of tokensFor('radarr')) {
 		assertValid(token, 'radarr');
 	}
 });
 
-Deno.test('naming tokens validates every advertised Sonarr token', () => {
+test('naming tokens validates every advertised Sonarr token', () => {
 	for (const token of tokensFor('sonarr')) {
 		assertValid(token, 'sonarr');
 	}
 });
 
-Deno.test('naming tokens keeps existing default formats valid and previewable', () => {
+test('naming tokens keeps existing default formats valid and previewable', () => {
 	assertValid('{Movie Title} ({Release Year}) {Quality Full}', 'radarr', 'movieFormat');
 	assertValid('{Movie Title} ({Release Year})', 'radarr', 'movieFolderFormat');
 	assertEquals(
@@ -69,7 +70,7 @@ Deno.test('naming tokens keeps existing default formats valid and previewable', 
 	);
 });
 
-Deno.test('naming tokens preserves current generic validation behavior', () => {
+test('naming tokens preserves current generic validation behavior', () => {
 	assertValid('', 'radarr');
 	assertValid('{[Quality Full]}{-Release Group}', 'radarr');
 	assertEquals(
@@ -85,7 +86,7 @@ Deno.test('naming tokens preserves current generic validation behavior', () => {
 	assertInvalid('{123}', 'radarr');
 });
 
-Deno.test('naming tokens normalizes Arr-style token spelling', () => {
+test('naming tokens normalizes Arr-style token spelling', () => {
 	const variants = [
 		'{Quality Full}',
 		'{Quality.Full}',
@@ -117,7 +118,7 @@ Deno.test('naming tokens normalizes Arr-style token spelling', () => {
 	assertInvalid('{Quality Missing}', 'radarr');
 });
 
-Deno.test('naming tokens exposes missing picker tokens and keeps aliases silent', () => {
+test('naming tokens exposes missing picker tokens and keeps aliases silent', () => {
 	const radarrTokens = tokensFor('radarr');
 	for (const token of [
 		'{Movie CollectionThe}',
@@ -154,7 +155,7 @@ Deno.test('naming tokens exposes missing picker tokens and keeps aliases silent'
 	assertEquals(resolveSonarrFormat('{MediaInfo Video} {MediaInfo Audio}'), 'x265 AAC');
 });
 
-Deno.test('naming tokens validates known parameterized tokens by base token', () => {
+test('naming tokens validates known parameterized tokens by base token', () => {
 	const commonLanguageCodes = ['de', 'DE', 'fr', 'FR', 'es', 'it', 'ja', 'pt-BR'];
 
 	for (const code of commonLanguageCodes) {
@@ -179,7 +180,7 @@ Deno.test('naming tokens validates known parameterized tokens by base token', ()
 	assertInvalid('{:-bad}', 'radarr');
 });
 
-Deno.test('naming tokens previews truncation parameters', () => {
+test('naming tokens previews truncation parameters', () => {
 	const truncatableTokens = [
 		'Movie Title',
 		'Movie CleanTitle',
@@ -226,7 +227,7 @@ Deno.test('naming tokens previews truncation parameters', () => {
 	assertEquals(resolveFormat('{Movie Title:99}', sample), 'The Fantastic Life of Mr. Sisko');
 });
 
-Deno.test('naming tokens previews media language parameters', () => {
+test('naming tokens previews media language parameters', () => {
 	const sample = {
 		'MediaInfo AudioLanguages': '[EN+DE+FR]',
 		'MediaInfo SubtitleLanguages': '[EN+DE]',
@@ -238,7 +239,7 @@ Deno.test('naming tokens previews media language parameters', () => {
 	assertEquals(resolveFormat('{MediaInfo Full:EN+}', sample), 'x264 DTS [EN+--]');
 });
 
-Deno.test('naming tokens previews custom format parameters', () => {
+test('naming tokens previews custom format parameters', () => {
 	const sample = { 'Custom Formats': 'AMZN WEB DV Surround Sound' };
 	const options = { customFormats: ['AMZN', 'WEB', 'DV', 'Surround Sound'] };
 
@@ -249,7 +250,7 @@ Deno.test('naming tokens previews custom format parameters', () => {
 	assertEquals(resolveFormat('{Custom Format:Surround Sound}', sample, options), 'Surround Sound');
 });
 
-Deno.test('naming tokens validates and previews Sonarr numbering flexibility', () => {
+test('naming tokens validates and previews Sonarr numbering flexibility', () => {
 	for (const format of [
 		'{season}',
 		'{episode}',
@@ -265,7 +266,7 @@ Deno.test('naming tokens validates and previews Sonarr numbering flexibility', (
 	assertEquals(resolveSonarrFormat('{season:000}-{episode:000}-{absolute:0000}'), '001-001-0001');
 });
 
-Deno.test('naming tokens validates Radarr field rules before Arr sync', () => {
+test('naming tokens validates Radarr field rules before Arr sync', () => {
 	assertValid('{Movie Title} ({Release Year}) {Quality Full}', 'radarr', 'movieFormat');
 	assertValid('{Movie.CleanTitle:16} ({Release.Year})', 'radarr', 'movieFormat');
 	assertValid('{Original Title}', 'radarr', 'movieFormat');
@@ -290,7 +291,7 @@ Deno.test('naming tokens validates Radarr field rules before Arr sync', () => {
 	}
 });
 
-Deno.test('naming tokens validates Sonarr field rules before Arr sync', () => {
+test('naming tokens validates Sonarr field rules before Arr sync', () => {
 	assertValid('S{season:00}E{episode:00}', 'sonarr', 'standardEpisodeFormat');
 	assertValid('{Original Title}', 'sonarr', 'standardEpisodeFormat');
 	assertInvalid('{Series Title} - {Episode Title}', 'sonarr', 'standardEpisodeFormat');

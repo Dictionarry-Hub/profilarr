@@ -163,6 +163,10 @@ jobs:
         with:
           deno-version-file: .tool-versions
 
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+
       - name: Cache deps
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -173,6 +177,9 @@ jobs:
           restore-keys: deno-${{ runner.os }}-
 
       - run: deno ci
+
+      - name: Sync SvelteKit types
+        run: deno run -A npm:@sveltejs/kit sync
 
       - name: Run unit tests
         run: deno task test

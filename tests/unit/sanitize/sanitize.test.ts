@@ -12,6 +12,7 @@
  * 6. Positive cases: allowed markup must survive unchanged
  */
 
+import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { marked } from 'marked';
 import { sanitizeHtml } from '$shared/utils/sanitize.ts';
@@ -50,7 +51,7 @@ function viaMarked(input: string): string {
 
 // --- SA-06 bypass vectors (entity-encoded / obfuscated javascript: URLs) ---
 
-Deno.test('sanitizeHtml: strips entity-encoded javascript: in href', () => {
+test('sanitizeHtml: strips entity-encoded javascript: in href', () => {
 	// Browser decodes &#x61; to "a", making this "javascript:alert(1)".
 	// A regex-only sanitizer misses this because the literal string "javascript:" isn't present.
 	const input = '<a href="jav&#x61;script:alert(1)">click</a>';
@@ -58,13 +59,13 @@ Deno.test('sanitizeHtml: strips entity-encoded javascript: in href', () => {
 	assertEquals(result.includes('href'), false, `Dangerous href survived sanitization -- ${result}`);
 });
 
-Deno.test('sanitizeHtml: strips case-varied javascript: in href', () => {
+test('sanitizeHtml: strips case-varied javascript: in href', () => {
 	const input = '<a href="JaVaScRiPt:alert(1)">click</a>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('href'), false, `Dangerous href survived sanitization -- ${result}`);
 });
 
-Deno.test('sanitizeHtml: strips whitespace-obfuscated javascript: in href', () => {
+test('sanitizeHtml: strips whitespace-obfuscated javascript: in href', () => {
 	// Browsers ignore whitespace inside URL schemes, so "java\nscript:" = "javascript:".
 	// A regex-only sanitizer misses this because the literal match is broken by the newline.
 	const input = '<a href="java\nscript:alert(1)">click</a>';
@@ -74,13 +75,13 @@ Deno.test('sanitizeHtml: strips whitespace-obfuscated javascript: in href', () =
 
 // --- Basic sanitizer behavior ---
 
-Deno.test('sanitizeHtml: preserves https href', () => {
+test('sanitizeHtml: preserves https href', () => {
 	const input = '<a href="https://example.com">link</a>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('https://example.com'), true, `Output lost https href -- ${result}`);
 });
 
-Deno.test('sanitizeHtml: strips script tags', () => {
+test('sanitizeHtml: strips script tags', () => {
 	const input = '<p>hello</p><script>alert(1)</script>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('<script'), false, `Output still contains script tag -- ${result}`);
@@ -91,13 +92,13 @@ Deno.test('sanitizeHtml: strips script tags', () => {
 	);
 });
 
-Deno.test('sanitizeHtml: strips onerror event handler', () => {
+test('sanitizeHtml: strips onerror event handler', () => {
 	const input = '<img src="x" onerror="alert(1)">';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('onerror'), false, `Output still contains onerror -- ${result}`);
 });
 
-Deno.test('sanitizeHtml: preserves allowed tags', () => {
+test('sanitizeHtml: preserves allowed tags', () => {
 	const input = '<p>text</p><strong>bold</strong><em>italic</em><code>mono</code>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('<p>'), true);
@@ -106,14 +107,14 @@ Deno.test('sanitizeHtml: preserves allowed tags', () => {
 	assertEquals(result.includes('<code>'), true);
 });
 
-Deno.test('sanitizeHtml: unwraps links to text when links are disabled', () => {
+test('sanitizeHtml: unwraps links to text when links are disabled', () => {
 	const input = 'Uses the <a href="https://dictionarry.dev/wiki/gppi"><strong>GPPI</strong></a>.';
 	assertEquals(sanitizeHtml(input, { links: false }), 'Uses the <strong>GPPI</strong>.');
 	const kept = sanitizeHtml(input);
 	assertEquals(kept.includes('href="https://dictionarry.dev/wiki/gppi"'), true, kept);
 });
 
-Deno.test('sanitizeHtml: strips disallowed tags', () => {
+test('sanitizeHtml: strips disallowed tags', () => {
 	const input = '<div>content</div><iframe src="evil"></iframe>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('<div'), false, `Output still contains div -- ${result}`);
@@ -148,10 +149,10 @@ const reportPayloads: Array<{ name: string; input: string }> = [
 ];
 
 for (const { name, input } of reportPayloads) {
-	Deno.test(`sanitizeHtml: report: ${name} (direct)`, () => {
+	test(`sanitizeHtml: report: ${name} (direct)`, () => {
 		assertNoHandler(sanitizeHtml(input), input);
 	});
-	Deno.test(`sanitizeHtml: report: ${name} (via marked)`, () => {
+	test(`sanitizeHtml: report: ${name} (via marked)`, () => {
 		assertNoHandler(sanitizeHtml(viaMarked(input)), input);
 	});
 }
@@ -185,10 +186,10 @@ const handlerVariants: Array<{ name: string; input: string }> = [
 ];
 
 for (const { name, input } of handlerVariants) {
-	Deno.test(`sanitizeHtml: handler variant: ${name} (direct)`, () => {
+	test(`sanitizeHtml: handler variant: ${name} (direct)`, () => {
 		assertNoHandler(sanitizeHtml(input), input);
 	});
-	Deno.test(`sanitizeHtml: handler variant: ${name} (via marked)`, () => {
+	test(`sanitizeHtml: handler variant: ${name} (via marked)`, () => {
 		assertNoHandler(sanitizeHtml(viaMarked(input)), input);
 	});
 }
@@ -205,10 +206,10 @@ const dangerousUrls: Array<{ name: string; input: string }> = [
 
 for (const { name, input } of dangerousUrls) {
 	const attr = input.startsWith('<img') ? 'src' : 'href';
-	Deno.test(`sanitizeHtml: dangerous url: ${name} (direct)`, () => {
+	test(`sanitizeHtml: dangerous url: ${name} (direct)`, () => {
 		assertNoAttr(sanitizeHtml(input), attr, input);
 	});
-	Deno.test(`sanitizeHtml: dangerous url: ${name} (via marked)`, () => {
+	test(`sanitizeHtml: dangerous url: ${name} (via marked)`, () => {
 		assertNoAttr(sanitizeHtml(viaMarked(input)), attr, input);
 	});
 }
@@ -230,22 +231,22 @@ const disallowedAttrs: Array<{ name: string; input: string; attr: string }> = [
 ];
 
 for (const { name, input, attr } of disallowedAttrs) {
-	Deno.test(`sanitizeHtml: disallowed attribute: ${name} (direct)`, () => {
+	test(`sanitizeHtml: disallowed attribute: ${name} (direct)`, () => {
 		assertNoAttr(sanitizeHtml(input), attr, input);
 	});
-	Deno.test(`sanitizeHtml: disallowed attribute: ${name} (via marked)`, () => {
+	test(`sanitizeHtml: disallowed attribute: ${name} (via marked)`, () => {
 		assertNoAttr(sanitizeHtml(viaMarked(input)), attr, input);
 	});
 }
 
-Deno.test('sanitizeHtml: unquoted handler is dropped when links are disabled', () => {
+test('sanitizeHtml: unquoted handler is dropped when links are disabled', () => {
 	const input = '<a href=https://ok.example onclick=alert(1)>x</a><img src=x onerror=alert(1)>';
 	const result = sanitizeHtml(input, { links: false });
 	assertNoHandler(result, input);
 	assertEquals(result.includes('<a'), false, result);
 });
 
-Deno.test('sanitizeHtml: disallowed tag with unquoted handler is removed entirely', () => {
+test('sanitizeHtml: disallowed tag with unquoted handler is removed entirely', () => {
 	const input = '<details open ontoggle=alert(1)>x</details>';
 	const result = sanitizeHtml(input);
 	assertEquals(result.includes('<details'), false, result);
@@ -254,18 +255,18 @@ Deno.test('sanitizeHtml: disallowed tag with unquoted handler is removed entirel
 
 // --- Markdown link syntax through marked ---
 
-Deno.test('sanitizeHtml: markdown link with javascript: href is stripped', () => {
+test('sanitizeHtml: markdown link with javascript: href is stripped', () => {
 	const result = sanitizeHtml(viaMarked('[click](javascript:alert(1))'));
 	assertNoAttr(result, 'href', '[click](javascript:alert(1))');
 	assertEquals(result.includes('click'), true, result);
 });
 
-Deno.test('sanitizeHtml: markdown image with javascript: src is stripped', () => {
+test('sanitizeHtml: markdown image with javascript: src is stripped', () => {
 	const result = sanitizeHtml(viaMarked('![x](javascript:alert(1))'));
 	assertNoAttr(result, 'src', '![x](javascript:alert(1))');
 });
 
-Deno.test('sanitizeHtml: raw img inside markdown paragraph loses unquoted handler', () => {
+test('sanitizeHtml: raw img inside markdown paragraph loses unquoted handler', () => {
 	const input = 'Benign text <img src=x onerror=window.xssFired++> more text';
 	const result = sanitizeHtml(viaMarked(input));
 	assertNoHandler(result, input);
@@ -274,27 +275,27 @@ Deno.test('sanitizeHtml: raw img inside markdown paragraph loses unquoted handle
 
 // --- Positive cases: allowed markup must survive ---
 
-Deno.test('sanitizeHtml: keeps href and title on links', () => {
+test('sanitizeHtml: keeps href and title on links', () => {
 	const result = sanitizeHtml('<a href="https://example.com/a" title="Example">x</a>');
 	assertEquals(result.includes('href="https://example.com/a"'), true, result);
 	assertEquals(result.includes('title="Example"'), true, result);
 });
 
-Deno.test('sanitizeHtml: keeps src, alt and title on images', () => {
+test('sanitizeHtml: keeps src, alt and title on images', () => {
 	const result = sanitizeHtml('<img src="https://example.com/i.png" alt="An image" title="T">');
 	assertEquals(result.includes('src="https://example.com/i.png"'), true, result);
 	assertEquals(result.includes('alt="An image"'), true, result);
 	assertEquals(result.includes('title="T"'), true, result);
 });
 
-Deno.test('sanitizeHtml: keeps relative, fragment and mailto hrefs', () => {
+test('sanitizeHtml: keeps relative, fragment and mailto hrefs', () => {
 	for (const href of ['/docs/page', '#section', 'mailto:someone@example.com']) {
 		const result = sanitizeHtml(`<a href="${href}">x</a>`);
 		assertEquals(result.includes(`href="${href}"`), true, result);
 	}
 });
 
-Deno.test('sanitizeHtml: keeps allowed structural tags from marked output', () => {
+test('sanitizeHtml: keeps allowed structural tags from marked output', () => {
 	const md = '# Title\n\n- item **bold** `code`\n\n> quote\n\n| a | b |\n|---|---|\n| 1 | 2 |';
 	const result = sanitizeHtml(viaMarked(md));
 	for (const tag of [
@@ -311,7 +312,7 @@ Deno.test('sanitizeHtml: keeps allowed structural tags from marked output', () =
 	}
 });
 
-Deno.test('sanitizeHtml: escaped text that looks like a tag stays escaped', () => {
+test('sanitizeHtml: escaped text that looks like a tag stays escaped', () => {
 	const result = sanitizeHtml('<p>&lt;img src=x onerror=alert(1)&gt;</p>');
 	assertEquals(result, '<p>&lt;img src=x onerror=alert(1)&gt;</p>');
 });
