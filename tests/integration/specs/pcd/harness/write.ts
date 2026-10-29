@@ -1,4 +1,4 @@
-import { assert } from '@std/assert';
+import { expect } from 'vitest';
 import type { OpOrigin, PcdTestContext } from './pcd.ts';
 import type { ConditionData } from '#shared/pcd/display.ts';
 
@@ -1006,9 +1006,9 @@ function qualityDefinitionsFields(
 }
 
 function assertSuccessfulAction(response: Response, action: string): Response {
-	assert(
+	expect(
 		response.status >= 200 && response.status < 400,
 		`Expected ${action} action to return 2xx/3xx, got ${response.status}`
-	);
+	).toBeTruthy();
 	return response;
 }

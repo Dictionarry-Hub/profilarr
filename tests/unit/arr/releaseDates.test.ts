@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { resolveRadarrInitialReleaseDate } from '#arr/releaseDates.ts';
 import type { RadarrMovie } from '#arr/types.ts';
@@ -16,59 +16,56 @@ function movie(dates: Partial<RadarrMovie>): RadarrMovie {
 class ReleaseDatesTest extends BaseTest {
 	runTests(): void {
 		this.test('prefers theatrical release over earlier availability dates', () => {
-			assertEquals(
+			expect(
 				resolveRadarrInitialReleaseDate(
 					movie({
 						inCinemas: '2025-03-01T00:00:00Z',
 						digitalRelease: '2025-02-01T00:00:00Z',
 						physicalRelease: '2025-01-01T00:00:00Z'
 					})
-				),
-				'2025-03-01T00:00:00Z'
-			);
+				)
+			).toStrictEqual('2025-03-01T00:00:00Z');
 		});
 
 		this.test('uses the earliest digital or physical fallback', () => {
-			assertEquals(
+			expect(
 				resolveRadarrInitialReleaseDate(
 					movie({
 						digitalRelease: '2025-04-01T00:00:00Z',
 						physicalRelease: '2025-03-01T00:00:00Z'
 					})
-				),
-				'2025-03-01T00:00:00Z'
-			);
-			assertEquals(
+				)
+			).toStrictEqual('2025-03-01T00:00:00Z');
+			expect(
 				resolveRadarrInitialReleaseDate(
 					movie({
 						digitalRelease: '2025-02-01T00:00:00Z',
 						physicalRelease: '2025-03-01T00:00:00Z'
 					})
-				),
-				'2025-02-01T00:00:00Z'
-			);
+				)
+			).toStrictEqual('2025-02-01T00:00:00Z');
 		});
 
 		this.test('uses matching digital and physical fallbacks', () => {
-			assertEquals(
+			expect(
 				resolveRadarrInitialReleaseDate(
 					movie({
 						digitalRelease: '2025-03-01T00:00:00Z',
 						physicalRelease: '2025-03-01T00:00:00Z'
 					})
-				),
-				'2025-03-01T00:00:00Z'
-			);
+				)
+			).toStrictEqual('2025-03-01T00:00:00Z');
 		});
 
 		this.test('skips invalid dates and returns unknown when none are valid', () => {
-			assertEquals(
+			expect(
 				resolveRadarrInitialReleaseDate(
 					movie({ digitalRelease: 'invalid', physicalRelease: '2025-03-01T00:00:00Z' })
-				),
-				'2025-03-01T00:00:00Z'
+				)
+			).toStrictEqual('2025-03-01T00:00:00Z');
+			expect(resolveRadarrInitialReleaseDate(movie({ inCinemas: 'invalid' }))).toStrictEqual(
+				undefined
 			);
-			assertEquals(resolveRadarrInitialReleaseDate(movie({ inCinemas: 'invalid' })), undefined);
 		});
 	}
 }

@@ -1,32 +1,36 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
 
 class ArrUrlTest extends BaseTest {
 	runTests(): void {
 		this.test('removes trailing slash', () => {
-			assertEquals(normalizeArrInstanceUrl('http://host:7878/'), 'http://host:7878');
+			expect(normalizeArrInstanceUrl('http://host:7878/')).toStrictEqual('http://host:7878');
 		});
 
 		this.test('ignores query string and hash', () => {
-			assertEquals(normalizeArrInstanceUrl('http://host:7878/?x=1#top'), 'http://host:7878');
+			expect(normalizeArrInstanceUrl('http://host:7878/?x=1#top')).toStrictEqual(
+				'http://host:7878'
+			);
 		});
 
 		this.test('lowercases scheme and hostname', () => {
-			assertEquals(normalizeArrInstanceUrl('HTTP://Radarr.Local:7878'), 'http://radarr.local:7878');
+			expect(normalizeArrInstanceUrl('HTTP://Radarr.Local:7878')).toStrictEqual(
+				'http://radarr.local:7878'
+			);
 		});
 
 		this.test('removes default ports', () => {
-			assertEquals(normalizeArrInstanceUrl('http://host:80'), 'http://host');
-			assertEquals(normalizeArrInstanceUrl('https://host:443'), 'https://host');
+			expect(normalizeArrInstanceUrl('http://host:80')).toStrictEqual('http://host');
+			expect(normalizeArrInstanceUrl('https://host:443')).toStrictEqual('https://host');
 		});
 
 		this.test('preserves non-default port', () => {
-			assertEquals(normalizeArrInstanceUrl('http://host:7879'), 'http://host:7879');
+			expect(normalizeArrInstanceUrl('http://host:7879')).toStrictEqual('http://host:7879');
 		});
 
 		this.test('preserves path', () => {
-			assertEquals(normalizeArrInstanceUrl('https://host/radarr/'), 'https://host/radarr');
+			expect(normalizeArrInstanceUrl('https://host/radarr/')).toStrictEqual('https://host/radarr');
 		});
 	}
 }

@@ -2,9 +2,8 @@
  * PCD write tests: delay profile delete.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -72,21 +71,21 @@ test('delay profile emits one delete op', async () => {
 	await write.delayProfile.remove(ctx, 'Delete Delay');
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'delete');
-	assertEquals(metadata.entity, 'delay_profile');
-	assertEquals(metadata.name, 'Delete Delay');
-	assertEquals(metadata.changed_fields, ['deleted']);
+	expect(metadata.operation).toStrictEqual('delete');
+	expect(metadata.entity).toStrictEqual('delay_profile');
+	expect(metadata.name).toStrictEqual('Delete Delay');
+	expect(metadata.changed_fields).toStrictEqual(['deleted']);
 	const desired = parseDesiredState(op);
-	assertEquals(desired.deleted, true);
-	assertEquals(desired.name, 'Delete Delay');
-	assertEquals(desired.preferred_protocol, 'prefer_torrent');
-	assertEquals(desired.usenet_delay, 15);
-	assertEquals(desired.torrent_delay, 5);
-	assertEquals(desired.bypass_if_highest_quality, true);
-	assertEquals(desired.bypass_if_above_custom_format_score, true);
-	assertEquals(desired.minimum_custom_format_score, 80);
-	assert(/delete from "?delay_profiles"?/i.test(normalizeSql(op.sql)));
+	expect(desired.deleted).toStrictEqual(true);
+	expect(desired.name).toStrictEqual('Delete Delay');
+	expect(desired.preferred_protocol).toStrictEqual('prefer_torrent');
+	expect(desired.usenet_delay).toStrictEqual(15);
+	expect(desired.torrent_delay).toStrictEqual(5);
+	expect(desired.bypass_if_highest_quality).toStrictEqual(true);
+	expect(desired.bypass_if_above_custom_format_score).toStrictEqual(true);
+	expect(desired.minimum_custom_format_score).toStrictEqual(80);
+	expect(/delete from "?delay_profiles"?/i.test(normalizeSql(op.sql))).toBeTruthy();
 });

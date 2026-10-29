@@ -27,11 +27,10 @@
  * 12. Webhook: new URL succeeds when no header is stored
  */
 
-import { assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { formResult, queryDb } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 
@@ -165,46 +164,46 @@ afterAll(async () => {
 
 test('arr: new URL with blank key is rejected and the row is unchanged', async () => {
 	const result = await updateArr({ url: 'http://attacker.example:8989' });
-	assertEquals(result.status, 400);
+	expect(result.status).toStrictEqual(400);
 	const row = arrRow();
-	assertEquals(row.url, ARR_URL);
-	assertEquals(row.api_key, ARR_API_KEY);
+	expect(row.url).toStrictEqual(ARR_URL);
+	expect(row.api_key).toStrictEqual(ARR_API_KEY);
 });
 
 test('arr: new URL with a key succeeds', async () => {
 	const result = await updateArr({ url: 'http://sonarr-new.internal:8989', api_key: 'new-key-1' });
-	assertEquals(result.status, 200);
+	expect(result.status).toStrictEqual(200);
 	const row = arrRow();
-	assertEquals(row.url, 'http://sonarr-new.internal:8989');
-	assertEquals(row.api_key, 'new-key-1');
+	expect(row.url).toStrictEqual('http://sonarr-new.internal:8989');
+	expect(row.api_key).toStrictEqual('new-key-1');
 	// Put it back for the remaining tests
 	await updateArr({ url: ARR_URL, api_key: ARR_API_KEY });
-	assertEquals(arrRow().url, ARR_URL);
+	expect(arrRow().url).toStrictEqual(ARR_URL);
 });
 
 test('arr: name change with blank key keeps the stored key', async () => {
 	const result = await updateArr({ name: 'Guarded Sonarr Renamed' });
-	assertEquals(result.status, 200);
+	expect(result.status).toStrictEqual(200);
 	const row = arrRow();
-	assertEquals(row.name, 'Guarded Sonarr Renamed');
-	assertEquals(row.api_key, ARR_API_KEY);
+	expect(row.name).toStrictEqual('Guarded Sonarr Renamed');
+	expect(row.api_key).toStrictEqual(ARR_API_KEY);
 	await updateArr({ name: 'Guarded Sonarr' });
 });
 
 test('arr: same URL with a trailing slash is not a change', async () => {
 	const result = await updateArr({ url: `${ARR_URL}/` });
-	assertEquals(result.status, 200);
-	assertEquals(arrRow().api_key, ARR_API_KEY);
+	expect(result.status).toStrictEqual(200);
+	expect(arrRow().api_key).toStrictEqual(ARR_API_KEY);
 });
 
 // --- Ntfy ---
 
 test('ntfy: new server with blank token is rejected when a token is stored', async () => {
 	const result = await updateNtfy(ntfyWithToken, { server_url: 'https://ntfy.attacker.example' });
-	assertEquals(result.status, 400);
+	expect(result.status).toStrictEqual(400);
 	const config = serviceConfig(ntfyWithToken);
-	assertEquals(config.server_url, NTFY_SERVER);
-	assertEquals(config.access_token, NTFY_TOKEN);
+	expect(config.server_url).toStrictEqual(NTFY_SERVER);
+	expect(config.access_token).toStrictEqual(NTFY_TOKEN);
 });
 
 test('ntfy: new server with a token succeeds', async () => {
@@ -212,28 +211,28 @@ test('ntfy: new server with a token succeeds', async () => {
 		server_url: 'https://ntfy.mine.example',
 		access_token: 'tk_new-token'
 	});
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	const config = serviceConfig(ntfyWithToken);
-	assertEquals(config.server_url, 'https://ntfy.mine.example');
-	assertEquals(config.access_token, 'tk_new-token');
+	expect(config.server_url).toStrictEqual('https://ntfy.mine.example');
+	expect(config.access_token).toStrictEqual('tk_new-token');
 	await updateNtfy(ntfyWithToken, { access_token: NTFY_TOKEN });
-	assertEquals(serviceConfig(ntfyWithToken).server_url, NTFY_SERVER);
+	expect(serviceConfig(ntfyWithToken).server_url).toStrictEqual(NTFY_SERVER);
 });
 
 test('ntfy: topic change with blank token keeps the stored token', async () => {
 	const result = await updateNtfy(ntfyWithToken, { topic: 'other-topic' });
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	const config = serviceConfig(ntfyWithToken);
-	assertEquals(config.topic, 'other-topic');
-	assertEquals(config.access_token, NTFY_TOKEN);
+	expect(config.topic).toStrictEqual('other-topic');
+	expect(config.access_token).toStrictEqual(NTFY_TOKEN);
 });
 
 test('ntfy: new server succeeds when no token is stored', async () => {
 	const result = await updateNtfy(ntfyWithoutToken, { server_url: 'https://ntfy.other.example' });
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	const config = serviceConfig(ntfyWithoutToken);
-	assertEquals(config.server_url, 'https://ntfy.other.example');
-	assertEquals(config.access_token, undefined);
+	expect(config.server_url).toStrictEqual('https://ntfy.other.example');
+	expect(config.access_token).toStrictEqual(undefined);
 });
 
 // --- Generic webhook ---
@@ -242,10 +241,10 @@ test('webhook: new URL with blank header is rejected when a header is stored', a
 	const result = await updateWebhook(webhookWithAuth, {
 		webhook_url: 'https://hooks.attacker.example/collect'
 	});
-	assertEquals(result.status, 400);
+	expect(result.status).toStrictEqual(400);
 	const config = serviceConfig(webhookWithAuth);
-	assertEquals(config.webhook_url, WEBHOOK_URL);
-	assertEquals(config.auth_header, WEBHOOK_AUTH);
+	expect(config.webhook_url).toStrictEqual(WEBHOOK_URL);
+	expect(config.auth_header).toStrictEqual(WEBHOOK_AUTH);
 });
 
 test('webhook: new URL with a header succeeds', async () => {
@@ -253,28 +252,28 @@ test('webhook: new URL with a header succeeds', async () => {
 		webhook_url: 'https://hooks.mine.example/new',
 		auth_header: 'Bearer new-auth'
 	});
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	const config = serviceConfig(webhookWithAuth);
-	assertEquals(config.webhook_url, 'https://hooks.mine.example/new');
-	assertEquals(config.auth_header, 'Bearer new-auth');
+	expect(config.webhook_url).toStrictEqual('https://hooks.mine.example/new');
+	expect(config.auth_header).toStrictEqual('Bearer new-auth');
 	await updateWebhook(webhookWithAuth, { webhook_url: WEBHOOK_URL, auth_header: WEBHOOK_AUTH });
-	assertEquals(serviceConfig(webhookWithAuth).webhook_url, WEBHOOK_URL);
+	expect(serviceConfig(webhookWithAuth).webhook_url).toStrictEqual(WEBHOOK_URL);
 });
 
 test('webhook: blank URL and blank header keep both', async () => {
 	const result = await updateWebhook(webhookWithAuth, {});
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	const config = serviceConfig(webhookWithAuth);
-	assertEquals(config.webhook_url, WEBHOOK_URL);
-	assertEquals(config.auth_header, WEBHOOK_AUTH);
+	expect(config.webhook_url).toStrictEqual(WEBHOOK_URL);
+	expect(config.auth_header).toStrictEqual(WEBHOOK_AUTH);
 });
 
 test('webhook: new URL succeeds when no header is stored', async () => {
 	const result = await updateWebhook(webhookWithoutAuth, {
 		webhook_url: 'https://hooks.other.example/x'
 	});
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	const config = serviceConfig(webhookWithoutAuth);
-	assertEquals(config.webhook_url, 'https://hooks.other.example/x');
-	assertEquals(config.auth_header, undefined);
+	expect(config.webhook_url).toStrictEqual('https://hooks.other.example/x');
+	expect(config.auth_header).toStrictEqual(undefined);
 });

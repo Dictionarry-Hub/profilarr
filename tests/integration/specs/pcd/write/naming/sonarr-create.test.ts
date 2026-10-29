@@ -2,9 +2,8 @@
  * PCD write tests: sonarr naming create.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -75,26 +74,36 @@ test('minimal sonarr naming emits one create op', async () => {
 	await write.namingSonarr.create(ctx, { name: 'Created Naming' });
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'create');
-	assertEquals(metadata.entity, 'sonarr_naming');
-	assertEquals(metadata.name, 'Created Naming');
+	expect(metadata.operation).toStrictEqual('create');
+	expect(metadata.entity).toStrictEqual('sonarr_naming');
+	expect(metadata.name).toStrictEqual('Created Naming');
 	const desired = parseDesiredState(op);
-	assertEquals(desired.name, 'Created Naming');
-	assertEquals(desired.rename, true);
-	assertEquals(desired.standard_episode_format, VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat);
-	assertEquals(desired.daily_episode_format, VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat);
-	assertEquals(desired.anime_episode_format, VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat);
-	assertEquals(desired.series_folder_format, VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat);
-	assertEquals(desired.season_folder_format, VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat);
-	assertEquals(desired.replace_illegal_characters, false);
-	assertEquals(desired.colon_replacement_format, 'delete');
-	assertEquals(desired.custom_colon_replacement_format, null);
-	assertEquals(desired.multi_episode_style, 'extend');
+	expect(desired.name).toStrictEqual('Created Naming');
+	expect(desired.rename).toStrictEqual(true);
+	expect(desired.standard_episode_format).toStrictEqual(
+		VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat
+	);
+	expect(desired.daily_episode_format).toStrictEqual(
+		VALID_SONARR_NAMING_DEFAULTS.dailyEpisodeFormat
+	);
+	expect(desired.anime_episode_format).toStrictEqual(
+		VALID_SONARR_NAMING_DEFAULTS.animeEpisodeFormat
+	);
+	expect(desired.series_folder_format).toStrictEqual(
+		VALID_SONARR_NAMING_DEFAULTS.seriesFolderFormat
+	);
+	expect(desired.season_folder_format).toStrictEqual(
+		VALID_SONARR_NAMING_DEFAULTS.seasonFolderFormat
+	);
+	expect(desired.replace_illegal_characters).toStrictEqual(false);
+	expect(desired.colon_replacement_format).toStrictEqual('delete');
+	expect(desired.custom_colon_replacement_format).toStrictEqual(null);
+	expect(desired.multi_episode_style).toStrictEqual('extend');
 	const sql = normalizeSql(op.sql);
-	assert(/insert into "?sonarr_naming"?/i.test(sql));
+	expect(/insert into "?sonarr_naming"?/i.test(sql)).toBeTruthy();
 });
 
 /**
@@ -145,14 +154,14 @@ test('sonarr naming non-default values are recorded', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const desired = parseDesiredState(ops[0]);
-	assertEquals(desired.rename, false);
-	assertEquals(desired.standard_episode_format, 'S{season}E{episode}');
-	assertEquals(desired.replace_illegal_characters, true);
-	assertEquals(desired.colon_replacement_format, 'custom');
-	assertEquals(desired.custom_colon_replacement_format, ' - ');
-	assertEquals(desired.multi_episode_style, 'range');
+	expect(desired.rename).toStrictEqual(false);
+	expect(desired.standard_episode_format).toStrictEqual('S{season}E{episode}');
+	expect(desired.replace_illegal_characters).toStrictEqual(true);
+	expect(desired.colon_replacement_format).toStrictEqual('custom');
+	expect(desired.custom_colon_replacement_format).toStrictEqual(' - ');
+	expect(desired.multi_episode_style).toStrictEqual('range');
 });
 
 /**
@@ -176,7 +185,7 @@ test('duplicate sonarr naming name fails without writing ops', async () => {
 	const response = await write.namingSonarr.submitCreate(ctx, { name: 'existing naming' });
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -206,13 +215,13 @@ test('sonarr standard episode format missing numbering fails without writing ops
 	});
 
 	const body = await response.clone().text();
-	assert(
+	expect(
 		body.includes(
 			'Standard episode format: Must contain season and episode numbers OR Original Title'
 		)
-	);
+	).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -242,13 +251,13 @@ test('sonarr daily episode format missing date or numbering fails without writin
 	});
 
 	const body = await response.clone().text();
-	assert(
+	expect(
 		body.includes(
 			'Daily episode format: Must contain Air Date OR Season and Episode OR Original Title'
 		)
-	);
+	).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -278,13 +287,13 @@ test('sonarr anime episode format missing absolute or numbering fails without wr
 	});
 
 	const body = await response.clone().text();
-	assert(
+	expect(
 		body.includes(
 			'Anime episode format: Must contain Absolute Episode number OR Season and Episode OR Original Title'
 		)
-	);
+	).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -314,9 +323,9 @@ test('sonarr series folder format missing series title fails without writing ops
 	});
 
 	const body = await response.clone().text();
-	assert(body.includes('Series folder format: Must contain series title'));
+	expect(body.includes('Series folder format: Must contain series title')).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -346,7 +355,7 @@ test('sonarr season folder format missing season number fails without writing op
 	});
 
 	const body = await response.clone().text();
-	assert(body.includes('Season folder format: Must contain season number'));
+	expect(body.includes('Season folder format: Must contain season number')).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

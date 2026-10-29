@@ -2,9 +2,8 @@
  * PCD write tests: regex rename.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -70,13 +69,13 @@ test('unreferenced regex emits one rename op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = opForChangedField(ops, 'name');
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.name, 'New Regex');
-	assertEquals(metadata.previousName, 'Old Regex');
-	assertEquals(metadata.group_id, undefined);
-	assertEquals(parseDesiredState(op).name, { from: 'Old Regex', to: 'New Regex' });
+	expect(metadata.name).toStrictEqual('New Regex');
+	expect(metadata.previousName).toStrictEqual('Old Regex');
+	expect(metadata.group_id).toStrictEqual(undefined);
+	expect(parseDesiredState(op).name).toStrictEqual({ from: 'Old Regex', to: 'New Regex' });
 });
 
 /**
@@ -112,7 +111,7 @@ test('rename plus pattern change emits grouped split ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	assertOnlyField(ops, 'pattern');
 	assertOnlyField(ops, 'name');
 	assertSameGroup(ops);
@@ -165,14 +164,14 @@ test('referenced regex emits generated custom format cascade op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	const renameOp = opForChangedField(ops, 'name');
 	const generatedOp = generatedCustomFormatOp(ops);
 	assertSameGroup([renameOp, generatedOp]);
-	assertEquals(parseMetadata(generatedOp).depends_on, [
+	expect(parseMetadata(generatedOp).depends_on).toStrictEqual([
 		{ entity: 'regular_expression', key: 'regular_expression_name', value: 'Renamed Regex' }
 	]);
-	assert(normalizeSql(generatedOp.sql).includes('condition_patterns'));
+	expect(normalizeSql(generatedOp.sql).includes('condition_patterns')).toBeTruthy();
 });
 
 /**
@@ -208,5 +207,5 @@ test('duplicate name fails without writing ops', async () => {
 	});
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

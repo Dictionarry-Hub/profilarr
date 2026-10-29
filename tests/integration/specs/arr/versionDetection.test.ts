@@ -7,8 +7,7 @@
  * updates the stored result for an existing instance.
  */
 
-import { assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { TestClient } from '#integration/harness/client.ts';
 import { openDb } from '#integration/harness/db.ts';
 import { serve, type MockHttpServer } from '#integration/harness/http.ts';
@@ -90,22 +89,22 @@ afterAll(async () => {
 
 test('creating an instance records what it reports', async () => {
 	const res = await createArrInstance('Sonarr v5', FAKE_URL, FAKE_KEY);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const row = readInstance('Sonarr v5');
-	assertEquals(row?.detected_version, '5.0.0.2569');
-	assertEquals(row?.detected_api, 'v5');
-	assertEquals(typeof row?.detected_at, 'string');
+	expect(row?.detected_version).toStrictEqual('5.0.0.2569');
+	expect(row?.detected_api).toStrictEqual('v5');
+	expect(typeof row?.detected_at).toStrictEqual('string');
 });
 
 test('an unreachable instance is still created with nothing recorded', async () => {
 	const res = await createArrInstance('Sonarr offline', 'http://localhost:7999', 'any-key');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const row = readInstance('Sonarr offline');
-	assertEquals(row?.detected_version, null);
-	assertEquals(row?.detected_api, null);
-	assertEquals(row?.detected_at, null);
+	expect(row?.detected_version).toStrictEqual(null);
+	expect(row?.detected_api).toStrictEqual(null);
+	expect(row?.detected_at).toStrictEqual(null);
 });
 
 test('the Test button updates the stored result for an existing instance', async () => {
@@ -117,16 +116,16 @@ test('the Test button updates the stored result for an existing instance', async
 		{ type: 'sonarr', url: FAKE_URL, apiKey: FAKE_KEY, instanceId: before.id },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(body.success, true);
-	assertEquals(body.appName, 'Sonarr');
-	assertEquals(body.version, '4.0.20.3014');
-	assertEquals(body.api, 'v3');
+	expect(body.success).toStrictEqual(true);
+	expect(body.appName).toStrictEqual('Sonarr');
+	expect(body.version).toStrictEqual('4.0.20.3014');
+	expect(body.api).toStrictEqual('v3');
 
 	const after = readInstance('Sonarr v5');
-	assertEquals(after?.detected_version, '4.0.20.3014');
-	assertEquals(after?.detected_api, 'v3');
+	expect(after?.detected_version).toStrictEqual('4.0.20.3014');
+	expect(after?.detected_api).toStrictEqual('v3');
 });
 
 test('the Test button without an instance id stores nothing', async () => {
@@ -136,9 +135,9 @@ test('the Test button without an instance id stores nothing', async () => {
 		{ type: 'sonarr', url: FAKE_URL, apiKey: FAKE_KEY },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 200);
-	assertEquals((await res.json()).version, '5.0.0.2569');
+	expect(res.status).toStrictEqual(200);
+	expect((await res.json()).version).toStrictEqual('5.0.0.2569');
 
 	const row = readInstance('Sonarr v5');
-	assertEquals(row?.detected_version, '4.0.20.3014');
+	expect(row?.detected_version).toStrictEqual('4.0.20.3014');
 });

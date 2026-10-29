@@ -6,8 +6,7 @@
  * keep rendering as before.
  */
 
-import { test } from 'vitest';
-import { assertEquals, assertMatch, assertNotMatch } from '@std/assert';
+import { expect, test } from 'vitest';
 import { renderMarkdown } from '#shared/utils/markdown.ts';
 
 const PAYLOAD = '<img src=x onerror=window.xssFired++>';
@@ -17,23 +16,23 @@ const ESCAPED_PAYLOAD = '&lt;img src=x onerror=window.xssFired++&gt;';
 
 test('renderMarkdown: raw HTML on its own line is escaped', () => {
 	const result = renderMarkdown(PAYLOAD);
-	assertEquals(result.includes(ESCAPED_PAYLOAD), true, result);
-	assertNotMatch(result, /<img/);
+	expect(result.includes(ESCAPED_PAYLOAD), result).toStrictEqual(true);
+	expect(result).not.toMatch(/<img/);
 });
 
 test('renderMarkdown: raw HTML inside a paragraph is escaped', () => {
 	const result = renderMarkdown(`Benign intro ${PAYLOAD} trailing text`);
-	assertEquals(result, `<p>Benign intro ${ESCAPED_PAYLOAD} trailing text</p>\n`);
+	expect(result).toStrictEqual(`<p>Benign intro ${ESCAPED_PAYLOAD} trailing text</p>\n`);
 });
 
 test('renderMarkdown: raw HTML in inline mode is escaped', () => {
 	const result = renderMarkdown(`Benign intro ${PAYLOAD} trailing text`, { inline: true });
-	assertEquals(result, `Benign intro ${ESCAPED_PAYLOAD} trailing text`);
+	expect(result).toStrictEqual(`Benign intro ${ESCAPED_PAYLOAD} trailing text`);
 });
 
 test('renderMarkdown: harmless raw tags are escaped too, markdown only', () => {
 	const result = renderMarkdown('some <b>bold</b> text<br>next');
-	assertEquals(result, '<p>some &lt;b&gt;bold&lt;/b&gt; text&lt;br&gt;next</p>\n');
+	expect(result).toStrictEqual('<p>some &lt;b&gt;bold&lt;/b&gt; text&lt;br&gt;next</p>\n');
 });
 
 test('renderMarkdown: quoted handlers and script blocks are escaped', () => {
@@ -45,19 +44,19 @@ test('renderMarkdown: quoted handlers and script blocks are escaped', () => {
 		'<details open ontoggle=alert(1)>x</details>'
 	]) {
 		const result = renderMarkdown(input);
-		assertNotMatch(result, /<[a-z][^>]*[\s/]on[a-z]+\s*=/i, `${input} -> ${result}`);
-		assertNotMatch(result, /<(script|svg|details)/i, `${input} -> ${result}`);
+		expect(result, `${input} -> ${result}`).not.toMatch(/<[a-z][^>]*[\s/]on[a-z]+\s*=/i);
+		expect(result, `${input} -> ${result}`).not.toMatch(/<(script|svg|details)/i);
 	}
 });
 
 test('renderMarkdown: angle brackets in prose are escaped', () => {
-	assertEquals(renderMarkdown('a < b > c'), '<p>a &lt; b &gt; c</p>\n');
+	expect(renderMarkdown('a < b > c')).toStrictEqual('<p>a &lt; b &gt; c</p>\n');
 });
 
 // --- Link and image URLs ---
 
 test('renderMarkdown: javascript: link keeps the text and drops the link', () => {
-	assertEquals(renderMarkdown('[click](javascript:alert(1))'), '<p>click</p>\n');
+	expect(renderMarkdown('[click](javascript:alert(1))')).toStrictEqual('<p>click</p>\n');
 });
 
 test('renderMarkdown: obfuscated javascript: link is dropped', () => {
@@ -68,14 +67,13 @@ test('renderMarkdown: obfuscated javascript: link is dropped', () => {
 		'data:text/html,x'
 	]) {
 		const result = renderMarkdown(`[click](${href})`);
-		assertNotMatch(result, /<a/, `${href} -> ${result}`);
-		assertEquals(result.includes('click'), true, result);
+		expect(result, `${href} -> ${result}`).not.toMatch(/<a/);
+		expect(result.includes('click'), result).toStrictEqual(true);
 	}
 });
 
 test('renderMarkdown: https link is kept with its title', () => {
-	assertEquals(
-		renderMarkdown('[ok](https://example.com/a "Title")'),
+	expect(renderMarkdown('[ok](https://example.com/a "Title")')).toStrictEqual(
 		'<p><a href="https://example.com/a" title="Title">ok</a></p>\n'
 	);
 });
@@ -83,41 +81,39 @@ test('renderMarkdown: https link is kept with its title', () => {
 test('renderMarkdown: relative, fragment and mailto links are kept', () => {
 	for (const href of ['/docs/page', '#section', 'mailto:someone@example.com']) {
 		const result = renderMarkdown(`[x](${href})`);
-		assertEquals(result.includes(`href="${href}"`), true, result);
+		expect(result.includes(`href="${href}"`), result).toStrictEqual(true);
 	}
 });
 
 test('renderMarkdown: bare GFM autolink becomes a link', () => {
 	const result = renderMarkdown('see https://example.com now');
-	assertEquals(
+	expect(
 		result.includes('<a href="https://example.com">https://example.com</a>'),
-		true,
 		result
-	);
+	).toStrictEqual(true);
 });
 
 test('renderMarkdown: links false unwraps every link to text', () => {
 	const result = renderMarkdown('Uses the [**GPPI**](https://dictionarry.dev/wiki/gppi).', {
 		links: false
 	});
-	assertEquals(result, '<p>Uses the <strong>GPPI</strong>.</p>\n');
+	expect(result).toStrictEqual('<p>Uses the <strong>GPPI</strong>.</p>\n');
 });
 
 test('renderMarkdown: javascript: image keeps the alt text and drops the image', () => {
-	assertEquals(renderMarkdown('![alt text](javascript:alert(1))'), '<p>alt text</p>\n');
+	expect(renderMarkdown('![alt text](javascript:alert(1))')).toStrictEqual('<p>alt text</p>\n');
 });
 
 test('renderMarkdown: https image is kept with alt and title', () => {
-	assertEquals(
-		renderMarkdown('![An image](https://example.com/i.png "T")'),
+	expect(renderMarkdown('![An image](https://example.com/i.png "T")')).toStrictEqual(
 		'<p><img src="https://example.com/i.png" alt="An image" title="T"></p>\n'
 	);
 });
 
 test('renderMarkdown: quotes in link text and titles are escaped', () => {
 	const result = renderMarkdown('[a "b"](https://example.com "say \\"hi\\"")');
-	assertEquals(result.includes('title="say &quot;hi&quot;"'), true, result);
-	assertNotMatch(result, /title="[^"]*"[^>]*"/);
+	expect(result.includes('title="say &quot;hi&quot;"'), result).toStrictEqual(true);
+	expect(result).not.toMatch(/title="[^"]*"[^>]*"/);
 });
 
 // --- Ordinary markdown still renders ---
@@ -151,22 +147,21 @@ test('renderMarkdown: GFM features render', () => {
 		'<td>',
 		'<pre>'
 	]) {
-		assertEquals(result.includes(tag), true, `Missing ${tag} -- ${result}`);
+		expect(result.includes(tag), `Missing ${tag} -- ${result}`).toStrictEqual(true);
 	}
-	assertEquals(result.includes('&lt;not a tag&gt;'), true, result);
+	expect(result.includes('&lt;not a tag&gt;'), result).toStrictEqual(true);
 });
 
 test('renderMarkdown: inline mode renders without a paragraph', () => {
-	assertEquals(
-		renderMarkdown('some **bold** text', { inline: true }),
+	expect(renderMarkdown('some **bold** text', { inline: true })).toStrictEqual(
 		'some <strong>bold</strong> text'
 	);
 });
 
 test('renderMarkdown: empty input renders nothing', () => {
-	assertEquals(renderMarkdown(''), '');
-	assertEquals(renderMarkdown(null), '');
-	assertEquals(renderMarkdown(undefined), '');
+	expect(renderMarkdown('')).toStrictEqual('');
+	expect(renderMarkdown(null)).toStrictEqual('');
+	expect(renderMarkdown(undefined)).toStrictEqual('');
 });
 
 test('renderMarkdown: output never carries an event handler for report payloads', () => {
@@ -186,11 +181,9 @@ test('renderMarkdown: output never carries an event handler for report payloads'
 	for (const input of payloads) {
 		for (const inline of [false, true]) {
 			const result = renderMarkdown(input, { inline });
-			assertMatch(result, /&lt;/, `${input} (inline=${inline}) -> ${result}`);
-			assertNotMatch(
-				result,
-				/<[a-z][^>]*[\s/]on[a-z]+\s*=/i,
-				`${input} (inline=${inline}) -> ${result}`
+			expect(result, `${input} (inline=${inline}) -> ${result}`).toMatch(/&lt;/);
+			expect(result, `${input} (inline=${inline}) -> ${result}`).not.toMatch(
+				/<[a-z][^>]*[\s/]on[a-z]+\s*=/i
 			);
 		}
 	}

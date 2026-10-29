@@ -2,10 +2,9 @@
  * Announcement notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -87,42 +86,41 @@ function makeAnnouncement(overrides: Partial<AnnouncementRecord> = {}): Announce
 // =========================================================================
 
 test('type is announcement.new', () => {
-	assertEquals(announcementNew({ announcement: makeAnnouncement() }).type, 'announcement.new');
+	expect(announcementNew({ announcement: makeAnnouncement() }).type).toStrictEqual(
+		'announcement.new'
+	);
 });
 
 test('severity maps correctly', () => {
-	assertEquals(
-		announcementNew({ announcement: makeAnnouncement({ severity: 'info' }) }).severity,
-		'info'
-	);
-	assertEquals(
-		announcementNew({ announcement: makeAnnouncement({ severity: 'warning' }) }).severity,
-		'warning'
-	);
-	assertEquals(
-		announcementNew({ announcement: makeAnnouncement({ severity: 'critical' }) }).severity,
-		'error'
-	);
+	expect(
+		announcementNew({ announcement: makeAnnouncement({ severity: 'info' }) }).severity
+	).toStrictEqual('info');
+	expect(
+		announcementNew({ announcement: makeAnnouncement({ severity: 'warning' }) }).severity
+	).toStrictEqual('warning');
+	expect(
+		announcementNew({ announcement: makeAnnouncement({ severity: 'critical' }) }).severity
+	).toStrictEqual('error');
 });
 
 test('title matches the announcement title', () => {
 	const title = 'API v2 coming soon';
-	assertEquals(announcementNew({ announcement: makeAnnouncement({ title }) }).title, title);
+	expect(announcementNew({ announcement: makeAnnouncement({ title }) }).title).toStrictEqual(title);
 });
 
 test('message is a short plain summary (no body)', () => {
 	const notification = announcementNew({ announcement: makeAnnouncement() });
-	assertEquals(notification.message, 'A new announcement from the Profilarr team.');
+	expect(notification.message).toStrictEqual('A new announcement from the Profilarr team.');
 	// Body is intentionally not in the notification message — users open the app to read it.
-	assertEquals(notification.message.includes('legacy `/api/v0/sync` endpoint'), false);
+	expect(notification.message.includes('legacy `/api/v0/sync` endpoint')).toStrictEqual(false);
 });
 
 test('blocks include severity and published_at field blocks', () => {
 	const blocks = announcementNew({ announcement: makeAnnouncement() }).blocks ?? [];
 	const severity = blocks.find((b) => b.kind === 'field' && b.label === 'Severity');
 	const published = blocks.find((b) => b.kind === 'field' && b.label === 'Published');
-	assertExists(severity);
-	assertExists(published);
+	expect(severity).not.toBeOneOf([null, undefined]);
+	expect(published).not.toBeOneOf([null, undefined]);
 });
 
 test('link block present when announcement.link is set', () => {
@@ -130,8 +128,8 @@ test('link block present when announcement.link is set', () => {
 		announcement: makeAnnouncement({ link: 'https://example.com/post' })
 	}).blocks;
 	const link = blocks?.find((b) => b.kind === 'field' && b.label === 'Link');
-	assertExists(link);
-	if (link?.kind === 'field') assertEquals(link.value, 'https://example.com/post');
+	expect(link).not.toBeOneOf([null, undefined]);
+	if (link?.kind === 'field') expect(link.value).toStrictEqual('https://example.com/post');
 });
 
 test('link block absent when announcement.link is null', () => {
@@ -139,7 +137,7 @@ test('link block absent when announcement.link is null', () => {
 		announcement: makeAnnouncement({ link: null })
 	}).blocks;
 	const link = blocks?.find((b) => b.kind === 'field' && b.label === 'Link');
-	assertEquals(link, undefined);
+	expect(link).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -151,7 +149,7 @@ test('pcd source: title is prefixed with the database name', () => {
 		announcement: makeAnnouncement({ title: 'Migration to v2' }),
 		source: { kind: 'pcd', databaseName: 'Library DB' }
 	});
-	assertEquals(out.title, 'Library DB: Migration to v2');
+	expect(out.title).toStrictEqual('Library DB: Migration to v2');
 });
 
 test('pcd source: message names the database, not the Profilarr team', () => {
@@ -159,7 +157,7 @@ test('pcd source: message names the database, not the Profilarr team', () => {
 		announcement: makeAnnouncement(),
 		source: { kind: 'pcd', databaseName: 'Library DB' }
 	});
-	assertEquals(out.message, 'A new announcement from Library DB.');
+	expect(out.message).toStrictEqual('A new announcement from Library DB.');
 });
 
 test('pcd source: From block carries the database name', () => {
@@ -169,8 +167,8 @@ test('pcd source: From block carries the database name', () => {
 			source: { kind: 'pcd', databaseName: 'Library DB' }
 		}).blocks ?? [];
 	const from = blocks.find((b) => b.kind === 'field' && b.label === 'From');
-	assertExists(from);
-	if (from?.kind === 'field') assertEquals(from.value, 'Library DB');
+	expect(from).not.toBeOneOf([null, undefined]);
+	if (from?.kind === 'field') expect(from.value).toStrictEqual('Library DB');
 });
 
 test('profilarr source: no From block (default behaviour preserved)', () => {
@@ -180,24 +178,23 @@ test('profilarr source: no From block (default behaviour preserved)', () => {
 			source: { kind: 'profilarr' }
 		}).blocks ?? [];
 	const from = blocks.find((b) => b.kind === 'field' && b.label === 'From');
-	assertEquals(from, undefined);
+	expect(from).toStrictEqual(undefined);
 });
 
 test('omitting source defaults to profilarr (no From block, original message)', () => {
 	const out = announcementNew({ announcement: makeAnnouncement() });
-	assertEquals(out.message, 'A new announcement from the Profilarr team.');
+	expect(out.message).toStrictEqual('A new announcement from the Profilarr team.');
 	const from = (out.blocks ?? []).find((b) => b.kind === 'field' && b.label === 'From');
-	assertEquals(from, undefined);
+	expect(from).toStrictEqual(undefined);
 });
 
 test('pcd source: severity mapping unchanged', () => {
-	assertEquals(
+	expect(
 		announcementNew({
 			announcement: makeAnnouncement({ severity: 'critical' }),
 			source: { kind: 'pcd', databaseName: 'Library DB' }
-		}).severity,
-		'error'
-	);
+		}).severity
+	).toStrictEqual('error');
 });
 
 test('pcd source: link block still appears when link is set', () => {
@@ -207,7 +204,7 @@ test('pcd source: link block still appears when link is set', () => {
 			source: { kind: 'pcd', databaseName: 'Library DB' }
 		}).blocks ?? [];
 	const link = blocks.find((b) => b.kind === 'field' && b.label === 'Link');
-	assertExists(link);
+	expect(link).not.toBeOneOf([null, undefined]);
 });
 
 // =========================================================================
@@ -224,7 +221,7 @@ test('discord: info severity uses Colors.INFO', async () => {
 	await notifier.notify(announcementNew({ announcement: makeAnnouncement({ severity: 'info' }) }));
 
 	const embeds = (captured[0]?.body as { embeds?: Record<string, unknown>[] })?.embeds ?? [];
-	assertEquals(embeds[0]?.color, Colors.INFO);
+	expect(embeds[0]?.color).toStrictEqual(Colors.INFO);
 });
 
 test('discord: critical severity uses Colors.ERROR', async () => {
@@ -239,7 +236,7 @@ test('discord: critical severity uses Colors.ERROR', async () => {
 	);
 
 	const embeds = (captured[0]?.body as { embeds?: Record<string, unknown>[] })?.embeds ?? [];
-	assertEquals(embeds[0]?.color, Colors.ERROR);
+	expect(embeds[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 test('discord: warning severity uses Colors.WARNING', async () => {
@@ -254,7 +251,7 @@ test('discord: warning severity uses Colors.WARNING', async () => {
 	);
 
 	const embeds = (captured[0]?.body as { embeds?: Record<string, unknown>[] })?.embeds ?? [];
-	assertEquals(embeds[0]?.color, Colors.WARNING);
+	expect(embeds[0]?.color).toStrictEqual(Colors.WARNING);
 });
 
 test('discord: embed title matches announcement title', async () => {
@@ -267,7 +264,7 @@ test('discord: embed title matches announcement title', async () => {
 	await notifier.notify(announcementNew({ announcement: makeAnnouncement({ title: 'Headline' }) }));
 
 	const embeds = (captured[0]?.body as { embeds?: Record<string, unknown>[] })?.embeds ?? [];
-	assertEquals(embeds[0]?.title, 'Headline');
+	expect(embeds[0]?.title).toStrictEqual('Headline');
 });
 
 // =========================================================================
@@ -283,7 +280,7 @@ test('ntfy: info severity maps to priority 3', async () => {
 	await notifier.notify(announcementNew({ announcement: makeAnnouncement({ severity: 'info' }) }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
+	expect(payload?.priority).toStrictEqual(3);
 });
 
 test('ntfy: warning severity maps to priority 4', async () => {
@@ -297,7 +294,7 @@ test('ntfy: warning severity maps to priority 4', async () => {
 	);
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 4);
+	expect(payload?.priority).toStrictEqual(4);
 });
 
 test('ntfy: critical severity maps to priority 5', async () => {
@@ -311,7 +308,7 @@ test('ntfy: critical severity maps to priority 5', async () => {
 	);
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 5);
+	expect(payload?.priority).toStrictEqual(5);
 });
 
 test('ntfy: title is the announcement title', async () => {
@@ -323,7 +320,7 @@ test('ntfy: title is the announcement title', async () => {
 	await notifier.notify(announcementNew({ announcement: makeAnnouncement({ title: 'Headline' }) }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.title, 'Headline');
+	expect(payload?.title).toStrictEqual('Headline');
 });
 
 // =========================================================================
@@ -338,11 +335,11 @@ test('webhook: sends raw notification with all blocks', async () => {
 	await notifier.notify(announcementNew({ announcement: makeAnnouncement() }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'announcement.new');
-	assertEquals(payload?.severity, 'info');
+	expect(payload?.type).toStrictEqual('announcement.new');
+	expect(payload?.severity).toStrictEqual('info');
 	const blocks = payload?.blocks as unknown[];
-	assertExists(blocks);
-	assertEquals(blocks.length > 0, true);
+	expect(blocks).not.toBeOneOf([null, undefined]);
+	expect(blocks.length > 0).toStrictEqual(true);
 });
 
 test('webhook: omits link block when link is null', async () => {
@@ -355,7 +352,7 @@ test('webhook: omits link block when link is null', async () => {
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const blocks = (payload?.blocks as { kind: string; label?: string }[]) ?? [];
 	const link = blocks.find((b) => b.kind === 'field' && b.label === 'Link');
-	assertEquals(link, undefined);
+	expect(link).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -374,7 +371,7 @@ test('telegram: info severity has ℹ️ prefix', async () => {
 	await notifier.notify(announcementNew({ announcement: makeAnnouncement({ severity: 'info' }) }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2139\uFE0F'), true);
+	expect(text.startsWith('\u2139\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: warning severity has ⚠️ prefix', async () => {
@@ -389,7 +386,7 @@ test('telegram: warning severity has ⚠️ prefix', async () => {
 	);
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u26A0\uFE0F'), true);
+	expect(text.startsWith('\u26A0\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: critical severity has ❌ prefix', async () => {
@@ -404,7 +401,7 @@ test('telegram: critical severity has ❌ prefix', async () => {
 	);
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 // =========================================================================

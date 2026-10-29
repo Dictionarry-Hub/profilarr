@@ -46,11 +46,10 @@
  *        auth header, Telegram bot token)
  */
 
-import { assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, login, queryDb } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 import { hash } from '#utils/auth/bcrypt.ts';
@@ -203,7 +202,7 @@ async function fetchPage(path: string): Promise<string> {
 }
 
 function assertNotExposed(body: string, secret: string, label: string) {
-	assertEquals(body.includes(secret), false, `Response body contains ${label}: ${secret}`);
+	expect(body.includes(secret), `Response body contains ${label}: ${secret}`).toStrictEqual(false);
 }
 
 beforeAll(async () => {
@@ -345,7 +344,7 @@ test('failed send history does not expose the Telegram bot token', async () => {
 		{ id: notificationServiceIds.telegram },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 502, 'a failed test notification should answer 502');
+	expect(res.status, 'a failed test notification should answer 502').toStrictEqual(502);
 	// The send error goes back to the browser, so it must not carry the token either
 	assertNotExposed(await res.text(), TELEGRAM_BOT_TOKEN, 'Telegram bot token in the 502 response');
 
@@ -354,8 +353,10 @@ test('failed send history does not expose the Telegram bot token', async () => {
 		'SELECT error FROM notification_history WHERE service_id = ? ORDER BY sent_at DESC',
 		[notificationServiceIds.telegram]
 	) as Array<{ error: string | null }>;
-	assertEquals(rows.length >= 1, true, 'a history row should be recorded for the failed send');
-	assertEquals(typeof rows[0].error, 'string', 'the failed send should record an error');
+	expect(rows.length >= 1, 'a history row should be recorded for the failed send').toStrictEqual(
+		true
+	);
+	expect(typeof rows[0].error, 'the failed send should record an error').toStrictEqual('string');
 	for (const row of rows) {
 		assertNotExposed(row.error ?? '', TELEGRAM_BOT_TOKEN, 'Telegram bot token in stored history');
 	}

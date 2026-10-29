@@ -8,12 +8,6 @@
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-	resolve: {
-		alias: [
-			// Deno installs the JSR package under its npm name only
-			{ find: /^@std\/assert$/, replacement: '@jsr/std__assert' }
-		]
-	},
 	test: {
 		include: ['tests/integration/specs/**/*.test.ts'],
 		environment: 'node',

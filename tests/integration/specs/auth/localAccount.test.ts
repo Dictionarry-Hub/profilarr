@@ -14,12 +14,11 @@
  * 7. Separate server: two create submissions at once make only one account
  */
 
-import { assert, assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { formResult, login, queryDb, setApiKey } from '#integration/harness/setup.ts';
 import { completeOidcLogin, OIDC_SETTINGS } from '#integration/harness/oidc.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.localAccount;
@@ -51,7 +50,7 @@ function ssoAccountHash(): string {
 
 async function securityPage(client: TestClient): Promise<string> {
 	const res = await client.get('/settings/security');
-	assertEquals(res.status, 200, 'Security page should render');
+	expect(res.status, 'Security page should render').toStrictEqual(200);
 	return res.text();
 }
 
@@ -81,7 +80,7 @@ beforeAll(async () => {
 	await setApiKey(getDbPath(PORT), API_KEY);
 
 	const { callbackRes } = await completeOidcLogin(ssoClient, 'sam');
-	assertEquals(callbackRes.status, 303, 'SSO sign-in should succeed');
+	expect(callbackRes.status, 'SSO sign-in should succeed').toStrictEqual(303);
 
 	await startServer(RACE_PORT, { AUTH: 'on', ORIGIN: RACE_ORIGIN, ...OIDC_SETTINGS }, 'preview');
 });
@@ -95,14 +94,16 @@ afterAll(async () => {
 
 test('SSO user sees the create form and not change password', async () => {
 	const html = await securityPage(ssoClient);
-	assert(html.includes(CREATE_FORM), 'Create local account form should be shown');
-	assert(!html.includes(CHANGE_FORM), 'Change password form should be hidden');
+	expect(html.includes(CREATE_FORM), 'Create local account form should be shown').toBeTruthy();
+	expect(!html.includes(CHANGE_FORM), 'Change password form should be hidden').toBeTruthy();
 });
 
 test('change password is refused for an SSO session', async () => {
 	const res = await changePassword(ssoClient, 'OIDC_NO_PASSWORD', 'newpassword123');
-	assertEquals((await formResult(res)).status, 403);
-	assertEquals(ssoAccountHash(), 'OIDC_NO_PASSWORD', 'SSO account hash should be untouched');
+	expect((await formResult(res)).status).toStrictEqual(403);
+	expect(ssoAccountHash(), 'SSO account hash should be untouched').toStrictEqual(
+		'OIDC_NO_PASSWORD'
+	);
 });
 
 // --- 2. Refusals before the account exists ---
@@ -110,29 +111,29 @@ test('change password is refused for an SSO session', async () => {
 test('create refuses usernames starting with oidc: in any case', async () => {
 	for (const username of ['oidc:admin', 'OIDC:admin']) {
 		const res = await createLocalAccount(ssoClient, username);
-		assertEquals((await formResult(res)).status, 400, `should refuse '${username}'`);
+		expect((await formResult(res)).status, `should refuse '${username}'`).toStrictEqual(400);
 	}
-	assertEquals(localAccounts().length, 0);
+	expect(localAccounts().length).toStrictEqual(0);
 });
 
 test('create refuses invalid input', async () => {
 	const res = await createLocalAccount(ssoClient, 'admin', 'short');
-	assertEquals((await formResult(res)).status, 400);
-	assertEquals(localAccounts().length, 0);
+	expect((await formResult(res)).status).toStrictEqual(400);
+	expect(localAccounts().length).toStrictEqual(0);
 });
 
 test('create is refused for API key requests', async () => {
 	const apiClient = new TestClient(ORIGIN);
 	const res = await createLocalAccount(apiClient, 'admin', 'password123', { 'X-Api-Key': API_KEY });
-	assertEquals((await formResult(res)).status, 403);
-	assertEquals(localAccounts().length, 0);
+	expect((await formResult(res)).status).toStrictEqual(403);
+	expect(localAccounts().length).toStrictEqual(0);
 });
 
 test('create is refused without a session', async () => {
 	const anonymous = new TestClient(ORIGIN);
 	const res = await createLocalAccount(anonymous, 'admin');
-	assertEquals((await formResult(res)).status, 303, 'Should redirect to login');
-	assertEquals(localAccounts().length, 0);
+	expect((await formResult(res)).status, 'Should redirect to login').toStrictEqual(303);
+	expect(localAccounts().length).toStrictEqual(0);
 });
 
 // --- 3. Creating the account ---
@@ -141,60 +142,62 @@ test('SSO user can create the local account', async () => {
 	const sessionBefore = ssoClient.getCookie('session');
 
 	const res = await createLocalAccount(ssoClient, 'admin');
-	assertEquals((await formResult(res)).status, 200);
+	expect((await formResult(res)).status).toStrictEqual(200);
 
 	const accounts = localAccounts();
-	assertEquals(accounts.length, 1);
-	assertEquals(accounts[0].username, 'admin');
-	assert(accounts[0].password_hash.startsWith('$2'), 'Password should be bcrypt-hashed');
+	expect(accounts.length).toStrictEqual(1);
+	expect(accounts[0].username).toStrictEqual('admin');
+	expect(
+		accounts[0].password_hash.startsWith('$2'),
+		'Password should be bcrypt-hashed'
+	).toBeTruthy();
 
-	assertEquals(
+	expect(
 		ssoClient.getCookie('session'),
-		sessionBefore,
 		'Creating the account should not switch the current session'
-	);
+	).toStrictEqual(sessionBefore);
 });
 
 // --- 4. After the account exists ---
 
 test('create form is gone once the account exists', async () => {
 	const html = await securityPage(ssoClient);
-	assert(!html.includes(CREATE_FORM), 'Create form should be hidden');
-	assert(!html.includes(CHANGE_FORM), 'Change password stays hidden for SSO sessions');
+	expect(!html.includes(CREATE_FORM), 'Create form should be hidden').toBeTruthy();
+	expect(!html.includes(CHANGE_FORM), 'Change password stays hidden for SSO sessions').toBeTruthy();
 });
 
 test('a second local account cannot be created', async () => {
 	const res = await createLocalAccount(ssoClient, 'second');
-	assertEquals((await formResult(res)).status, 409);
-	assertEquals(localAccounts().length, 1);
+	expect((await formResult(res)).status).toStrictEqual(409);
+	expect(localAccounts().length).toStrictEqual(1);
 });
 
 test('the new password signs in', async () => {
 	const res = await login(passwordClient, 'admin', 'password123', ORIGIN);
-	assertEquals(await formResult(res), { status: 303, location: '/' });
+	expect(await formResult(res)).toStrictEqual({ status: 303, location: '/' });
 	const page = await passwordClient.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 // --- 5. Signed in with the password ---
 
 test('password user sees change password and not the create form', async () => {
 	const html = await securityPage(passwordClient);
-	assert(html.includes(CHANGE_FORM), 'Change password form should be shown');
-	assert(!html.includes(CREATE_FORM), 'Create form should be hidden');
+	expect(html.includes(CHANGE_FORM), 'Change password form should be shown').toBeTruthy();
+	expect(!html.includes(CREATE_FORM), 'Create form should be hidden').toBeTruthy();
 });
 
 test('create is refused for a password session', async () => {
 	const res = await createLocalAccount(passwordClient, 'another');
-	assertEquals((await formResult(res)).status, 403);
-	assertEquals(localAccounts().length, 1);
+	expect((await formResult(res)).status).toStrictEqual(403);
+	expect(localAccounts().length).toStrictEqual(1);
 });
 
 test('password user can still change their password', async () => {
 	const before = localAccounts()[0].password_hash;
 	const res = await changePassword(passwordClient, 'password123', 'password456');
-	assertEquals((await formResult(res)).status, 200);
-	assertNotEquals(localAccounts()[0].password_hash, before);
+	expect((await formResult(res)).status).toStrictEqual(200);
+	expect(localAccounts()[0].password_hash).not.toStrictEqual(before);
 });
 
 // --- 6. Sessions across both accounts ---
@@ -215,29 +218,38 @@ function revokeSession(client: TestClient, session: string): Promise<Response> {
 
 test('sessions list shows both accounts without exposing session IDs', async () => {
 	const res = await ssoClient.get('/settings/security/__data.json');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const data = await res.text();
 
 	const ssoSession = ssoClient.getCookie('session')!;
 	const passwordSession = passwordClient.getCookie('session')!;
-	assert(data.includes(await sessionHandle(ssoSession)), 'SSO session should be listed');
-	assert(data.includes(await sessionHandle(passwordSession)), 'Password session should be listed');
-	assert(!data.includes(ssoSession), 'Raw SSO session ID must not reach the page');
-	assert(!data.includes(passwordSession), 'Raw password session ID must not reach the page');
+	expect(
+		data.includes(await sessionHandle(ssoSession)),
+		'SSO session should be listed'
+	).toBeTruthy();
+	expect(
+		data.includes(await sessionHandle(passwordSession)),
+		'Password session should be listed'
+	).toBeTruthy();
+	expect(!data.includes(ssoSession), 'Raw SSO session ID must not reach the page').toBeTruthy();
+	expect(
+		!data.includes(passwordSession),
+		'Raw password session ID must not reach the page'
+	).toBeTruthy();
 });
 
 test('a raw session ID is not accepted for revoking', async () => {
 	const res = await revokeSession(ssoClient, passwordClient.getCookie('session')!);
-	assertEquals((await formResult(res)).status, 404);
+	expect((await formResult(res)).status).toStrictEqual(404);
 	const page = await passwordClient.get('/databases');
-	assertNotEquals(page.status, 303, 'Password session should still be valid');
+	expect(page.status, 'Password session should still be valid').not.toStrictEqual(303);
 });
 
 test('the current session cannot be revoked from the list', async () => {
 	const res = await revokeSession(ssoClient, await sessionHandle(ssoClient.getCookie('session')!));
-	assertEquals((await formResult(res)).status, 400);
+	expect((await formResult(res)).status).toStrictEqual(400);
 	const page = await ssoClient.get('/databases');
-	assertNotEquals(page.status, 303, 'SSO session should still be valid');
+	expect(page.status, 'SSO session should still be valid').not.toStrictEqual(303);
 });
 
 test('a single session can be revoked by its handle', async () => {
@@ -245,14 +257,14 @@ test('a single session can be revoked by its handle', async () => {
 		ssoClient,
 		await sessionHandle(passwordClient.getCookie('session')!)
 	);
-	assertEquals((await formResult(res)).status, 200);
+	expect((await formResult(res)).status).toStrictEqual(200);
 
 	const page = await passwordClient.get('/databases');
-	assertEquals(page.status, 303, 'Password session should be signed out');
+	expect(page.status, 'Password session should be signed out').toStrictEqual(303);
 
 	// Sign back in for the revoke-others test
 	const again = await login(passwordClient, 'admin', 'password456', ORIGIN);
-	assertEquals((await formResult(again)).status, 303);
+	expect((await formResult(again)).status).toStrictEqual(303);
 });
 
 test('revoke others from the SSO session signs out the password session', async () => {
@@ -261,18 +273,18 @@ test('revoke others from the SSO session signs out the password session', async 
 		{},
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals((await formResult(res)).status, 200);
+	expect((await formResult(res)).status).toStrictEqual(200);
 
 	const passwordPage = await passwordClient.get('/databases');
-	assertEquals(passwordPage.status, 303, 'Password session should be signed out');
+	expect(passwordPage.status, 'Password session should be signed out').toStrictEqual(303);
 
 	const ssoPage = await ssoClient.get('/databases');
-	assertNotEquals(ssoPage.status, 303, 'Current SSO session should remain');
+	expect(ssoPage.status, 'Current SSO session should remain').not.toStrictEqual(303);
 
 	const rows = queryDb(getDbPath(PORT), 'SELECT COUNT(*) as count FROM sessions') as {
 		count: number;
 	}[];
-	assertEquals(rows[0].count, 1);
+	expect(rows[0].count).toStrictEqual(1);
 });
 
 // --- 7. Concurrent create submissions ---
@@ -296,6 +308,6 @@ test('two create submissions at once make only one local account', async () => {
 		getDbPath(RACE_PORT),
 		"SELECT COUNT(*) as count FROM users WHERE username NOT LIKE 'oidc:%'"
 	) as { count: number }[];
-	assertEquals(rows[0].count, 1, 'Only one password account may exist');
-	assertEquals(statuses.sort(), [200, 409]);
+	expect(rows[0].count, 'Only one password account may exist').toStrictEqual(1);
+	expect(statuses.sort()).toStrictEqual([200, 409]);
 });

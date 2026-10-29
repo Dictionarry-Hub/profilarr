@@ -4,7 +4,7 @@
  * payload, and the precedence between them.
  */
 
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import type { ArrQualityProfileItem, ArrQualityProfileReadItem } from '#arr/types.ts';
 import {
@@ -64,15 +64,15 @@ class QualityProfileSizesTest extends BaseTest {
 					}
 				];
 				const result = collectItemSizes(fetched);
-				assertEquals(result.get('webdl-1080p'), sizes(4, 125, 95));
-				assertEquals(result.get('hdtv-1080p'), sizes(2, null, 50));
-				assertEquals(result.has('hd'), false, 'group rows carry no sizes');
+				expect(result.get('webdl-1080p')).toStrictEqual(sizes(4, 125, 95));
+				expect(result.get('hdtv-1080p')).toStrictEqual(sizes(2, null, 50));
+				expect(result.has('hd'), 'group rows carry no sizes').toStrictEqual(false);
 			}
 		);
 
 		this.test('collectItemSizes treats a missing key as null', () => {
 			const result = collectItemSizes([{ quality: { id: 3, name: 'WEBDL-1080p' }, allowed: true }]);
-			assertEquals(result.get('webdl-1080p'), sizes(null, null, null));
+			expect(result.get('webdl-1080p')).toStrictEqual(sizes(null, null, null));
 		});
 
 		this.test('applySizesToItems writes onto quality rows and members, not group rows', () => {
@@ -87,15 +87,15 @@ class QualityProfileSizesTest extends BaseTest {
 
 			const applied = applySizesToItems([group, single, untouched], map);
 
-			assertEquals(applied, 2);
-			assertEquals(single.minSize, 4);
-			assertEquals(single.maxSize, 125);
-			assertEquals(single.preferredSize, 95);
-			assertEquals(member.minSize, 2);
-			assertEquals(member.maxSize, null);
-			assertEquals(member.preferredSize, 50);
-			assertEquals('minSize' in group, false);
-			assertEquals('minSize' in untouched, false);
+			expect(applied).toStrictEqual(2);
+			expect(single.minSize).toStrictEqual(4);
+			expect(single.maxSize).toStrictEqual(125);
+			expect(single.preferredSize).toStrictEqual(95);
+			expect(member.minSize).toStrictEqual(2);
+			expect(member.maxSize).toStrictEqual(null);
+			expect(member.preferredSize).toStrictEqual(50);
+			expect('minSize' in group).toStrictEqual(false);
+			expect('minSize' in untouched).toStrictEqual(false);
 		});
 
 		this.test('mergeSizes lets the override win per quality and keeps the rest', () => {
@@ -107,8 +107,8 @@ class QualityProfileSizesTest extends BaseTest {
 
 			const merged = mergeSizes(fallback, override);
 
-			assertEquals(merged.get('webdl-1080p'), sizes(15, null, 995));
-			assertEquals(merged.get('sdtv'), sizes(1, 10, 5));
+			expect(merged.get('webdl-1080p')).toStrictEqual(sizes(15, null, 995));
+			expect(merged.get('sdtv')).toStrictEqual(sizes(1, 10, 5));
 		});
 
 		this.test('resolveProfileSizes: override beats global beats fallback, per quality', () => {
@@ -125,15 +125,21 @@ class QualityProfileSizesTest extends BaseTest {
 
 			const resolved = resolveProfileSizes({ fallback, global, override });
 
-			assertEquals(resolved.get('webdl-1080p'), sizes(6, 60, 40), 'override wins');
-			assertEquals(resolved.get('hdtv-1080p'), sizes(15, null, 995), 'global fills the rest');
-			assertEquals(resolved.get('sdtv'), sizes(1, 10, 5), 'fallback keeps what neither covers');
+			expect(resolved.get('webdl-1080p'), 'override wins').toStrictEqual(sizes(6, 60, 40));
+			expect(resolved.get('hdtv-1080p'), 'global fills the rest').toStrictEqual(
+				sizes(15, null, 995)
+			);
+			expect(resolved.get('sdtv'), 'fallback keeps what neither covers').toStrictEqual(
+				sizes(1, 10, 5)
+			);
 		});
 
 		this.test('resolveProfileSizes without global or override is the fallback', () => {
 			const fallback: QualitySizeMap = new Map([['sdtv', sizes(1, 10, 5)]]);
-			assertEquals(resolveProfileSizes({ fallback }), fallback);
-			assertEquals(resolveProfileSizes({ fallback, global: null, override: null }), fallback);
+			expect(resolveProfileSizes({ fallback })).toStrictEqual(fallback);
+			expect(resolveProfileSizes({ fallback, global: null, override: null })).toStrictEqual(
+				fallback
+			);
 		});
 
 		this.test(
@@ -147,10 +153,12 @@ class QualityProfileSizesTest extends BaseTest {
 
 				const resolved = resolveDefinitionSizes({ global, override });
 
-				assertEquals(resolved.get('webdl-1080p'), sizes(6, 60, 40), 'override wins');
-				assertEquals(resolved.get('hdtv-1080p'), sizes(15, null, 995), 'global fills the rest');
-				assertEquals(resolved.has('sdtv'), false, 'no definition sets SDTV');
-				assertEquals(resolveDefinitionSizes({}).size, 0);
+				expect(resolved.get('webdl-1080p'), 'override wins').toStrictEqual(sizes(6, 60, 40));
+				expect(resolved.get('hdtv-1080p'), 'global fills the rest').toStrictEqual(
+					sizes(15, null, 995)
+				);
+				expect(resolved.has('sdtv'), 'no definition sets SDTV').toStrictEqual(false);
+				expect(resolveDefinitionSizes({}).size).toStrictEqual(0);
 			}
 		);
 
@@ -158,7 +166,7 @@ class QualityProfileSizesTest extends BaseTest {
 			const map = definitionsToSizeMap([
 				{ qualityName: 'WEBDL-1080p', fields: sizes(15, null, 995) }
 			]);
-			assertEquals(map.get('webdl-1080p'), sizes(15, null, 995));
+			expect(map.get('webdl-1080p')).toStrictEqual(sizes(15, null, 995));
 		});
 	}
 }

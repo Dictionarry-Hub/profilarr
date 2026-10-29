@@ -5,8 +5,7 @@
  * what every later version-dependent decision rests on.
  */
 
-import { describe, test } from 'vitest';
-import { assertEquals, assertRejects } from '@std/assert';
+import { describe, expect, test } from 'vitest';
 import { BaseArrClient } from '#arr/base.ts';
 import { HttpError } from '#utils/http/types.ts';
 import type { RequestOptions } from '#utils/http/types.ts';
@@ -46,7 +45,7 @@ describe('detectVersion', () => {
 			'/api/v3/system/status': status('Sonarr', '5.0.0.2569'),
 			'/api': { current: 'v5', deprecated: ['v3'] }
 		});
-		assertEquals(info, { appName: 'Sonarr', version: '5.0.0.2569', currentApi: 'v5' });
+		expect(info).toStrictEqual({ appName: 'Sonarr', version: '5.0.0.2569', currentApi: 'v5' });
 	});
 
 	test('Sonarr v4 reports v3 as the current API', async () => {
@@ -54,12 +53,12 @@ describe('detectVersion', () => {
 			'/api/v3/system/status': status('Sonarr', '4.0.20.3014'),
 			'/api': { current: 'v3', deprecated: [] }
 		});
-		assertEquals(info.currentApi, 'v3');
+		expect(info.currentApi).toStrictEqual('v3');
 	});
 
 	test('a missing /api route is not an error', async () => {
 		const info = await detect({ '/api/v3/system/status': status('Sonarr', '5.0.0.2569') });
-		assertEquals(info, { appName: 'Sonarr', version: '5.0.0.2569', currentApi: null });
+		expect(info).toStrictEqual({ appName: 'Sonarr', version: '5.0.0.2569', currentApi: null });
 	});
 
 	test('an /api route that is not JSON is not an error', async () => {
@@ -67,7 +66,7 @@ describe('detectVersion', () => {
 			'/api/v3/system/status': status('Radarr', '5.2.0.1'),
 			'/api': new HttpError('Unexpected token < in JSON', 0)
 		});
-		assertEquals(info.currentApi, null);
+		expect(info.currentApi).toStrictEqual(null);
 	});
 
 	test('an /api answer without a current field is treated as unknown', async () => {
@@ -75,90 +74,81 @@ describe('detectVersion', () => {
 			'/api/v3/system/status': status('Sonarr', '5.0.0.2569'),
 			'/api': { current: '', deprecated: [] }
 		});
-		assertEquals(info.currentApi, null);
+		expect(info.currentApi).toStrictEqual(null);
 	});
 
 	test('an unreachable system/status throws', async () => {
-		await assertRejects(() => detect({ '/api': { current: 'v5', deprecated: [] } }), HttpError);
+		await expect(detect({ '/api': { current: 'v5', deprecated: [] } })).rejects.toThrow(HttpError);
 	});
 });
 
 describe('capabilities', () => {
 	test('versionMajor reads the leading number', () => {
-		assertEquals(versionMajor('5.0.0.2569'), 5);
-		assertEquals(versionMajor('4.0.20.3014'), 4);
-		assertEquals(versionMajor('10.0.0.0'), 10);
-		assertEquals(versionMajor(''), null);
-		assertEquals(versionMajor(null), null);
-		assertEquals(versionMajor('v5'), null);
+		expect(versionMajor('5.0.0.2569')).toStrictEqual(5);
+		expect(versionMajor('4.0.20.3014')).toStrictEqual(4);
+		expect(versionMajor('10.0.0.0')).toStrictEqual(10);
+		expect(versionMajor('')).toStrictEqual(null);
+		expect(versionMajor(null)).toStrictEqual(null);
+		expect(versionMajor('v5')).toStrictEqual(null);
 	});
 
 	test('apiGeneration reads v-prefixed generations only', () => {
-		assertEquals(apiGeneration('v5'), 5);
-		assertEquals(apiGeneration('V3'), 3);
-		assertEquals(apiGeneration('5'), null);
-		assertEquals(apiGeneration(null), null);
+		expect(apiGeneration('v5')).toStrictEqual(5);
+		expect(apiGeneration('V3')).toStrictEqual(3);
+		expect(apiGeneration('5')).toStrictEqual(null);
+		expect(apiGeneration(null)).toStrictEqual(null);
 	});
 
 	test('Sonarr on API v5 keeps sizes per profile', () => {
-		assertEquals(
-			hasProfileItemSizes({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: 'v5' }),
-			true
-		);
+		expect(
+			hasProfileItemSizes({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: 'v5' })
+		).toStrictEqual(true);
 	});
 
 	test('Sonarr on API v3 does not', () => {
-		assertEquals(
-			hasProfileItemSizes({ type: 'sonarr', detected_version: '4.0.20.3014', detected_api: 'v3' }),
-			false
-		);
+		expect(
+			hasProfileItemSizes({ type: 'sonarr', detected_version: '4.0.20.3014', detected_api: 'v3' })
+		).toStrictEqual(false);
 	});
 
 	test('the reported API wins over the version major', () => {
 		// A source build reports 10.0.0.x but still says which API is current
-		assertEquals(
-			hasProfileItemSizes({ type: 'sonarr', detected_version: '10.0.0.0', detected_api: 'v3' }),
-			false
-		);
+		expect(
+			hasProfileItemSizes({ type: 'sonarr', detected_version: '10.0.0.0', detected_api: 'v3' })
+		).toStrictEqual(false);
 	});
 
 	test('the version major is the fallback without an /api answer', () => {
-		assertEquals(
-			hasProfileItemSizes({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: null }),
-			true
-		);
-		assertEquals(
-			hasProfileItemSizes({ type: 'sonarr', detected_version: '4.0.20.3014', detected_api: null }),
-			false
-		);
+		expect(
+			hasProfileItemSizes({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: null })
+		).toStrictEqual(true);
+		expect(
+			hasProfileItemSizes({ type: 'sonarr', detected_version: '4.0.20.3014', detected_api: null })
+		).toStrictEqual(false);
 	});
 
 	test('nothing detected yet means no capability', () => {
-		assertEquals(
-			hasProfileItemSizes({ type: 'sonarr', detected_version: null, detected_api: null }),
-			false
-		);
+		expect(
+			hasProfileItemSizes({ type: 'sonarr', detected_version: null, detected_api: null })
+		).toStrictEqual(false);
 	});
 
 	test('Radarr never keeps sizes per profile today', () => {
-		assertEquals(
-			hasProfileItemSizes({ type: 'radarr', detected_version: '5.2.0.1', detected_api: 'v5' }),
-			false
-		);
+		expect(
+			hasProfileItemSizes({ type: 'radarr', detected_version: '5.2.0.1', detected_api: 'v5' })
+		).toStrictEqual(false);
 	});
 
 	test('experimental matches the per-profile size model', () => {
-		assertEquals(
-			isExperimentalVersion({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: 'v5' }),
-			true
-		);
-		assertEquals(
+		expect(
+			isExperimentalVersion({ type: 'sonarr', detected_version: '5.0.0.2569', detected_api: 'v5' })
+		).toStrictEqual(true);
+		expect(
 			isExperimentalVersion({
 				type: 'sonarr',
 				detected_version: '4.0.20.3014',
 				detected_api: 'v3'
-			}),
-			false
-		);
+			})
+		).toStrictEqual(false);
 	});
 });

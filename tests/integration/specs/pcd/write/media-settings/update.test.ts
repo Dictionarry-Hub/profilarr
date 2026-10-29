@@ -6,9 +6,8 @@
  * implementation. The unchanged-submit test passes immediately.
  */
 
-import { assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -84,7 +83,7 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		});
 
 		const ops = userOpsSince(ctx, checkpoint);
-		assertEquals(ops.length, 2);
+		expect(ops.length).toStrictEqual(2);
 		assertOnlyField(ops, 'propers_repacks');
 		assertOnlyField(ops, 'enable_media_info');
 		assertSameGroup(ops);
@@ -132,15 +131,15 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		});
 
 		const ops = userOpsSince(ctx, checkpoint);
-		assertEquals(ops.length, 2);
+		expect(ops.length).toStrictEqual(2);
 		assertOnlyField(ops, 'propers_repacks');
 		assertOnlyField(ops, 'name');
 		assertSameGroup(ops);
 		const renameOp = opForChangedField(ops, 'name');
 		const metadata = parseMetadata(renameOp);
-		assertEquals(metadata.name, 'New Media');
-		assertEquals(metadata.previousName, 'Old Media');
-		assertEquals(parseDesiredState(renameOp).name, { from: 'Old Media', to: 'New Media' });
+		expect(metadata.name).toStrictEqual('New Media');
+		expect(metadata.previousName).toStrictEqual('Old Media');
+		expect(parseDesiredState(renameOp).name).toStrictEqual({ from: 'Old Media', to: 'New Media' });
 	});
 }
 
@@ -183,13 +182,13 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		});
 
 		const ops = userOpsSince(ctx, checkpoint);
-		assertEquals(ops.length, 1);
+		expect(ops.length).toStrictEqual(1);
 		const renameOp = opForChangedField(ops, 'name');
 		const metadata = parseMetadata(renameOp);
-		assertEquals(metadata.group_id, undefined);
-		assertEquals(metadata.name, 'Renamed Media');
-		assertEquals(metadata.previousName, 'Pure Rename Media');
-		assertEquals(parseDesiredState(renameOp).name, {
+		expect(metadata.group_id).toStrictEqual(undefined);
+		expect(metadata.name).toStrictEqual('Renamed Media');
+		expect(metadata.previousName).toStrictEqual('Pure Rename Media');
+		expect(parseDesiredState(renameOp).name).toStrictEqual({
 			from: 'Pure Rename Media',
 			to: 'Renamed Media'
 		});
@@ -224,6 +223,6 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 			enableMediaInfo: false
 		});
 
-		assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+		expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 	});
 }

@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	transformCustomFormat,
@@ -34,7 +34,7 @@ class CustomFormatTransformerTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.specifications, [
+			expect(result.specifications).toStrictEqual([
 				{
 					name: 'Size',
 					implementation: 'SizeSpecification',
@@ -66,7 +66,7 @@ class CustomFormatTransformerTest extends BaseTest {
 				'sonarr'
 			);
 
-			assertEquals(result.specifications[0].fields, [
+			expect(result.specifications[0].fields).toStrictEqual([
 				{ name: 'min', value: 0 },
 				{ name: 'max', value: 0 }
 			]);

@@ -2,10 +2,9 @@
  * Rename notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -185,19 +184,23 @@ function makeSonarrLog(overrides: Partial<RenameJobLog> = {}): RenameJobLog {
 // =========================================================================
 
 test('type includes status', () => {
-	assertEquals(rename({ log: makeRadarrLog({ status: 'success' }) }).type, 'rename.success');
-	assertEquals(rename({ log: makeRadarrLog({ status: 'failed' }) }).type, 'rename.failed');
-	assertEquals(rename({ log: makeRadarrLog({ status: 'partial' }) }).type, 'rename.partial');
+	expect(rename({ log: makeRadarrLog({ status: 'success' }) }).type).toStrictEqual(
+		'rename.success'
+	);
+	expect(rename({ log: makeRadarrLog({ status: 'failed' }) }).type).toStrictEqual('rename.failed');
+	expect(rename({ log: makeRadarrLog({ status: 'partial' }) }).type).toStrictEqual(
+		'rename.partial'
+	);
 });
 
 test('severity maps correctly', () => {
-	assertEquals(rename({ log: makeRadarrLog({ status: 'success' }) }).severity, 'success');
-	assertEquals(rename({ log: makeRadarrLog({ status: 'failed' }) }).severity, 'error');
-	assertEquals(rename({ log: makeRadarrLog({ status: 'partial' }) }).severity, 'warning');
+	expect(rename({ log: makeRadarrLog({ status: 'success' }) }).severity).toStrictEqual('success');
+	expect(rename({ log: makeRadarrLog({ status: 'failed' }) }).severity).toStrictEqual('error');
+	expect(rename({ log: makeRadarrLog({ status: 'partial' }) }).severity).toStrictEqual('warning');
 });
 
 test('title includes instance name', () => {
-	assertEquals(rename({ log: makeRadarrLog() }).title.includes('Movies'), true);
+	expect(rename({ log: makeRadarrLog() }).title.includes('Movies')).toStrictEqual(true);
 });
 
 test('manual flag changes title', () => {
@@ -211,18 +214,18 @@ test('manual flag changes title', () => {
 			config: { dryRun: false, renameFolders: false, ignoreTag: null, manual: true }
 		})
 	});
-	assertEquals(auto.title.includes('Automatic'), true);
-	assertEquals(manual.title.includes('Manual'), true);
+	expect(auto.title.includes('Automatic')).toStrictEqual(true);
+	expect(manual.title.includes('Manual')).toStrictEqual(true);
 });
 
 test('stats section has file and folder counts', () => {
 	const stats = rename({ log: makeRadarrLog() }).blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Stats'
 	);
-	assertExists(stats);
+	expect(stats).not.toBeOneOf([null, undefined]);
 	if (stats?.kind === 'section') {
-		assertEquals(stats.content.includes('3/3'), true);
-		assertEquals(stats.content.includes('Folders'), true);
+		expect(stats.content.includes('3/3')).toStrictEqual(true);
+		expect(stats.content.includes('Folders')).toStrictEqual(true);
 	}
 });
 
@@ -231,16 +234,16 @@ test('dry run shows in stats', () => {
 		config: { dryRun: true, renameFolders: false, ignoreTag: null, manual: false }
 	});
 	const stats = rename({ log }).blocks?.find((b) => b.kind === 'section' && b.title === 'Stats');
-	if (stats?.kind === 'section') assertEquals(stats.content.includes('Dry Run'), true);
+	if (stats?.kind === 'section') expect(stats.content.includes('Dry Run')).toStrictEqual(true);
 });
 
 test('radarr rich mode has per-item sections with imageUrl', () => {
 	const items = rename({ log: makeRadarrLog(), summaryNotifications: false }).blocks?.filter(
 		(b) => b.kind === 'section' && b.title !== 'Stats'
 	);
-	assertEquals(items!.length, 2);
+	expect(items!.length).toStrictEqual(2);
 	for (const item of items!) {
-		if (item.kind === 'section') assertExists(item.imageUrl);
+		if (item.kind === 'section') expect(item.imageUrl).not.toBeOneOf([null, undefined]);
 	}
 });
 
@@ -249,9 +252,9 @@ test('radarr item content has before/after and folder rename', () => {
 		(b) => b.kind === 'section' && b.title === 'Interstellar'
 	);
 	if (section?.kind === 'section') {
-		assertEquals(section.content.includes('Before'), true);
-		assertEquals(section.content.includes('After'), true);
-		assertEquals(section.content.includes('Folder'), true);
+		expect(section.content.includes('Before')).toStrictEqual(true);
+		expect(section.content.includes('After')).toStrictEqual(true);
+		expect(section.content.includes('Folder')).toStrictEqual(true);
 	}
 });
 
@@ -259,10 +262,10 @@ test('summary mode has one sample with others count', () => {
 	const items = rename({ log: makeRadarrLog(), summaryNotifications: true }).blocks?.filter(
 		(b) => b.kind === 'section' && b.title !== 'Stats'
 	);
-	assertEquals(items!.length, 1);
+	expect(items!.length).toStrictEqual(1);
 	if (items![0].kind === 'section') {
-		assertEquals(items![0].title.includes('Interstellar'), true);
-		assertEquals(items![0].title.includes('1 other'), true);
+		expect(items![0].title.includes('Interstellar')).toStrictEqual(true);
+		expect(items![0].title.includes('1 other')).toStrictEqual(true);
 	}
 });
 
@@ -271,20 +274,19 @@ test('sonarr groups by season in content', () => {
 		(b) => b.kind === 'section' && b.title === 'Breaking Bad'
 	);
 	if (section?.kind === 'section') {
-		assertEquals(section.content.includes('Season 3 (Before)'), true);
-		assertEquals(section.content.includes('Season 3 (After)'), true);
-		assertEquals(section.content.includes('Season 4 (Before)'), true);
-		assertEquals(section.content.includes('Season 4 (After)'), true);
+		expect(section.content.includes('Season 3 (Before)')).toStrictEqual(true);
+		expect(section.content.includes('Season 3 (After)')).toStrictEqual(true);
+		expect(section.content.includes('Season 4 (Before)')).toStrictEqual(true);
+		expect(section.content.includes('Season 4 (After)')).toStrictEqual(true);
 	}
 });
 
 test('no items produces status-only message', () => {
-	assertEquals(
+	expect(
 		rename({ log: makeRadarrLog({ renamedItems: [] }) }).message.includes(
 			'No files needed renaming'
-		),
-		true
-	);
+		)
+	).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -300,7 +302,7 @@ test('discord: success uses correct color', async () => {
 	});
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.SUCCESS);
 });
 
 test('discord: radarr item embeds have poster thumbnails', async () => {
@@ -313,7 +315,7 @@ test('discord: radarr item embeds have poster thumbnails', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog(), summaryNotifications: false }));
 
 	const withThumbnails = getAllEmbeds().filter((e) => e.thumbnail);
-	assertEquals(withThumbnails.length, 2);
+	expect(withThumbnails.length).toStrictEqual(2);
 });
 
 test('discord: sonarr embed has poster thumbnail', async () => {
@@ -326,7 +328,7 @@ test('discord: sonarr embed has poster thumbnail', async () => {
 	await notifier.notify(rename({ log: makeSonarrLog(), summaryNotifications: false }));
 
 	const withThumbnails = getAllEmbeds().filter((e) => e.thumbnail);
-	assertEquals(withThumbnails.length, 1);
+	expect(withThumbnails.length).toStrictEqual(1);
 });
 
 // =========================================================================
@@ -342,8 +344,8 @@ test('ntfy: success maps to priority 3', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
-	assertEquals(payload?.tags, ['white_check_mark']);
+	expect(payload?.priority).toStrictEqual(3);
+	expect(payload?.tags).toStrictEqual(['white_check_mark']);
 });
 
 test('ntfy: failed maps to priority 5', async () => {
@@ -355,8 +357,8 @@ test('ntfy: failed maps to priority 5', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog({ status: 'failed' }) }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 5);
-	assertEquals(payload?.tags, ['x']);
+	expect(payload?.priority).toStrictEqual(5);
+	expect(payload?.tags).toStrictEqual(['x']);
 });
 
 test('ntfy: message includes instance name', async () => {
@@ -368,7 +370,7 @@ test('ntfy: message includes instance name', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals((payload?.title as string).includes('Movies'), true);
+	expect((payload?.title as string).includes('Movies')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -383,11 +385,11 @@ test('webhook: sends full notification with blocks', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'rename.success');
-	assertEquals(payload?.severity, 'success');
+	expect(payload?.type).toStrictEqual('rename.success');
+	expect(payload?.severity).toStrictEqual('success');
 	const blocks = payload?.blocks as unknown[];
-	assertExists(blocks);
-	assertEquals(blocks.length > 0, true);
+	expect(blocks).not.toBeOneOf([null, undefined]);
+	expect(blocks.length > 0).toStrictEqual(true);
 });
 
 test('webhook: includes section blocks with imageUrl', async () => {
@@ -400,7 +402,7 @@ test('webhook: includes section blocks with imageUrl', async () => {
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const blocks = payload?.blocks as { kind: string; imageUrl?: string }[];
 	const sections = blocks.filter((b) => b.kind === 'section' && b.imageUrl);
-	assertEquals(sections.length, 2);
+	expect(sections.length).toStrictEqual(2);
 });
 
 // =========================================================================
@@ -419,7 +421,7 @@ test('telegram: success has ✅ prefix', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog() }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2705'), true);
+	expect(text.startsWith('\u2705')).toStrictEqual(true);
 });
 
 test('telegram: failed has ❌ prefix', async () => {
@@ -432,7 +434,7 @@ test('telegram: failed has ❌ prefix', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog({ status: 'failed' }) }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 test('telegram: partial has ⚠️ prefix', async () => {
@@ -445,7 +447,7 @@ test('telegram: partial has ⚠️ prefix', async () => {
 	await notifier.notify(rename({ log: makeRadarrLog({ status: 'partial' }) }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u26A0\uFE0F'), true);
+	expect(text.startsWith('\u26A0\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: includes field block content but omits section blocks', async () => {
@@ -459,7 +461,7 @@ test('telegram: includes field block content but omits section blocks', async ()
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
 	// Should not contain section content (movie titles, file paths)
-	assertEquals(text.includes('Interstellar.2014.2160p'), false);
+	expect(text.includes('Interstellar.2014.2160p')).toStrictEqual(false);
 });
 
 // =========================================================================

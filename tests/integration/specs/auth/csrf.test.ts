@@ -18,11 +18,10 @@
  * 7. ORIGIN env differs from server URL — mismatched origin → 403
  */
 
-import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUser, createUserDirect } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.csrf;
@@ -55,7 +54,7 @@ test('POST with mismatched origin returns 403', async () => {
 		{ username: 'admin', password: 'password123' },
 		{ headers: { Origin: 'http://evil.com' } }
 	);
-	assertEquals(res.status, 403);
+	expect(res.status).toStrictEqual(403);
 });
 
 test('POST with correct origin does not return 403', async () => {
@@ -65,13 +64,13 @@ test('POST with correct origin does not return 403', async () => {
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertNotEquals(res.status, 403);
+	expect(res.status).not.toStrictEqual(403);
 });
 
 test('POST with no origin header returns 403', async () => {
 	const client = new TestClient(ORIGIN);
 	const res = await client.postForm('/auth/login', { username: 'admin', password: 'password123' });
-	assertEquals(res.status, 403);
+	expect(res.status).toStrictEqual(403);
 });
 
 test('no ORIGIN env — POST with matching host origin is accepted', async () => {
@@ -83,7 +82,7 @@ test('no ORIGIN env — POST with matching host origin is accepted', async () =>
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: NO_ORIGIN_URL } }
 	);
-	assertNotEquals(res.status, 403);
+	expect(res.status).not.toStrictEqual(403);
 });
 
 test('no ORIGIN env — POST with mismatched origin returns 403', async () => {
@@ -93,7 +92,7 @@ test('no ORIGIN env — POST with mismatched origin returns 403', async () => {
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: 'https://profilarr.mydomain.com' } }
 	);
-	assertEquals(res.status, 403);
+	expect(res.status).toStrictEqual(403);
 });
 
 test('ORIGIN env (reverse proxy) — POST with matching ORIGIN accepted', async () => {
@@ -107,7 +106,7 @@ test('ORIGIN env (reverse proxy) — POST with matching ORIGIN accepted', async 
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: PROXY_ORIGIN } }
 	);
-	assertNotEquals(res.status, 403);
+	expect(res.status).not.toStrictEqual(403);
 });
 
 test('ORIGIN env (reverse proxy) — POST with evil origin returns 403', async () => {
@@ -117,5 +116,5 @@ test('ORIGIN env (reverse proxy) — POST with evil origin returns 403', async (
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: 'http://evil.com' } }
 	);
-	assertEquals(res.status, 403);
+	expect(res.status).toStrictEqual(403);
 });

@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists, assertStringIncludes } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -99,14 +98,14 @@ test('split tier conflicts apply independently', async () => {
 		assertLatestHistory(ctx, hdtvOp, 'applied');
 
 		const hdtvRow = assertQualityDefinition(ctx, 'Split QD', 'HDTV-720p');
-		assertEquals(hdtvRow.min_size, 2);
-		assertEquals(hdtvRow.max_size, 18);
-		assertEquals(hdtvRow.preferred_size, 10);
+		expect(hdtvRow.min_size).toStrictEqual(2);
+		expect(hdtvRow.max_size).toStrictEqual(18);
+		expect(hdtvRow.preferred_size).toStrictEqual(10);
 
 		const webdlRow = assertQualityDefinition(ctx, 'Split QD', 'WEBDL-1080p');
-		assertEquals(webdlRow.min_size, 5);
-		assertEquals(webdlRow.max_size, 45);
-		assertEquals(webdlRow.preferred_size, 22);
+		expect(webdlRow.min_size).toStrictEqual(5);
+		expect(webdlRow.max_size).toStrictEqual(45);
+		expect(webdlRow.preferred_size).toStrictEqual(22);
 	}
 });
 
@@ -155,13 +154,13 @@ test('same-tier conflict resolves by strategy', async () => {
 
 		const hdtvRow = assertQualityDefinition(ctx, 'Same Tier QD', 'HDTV-720p');
 		if (strategy === 'override') {
-			assertEquals(hdtvRow.min_size, 2);
-			assertEquals(hdtvRow.max_size, 18);
-			assertEquals(hdtvRow.preferred_size, 10);
+			expect(hdtvRow.min_size).toStrictEqual(2);
+			expect(hdtvRow.max_size).toStrictEqual(18);
+			expect(hdtvRow.preferred_size).toStrictEqual(10);
 		} else {
-			assertEquals(hdtvRow.min_size, 3);
-			assertEquals(hdtvRow.max_size, 19);
-			assertEquals(hdtvRow.preferred_size, 11);
+			expect(hdtvRow.min_size).toStrictEqual(3);
+			expect(hdtvRow.max_size).toStrictEqual(19);
+			expect(hdtvRow.preferred_size).toStrictEqual(11);
 		}
 	}
 });
@@ -201,11 +200,11 @@ test('rename conflict follows upstream rename by strategy', async () => {
 		const allRows = compiledSonarrQualityDefinitions(ctx);
 		const finalNames = new Set(allRows.map((row) => row.name));
 		if (strategy === 'override') {
-			assert(finalNames.has('User QD'));
-			assert(!finalNames.has('Upstream QD'));
+			expect(finalNames.has('User QD')).toBeTruthy();
+			expect(!finalNames.has('Upstream QD')).toBeTruthy();
 		} else {
-			assert(finalNames.has('Upstream QD'));
-			assert(!finalNames.has('User QD'));
+			expect(finalNames.has('Upstream QD')).toBeTruthy();
+			expect(!finalNames.has('User QD')).toBeTruthy();
 		}
 	}
 });
@@ -240,9 +239,9 @@ test('conflict page field details follow upstream rename', async () => {
 	await compilePcd(ctx);
 
 	const response = await ctx.client.get(`/databases/${ctx.dbId}/conflicts`);
-	assertEquals(response.status, 200);
+	expect(response.status).toStrictEqual(200);
 	const body = await response.text();
-	assertStringIncludes(body, 'Upstream QD');
+	expect(body).toContain('Upstream QD');
 });
 
 /**
@@ -291,13 +290,13 @@ test('create duplicate conflict resolves by strategy', async () => {
 
 		const hdtvRow = assertQualityDefinition(ctx, 'Create Conflict', 'HDTV-720p');
 		if (strategy === 'override') {
-			assertEquals(hdtvRow.min_size, 2);
-			assertEquals(hdtvRow.max_size, 18);
-			assertEquals(hdtvRow.preferred_size, 10);
+			expect(hdtvRow.min_size).toStrictEqual(2);
+			expect(hdtvRow.max_size).toStrictEqual(18);
+			expect(hdtvRow.preferred_size).toStrictEqual(10);
 		} else {
-			assertEquals(hdtvRow.min_size, 1);
-			assertEquals(hdtvRow.max_size, 15);
-			assertEquals(hdtvRow.preferred_size, 8);
+			expect(hdtvRow.min_size).toStrictEqual(1);
+			expect(hdtvRow.max_size).toStrictEqual(15);
+			expect(hdtvRow.preferred_size).toStrictEqual(8);
 		}
 	}
 });
@@ -335,7 +334,7 @@ test('delete applies cleanly after upstream tier change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoQualityDefinition(ctx, 'Delete QD');
 	}
@@ -367,7 +366,7 @@ test('delete missing target auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoQualityDefinition(ctx, 'Already Deleted');
 	}
@@ -408,13 +407,13 @@ function opsSince(ctx: PcdTestContext, checkpoint: number): OpRow[] {
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user ${operation} op`);
+	expect(op, `Expected a user ${operation} op`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 function firstOpForQualityName(ops: OpRow[], qualityName: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).qualityName === qualityName);
-	assertExists(op, `Expected a user op for quality_name ${qualityName}`);
+	expect(op, `Expected a user op for quality_name ${qualityName}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -426,7 +425,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -443,19 +442,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assert(op.superseded_by_op_id !== null, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(
+		op.superseded_by_op_id !== null,
+		'Expected override to link a replacement op'
+	).toBeTruthy();
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -466,9 +468,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -485,7 +487,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -500,13 +502,15 @@ function assertQualityDefinition(
 	const row = compiledSonarrQualityDefinitions(ctx).find(
 		(r) => r.name === configName && r.quality_name === qualityName
 	);
-	assertExists(row, `Expected sonarr quality definitions row ${configName}/${qualityName}`);
+	expect(row, `Expected sonarr quality definitions row ${configName}/${qualityName}`).not.toBeOneOf(
+		[null, undefined]
+	);
 	return row;
 }
 
 function assertNoQualityDefinition(ctx: PcdTestContext, configName: string): void {
 	const rows = compiledSonarrQualityDefinitions(ctx).filter((r) => r.name === configName);
-	assertEquals(rows.length, 0);
+	expect(rows.length).toStrictEqual(0);
 }
 
 function compiledSonarrQualityDefinitions(ctx: PcdTestContext): SonarrQualityDefinitionsRow[] {

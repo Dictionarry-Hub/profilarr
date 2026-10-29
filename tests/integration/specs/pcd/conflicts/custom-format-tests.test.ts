@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertStringIncludes } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -73,10 +72,10 @@ test('read-only database blocks custom format test creation', async () => {
 	);
 	const body = await response.text();
 
-	assertEquals(formActionStatus(response, body), 403);
-	assertStringIncludes(body, READ_ONLY_MESSAGE);
-	assertEquals(queryOpsSince(ctx, checkpoint, { origin: 'user' }), []);
-	assertEquals(compiledTestCount(ctx.dbPath, ctx.dbId), 0);
+	expect(formActionStatus(response, body)).toStrictEqual(403);
+	expect(body).toContain(READ_ONLY_MESSAGE);
+	expect(queryOpsSince(ctx, checkpoint, { origin: 'user' })).toStrictEqual([]);
+	expect(compiledTestCount(ctx.dbPath, ctx.dbId)).toStrictEqual(0);
 });
 
 function formActionStatus(response: Response, body: string): number {

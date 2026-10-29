@@ -20,7 +20,6 @@
  * 6. 429 response includes error message
  */
 
-import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import {
@@ -29,7 +28,7 @@ import {
 	clearLoginAttempts,
 	insertExpiredAttempts
 } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.rateLimit;
@@ -80,7 +79,7 @@ test('suspicious username blocked after 3 attempts', async () => {
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(await getFormStatus(res), 429);
+	expect(await getFormStatus(res)).toStrictEqual(429);
 });
 
 test('typo category blocked after 10 attempts', async () => {
@@ -94,7 +93,7 @@ test('typo category blocked after 10 attempts', async () => {
 		{ username: 'myuser', password: 'wrong' },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(await getFormStatus(res), 429);
+	expect(await getFormStatus(res)).toStrictEqual(429);
 });
 
 test('below threshold is not blocked', async () => {
@@ -108,7 +107,7 @@ test('below threshold is not blocked', async () => {
 		{ username: 'admin', password: 'wrong' },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertNotEquals(await getFormStatus(res), 429);
+	expect(await getFormStatus(res)).not.toStrictEqual(429);
 });
 
 test('successful login clears attempts', async () => {
@@ -130,7 +129,7 @@ test('successful login clears attempts', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	// 3 attempts after clear — exactly at threshold, should be blocked
-	assertEquals(await getFormStatus(res), 429);
+	expect(await getFormStatus(res)).toStrictEqual(429);
 });
 
 test('expired attempts not counted', async () => {
@@ -145,7 +144,7 @@ test('expired attempts not counted', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	// Old attempts don't count — this should NOT be blocked
-	assertNotEquals(await getFormStatus(res), 429);
+	expect(await getFormStatus(res)).not.toStrictEqual(429);
 });
 
 test('429 response includes error message', async () => {
@@ -159,5 +158,5 @@ test('429 response includes error message', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await res.text();
-	assertEquals(body.includes('Too many login attempts'), true);
+	expect(body.includes('Too many login attempts')).toStrictEqual(true);
 });

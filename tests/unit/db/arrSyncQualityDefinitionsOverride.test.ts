@@ -5,12 +5,11 @@
  * pick leaves the rest of the media management row alone.
  */
 
-import { afterAll, describe, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { assertEquals } from '@std/assert';
 
 describe('quality definitions override on profile selections', async () => {
 	// Point the app at a fresh folder before anything imports config
@@ -50,22 +49,16 @@ describe('quality definitions override on profile selections', async () => {
 			{ trigger: 'manual', cron: null }
 		);
 		const { selections } = arrSyncQueries.getQualityProfilesSync(instanceId);
-		assertEquals(
-			selections.map((s) => [s.profileName, s.qualityDefinitionsConfigName]),
-			[
-				['1080p Quality', 'Series'],
-				['2160p Quality', null]
-			]
-		);
+		expect(selections.map((s) => [s.profileName, s.qualityDefinitionsConfigName])).toStrictEqual([
+			['1080p Quality', 'Series'],
+			['2160p Quality', null]
+		]);
 	});
 
 	test('the affected-instances query finds the override', () => {
 		const rows = arrSyncQueries.getInstancesForQualityDefinitionsOverride(1, 'Series');
-		assertEquals(
-			rows.map((r) => r.instance_id),
-			[instanceId]
-		);
-		assertEquals(arrSyncQueries.getInstancesForQualityDefinitionsOverride(1, 'Other'), []);
+		expect(rows.map((r) => r.instance_id)).toStrictEqual([instanceId]);
+		expect(arrSyncQueries.getInstancesForQualityDefinitionsOverride(1, 'Other')).toStrictEqual([]);
 	});
 
 	test('renaming a config renames the override and the instance pick', () => {
@@ -80,30 +73,27 @@ describe('quality definitions override on profile selections', async () => {
 			cron: null
 		});
 		const changed = arrSyncQueries.updateQualityDefinitionsConfigName('Series', 'Series v2');
-		assertEquals(changed, 2);
-		assertEquals(
-			arrSyncQueries.getQualityProfilesSync(instanceId).selections[0].qualityDefinitionsConfigName,
-			'Series v2'
-		);
-		assertEquals(
-			arrSyncQueries.getMediaManagementSync(instanceId).qualityDefinitionsConfigName,
-			'Series v2'
-		);
+		expect(changed).toStrictEqual(2);
+		expect(
+			arrSyncQueries.getQualityProfilesSync(instanceId).selections[0].qualityDefinitionsConfigName
+		).toStrictEqual('Series v2');
+		expect(
+			arrSyncQueries.getMediaManagementSync(instanceId).qualityDefinitionsConfigName
+		).toStrictEqual('Series v2');
 	});
 
 	test('the narrow pick write leaves naming and media settings alone', () => {
 		arrSyncQueries.saveQualityDefinitionsSelection(instanceId, 1, 'Movies');
 		const mm = arrSyncQueries.getMediaManagementSync(instanceId);
-		assertEquals(mm.qualityDefinitionsDatabaseId, 1);
-		assertEquals(mm.qualityDefinitionsConfigName, 'Movies');
-		assertEquals(mm.namingConfigName, 'Sonarr');
-		assertEquals(mm.mediaSettingsConfigName, 'Sonarr');
+		expect(mm.qualityDefinitionsDatabaseId).toStrictEqual(1);
+		expect(mm.qualityDefinitionsConfigName).toStrictEqual('Movies');
+		expect(mm.namingConfigName).toStrictEqual('Sonarr');
+		expect(mm.mediaSettingsConfigName).toStrictEqual('Sonarr');
 
 		arrSyncQueries.saveQualityDefinitionsSelection(instanceId, null, null);
-		assertEquals(
-			arrSyncQueries.getMediaManagementSync(instanceId).qualityDefinitionsConfigName,
-			null
-		);
+		expect(
+			arrSyncQueries.getMediaManagementSync(instanceId).qualityDefinitionsConfigName
+		).toStrictEqual(null);
 	});
 
 	test('the narrow pick write creates the row when there is none', () => {
@@ -115,7 +105,7 @@ describe('quality definitions override on profile selections', async () => {
 		});
 		arrSyncQueries.saveQualityDefinitionsSelection(other, 1, 'Series v2');
 		const mm = arrSyncQueries.getMediaManagementSync(other);
-		assertEquals(mm.qualityDefinitionsConfigName, 'Series v2');
-		assertEquals(mm.namingConfigName, null);
+		expect(mm.qualityDefinitionsConfigName).toStrictEqual('Series v2');
+		expect(mm.namingConfigName).toStrictEqual(null);
 	});
 });

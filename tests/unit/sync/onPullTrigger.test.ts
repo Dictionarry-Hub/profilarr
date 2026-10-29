@@ -6,12 +6,11 @@
  * trigger are never queued.
  */
 
-import { afterAll, describe, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { assertEquals } from '@std/assert';
 import type { SyncTrigger } from '#db/queries/arrSync.ts';
 
 type Section = 'qualityProfiles' | 'delayProfiles' | 'mediaManagement';
@@ -150,8 +149,7 @@ describe('on pull syncs only the sections that use the pulled database', async (
 	});
 
 	test('a pull of A queues only the sections that use A', async () => {
-		assertEquals(
-			await pull(A),
+		expect(await pull(A)).toStrictEqual(
 			[
 				job('delayProfiles', mixed),
 				job('delayProfiles', onA),
@@ -166,16 +164,18 @@ describe('on pull syncs only the sections that use the pulled database', async (
 
 	test('only the queued sections are marked pending', () => {
 		const status = arrSyncQueries.getSyncConfigStatus(mixed);
-		assertEquals(status.qualityProfiles.syncStatus, 'idle');
-		assertEquals(status.delayProfiles.syncStatus, 'pending');
-		assertEquals(status.mediaManagement.syncStatus, 'pending');
-		assertEquals(arrSyncQueries.getSyncConfigStatus(onB).qualityProfiles.syncStatus, 'idle');
+		expect(status.qualityProfiles.syncStatus).toStrictEqual('idle');
+		expect(status.delayProfiles.syncStatus).toStrictEqual('pending');
+		expect(status.mediaManagement.syncStatus).toStrictEqual('pending');
+		expect(arrSyncQueries.getSyncConfigStatus(onB).qualityProfiles.syncStatus).toStrictEqual(
+			'idle'
+		);
 	});
 
 	test('a trigger without a database queues every on pull section', async () => {
 		const jobs = await pull();
-		assertEquals(jobs.length, 12);
-		assertEquals(jobs.includes(job('qualityProfiles', onB)), true);
-		assertEquals(jobs.includes(job('qualityProfiles', mixed)), true);
+		expect(jobs.length).toStrictEqual(12);
+		expect(jobs.includes(job('qualityProfiles', onB))).toStrictEqual(true);
+		expect(jobs.includes(job('qualityProfiles', mixed))).toStrictEqual(true);
 	});
 });

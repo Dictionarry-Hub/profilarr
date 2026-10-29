@@ -2,9 +2,8 @@
  * PCD write tests: custom format conditions.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import { opCheckpoint } from '#integration/specs/pcd/harness/pcd.ts';
@@ -54,12 +53,12 @@ test('invalid size condition range fails without writing ops', async () => {
 	]);
 
 	const body = await response.text();
-	assert(
+	expect(
 		response.status >= 400 || body.includes('"type":"failure"'),
 		`Expected form action failure, got status=${response.status} body=${body}`
-	);
-	assert(body.includes('Max size must be greater than min size.'));
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	).toBeTruthy();
+	expect(body.includes('Max size must be greater than min size.')).toBeTruthy();
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -89,12 +88,12 @@ test('negative size condition value fails without writing ops', async () => {
 	]);
 
 	const body = await response.text();
-	assert(
+	expect(
 		response.status >= 400 || body.includes('"type":"failure"'),
 		`Expected form action failure, got status=${response.status} body=${body}`
-	);
-	assert(body.includes('Size values must be zero or greater.'));
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	).toBeTruthy();
+	expect(body.includes('Size values must be zero or greater.')).toBeTruthy();
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 function sizeCondition(size: { minBytes: number | null; maxBytes: number | null }): ConditionData {

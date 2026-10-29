@@ -9,11 +9,10 @@
  * address the old bypass used to admit.
  */
 
-import { assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.localBypass;
@@ -32,6 +31,6 @@ test('local requests require auth', async () => {
 	const client = new TestClient(ORIGIN);
 	const res = await client.get('/databases');
 
-	assertEquals(res.status, 303, 'Unauthenticated local request should redirect');
-	assertEquals(res.headers.get('location'), '/auth/login', 'Redirect should target login');
+	expect(res.status, 'Unauthenticated local request should redirect').toStrictEqual(303);
+	expect(res.headers.get('location'), 'Redirect should target login').toStrictEqual('/auth/login');
 });

@@ -11,11 +11,10 @@
  * 7. Seeded database and arr appear in response
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, setApiKey } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 
@@ -64,21 +63,21 @@ afterAll(async () => {
 test('GET /api/v1/status returns 401 without auth', async () => {
 	const unauthClient = new TestClient(ORIGIN);
 	const res = await unauthClient.get('/api/v1/status');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 test('GET /api/v1/status returns 200 with valid shape', async () => {
 	const res = await client.get('/api/v1/status', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertExists(body.version);
-	assertExists(body.uptime);
-	assertExists(body.databases);
-	assertExists(body.arrs);
-	assertExists(body.jobs);
-	assertExists(body.backups);
+	expect(body.version).not.toBeOneOf([null, undefined]);
+	expect(body.uptime).not.toBeOneOf([null, undefined]);
+	expect(body.databases).not.toBeOneOf([null, undefined]);
+	expect(body.arrs).not.toBeOneOf([null, undefined]);
+	expect(body.jobs).not.toBeOneOf([null, undefined]);
+	expect(body.backups).not.toBeOneOf([null, undefined]);
 });
 
 test('version is a string, uptime is a number', async () => {
@@ -86,8 +85,8 @@ test('version is a string, uptime is a number', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(typeof body.version, 'string');
-	assertEquals(typeof body.uptime, 'number');
+	expect(typeof body.version).toStrictEqual('string');
+	expect(typeof body.uptime).toStrictEqual('number');
 });
 
 test('databases and arrs are arrays', async () => {
@@ -95,8 +94,8 @@ test('databases and arrs are arrays', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(Array.isArray(body.databases), true);
-	assertEquals(Array.isArray(body.arrs), true);
+	expect(Array.isArray(body.databases)).toStrictEqual(true);
+	expect(Array.isArray(body.arrs)).toStrictEqual(true);
 });
 
 test('jobs has active, queued, nextRunAt', async () => {
@@ -104,9 +103,9 @@ test('jobs has active, queued, nextRunAt', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(typeof body.jobs.active, 'number');
-	assertEquals(typeof body.jobs.queued, 'number');
-	assertEquals('nextRunAt' in body.jobs, true);
+	expect(typeof body.jobs.active).toStrictEqual('number');
+	expect(typeof body.jobs.queued).toStrictEqual('number');
+	expect('nextRunAt' in body.jobs).toStrictEqual(true);
 });
 
 test('backups has enabled and lastBackupAt', async () => {
@@ -114,8 +113,8 @@ test('backups has enabled and lastBackupAt', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(typeof body.backups.enabled, 'boolean');
-	assertEquals('lastBackupAt' in body.backups, true);
+	expect(typeof body.backups.enabled).toStrictEqual('boolean');
+	expect('lastBackupAt' in body.backups).toStrictEqual(true);
 });
 
 test('seeded database and arr appear in response', async () => {
@@ -130,17 +129,17 @@ test('seeded database and arr appear in response', async () => {
 
 	// Find the seeded entries (server may have pre-existing data)
 	const testDb = body.databases.find((d: { name: string }) => d.name === 'Test DB');
-	assertExists(testDb);
-	assertEquals(testDb.enabled, true);
-	assertEquals(testDb.syncStrategy, 'manual');
-	assertExists(testDb.counts);
-	assertEquals(typeof testDb.counts.customFormats, 'number');
-	assertEquals(typeof testDb.counts.qualityProfiles, 'number');
+	expect(testDb).not.toBeOneOf([null, undefined]);
+	expect(testDb.enabled).toStrictEqual(true);
+	expect(testDb.syncStrategy).toStrictEqual('manual');
+	expect(testDb.counts).not.toBeOneOf([null, undefined]);
+	expect(typeof testDb.counts.customFormats).toStrictEqual('number');
+	expect(typeof testDb.counts.qualityProfiles).toStrictEqual('number');
 
 	const testArr = body.arrs.find((a: { name: string }) => a.name === 'Test Radarr');
-	assertExists(testArr);
-	assertEquals(testArr.type, 'radarr');
-	assertEquals(testArr.enabled, true);
-	assertExists(testArr.sync);
-	assertEquals(testArr.drift, null);
+	expect(testArr).not.toBeOneOf([null, undefined]);
+	expect(testArr.type).toStrictEqual('radarr');
+	expect(testArr.enabled).toStrictEqual(true);
+	expect(testArr.sync).not.toBeOneOf([null, undefined]);
+	expect(testArr.drift).toStrictEqual(null);
 });

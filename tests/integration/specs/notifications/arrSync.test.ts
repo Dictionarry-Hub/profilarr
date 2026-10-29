@@ -2,10 +2,9 @@
  * Arr sync notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -170,33 +169,33 @@ function makeFailedParams(): ArrSyncNotificationParams {
 // =========================================================================
 
 test('type includes status', () => {
-	assertEquals(arrSync(makeSuccessParams()).type, 'arr.sync.success');
-	assertEquals(arrSync(makePartialParams()).type, 'arr.sync.partial');
-	assertEquals(arrSync(makeFailedParams()).type, 'arr.sync.failed');
+	expect(arrSync(makeSuccessParams()).type).toStrictEqual('arr.sync.success');
+	expect(arrSync(makePartialParams()).type).toStrictEqual('arr.sync.partial');
+	expect(arrSync(makeFailedParams()).type).toStrictEqual('arr.sync.failed');
 });
 
 test('severity maps correctly', () => {
-	assertEquals(arrSync(makeSuccessParams()).severity, 'success');
-	assertEquals(arrSync(makePartialParams()).severity, 'warning');
-	assertEquals(arrSync(makeFailedParams()).severity, 'error');
+	expect(arrSync(makeSuccessParams()).severity).toStrictEqual('success');
+	expect(arrSync(makePartialParams()).severity).toStrictEqual('warning');
+	expect(arrSync(makeFailedParams()).severity).toStrictEqual('error');
 });
 
 test('title includes instance name', () => {
-	assertEquals(arrSync(makeSuccessParams()).title.includes('Movies'), true);
+	expect(arrSync(makeSuccessParams()).title.includes('Movies')).toStrictEqual(true);
 });
 
 test('title includes instance type', () => {
-	assertEquals(arrSync(makeSuccessParams()).title.includes('Radarr'), true);
+	expect(arrSync(makeSuccessParams()).title.includes('Radarr')).toStrictEqual(true);
 });
 
 test('title reflects status', () => {
-	assertEquals(arrSync(makeSuccessParams()).title.includes('Complete'), true);
-	assertEquals(arrSync(makePartialParams()).title.includes('Partial'), true);
-	assertEquals(arrSync(makeFailedParams()).title.includes('Failed'), true);
+	expect(arrSync(makeSuccessParams()).title.includes('Complete')).toStrictEqual(true);
+	expect(arrSync(makePartialParams()).title.includes('Partial')).toStrictEqual(true);
+	expect(arrSync(makeFailedParams()).title.includes('Failed')).toStrictEqual(true);
 });
 
 test('message includes section count', () => {
-	assertEquals(arrSync(makeSuccessParams()).message.includes('3'), true);
+	expect(arrSync(makeSuccessParams()).message.includes('3')).toStrictEqual(true);
 });
 
 test('successful sections produce section blocks with items', () => {
@@ -204,47 +203,47 @@ test('successful sections produce section blocks with items', () => {
 	const qpBlock = notification.blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Quality Profiles'
 	);
-	assertExists(qpBlock);
+	expect(qpBlock).not.toBeOneOf([null, undefined]);
 	if (qpBlock?.kind === 'section') {
-		assertExists(qpBlock.items);
+		expect(qpBlock.items).not.toBeOneOf([null, undefined]);
 		const created = qpBlock.items!.find((i) => i.label === 'created');
 		const updated = qpBlock.items!.find((i) => i.label === 'updated');
-		assertExists(created);
-		assertExists(updated);
-		assertEquals(created!.items.length, 3);
-		assertEquals(updated!.items.length, 12);
-		assertEquals(created!.items.includes('HD Bluray'), true);
-		assertEquals(updated!.items.includes('Remux'), true);
+		expect(created).not.toBeOneOf([null, undefined]);
+		expect(updated).not.toBeOneOf([null, undefined]);
+		expect(created!.items.length).toStrictEqual(3);
+		expect(updated!.items.length).toStrictEqual(12);
+		expect(created!.items.includes('HD Bluray')).toStrictEqual(true);
+		expect(updated!.items.includes('Remux')).toStrictEqual(true);
 	}
 });
 
 test('message summarizes counts per section', () => {
 	const notification = arrSync(makeSuccessParams());
-	assertEquals(notification.message.includes('12 updated'), true);
-	assertEquals(notification.message.includes('3 created'), true);
-	assertEquals(notification.message.includes('Quality Profiles'), true);
+	expect(notification.message.includes('12 updated')).toStrictEqual(true);
+	expect(notification.message.includes('3 created')).toStrictEqual(true);
+	expect(notification.message.includes('Quality Profiles')).toStrictEqual(true);
 });
 
 test('failed sections produce no blocks, errors in message', () => {
 	const notification = arrSync(makeFailedParams());
 	const blocks = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
-	assertEquals(blocks.length, 0);
-	assertEquals(notification.message.includes('API returned 401'), true);
-	assertEquals(notification.message.includes('connection timeout'), true);
+	expect(blocks.length).toStrictEqual(0);
+	expect(notification.message.includes('API returned 401')).toStrictEqual(true);
+	expect(notification.message.includes('connection timeout')).toStrictEqual(true);
 });
 
 test('partial: blocks for success sections, errors in message', () => {
 	const notification = arrSync(makePartialParams());
 	const blocks = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
-	assertEquals(blocks.length, 2);
+	expect(blocks.length).toStrictEqual(2);
 
 	const qpBlock = blocks.find((b) => b.kind === 'section' && b.title === 'Quality Profiles');
-	assertExists(qpBlock);
+	expect(qpBlock).not.toBeOneOf([null, undefined]);
 	if (qpBlock?.kind === 'section') {
-		assertExists(qpBlock.items);
+		expect(qpBlock.items).not.toBeOneOf([null, undefined]);
 	}
 
-	assertEquals(notification.message.includes('connection timeout'), true);
+	expect(notification.message.includes('connection timeout')).toStrictEqual(true);
 });
 
 test('all sections have display names', () => {
@@ -252,9 +251,9 @@ test('all sections have display names', () => {
 	const titles = notification.blocks
 		?.filter((b) => b.kind === 'section')
 		.map((b) => (b.kind === 'section' ? b.title : ''));
-	assertEquals(titles?.includes('Quality Profiles'), true);
-	assertEquals(titles?.includes('Delay Profiles'), true);
-	assertEquals(titles?.includes('Media Management'), true);
+	expect(titles?.includes('Quality Profiles')).toStrictEqual(true);
+	expect(titles?.includes('Delay Profiles')).toStrictEqual(true);
+	expect(titles?.includes('Media Management')).toStrictEqual(true);
 });
 
 test('update-only section omits created group', () => {
@@ -263,12 +262,12 @@ test('update-only section omits created group', () => {
 		(b) => b.kind === 'section' && b.title === 'Delay Profiles'
 	);
 	if (dpBlock?.kind === 'section') {
-		assertExists(dpBlock.items);
+		expect(dpBlock.items).not.toBeOneOf([null, undefined]);
 		const created = dpBlock.items!.find((i) => i.label === 'created');
-		assertEquals(created, undefined);
+		expect(created).toStrictEqual(undefined);
 		const updated = dpBlock.items!.find((i) => i.label === 'updated');
-		assertExists(updated);
-		assertEquals(updated!.items.includes('Standard'), true);
+		expect(updated).not.toBeOneOf([null, undefined]);
+		expect(updated!.items.includes('Standard')).toStrictEqual(true);
 	}
 });
 
@@ -285,7 +284,7 @@ test('discord: success uses correct color', async () => {
 	});
 	await notifier.notify(arrSync(makeSuccessParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.SUCCESS);
 });
 
 test('discord: partial uses warning color', async () => {
@@ -297,7 +296,7 @@ test('discord: partial uses warning color', async () => {
 	});
 	await notifier.notify(arrSync(makePartialParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.WARNING);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.WARNING);
 });
 
 test('discord: failed uses error color', async () => {
@@ -309,7 +308,7 @@ test('discord: failed uses error color', async () => {
 	});
 	await notifier.notify(arrSync(makeFailedParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.ERROR);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 test('discord: section items render in compact format', async () => {
@@ -325,11 +324,11 @@ test('discord: section items render in compact format', async () => {
 	const allFields = embeds.flatMap((e) => (e.fields as { name: string; value: string }[]) ?? []);
 
 	const qpField = allFields.find((f) => f.name.startsWith('Quality Profiles'));
-	assertExists(qpField);
-	assertEquals(qpField!.value.includes('HD Bluray'), true);
-	assertEquals(qpField!.value.includes('Remux'), true);
-	assertEquals(qpField!.value.includes('🆕'), true);
-	assertEquals(qpField!.value.includes('✏️'), true);
+	expect(qpField).not.toBeOneOf([null, undefined]);
+	expect(qpField!.value.includes('HD Bluray')).toStrictEqual(true);
+	expect(qpField!.value.includes('Remux')).toStrictEqual(true);
+	expect(qpField!.value.includes('🆕')).toStrictEqual(true);
+	expect(qpField!.value.includes('✏️')).toStrictEqual(true);
 });
 
 test('discord: failed sections have no fields, errors in description', async () => {
@@ -343,11 +342,11 @@ test('discord: failed sections have no fields, errors in description', async () 
 
 	const embeds = getAllEmbeds();
 	const allFields = embeds.flatMap((e) => (e.fields as { name: string; value: string }[]) ?? []);
-	assertEquals(allFields.length, 0);
+	expect(allFields.length).toStrictEqual(0);
 
 	const description = embeds[0]?.description as string;
-	assertEquals(description.includes('API returned 401'), true);
-	assertEquals(description.includes('connection timeout'), true);
+	expect(description.includes('API returned 401')).toStrictEqual(true);
+	expect(description.includes('connection timeout')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -363,8 +362,8 @@ test('ntfy: success maps to priority 3', async () => {
 	await notifier.notify(arrSync(makeSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
-	assertEquals(payload?.tags, ['white_check_mark']);
+	expect(payload?.priority).toStrictEqual(3);
+	expect(payload?.tags).toStrictEqual(['white_check_mark']);
 });
 
 test('ntfy: failed maps to priority 5', async () => {
@@ -376,8 +375,8 @@ test('ntfy: failed maps to priority 5', async () => {
 	await notifier.notify(arrSync(makeFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 5);
-	assertEquals(payload?.tags, ['x']);
+	expect(payload?.priority).toStrictEqual(5);
+	expect(payload?.tags).toStrictEqual(['x']);
 });
 
 test('ntfy: message includes per-section summaries but omits item names', async () => {
@@ -390,9 +389,9 @@ test('ntfy: message includes per-section summaries but omits item names', async 
 
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const message = payload?.message as string;
-	assertEquals(message.includes('Quality Profiles'), true);
-	assertEquals(message.includes('12 updated'), true);
-	assertEquals(message.includes('HD Bluray'), false);
+	expect(message.includes('Quality Profiles')).toStrictEqual(true);
+	expect(message.includes('12 updated')).toStrictEqual(true);
+	expect(message.includes('HD Bluray')).toStrictEqual(false);
 });
 
 // =========================================================================
@@ -407,12 +406,12 @@ test('webhook: sends full notification with section items', async () => {
 	await notifier.notify(arrSync(makeSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'arr.sync.success');
-	assertEquals(payload?.severity, 'success');
+	expect(payload?.type).toStrictEqual('arr.sync.success');
+	expect(payload?.severity).toStrictEqual('success');
 	const blocks = payload?.blocks as { kind: string; items?: unknown[] }[];
-	assertExists(blocks);
+	expect(blocks).not.toBeOneOf([null, undefined]);
 	const withItems = blocks.filter((b) => b.kind === 'section' && b.items);
-	assertEquals(withItems.length, 3);
+	expect(withItems.length).toStrictEqual(3);
 });
 
 test('webhook: failed sections have no items', async () => {
@@ -423,10 +422,10 @@ test('webhook: failed sections have no items', async () => {
 	await notifier.notify(arrSync(makeFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'arr.sync.failed');
+	expect(payload?.type).toStrictEqual('arr.sync.failed');
 	const blocks = payload?.blocks as { kind: string; items?: unknown[] }[];
 	const withItems = blocks.filter((b) => b.items);
-	assertEquals(withItems.length, 0);
+	expect(withItems.length).toStrictEqual(0);
 });
 
 // =========================================================================
@@ -445,7 +444,7 @@ test('telegram: success has ✅ prefix', async () => {
 	await notifier.notify(arrSync(makeSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2705'), true);
+	expect(text.startsWith('\u2705')).toStrictEqual(true);
 });
 
 test('telegram: failed has ❌ prefix', async () => {
@@ -458,7 +457,7 @@ test('telegram: failed has ❌ prefix', async () => {
 	await notifier.notify(arrSync(makeFailedParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 test('telegram: partial has ⚠️ prefix', async () => {
@@ -471,7 +470,7 @@ test('telegram: partial has ⚠️ prefix', async () => {
 	await notifier.notify(arrSync(makePartialParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u26A0\uFE0F'), true);
+	expect(text.startsWith('\u26A0\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: message includes title but omits section item names', async () => {
@@ -484,9 +483,9 @@ test('telegram: message includes title but omits section item names', async () =
 	await notifier.notify(arrSync(makeSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.includes('Movies'), true);
+	expect(text.includes('Movies')).toStrictEqual(true);
 	// Section item names should not appear (summary tier)
-	assertEquals(text.includes('HD Bluray'), false);
+	expect(text.includes('HD Bluray')).toStrictEqual(false);
 });
 
 // =========================================================================

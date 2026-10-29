@@ -2,9 +2,8 @@
  * PCD write tests: radarr quality definitions create.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -70,17 +69,17 @@ test('minimal radarr quality definitions emits one create op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'create');
-	assertEquals(metadata.entity, 'radarr_quality_definitions');
-	assertEquals(metadata.name, 'Created QualityDefs');
+	expect(metadata.operation).toStrictEqual('create');
+	expect(metadata.entity).toStrictEqual('radarr_quality_definitions');
+	expect(metadata.name).toStrictEqual('Created QualityDefs');
 	const desired = parseDesiredState(op);
-	assertEquals(desired.name, 'Created QualityDefs');
-	assertEquals((desired.entries as unknown[]).length, 2);
+	expect(desired.name).toStrictEqual('Created QualityDefs');
+	expect((desired.entries as unknown[]).length).toStrictEqual(2);
 	const sql = normalizeSql(op.sql);
-	assert(/insert into "?radarr_quality_definitions"?/i.test(sql));
+	expect(/insert into "?radarr_quality_definitions"?/i.test(sql)).toBeTruthy();
 });
 
 /**
@@ -110,7 +109,7 @@ test('radarr quality definitions non-default sizes are recorded', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const desired = parseDesiredState(ops[0]);
 	const entries = desired.entries as Array<{
 		quality_name: string;
@@ -119,9 +118,9 @@ test('radarr quality definitions non-default sizes are recorded', async () => {
 		preferred_size: number;
 	}>;
 	const bluray = entries.find((e) => e.quality_name === 'Bluray-1080p');
-	assertEquals(bluray?.min_size, 7);
-	assertEquals(bluray?.max_size, 60);
-	assertEquals(bluray?.preferred_size, 35);
+	expect(bluray?.min_size).toStrictEqual(7);
+	expect(bluray?.max_size).toStrictEqual(60);
+	expect(bluray?.preferred_size).toStrictEqual(35);
 });
 
 /**
@@ -147,5 +146,5 @@ test('duplicate radarr quality definitions name fails without writing ops', asyn
 	});
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

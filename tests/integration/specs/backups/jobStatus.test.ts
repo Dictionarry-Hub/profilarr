@@ -5,8 +5,7 @@
  * from job_run_history.
  */
 
-import { assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -108,12 +107,12 @@ test('GET /api/v1/jobs/{id} with session returns 200', async () => {
 	});
 
 	const res = await client.get(`/api/v1/jobs/${jobId}`);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.id, jobId);
-	assertEquals(body.jobType, 'backup.create');
-	assertEquals(body.status, 'queued');
+	expect(body.id).toStrictEqual(jobId);
+	expect(body.jobType).toStrictEqual('backup.create');
+	expect(body.status).toStrictEqual('queued');
 });
 
 test('GET /api/v1/jobs/{id} with API key returns 200', async () => {
@@ -125,10 +124,10 @@ test('GET /api/v1/jobs/{id} with API key returns 200', async () => {
 	const res = await apiKeyClient.get(`/api/v1/jobs/${jobId}`, {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.id, jobId);
+	expect(body.id).toStrictEqual(jobId);
 });
 
 test('GET /api/v1/jobs/{id} without auth returns 401', async () => {
@@ -138,25 +137,25 @@ test('GET /api/v1/jobs/{id} without auth returns 401', async () => {
 	});
 
 	const res = await unauthClient.get(`/api/v1/jobs/${jobId}`);
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── Not found / bad input ───────────────────────────────────────────────────
 
 test('GET /api/v1/jobs/{id} with non-existent ID returns 404', async () => {
 	const res = await client.get('/api/v1/jobs/999999');
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 
 	const body = await res.json();
-	assertEquals(body.error, 'Job not found');
+	expect(body.error).toStrictEqual('Job not found');
 });
 
 test('GET /api/v1/jobs/{id} with non-numeric ID returns 400', async () => {
 	const res = await client.get('/api/v1/jobs/abc');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 
 	const body = await res.json();
-	assertEquals(body.error, 'Invalid job ID');
+	expect(body.error).toStrictEqual('Invalid job ID');
 });
 
 // ─── Result enrichment ───────────────────────────────────────────────────────
@@ -179,14 +178,16 @@ test('completed job includes result from run history', async () => {
 	});
 
 	const res = await client.get(`/api/v1/jobs/${jobId}`);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.status, 'success');
-	assertEquals(body.result.status, 'success');
-	assertEquals(body.result.durationMs, 4500);
-	assertEquals(body.result.output, 'Backup created: backup-2026-03-15-100005.tar.gz (12.34 MB)');
-	assertEquals(body.result.error, null);
+	expect(body.status).toStrictEqual('success');
+	expect(body.result.status).toStrictEqual('success');
+	expect(body.result.durationMs).toStrictEqual(4500);
+	expect(body.result.output).toStrictEqual(
+		'Backup created: backup-2026-03-15-100005.tar.gz (12.34 MB)'
+	);
+	expect(body.result.error).toStrictEqual(null);
 });
 
 test('queued job has result: null', async () => {
@@ -196,9 +197,9 @@ test('queued job has result: null', async () => {
 	});
 
 	const res = await client.get(`/api/v1/jobs/${jobId}`);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.status, 'queued');
-	assertEquals(body.result, null);
+	expect(body.status).toStrictEqual('queued');
+	expect(body.result).toStrictEqual(null);
 });

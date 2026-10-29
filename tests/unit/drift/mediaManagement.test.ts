@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareMediaManagementDrift,
@@ -151,8 +151,8 @@ class MediaManagementDriftTest extends BaseTest {
 		this.test('clean when no media settings are configured', () => {
 			const result = compareMediaManagementDrift(null, actualMediaSettings());
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, {
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({
 				media_settings: { missing: [], modified: [] },
 				naming: { missing: [], modified: [] },
 				quality_definitions: { missing: [], modified: [] }
@@ -165,8 +165,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualMediaSettings({ untouchedArrField: 'preserved' })
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, {
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({
 				media_settings: { missing: [], modified: [] },
 				naming: { missing: [], modified: [] },
 				quality_definitions: { missing: [], modified: [] }
@@ -179,7 +179,7 @@ class MediaManagementDriftTest extends BaseTest {
 				enable_media_info: true
 			});
 
-			assertEquals(result.downloadPropersAndRepacks, 'doNotUpgrade');
+			expect(result.downloadPropersAndRepacks).toStrictEqual('doNotUpgrade');
 		});
 
 		this.test('reports propers and repacks mismatch', () => {
@@ -188,8 +188,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualMediaSettings({ downloadPropersAndRepacks: 'doNotPrefer' })
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.media_settings.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.media_settings.modified).toStrictEqual([
 				{
 					name: 'Standard Media Settings',
 					fields: [
@@ -209,8 +209,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualMediaSettings({ enableMediaInfo: true })
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.media_settings.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.media_settings.modified).toStrictEqual([
 				{
 					name: 'Standard Media Settings',
 					fields: [{ path: 'enableMediaInfo', expected: false, actual: true }]
@@ -226,8 +226,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualRadarrNaming({ untouchedArrField: 'preserved' })
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.naming, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.naming).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('reports Radarr naming managed field mismatch', () => {
@@ -238,8 +238,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualRadarrNaming({ movieFolderFormat: '{Movie CleanTitle}' })
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.naming.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.naming.modified).toStrictEqual([
 				{
 					name: 'Standard Naming',
 					fields: [
@@ -261,8 +261,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualSonarrNaming({ untouchedArrField: 'preserved' })
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.naming, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.naming).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('treats blank Sonarr custom colon replacement as empty', () => {
@@ -273,8 +273,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualSonarrNaming({ customColonReplacementFormat: '' })
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.naming, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.naming).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('reports Sonarr colon replacement mismatch with semantic values', () => {
@@ -285,8 +285,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualSonarrNaming({ colonReplacementFormat: 4 })
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.naming.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.naming.modified).toStrictEqual([
 				{
 					name: 'Standard Naming',
 					fields: [
@@ -308,8 +308,8 @@ class MediaManagementDriftTest extends BaseTest {
 				actualSonarrNaming({ multiEpisodeStyle: 5 })
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.naming.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.naming.modified).toStrictEqual([
 				{
 					name: 'Standard Naming',
 					fields: [
@@ -333,8 +333,8 @@ class MediaManagementDriftTest extends BaseTest {
 				[actualQualityDefinition('WEBDL-1080p', { title: 'Preserved' })]
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.quality_definitions).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('normalizes unlimited quality definition sizes to Arr null', () => {
@@ -358,13 +358,13 @@ class MediaManagementDriftTest extends BaseTest {
 				[actualQualityDefinition('WEBDL-1080p', { preferredSize: null })]
 			);
 
-			assertEquals(transformed.definitions[0].fields, {
+			expect(transformed.definitions[0].fields).toStrictEqual({
 				minSize: 10,
 				maxSize: null,
 				preferredSize: null
 			});
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.quality_definitions).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('treats missing Arr quality definition size fields as unlimited', () => {
@@ -380,8 +380,8 @@ class MediaManagementDriftTest extends BaseTest {
 				[actual]
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.quality_definitions).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('reports quality definition size mismatch', () => {
@@ -394,8 +394,8 @@ class MediaManagementDriftTest extends BaseTest {
 				[actualQualityDefinition('WEBDL-1080p', { maxSize: 100 })]
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.quality_definitions.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.quality_definitions.modified).toStrictEqual([
 				{
 					name: 'Standard Quality Definitions',
 					fields: [
@@ -430,9 +430,9 @@ class MediaManagementDriftTest extends BaseTest {
 				[]
 			);
 
-			assertEquals(transformed.unmapped, ['Unmapped']);
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+			expect(transformed.unmapped).toStrictEqual(['Unmapped']);
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.quality_definitions).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('ignores mapped quality definition entries missing in Arr', () => {
@@ -453,8 +453,8 @@ class MediaManagementDriftTest extends BaseTest {
 				[actualQualityDefinition('WEBDL-1080p')]
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.quality_definitions).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('ignores extra Arr quality definitions and unmanaged fields', () => {
@@ -475,8 +475,8 @@ class MediaManagementDriftTest extends BaseTest {
 				]
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff.quality_definitions, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff.quality_definitions).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('displays stored quality definition diffs with omitted actual values', () => {
@@ -504,9 +504,9 @@ class MediaManagementDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(entities.length, 1);
-			assertEquals(entities[0].changes[0].label, 'WEBDL-1080p');
-			assertEquals(entities[0].changes[0].actual?.text, 'Unlimited');
+			expect(entities.length).toStrictEqual(1);
+			expect(entities[0].changes[0].label).toStrictEqual('WEBDL-1080p');
+			expect(entities[0].changes[0].actual?.text).toStrictEqual('Unlimited');
 		});
 
 		this.test('hash is stable for equivalent object key order', async () => {
@@ -593,8 +593,7 @@ class MediaManagementDriftTest extends BaseTest {
 				}
 			};
 
-			assertEquals(
-				await hashDriftDiff({ media_management: first }),
+			expect(await hashDriftDiff({ media_management: first })).toStrictEqual(
 				await hashDriftDiff({ media_management: second })
 			);
 		});

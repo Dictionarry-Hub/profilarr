@@ -4,12 +4,11 @@
  * stays put).
  */
 
-import { afterAll, describe, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { assertEquals } from '@std/assert';
 
 describe('arr_instances detected version columns', async () => {
 	// Point the app at a fresh folder before anything imports config
@@ -37,9 +36,9 @@ describe('arr_instances detected version columns', async () => {
 
 	test('a new instance has nothing detected', () => {
 		const row = arrInstancesQueries.getById(id)!;
-		assertEquals(row.detected_version, null);
-		assertEquals(row.detected_api, null);
-		assertEquals(row.detected_at, null);
+		expect(row.detected_version).toStrictEqual(null);
+		expect(row.detected_api).toStrictEqual(null);
+		expect(row.detected_at).toStrictEqual(null);
 	});
 
 	test('updateDetectedVersion stores the probe result', () => {
@@ -50,17 +49,17 @@ describe('arr_instances detected version columns', async () => {
 			checkedAt: '2026-10-15T01:46:05.000Z'
 		});
 		const row = arrInstancesQueries.getById(id)!;
-		assertEquals(row.detected_version, '5.0.0.2569');
-		assertEquals(row.detected_api, 'v5');
-		assertEquals(row.detected_at, '2026-10-15T01:46:05.000Z');
-		assertEquals(row.updated_at, before.updated_at);
+		expect(row.detected_version).toStrictEqual('5.0.0.2569');
+		expect(row.detected_api).toStrictEqual('v5');
+		expect(row.detected_at).toStrictEqual('2026-10-15T01:46:05.000Z');
+		expect(row.updated_at).toStrictEqual(before.updated_at);
 	});
 
 	test('a null API generation is stored as null', () => {
 		arrInstancesQueries.updateDetectedVersion(id, { version: '4.0.20.3014', api: null });
 		const row = arrInstancesQueries.getById(id)!;
-		assertEquals(row.detected_version, '4.0.20.3014');
-		assertEquals(row.detected_api, null);
-		assertEquals(typeof row.detected_at, 'string');
+		expect(row.detected_version).toStrictEqual('4.0.20.3014');
+		expect(row.detected_api).toStrictEqual(null);
+		expect(typeof row.detected_at).toStrictEqual('string');
 	});
 });

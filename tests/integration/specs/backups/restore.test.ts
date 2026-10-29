@@ -19,11 +19,10 @@
  *   4. Restored server can create new backups (writes work)
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { execFile } from 'node:child_process';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -69,7 +68,7 @@ function seedData(dbPath: string) {
  */
 async function createAndReadBackup(client: TestClient, port: number): Promise<Uint8Array> {
 	const createRes = await client.post('/api/v1/backups', {});
-	assertEquals(createRes.status, 202, 'Backup creation should return 202');
+	expect(createRes.status, 'Backup creation should return 202').toStrictEqual(202);
 	const { jobId } = await createRes.json();
 
 	for (let i = 0; i < 30; i++) {
@@ -144,39 +143,42 @@ afterAll(async () => {
 
 test('restored server is healthy', async () => {
 	const res = await clientB.get('/api/v1/health');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.status, 'healthy');
+	expect(body.status).toStrictEqual('healthy');
 });
 
 test('arr instances survive restore (secrets stripped)', async () => {
 	const res = await clientB.get('/api/v1/arr');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const instances = await res.json();
 	const sonarr = instances.find((i: { name: string }) => i.name === 'Restore Test Sonarr');
-	assertExists(sonarr, 'Seeded Sonarr instance should exist after restore');
-	assertEquals(sonarr.type, 'sonarr');
-	assertEquals(sonarr.url, 'http://sonarr:8989');
+	expect(sonarr, 'Seeded Sonarr instance should exist after restore').not.toBeOneOf([
+		null,
+		undefined
+	]);
+	expect(sonarr.type).toStrictEqual('sonarr');
+	expect(sonarr.url).toStrictEqual('http://sonarr:8989');
 	// api_key is destructured out of the API response entirely
-	assertEquals(sonarr.api_key, undefined, 'API key should not be in response');
+	expect(sonarr.api_key, 'API key should not be in response').toStrictEqual(undefined);
 });
 
 test('backup settings survive restore', async () => {
 	const res = await clientB.get('/api/v1/backups/settings');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const settings = await res.json();
-	assertEquals(settings.schedule, 'weekly');
-	assertEquals(settings.retentionDays, 14);
+	expect(settings.schedule).toStrictEqual('weekly');
+	expect(settings.retentionDays).toStrictEqual(14);
 });
 
 test('restored server can create new backups', async () => {
 	const res = await clientB.post('/api/v1/backups', {});
-	assertEquals(res.status, 202);
+	expect(res.status).toStrictEqual(202);
 
 	const body = await res.json();
-	assertExists(body.jobId);
-	assertEquals(typeof body.jobId, 'number');
+	expect(body.jobId).not.toBeOneOf([null, undefined]);
+	expect(typeof body.jobId).toStrictEqual('number');
 });

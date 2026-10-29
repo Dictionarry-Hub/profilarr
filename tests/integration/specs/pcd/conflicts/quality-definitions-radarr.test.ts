@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists, assertStringIncludes } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -100,14 +99,14 @@ test('split tier conflicts apply independently', async () => {
 		assertLatestHistory(ctx, blurayOp, 'applied');
 
 		const blurayRow = assertQualityDefinition(ctx, 'Split QD', 'Bluray-1080p');
-		assertEquals(blurayRow.min_size, 6);
-		assertEquals(blurayRow.max_size, 55);
-		assertEquals(blurayRow.preferred_size, 32);
+		expect(blurayRow.min_size).toStrictEqual(6);
+		expect(blurayRow.max_size).toStrictEqual(55);
+		expect(blurayRow.preferred_size).toStrictEqual(32);
 
 		const webdlRow = assertQualityDefinition(ctx, 'Split QD', 'WEBDL-720p');
-		assertEquals(webdlRow.min_size, 2);
-		assertEquals(webdlRow.max_size, 22);
-		assertEquals(webdlRow.preferred_size, 12);
+		expect(webdlRow.min_size).toStrictEqual(2);
+		expect(webdlRow.max_size).toStrictEqual(22);
+		expect(webdlRow.preferred_size).toStrictEqual(12);
 	}
 });
 
@@ -156,13 +155,13 @@ test('same-tier conflict resolves by strategy', async () => {
 
 		const blurayRow = assertQualityDefinition(ctx, 'Same Tier QD', 'Bluray-1080p');
 		if (strategy === 'override') {
-			assertEquals(blurayRow.min_size, 6);
-			assertEquals(blurayRow.max_size, 55);
-			assertEquals(blurayRow.preferred_size, 32);
+			expect(blurayRow.min_size).toStrictEqual(6);
+			expect(blurayRow.max_size).toStrictEqual(55);
+			expect(blurayRow.preferred_size).toStrictEqual(32);
 		} else {
-			assertEquals(blurayRow.min_size, 7);
-			assertEquals(blurayRow.max_size, 60);
-			assertEquals(blurayRow.preferred_size, 35);
+			expect(blurayRow.min_size).toStrictEqual(7);
+			expect(blurayRow.max_size).toStrictEqual(60);
+			expect(blurayRow.preferred_size).toStrictEqual(35);
 		}
 	}
 });
@@ -202,11 +201,14 @@ test('rename conflict follows upstream rename by strategy', async () => {
 		const allRows = compiledRadarrQualityDefinitions(ctx);
 		const finalNames = new Set(allRows.map((row) => row.name));
 		if (strategy === 'override') {
-			assert(finalNames.has('User QD'), 'expected override to land on User QD');
-			assert(!finalNames.has('Upstream QD'), 'expected Upstream QD to be renamed away');
+			expect(finalNames.has('User QD'), 'expected override to land on User QD').toBeTruthy();
+			expect(
+				!finalNames.has('Upstream QD'),
+				'expected Upstream QD to be renamed away'
+			).toBeTruthy();
 		} else {
-			assert(finalNames.has('Upstream QD'), 'expected upstream to win');
-			assert(!finalNames.has('User QD'), 'expected User QD not to exist');
+			expect(finalNames.has('Upstream QD'), 'expected upstream to win').toBeTruthy();
+			expect(!finalNames.has('User QD'), 'expected User QD not to exist').toBeTruthy();
 		}
 	}
 });
@@ -242,9 +244,9 @@ test('conflict page field details follow upstream rename', async () => {
 	await compilePcd(ctx);
 
 	const response = await ctx.client.get(`/databases/${ctx.dbId}/conflicts`);
-	assertEquals(response.status, 200);
+	expect(response.status).toStrictEqual(200);
 	const body = await response.text();
-	assertStringIncludes(body, 'Upstream QD');
+	expect(body).toContain('Upstream QD');
 });
 
 /**
@@ -293,13 +295,13 @@ test('create duplicate conflict resolves by strategy', async () => {
 
 		const blurayRow = assertQualityDefinition(ctx, 'Create Conflict', 'Bluray-1080p');
 		if (strategy === 'override') {
-			assertEquals(blurayRow.min_size, 6);
-			assertEquals(blurayRow.max_size, 55);
-			assertEquals(blurayRow.preferred_size, 32);
+			expect(blurayRow.min_size).toStrictEqual(6);
+			expect(blurayRow.max_size).toStrictEqual(55);
+			expect(blurayRow.preferred_size).toStrictEqual(32);
 		} else {
-			assertEquals(blurayRow.min_size, 5);
-			assertEquals(blurayRow.max_size, 50);
-			assertEquals(blurayRow.preferred_size, 30);
+			expect(blurayRow.min_size).toStrictEqual(5);
+			expect(blurayRow.max_size).toStrictEqual(50);
+			expect(blurayRow.preferred_size).toStrictEqual(30);
 		}
 	}
 });
@@ -337,7 +339,7 @@ test('delete applies cleanly after upstream tier change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoQualityDefinition(ctx, 'Delete QD');
 	}
@@ -369,7 +371,7 @@ test('delete missing target auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoQualityDefinition(ctx, 'Already Deleted');
 	}
@@ -410,13 +412,13 @@ function opsSince(ctx: PcdTestContext, checkpoint: number): OpRow[] {
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user ${operation} op`);
+	expect(op, `Expected a user ${operation} op`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 function firstOpForQualityName(ops: OpRow[], qualityName: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).qualityName === qualityName);
-	assertExists(op, `Expected a user op for quality_name ${qualityName}`);
+	expect(op, `Expected a user op for quality_name ${qualityName}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -428,7 +430,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -445,19 +447,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assert(op.superseded_by_op_id !== null, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(
+		op.superseded_by_op_id !== null,
+		'Expected override to link a replacement op'
+	).toBeTruthy();
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -468,9 +473,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -487,7 +492,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -502,13 +507,15 @@ function assertQualityDefinition(
 	const row = compiledRadarrQualityDefinitions(ctx).find(
 		(r) => r.name === configName && r.quality_name === qualityName
 	);
-	assertExists(row, `Expected radarr quality definitions row ${configName}/${qualityName}`);
+	expect(row, `Expected radarr quality definitions row ${configName}/${qualityName}`).not.toBeOneOf(
+		[null, undefined]
+	);
 	return row;
 }
 
 function assertNoQualityDefinition(ctx: PcdTestContext, configName: string): void {
 	const rows = compiledRadarrQualityDefinitions(ctx).filter((r) => r.name === configName);
-	assertEquals(rows.length, 0);
+	expect(rows.length).toStrictEqual(0);
 }
 
 function compiledRadarrQualityDefinitions(ctx: PcdTestContext): RadarrQualityDefinitionsRow[] {

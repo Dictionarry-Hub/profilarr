@@ -14,11 +14,10 @@
 
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { assertEquals, assertStringIncludes } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, login } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.reverseProxy502;
@@ -94,20 +93,20 @@ test('proxy serves /auth/login normally', async () => {
 	const res = await client.get('/auth/login');
 
 	logHeaderSizes('/auth/login via nginx', res.headers);
-	assertEquals(res.status, 200);
-	assertEquals(res.headers.get('x-sveltekit-page'), 'true');
+	expect(res.status).toStrictEqual(200);
+	expect(res.headers.get('x-sveltekit-page')).toStrictEqual('true');
 });
 
 test('proxy login succeeds and client-side route data remains accessible', async () => {
 	const client = new TestClient(PROXY_ORIGIN);
 	const loginRes = await login(client, 'admin', 'password123', PROXY_ORIGIN);
 
-	assertEquals(loginRes.status, 200);
+	expect(loginRes.status).toStrictEqual(200);
 
 	const dataRes = await client.get('/databases/__data.json');
 	logHeaderSizes('/databases/__data.json via nginx', dataRes.headers);
-	assertEquals(dataRes.status, 200);
-	assertEquals(dataRes.headers.get('content-type'), 'application/json');
+	expect(dataRes.status).toStrictEqual(200);
+	expect(dataRes.headers.get('content-type')).toStrictEqual('application/json');
 });
 
 test('proxy serves full SSR /databases page without upstream header errors', async () => {
@@ -123,8 +122,8 @@ test('proxy serves full SSR /databases page without upstream header errors', asy
 	const res = await client.get('/databases');
 	logHeaderSizes('/databases via nginx', res.headers);
 
-	assertEquals(res.status, 200);
-	assertEquals(res.headers.get('x-sveltekit-page'), 'true');
+	expect(res.status).toStrictEqual(200);
+	expect(res.headers.get('x-sveltekit-page')).toStrictEqual('true');
 
 	// Give nginx a moment to flush any upstream header error to container logs.
 	await new Promise((resolve) => setTimeout(resolve, 200));

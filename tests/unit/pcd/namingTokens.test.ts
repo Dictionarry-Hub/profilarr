@@ -1,5 +1,4 @@
-import { test } from 'vitest';
-import { assertEquals, assertFalse } from '@std/assert';
+import { expect, test } from 'vitest';
 import {
 	getRadarrTokenCategories,
 	getSonarrTokenCategories,
@@ -14,12 +13,12 @@ type ArrType = 'radarr' | 'sonarr';
 
 function assertValid(format: string, arrType: ArrType, field?: NamingFormatField): void {
 	const result = validateNamingFormat(format, arrType, field ? { field } : undefined);
-	assertEquals(result.valid, true, `${format}: ${result.errors.join(', ')}`);
+	expect(result.valid, `${format}: ${result.errors.join(', ')}`).toStrictEqual(true);
 }
 
 function assertInvalid(format: string, arrType: ArrType, field?: NamingFormatField): void {
 	const result = validateNamingFormat(format, arrType, field ? { field } : undefined);
-	assertEquals(result.valid, false, `${format} should be invalid`);
+	expect(result.valid, `${format} should be invalid`).toStrictEqual(false);
 }
 
 function tokensFor(arrType: ArrType): string[] {
@@ -42,8 +41,7 @@ test('naming tokens validates every advertised Sonarr token', () => {
 test('naming tokens keeps existing default formats valid and previewable', () => {
 	assertValid('{Movie Title} ({Release Year}) {Quality Full}', 'radarr', 'movieFormat');
 	assertValid('{Movie Title} ({Release Year})', 'radarr', 'movieFolderFormat');
-	assertEquals(
-		resolveRadarrFormat('{Movie Title} ({Release Year}) {Quality Full}'),
+	expect(resolveRadarrFormat('{Movie Title} ({Release Year}) {Quality Full}')).toStrictEqual(
 		'The Movie Title (2010) Bluray-1080p Proper'
 	);
 
@@ -64,17 +62,15 @@ test('naming tokens keeps existing default formats valid and previewable', () =>
 	);
 	assertValid('{Series Title}', 'sonarr', 'seriesFolderFormat');
 	assertValid('Season {season}', 'sonarr', 'seasonFolderFormat');
-	assertEquals(
-		resolveSonarrFormat('{Series Title} - S{season:00}E{episode:00} - {Episode Title}'),
-		'The Series Title - S01E01 - Pilot Episode'
-	);
+	expect(
+		resolveSonarrFormat('{Series Title} - S{season:00}E{episode:00} - {Episode Title}')
+	).toStrictEqual('The Series Title - S01E01 - Pilot Episode');
 });
 
 test('naming tokens preserves current generic validation behavior', () => {
 	assertValid('', 'radarr');
 	assertValid('{[Quality Full]}{-Release Group}', 'radarr');
-	assertEquals(
-		resolveRadarrFormat('{[Quality Full]}{-Release Group}'),
+	expect(resolveRadarrFormat('{[Quality Full]}{-Release Group}')).toStrictEqual(
 		'[Bluray-1080p Proper]-EVOLVE'
 	);
 
@@ -99,21 +95,23 @@ test('naming tokens normalizes Arr-style token spelling', () => {
 
 	for (const variant of variants) {
 		assertValid(variant, 'radarr');
-		assertEquals(resolveRadarrFormat(variant), resolveRadarrFormat('{Quality Full}'), variant);
+		expect(resolveRadarrFormat(variant), variant).toStrictEqual(
+			resolveRadarrFormat('{Quality Full}')
+		);
 	}
 
 	assertValid('{Movie.CleanTitle}', 'radarr');
-	assertEquals(
-		resolveRadarrFormat('{Movie.CleanTitle}'),
+	expect(resolveRadarrFormat('{Movie.CleanTitle}')).toStrictEqual(
 		resolveRadarrFormat('{Movie CleanTitle}')
 	);
 	assertValid('{Series_TitleYear}', 'sonarr');
-	assertEquals(
-		resolveSonarrFormat('{Series_TitleYear}'),
+	expect(resolveSonarrFormat('{Series_TitleYear}')).toStrictEqual(
 		resolveSonarrFormat('{Series TitleYear}')
 	);
 	assertValid('{ReleaseGroup}', 'sonarr');
-	assertEquals(resolveSonarrFormat('{ReleaseGroup}'), resolveSonarrFormat('{Release Group}'));
+	expect(resolveSonarrFormat('{ReleaseGroup}')).toStrictEqual(
+		resolveSonarrFormat('{Release Group}')
+	);
 
 	assertInvalid('{Quality Missing}', 'radarr');
 });
@@ -126,7 +124,7 @@ test('naming tokens exposes missing picker tokens and keeps aliases silent', () 
 		'{Quality Proper}',
 		'{Quality Real}'
 	]) {
-		assertEquals(radarrTokens.includes(token), true, `${token} should be advertised`);
+		expect(radarrTokens.includes(token), `${token} should be advertised`).toStrictEqual(true);
 	}
 
 	const sonarrTokens = tokensFor('sonarr');
@@ -141,18 +139,18 @@ test('naming tokens exposes missing picker tokens and keeps aliases silent', () 
 		'{Quality Proper}',
 		'{Quality Real}'
 	]) {
-		assertEquals(sonarrTokens.includes(token), true, `${token} should be advertised`);
+		expect(sonarrTokens.includes(token), `${token} should be advertised`).toStrictEqual(true);
 	}
 
 	for (const arrType of ['radarr', 'sonarr'] as const) {
 		assertValid('{MediaInfo Video}', arrType);
 		assertValid('{MediaInfo Audio}', arrType);
-		assertFalse(tokensFor(arrType).includes('{MediaInfo Video}'));
-		assertFalse(tokensFor(arrType).includes('{MediaInfo Audio}'));
+		expect(tokensFor(arrType).includes('{MediaInfo Video}')).toBeFalsy();
+		expect(tokensFor(arrType).includes('{MediaInfo Audio}')).toBeFalsy();
 	}
 
-	assertEquals(resolveRadarrFormat('{MediaInfo Video} {MediaInfo Audio}'), 'x264 DTS');
-	assertEquals(resolveSonarrFormat('{MediaInfo Video} {MediaInfo Audio}'), 'x265 AAC');
+	expect(resolveRadarrFormat('{MediaInfo Video} {MediaInfo Audio}')).toStrictEqual('x264 DTS');
+	expect(resolveSonarrFormat('{MediaInfo Video} {MediaInfo Audio}')).toStrictEqual('x265 AAC');
 });
 
 test('naming tokens validates known parameterized tokens by base token', () => {
@@ -217,14 +215,16 @@ test('naming tokens previews truncation parameters', () => {
 	};
 
 	for (const token of truncatableTokens) {
-		assertEquals(resolveFormat(`{${token}:16}`, sample), 'The Fantastic...', token);
-		assertEquals(resolveFormat(`{${token}:-13}`, sample), '...Mr. Sisko', token);
+		expect(resolveFormat(`{${token}:16}`, sample), token).toStrictEqual('The Fantastic...');
+		expect(resolveFormat(`{${token}:-13}`, sample), token).toStrictEqual('...Mr. Sisko');
 	}
 
-	assertEquals(resolveFormat('{ReleaseGroup:-17}', sample), '...ASixFourImpala');
-	assertEquals(resolveFormat('{Release Group:12}', sample), 'IWishIWas...');
-	assertEquals(resolveFormat('{Edition Tags:16}', sample), 'The Fantastic...');
-	assertEquals(resolveFormat('{Movie Title:99}', sample), 'The Fantastic Life of Mr. Sisko');
+	expect(resolveFormat('{ReleaseGroup:-17}', sample)).toStrictEqual('...ASixFourImpala');
+	expect(resolveFormat('{Release Group:12}', sample)).toStrictEqual('IWishIWas...');
+	expect(resolveFormat('{Edition Tags:16}', sample)).toStrictEqual('The Fantastic...');
+	expect(resolveFormat('{Movie Title:99}', sample)).toStrictEqual(
+		'The Fantastic Life of Mr. Sisko'
+	);
 });
 
 test('naming tokens previews media language parameters', () => {
@@ -234,20 +234,24 @@ test('naming tokens previews media language parameters', () => {
 		'MediaInfo Full': 'x264 DTS [EN+DE]'
 	};
 
-	assertEquals(resolveFormat('{MediaInfo AudioLanguages:EN+DE}', sample), '[EN+DE]');
-	assertEquals(resolveFormat('{MediaInfo SubtitleLanguages:-EN}', sample), '[DE]');
-	assertEquals(resolveFormat('{MediaInfo Full:EN+}', sample), 'x264 DTS [EN+--]');
+	expect(resolveFormat('{MediaInfo AudioLanguages:EN+DE}', sample)).toStrictEqual('[EN+DE]');
+	expect(resolveFormat('{MediaInfo SubtitleLanguages:-EN}', sample)).toStrictEqual('[DE]');
+	expect(resolveFormat('{MediaInfo Full:EN+}', sample)).toStrictEqual('x264 DTS [EN+--]');
 });
 
 test('naming tokens previews custom format parameters', () => {
 	const sample = { 'Custom Formats': 'AMZN WEB DV Surround Sound' };
 	const options = { customFormats: ['AMZN', 'WEB', 'DV', 'Surround Sound'] };
 
-	assertEquals(resolveFormat('{Custom Formats:AMZN,WEB}', sample, options), 'AMZN WEB');
-	assertEquals(resolveFormat('{Custom Formats:-DV}', sample, options), 'AMZN WEB Surround Sound');
-	assertEquals(resolveFormat('{Custom Format:AMZN}', sample, options), 'AMZN');
-	assertEquals(resolveFormat('{Custom Format:amzn}', sample, options), '');
-	assertEquals(resolveFormat('{Custom Format:Surround Sound}', sample, options), 'Surround Sound');
+	expect(resolveFormat('{Custom Formats:AMZN,WEB}', sample, options)).toStrictEqual('AMZN WEB');
+	expect(resolveFormat('{Custom Formats:-DV}', sample, options)).toStrictEqual(
+		'AMZN WEB Surround Sound'
+	);
+	expect(resolveFormat('{Custom Format:AMZN}', sample, options)).toStrictEqual('AMZN');
+	expect(resolveFormat('{Custom Format:amzn}', sample, options)).toStrictEqual('');
+	expect(resolveFormat('{Custom Format:Surround Sound}', sample, options)).toStrictEqual(
+		'Surround Sound'
+	);
 });
 
 test('naming tokens validates and previews Sonarr numbering flexibility', () => {
@@ -262,8 +266,10 @@ test('naming tokens validates and previews Sonarr numbering flexibility', () => 
 		assertValid(format, 'sonarr');
 	}
 
-	assertEquals(resolveSonarrFormat('{season}-{episode}-{absolute}'), '1-1-1');
-	assertEquals(resolveSonarrFormat('{season:000}-{episode:000}-{absolute:0000}'), '001-001-0001');
+	expect(resolveSonarrFormat('{season}-{episode}-{absolute}')).toStrictEqual('1-1-1');
+	expect(resolveSonarrFormat('{season:000}-{episode:000}-{absolute:0000}')).toStrictEqual(
+		'001-001-0001'
+	);
 });
 
 test('naming tokens validates Radarr field rules before Arr sync', () => {

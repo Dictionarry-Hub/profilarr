@@ -19,7 +19,7 @@
  */
 
 import { BaseTest, type TestContext } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals, assertRejects } from '@std/assert';
+import { expect } from 'vitest';
 import { applyPendingRestore } from '#utils/backup/applyPending.ts';
 import { config } from '#utils/config/config.ts';
 import { Database } from '#db/sqlite.ts';
@@ -109,9 +109,9 @@ class ApplyPendingTest extends BaseTest {
 
 			await applyPendingRestore();
 
-			assertEquals(await readText(`${ctx.tempDir}/data/profilarr.db`), 'live');
-			assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), false);
-			assertEquals(await exists(`${ctx.tempDir}/${STAGING_NAME}`), false);
+			expect(await readText(`${ctx.tempDir}/data/profilarr.db`)).toStrictEqual('live');
+			expect(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`)).toStrictEqual(false);
+			expect(await exists(`${ctx.tempDir}/${STAGING_NAME}`)).toStrictEqual(false);
 		});
 	}
 
@@ -122,8 +122,8 @@ class ApplyPendingTest extends BaseTest {
 
 			await applyPendingRestore();
 
-			assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), false);
-			assertEquals(await readText(`${ctx.tempDir}/data/profilarr.db`), 'live');
+			expect(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`)).toStrictEqual(false);
+			expect(await readText(`${ctx.tempDir}/data/profilarr.db`)).toStrictEqual('live');
 		});
 	}
 
@@ -137,11 +137,12 @@ class ApplyPendingTest extends BaseTest {
 				await writeFile(archivePath, new Uint8Array([0xff, 0xff, 0xff, 0xff, 0xff]));
 				await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
 
-				await assertRejects(() => applyPendingRestore(), Error, 'Restore extraction failed');
+				await expect(applyPendingRestore()).rejects.toThrow(Error);
+				await expect(applyPendingRestore()).rejects.toThrow('Restore extraction failed');
 
-				assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), true);
-				assertEquals(await exists(`${ctx.tempDir}/${STAGING_NAME}`), false);
-				assertEquals(await readText(`${ctx.tempDir}/data/profilarr.db`), 'live');
+				expect(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`)).toStrictEqual(true);
+				expect(await exists(`${ctx.tempDir}/${STAGING_NAME}`)).toStrictEqual(false);
+				expect(await readText(`${ctx.tempDir}/data/profilarr.db`)).toStrictEqual('live');
 			}
 		);
 	}
@@ -154,11 +155,12 @@ class ApplyPendingTest extends BaseTest {
 			await createArchiveWithoutDb(ctx.tempDir, archivePath);
 			await writeFile(`${ctx.tempDir}/${SENTINEL_NAME}`, archivePath);
 
-			await assertRejects(() => applyPendingRestore(), Error, 'does not contain data/profilarr.db');
+			await expect(applyPendingRestore()).rejects.toThrow(Error);
+			await expect(applyPendingRestore()).rejects.toThrow('does not contain data/profilarr.db');
 
-			assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), true);
-			assertEquals(await exists(`${ctx.tempDir}/${STAGING_NAME}`), false);
-			assertEquals(await readText(`${ctx.tempDir}/data/profilarr.db`), 'live');
+			expect(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`)).toStrictEqual(true);
+			expect(await exists(`${ctx.tempDir}/${STAGING_NAME}`)).toStrictEqual(false);
+			expect(await readText(`${ctx.tempDir}/data/profilarr.db`)).toStrictEqual('live');
 		});
 	}
 
@@ -180,17 +182,17 @@ class ApplyPendingTest extends BaseTest {
 				await applyPendingRestore();
 
 				// New DB content moved into place.
-				assertEquals(readMarker(`${ctx.tempDir}/data/profilarr.db`), 'restored-NEW');
+				expect(readMarker(`${ctx.tempDir}/data/profilarr.db`)).toStrictEqual('restored-NEW');
 				// Sidecars wiped (archive doesn't include them, and the live ones are removed pre-swap).
-				assertEquals(await exists(`${ctx.tempDir}/data/profilarr.db-wal`), false);
-				assertEquals(await exists(`${ctx.tempDir}/data/profilarr.db-shm`), false);
+				expect(await exists(`${ctx.tempDir}/data/profilarr.db-wal`)).toStrictEqual(false);
+				expect(await exists(`${ctx.tempDir}/data/profilarr.db-shm`)).toStrictEqual(false);
 				// Old databases/ subtree replaced.
-				assertEquals(await exists(`${ctx.tempDir}/data/databases/old.txt`), false);
+				expect(await exists(`${ctx.tempDir}/data/databases/old.txt`)).toStrictEqual(false);
 				// INFO.json restored.
-				assertEquals(await exists(`${ctx.tempDir}/data/INFO.json`), true);
+				expect(await exists(`${ctx.tempDir}/data/INFO.json`)).toStrictEqual(true);
 				// Sentinel removed last; staging dir cleaned up.
-				assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), false);
-				assertEquals(await exists(`${ctx.tempDir}/${STAGING_NAME}`), false);
+				expect(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`)).toStrictEqual(false);
+				expect(await exists(`${ctx.tempDir}/${STAGING_NAME}`)).toStrictEqual(false);
 			}
 		);
 	}
@@ -212,9 +214,9 @@ class ApplyPendingTest extends BaseTest {
 				await applyPendingRestore();
 
 				// New content applied, leftover gone, staging dir removed entirely.
-				assertEquals(readMarker(`${ctx.tempDir}/data/profilarr.db`), 'restored-NEW');
-				assertEquals(await exists(`${ctx.tempDir}/${STAGING_NAME}`), false);
-				assertEquals(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`), false);
+				expect(readMarker(`${ctx.tempDir}/data/profilarr.db`)).toStrictEqual('restored-NEW');
+				expect(await exists(`${ctx.tempDir}/${STAGING_NAME}`)).toStrictEqual(false);
+				expect(await exists(`${ctx.tempDir}/${SENTINEL_NAME}`)).toStrictEqual(false);
 			}
 		);
 	}

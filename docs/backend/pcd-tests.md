@@ -116,7 +116,7 @@ test('scalar fields split into independent grouped ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 3);
+	expect(ops).toHaveLength(3);
 	assertOnlyField(ops, 'pattern');
 	assertOnlyField(ops, 'description');
 	assertOnlyField(ops, 'regex101_id');

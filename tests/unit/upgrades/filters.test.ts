@@ -4,7 +4,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	evaluateRule,
 	evaluateGroup,
@@ -32,8 +32,8 @@ class FilterEvaluationTest extends BaseTest {
 				]
 			};
 
-			assertEquals(filterGroupUsesField(group, 'cutoff_met'), true);
-			assertEquals(filterGroupUsesField(group, 'year'), false);
+			expect(filterGroupUsesField(group, 'cutoff_met')).toStrictEqual(true);
+			expect(filterGroupUsesField(group, 'year')).toStrictEqual(false);
 		});
 
 		// =====================
@@ -43,13 +43,13 @@ class FilterEvaluationTest extends BaseTest {
 		this.test('boolean: is operator matches true', () => {
 			const item = { monitored: true };
 			const rule: FilterRule = { type: 'rule', field: 'monitored', operator: 'is', value: true };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('boolean: is operator rejects false', () => {
 			const item = { monitored: false };
 			const rule: FilterRule = { type: 'rule', field: 'monitored', operator: 'is', value: true };
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('boolean: is_not operator matches', () => {
@@ -60,7 +60,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_not',
 				value: true
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('boolean: is_not operator rejects', () => {
@@ -71,7 +71,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_not',
 				value: true
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		// =====================
@@ -81,73 +81,73 @@ class FilterEvaluationTest extends BaseTest {
 		this.test('number: eq operator matches', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'eq', value: 2023 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: eq operator rejects', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'eq', value: 2024 };
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('number: neq operator matches', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'neq', value: 2024 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: neq operator rejects', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'neq', value: 2023 };
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('number: gt operator matches', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'gt', value: 2020 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: gt operator rejects equal value', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'gt', value: 2023 };
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('number: gte operator matches equal value', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'gte', value: 2023 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: gte operator matches greater value', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'gte', value: 2020 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: lt operator matches', () => {
 			const item = { year: 2020 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'lt', value: 2023 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: lt operator rejects equal value', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'lt', value: 2023 };
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('number: lte operator matches equal value', () => {
 			const item = { year: 2023 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'lte', value: 2023 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('number: lte operator matches less value', () => {
 			const item = { year: 2020 };
 			const rule: FilterRule = { type: 'rule', field: 'year', operator: 'lte', value: 2023 };
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		// =====================
@@ -162,7 +162,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'contains',
 				value: 'dark'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('text: contains operator rejects', () => {
@@ -173,7 +173,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'contains',
 				value: 'batman'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('text: not_contains operator matches', () => {
@@ -184,7 +184,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'not_contains',
 				value: 'batman'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('text: not_contains operator rejects', () => {
@@ -195,7 +195,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'not_contains',
 				value: 'dark'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('text: starts_with operator matches (case insensitive)', () => {
@@ -206,7 +206,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'starts_with',
 				value: 'the'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('text: starts_with operator rejects', () => {
@@ -217,7 +217,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'starts_with',
 				value: 'dark'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('text: ends_with operator matches (case insensitive)', () => {
@@ -228,7 +228,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'ends_with',
 				value: 'KNIGHT'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('text: ends_with operator rejects', () => {
@@ -239,7 +239,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'ends_with',
 				value: 'dark'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('text: eq operator matches (case insensitive)', () => {
@@ -250,7 +250,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'eq',
 				value: 'hd-1080p'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('text: neq operator matches (case insensitive)', () => {
@@ -261,7 +261,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'neq',
 				value: '4K'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		// =====================
@@ -276,7 +276,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'includes',
 				value: 'no-redownload'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('tags: does_not_include rejects exact tag in multi-tag list', () => {
@@ -287,7 +287,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'does_not_include',
 				value: 'no-redownload'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('tags: has_any matches non-empty tag list', () => {
@@ -298,7 +298,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'has_any',
 				value: null
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('tags: is_only matches single selected tag', () => {
@@ -309,7 +309,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_only',
 				value: 'no-redownload'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('tags: is_only rejects selected tag with other tags', () => {
@@ -320,7 +320,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_only',
 				value: 'no-redownload'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('tags: has_none matches empty tag list', () => {
@@ -331,7 +331,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'has_none',
 				value: null
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('tags: legacy eq matches exact tag in multi-tag list', () => {
@@ -342,7 +342,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'eq',
 				value: 'no-redownload'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('tags: legacy neq rejects exact tag in multi-tag list', () => {
@@ -353,7 +353,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'neq',
 				value: 'no-redownload'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('genres: includes matches exact genre in multi-genre list', () => {
@@ -364,7 +364,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'includes',
 				value: 'fantasy'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('genres: legacy neq rejects exact genre in multi-genre list', () => {
@@ -375,7 +375,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'neq',
 				value: 'Fantasy'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('multi-value normalize: maps legacy tag and genre operators', () => {
@@ -390,12 +390,12 @@ class FilterEvaluationTest extends BaseTest {
 				]
 			};
 
-			assertEquals(normalizeFilterGroup(group, 'radarr'), true);
+			expect(normalizeFilterGroup(group, 'radarr')).toStrictEqual(true);
 			const rules = group.children as FilterRule[];
-			assertEquals(rules[0].operator, 'includes');
-			assertEquals(rules[1].operator, 'does_not_include');
-			assertEquals(rules[2].operator, 'includes');
-			assertEquals(rules[3].operator, 'does_not_include');
+			expect(rules[0].operator).toStrictEqual('includes');
+			expect(rules[1].operator).toStrictEqual('does_not_include');
+			expect(rules[2].operator).toStrictEqual('includes');
+			expect(rules[3].operator).toStrictEqual('does_not_include');
 		});
 
 		this.test('multi-value normalize: clears values for unary operators', () => {
@@ -405,9 +405,9 @@ class FilterEvaluationTest extends BaseTest {
 				children: [{ type: 'rule', field: 'tags', operator: 'has_any', value: 'unused' }]
 			};
 
-			assertEquals(normalizeFilterGroup(group, 'radarr'), true);
+			expect(normalizeFilterGroup(group, 'radarr')).toStrictEqual(true);
 			const rule = group.children[0] as FilterRule;
-			assertEquals(rule.value, null);
+			expect(rule.value).toStrictEqual(null);
 		});
 
 		// =====================
@@ -422,7 +422,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'includes',
 				value: 'Tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('custom format: includes rejects absent format', () => {
@@ -433,7 +433,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'includes',
 				value: 'Tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('custom format: does_not_include matches absent format', () => {
@@ -444,7 +444,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'does_not_include',
 				value: 'Tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('custom format: does_not_include rejects present format', () => {
@@ -455,7 +455,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'does_not_include',
 				value: 'Tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('custom format: is_only matches single selected format', () => {
@@ -466,7 +466,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_only',
 				value: 'Tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('custom format: is_only rejects selected format with other formats', () => {
@@ -477,7 +477,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_only',
 				value: 'Tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('custom format: has_any matches non-empty formats', () => {
@@ -488,7 +488,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'has_any',
 				value: null
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('custom format: has_any rejects empty formats', () => {
@@ -499,7 +499,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'has_any',
 				value: null
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('custom format: has_none matches empty formats', () => {
@@ -510,7 +510,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'has_none',
 				value: null
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('custom format: has_none rejects non-empty formats', () => {
@@ -521,7 +521,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'has_none',
 				value: null
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('custom format: matching is case-insensitive', () => {
@@ -532,23 +532,21 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'includes',
 				value: 'tier 6'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('custom format: field is Radarr-only', () => {
-			assertEquals(
-				getFilterFields('radarr').some((field) => field.id === 'custom_format'),
+			expect(getFilterFields('radarr').some((field) => field.id === 'custom_format')).toStrictEqual(
 				true
 			);
-			assertEquals(
-				getFilterFields('sonarr').some((field) => field.id === 'custom_format'),
+			expect(getFilterFields('sonarr').some((field) => field.id === 'custom_format')).toStrictEqual(
 				false
 			);
 		});
 
 		this.test('custom format: field is Radarr dynamic', () => {
-			assertEquals(getDynamicFilterFieldIds('radarr').includes('custom_format'), true);
-			assertEquals(getDynamicFilterFieldIds('sonarr').includes('custom_format'), false);
+			expect(getDynamicFilterFieldIds('radarr').includes('custom_format')).toStrictEqual(true);
+			expect(getDynamicFilterFieldIds('sonarr').includes('custom_format')).toStrictEqual(false);
 		});
 
 		// =====================
@@ -563,7 +561,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'before',
 				value: '2023-06-01T00:00:00Z'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('date: before operator rejects', () => {
@@ -574,7 +572,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'before',
 				value: '2023-06-01T00:00:00Z'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('date: after operator matches', () => {
@@ -585,7 +583,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'after',
 				value: '2023-06-01T00:00:00Z'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('date: after operator rejects', () => {
@@ -596,7 +594,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'after',
 				value: '2023-06-01T00:00:00Z'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('date: in_last operator matches recent date', () => {
@@ -609,7 +607,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'in_last',
 				value: 7 // days
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('date: in_last operator rejects old date', () => {
@@ -622,7 +620,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'in_last',
 				value: 7 // days
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('date: not_in_last operator matches old date', () => {
@@ -635,7 +633,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'not_in_last',
 				value: 7 // days
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('date: not_in_last operator rejects recent date', () => {
@@ -648,7 +646,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'not_in_last',
 				value: 7 // days
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		// =====================
@@ -664,7 +662,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'eq',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('ordinal: eq operator rejects different value', () => {
@@ -675,7 +673,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'eq',
 				value: 'released'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: neq operator matches different value', () => {
@@ -686,7 +684,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'neq',
 				value: 'released'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('ordinal: neq operator rejects same value', () => {
@@ -697,7 +695,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'neq',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: gte (has reached) matches same stage', () => {
@@ -708,7 +706,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'gte',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('ordinal: gte (has reached) matches later stage', () => {
@@ -719,7 +717,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'gte',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('ordinal: gte (has reached) rejects earlier stage', () => {
@@ -730,7 +728,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'gte',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test("ordinal: lte (hasn't passed) matches same stage", () => {
@@ -741,7 +739,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'lte',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test("ordinal: lte (hasn't passed) matches earlier stage", () => {
@@ -752,7 +750,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'lte',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test("ordinal: lte (hasn't passed) rejects later stage", () => {
@@ -763,7 +761,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'lte',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: gt (is past) matches later stage', () => {
@@ -774,7 +772,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'gt',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('ordinal: gt (is past) rejects same stage', () => {
@@ -785,7 +783,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'gt',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: gt (is past) rejects earlier stage', () => {
@@ -796,7 +794,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'gt',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: lt (is before) matches earlier stage', () => {
@@ -807,7 +805,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'lt',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('ordinal: lt (is before) rejects same stage', () => {
@@ -818,7 +816,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'lt',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: lt (is before) rejects later stage', () => {
@@ -829,71 +827,65 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'lt',
 				value: 'inCinemas'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('ordinal: full hierarchy test - tba is earliest', () => {
 			const item = { minimum_availability: 'tba' };
 			// tba should be before all others
-			assertEquals(
+			expect(
 				evaluateRule(item, {
 					type: 'rule',
 					field: 'minimum_availability',
 					operator: 'lt',
 					value: 'announced'
-				}),
-				true
-			);
-			assertEquals(
+				})
+			).toStrictEqual(true);
+			expect(
 				evaluateRule(item, {
 					type: 'rule',
 					field: 'minimum_availability',
 					operator: 'lt',
 					value: 'inCinemas'
-				}),
-				true
-			);
-			assertEquals(
+				})
+			).toStrictEqual(true);
+			expect(
 				evaluateRule(item, {
 					type: 'rule',
 					field: 'minimum_availability',
 					operator: 'lt',
 					value: 'released'
-				}),
-				true
-			);
+				})
+			).toStrictEqual(true);
 		});
 
 		this.test('ordinal: full hierarchy test - released is latest', () => {
 			const item = { minimum_availability: 'released' };
 			// released should be past all others
-			assertEquals(
+			expect(
 				evaluateRule(item, {
 					type: 'rule',
 					field: 'minimum_availability',
 					operator: 'gt',
 					value: 'tba'
-				}),
-				true
-			);
-			assertEquals(
+				})
+			).toStrictEqual(true);
+			expect(
 				evaluateRule(item, {
 					type: 'rule',
 					field: 'minimum_availability',
 					operator: 'gt',
 					value: 'announced'
-				}),
-				true
-			);
-			assertEquals(
+				})
+			).toStrictEqual(true);
+			expect(
 				evaluateRule(item, {
 					type: 'rule',
 					field: 'minimum_availability',
 					operator: 'gt',
 					value: 'inCinemas'
-				}),
-				true
-			);
+				})
+			).toStrictEqual(true);
 		});
 
 		// =====================
@@ -908,7 +900,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is',
 				value: 'something'
 			};
-			assertEquals(evaluateRule(item, rule), false);
+			expect(evaluateRule(item, rule)).toStrictEqual(false);
 		});
 
 		this.test('null field: is_not operator returns true', () => {
@@ -919,7 +911,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'is_not',
 				value: 'something'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('undefined field: neq operator returns true', () => {
@@ -930,7 +922,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'neq',
 				value: 'Action'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		this.test('undefined field: not_contains operator returns true', () => {
@@ -941,7 +933,7 @@ class FilterEvaluationTest extends BaseTest {
 				operator: 'not_contains',
 				value: 'Action'
 			};
-			assertEquals(evaluateRule(item, rule), true);
+			expect(evaluateRule(item, rule)).toStrictEqual(true);
 		});
 
 		// =====================
@@ -951,7 +943,7 @@ class FilterEvaluationTest extends BaseTest {
 		this.test('group: empty group matches all items', () => {
 			const item = { title: 'Test', year: 2023 };
 			const group: FilterGroup = { type: 'group', match: 'all', children: [] };
-			assertEquals(evaluateGroup(item, group), true);
+			expect(evaluateGroup(item, group)).toStrictEqual(true);
 		});
 
 		this.test('group: all match - both rules pass', () => {
@@ -964,7 +956,7 @@ class FilterEvaluationTest extends BaseTest {
 					{ type: 'rule', field: 'year', operator: 'gte', value: 2020 }
 				]
 			};
-			assertEquals(evaluateGroup(item, group), true);
+			expect(evaluateGroup(item, group)).toStrictEqual(true);
 		});
 
 		this.test('group: all match - one rule fails', () => {
@@ -977,7 +969,7 @@ class FilterEvaluationTest extends BaseTest {
 					{ type: 'rule', field: 'year', operator: 'gte', value: 2020 }
 				]
 			};
-			assertEquals(evaluateGroup(item, group), false);
+			expect(evaluateGroup(item, group)).toStrictEqual(false);
 		});
 
 		// =====================
@@ -994,7 +986,7 @@ class FilterEvaluationTest extends BaseTest {
 					{ type: 'rule', field: 'year', operator: 'gte', value: 2020 }
 				]
 			};
-			assertEquals(evaluateGroup(item, group), true);
+			expect(evaluateGroup(item, group)).toStrictEqual(true);
 		});
 
 		this.test('group: any match - no rules pass', () => {
@@ -1007,7 +999,7 @@ class FilterEvaluationTest extends BaseTest {
 					{ type: 'rule', field: 'year', operator: 'gte', value: 2020 }
 				]
 			};
-			assertEquals(evaluateGroup(item, group), false);
+			expect(evaluateGroup(item, group)).toStrictEqual(false);
 		});
 
 		// =====================
@@ -1032,7 +1024,7 @@ class FilterEvaluationTest extends BaseTest {
 					}
 				]
 			};
-			assertEquals(evaluateGroup(item, group), true);
+			expect(evaluateGroup(item, group)).toStrictEqual(true);
 		});
 
 		this.test('nested groups: OR containing AND', () => {
@@ -1053,7 +1045,7 @@ class FilterEvaluationTest extends BaseTest {
 					{ type: 'rule', field: 'quality_profile', operator: 'eq', value: '4K' }
 				]
 			};
-			assertEquals(evaluateGroup(item, group), true);
+			expect(evaluateGroup(item, group)).toStrictEqual(true);
 		});
 
 		this.test('nested groups: deeply nested structure', () => {
@@ -1086,7 +1078,7 @@ class FilterEvaluationTest extends BaseTest {
 					}
 				]
 			};
-			assertEquals(evaluateGroup(item, group), true);
+			expect(evaluateGroup(item, group)).toStrictEqual(true);
 		});
 
 		// =====================
@@ -1110,9 +1102,9 @@ class FilterEvaluationTest extends BaseTest {
 			};
 
 			const matched = movies.filter((m) => evaluateGroup(m, group));
-			assertEquals(matched.length, 2);
-			assertEquals(matched[0].title, 'Movie 2');
-			assertEquals(matched[1].title, 'Movie 4');
+			expect(matched.length).toStrictEqual(2);
+			expect(matched[0].title).toStrictEqual('Movie 2');
+			expect(matched[1].title).toStrictEqual('Movie 4');
 		});
 
 		this.test('scenario: find high-rated action movies', () => {
@@ -1132,9 +1124,9 @@ class FilterEvaluationTest extends BaseTest {
 			};
 
 			const matched = movies.filter((m) => evaluateGroup(m, group));
-			assertEquals(matched.length, 2);
-			assertEquals(matched[0].title, 'Movie 1');
-			assertEquals(matched[1].title, 'Movie 4');
+			expect(matched.length).toStrictEqual(2);
+			expect(matched[0].title).toStrictEqual('Movie 1');
+			expect(matched[1].title).toStrictEqual('Movie 4');
 		});
 
 		this.test('scenario: find movies where cutoff not met', () => {
@@ -1154,9 +1146,9 @@ class FilterEvaluationTest extends BaseTest {
 			};
 
 			const matched = movies.filter((m) => evaluateGroup(m, group));
-			assertEquals(matched.length, 2);
-			assertEquals(matched[0].title, 'Movie 2');
-			assertEquals(matched[1].title, 'Movie 4');
+			expect(matched.length).toStrictEqual(2);
+			expect(matched[0].title).toStrictEqual('Movie 2');
+			expect(matched[1].title).toStrictEqual('Movie 4');
 		});
 
 		this.test('scenario: find monitored movies matching Tier 6', () => {
@@ -1176,9 +1168,9 @@ class FilterEvaluationTest extends BaseTest {
 			};
 
 			const matched = movies.filter((m) => evaluateGroup(m, group));
-			assertEquals(matched.length, 2);
-			assertEquals(matched[0].title, 'Movie 1');
-			assertEquals(matched[1].title, 'Movie 4');
+			expect(matched.length).toStrictEqual(2);
+			expect(matched[0].title).toStrictEqual('Movie 1');
+			expect(matched[1].title).toStrictEqual('Movie 4');
 		});
 	}
 }

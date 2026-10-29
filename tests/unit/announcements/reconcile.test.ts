@@ -3,7 +3,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals, assertThrows } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	ANNOUNCEMENTS_CAP,
 	reconcileAnnouncements,
@@ -67,17 +67,11 @@ class AnnouncementReconcileTest extends BaseTest {
 		this.test('inserts new ids into upserts and newlyInserted', () => {
 			const file = makeFile([makeBulletin({ id: 'new-1' })]);
 			const plan = reconcileAnnouncements(file, []);
-			assertEquals(
-				plan.upserts.map((a) => a.id),
-				['new-1']
-			);
-			assertEquals(
-				plan.newlyInserted.map((a) => a.id),
-				['new-1']
-			);
-			assertEquals(plan.withdrawnIds, []);
-			assertEquals(plan.unwithdrawnIds, []);
-			assertEquals(plan.droppedCount, 0);
+			expect(plan.upserts.map((a) => a.id)).toStrictEqual(['new-1']);
+			expect(plan.newlyInserted.map((a) => a.id)).toStrictEqual(['new-1']);
+			expect(plan.withdrawnIds).toStrictEqual([]);
+			expect(plan.unwithdrawnIds).toStrictEqual([]);
+			expect(plan.droppedCount).toStrictEqual(0);
 		});
 
 		this.test('multiple new ids all go into newlyInserted', () => {
@@ -87,10 +81,7 @@ class AnnouncementReconcileTest extends BaseTest {
 				makeBulletin({ id: 'c' })
 			]);
 			const plan = reconcileAnnouncements(file, []);
-			assertEquals(
-				plan.newlyInserted.map((a) => a.id),
-				['a', 'b', 'c']
-			);
+			expect(plan.newlyInserted.map((a) => a.id)).toStrictEqual(['a', 'b', 'c']);
 		});
 
 		// ─── Existing rows ───────────────────────────────────────────────────
@@ -99,20 +90,17 @@ class AnnouncementReconcileTest extends BaseTest {
 			const existing = [makeRow({ id: 'existing-1' })];
 			const file = makeFile([makeBulletin({ id: 'existing-1', title: 'Updated' })]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.upserts.length, 1);
-			assertEquals(plan.upserts[0].title, 'Updated');
-			assertEquals(plan.newlyInserted, []);
+			expect(plan.upserts.length).toStrictEqual(1);
+			expect(plan.upserts[0].title).toStrictEqual('Updated');
+			expect(plan.newlyInserted).toStrictEqual([]);
 		});
 
 		this.test('mix of new and existing: only new ids in newlyInserted', () => {
 			const existing = [makeRow({ id: 'a' })];
 			const file = makeFile([makeBulletin({ id: 'a' }), makeBulletin({ id: 'b' })]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.upserts.map((a) => a.id).sort(), ['a', 'b']);
-			assertEquals(
-				plan.newlyInserted.map((a) => a.id),
-				['b']
-			);
+			expect(plan.upserts.map((a) => a.id).sort()).toStrictEqual(['a', 'b']);
+			expect(plan.newlyInserted.map((a) => a.id)).toStrictEqual(['b']);
 		});
 
 		// ─── Withdrawal ──────────────────────────────────────────────────────
@@ -121,15 +109,15 @@ class AnnouncementReconcileTest extends BaseTest {
 			const existing = [makeRow({ id: 'gone' })];
 			const file = makeFile([]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.withdrawnIds, ['gone']);
-			assertEquals(plan.upserts, []);
+			expect(plan.withdrawnIds).toStrictEqual(['gone']);
+			expect(plan.upserts).toStrictEqual([]);
 		});
 
 		this.test('already-withdrawn rows still absent from file are not re-withdrawn', () => {
 			const existing = [makeRow({ id: 'already-gone', withdrawn: 1 })];
 			const file = makeFile([]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.withdrawnIds, []);
+			expect(plan.withdrawnIds).toStrictEqual([]);
 		});
 
 		// ─── Unwithdrawal ────────────────────────────────────────────────────
@@ -138,25 +126,24 @@ class AnnouncementReconcileTest extends BaseTest {
 			const existing = [makeRow({ id: 'back', withdrawn: 1 })];
 			const file = makeFile([makeBulletin({ id: 'back' })]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.unwithdrawnIds, ['back']);
+			expect(plan.unwithdrawnIds).toStrictEqual(['back']);
 			// A reappearing announcement should NOT be treated as newly inserted.
-			assertEquals(plan.newlyInserted, []);
+			expect(plan.newlyInserted).toStrictEqual([]);
 		});
 
 		this.test('non-withdrawn row still in file does not appear in unwithdrawnIds', () => {
 			const existing = [makeRow({ id: 'stable', withdrawn: 0 })];
 			const file = makeFile([makeBulletin({ id: 'stable' })]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.unwithdrawnIds, []);
+			expect(plan.unwithdrawnIds).toStrictEqual([]);
 		});
 
 		// ─── Schema rejection ────────────────────────────────────────────────
 
 		this.test('schema != 1 throws UnsupportedSchemaError', () => {
 			const file = makeFile([], { schema: 2 });
-			assertThrows(
-				() => reconcileAnnouncements(file, []),
-				UnsupportedSchemaError,
+			expect(() => reconcileAnnouncements(file, [])).toThrow(UnsupportedSchemaError);
+			expect(() => reconcileAnnouncements(file, [])).toThrow(
 				'Unsupported announcements schema version: 2'
 			);
 		});
@@ -164,7 +151,7 @@ class AnnouncementReconcileTest extends BaseTest {
 		this.test('schema === 1 is accepted', () => {
 			const file = makeFile([], { schema: 1 });
 			const plan = reconcileAnnouncements(file, []);
-			assertEquals(plan.upserts, []);
+			expect(plan.upserts).toStrictEqual([]);
 		});
 
 		// ─── Overflow cap ────────────────────────────────────────────────────
@@ -175,8 +162,8 @@ class AnnouncementReconcileTest extends BaseTest {
 				announcements.push(makeBulletin({ id: `id-${i}` }));
 			}
 			const plan = reconcileAnnouncements(makeFile(announcements), []);
-			assertEquals(plan.upserts.length, ANNOUNCEMENTS_CAP);
-			assertEquals(plan.droppedCount, 5);
+			expect(plan.upserts.length).toStrictEqual(ANNOUNCEMENTS_CAP);
+			expect(plan.droppedCount).toStrictEqual(5);
 		});
 
 		this.test('payloads at the cap are not truncated', () => {
@@ -185,8 +172,8 @@ class AnnouncementReconcileTest extends BaseTest {
 				announcements.push(makeBulletin({ id: `id-${i}` }));
 			}
 			const plan = reconcileAnnouncements(makeFile(announcements), []);
-			assertEquals(plan.upserts.length, ANNOUNCEMENTS_CAP);
-			assertEquals(plan.droppedCount, 0);
+			expect(plan.upserts.length).toStrictEqual(ANNOUNCEMENTS_CAP);
+			expect(plan.droppedCount).toStrictEqual(0);
 		});
 
 		// ─── Combined scenarios ──────────────────────────────────────────────
@@ -203,13 +190,14 @@ class AnnouncementReconcileTest extends BaseTest {
 				makeBulletin({ id: 'brand-new' })
 			]);
 			const plan = reconcileAnnouncements(file, existing);
-			assertEquals(plan.upserts.map((a) => a.id).sort(), ['brand-new', 'keep', 'returning']);
-			assertEquals(plan.withdrawnIds, ['withdraw-me']);
-			assertEquals(plan.unwithdrawnIds, ['returning']);
-			assertEquals(
-				plan.newlyInserted.map((a) => a.id),
-				['brand-new']
-			);
+			expect(plan.upserts.map((a) => a.id).sort()).toStrictEqual([
+				'brand-new',
+				'keep',
+				'returning'
+			]);
+			expect(plan.withdrawnIds).toStrictEqual(['withdraw-me']);
+			expect(plan.unwithdrawnIds).toStrictEqual(['returning']);
+			expect(plan.newlyInserted.map((a) => a.id)).toStrictEqual(['brand-new']);
 		});
 	}
 }

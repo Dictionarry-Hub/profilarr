@@ -6,7 +6,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { generateUlid } from '#shared/utils/ulid.ts';
 
 const CROCKFORD_RE = /^[0-9A-HJKMNP-TV-Z]{26}$/;
@@ -15,14 +15,14 @@ class UlidTest extends BaseTest {
 	runTests(): void {
 		this.test('returns a 26-char Crockford Base32 string', () => {
 			const id = generateUlid();
-			assertEquals(id.length, 26);
-			assertEquals(CROCKFORD_RE.test(id), true);
+			expect(id.length).toStrictEqual(26);
+			expect(CROCKFORD_RE.test(id)).toStrictEqual(true);
 		});
 
 		this.test('100 generated ulids are all unique', () => {
 			const seen = new Set<string>();
 			for (let i = 0; i < 100; i++) seen.add(generateUlid());
-			assertEquals(seen.size, 100);
+			expect(seen.size).toStrictEqual(100);
 		});
 
 		this.test('time-half encodes the current millisecond', () => {
@@ -37,15 +37,15 @@ class UlidTest extends BaseTest {
 				decoded = decoded * 32 + CROCKFORD.indexOf(ch);
 			}
 
-			assertEquals(decoded >= before, true);
-			assertEquals(decoded <= after, true);
+			expect(decoded >= before).toStrictEqual(true);
+			expect(decoded <= after).toStrictEqual(true);
 		});
 
 		this.test('ulids generated across milliseconds sort lexicographically by time', async () => {
 			const a = generateUlid();
 			await new Promise((resolve) => setTimeout(resolve, 5));
 			const b = generateUlid();
-			assertEquals(a < b, true);
+			expect(a < b).toStrictEqual(true);
 		});
 	}
 }

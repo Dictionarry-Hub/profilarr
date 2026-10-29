@@ -1,6 +1,5 @@
 import process from 'node:process';
-import { test } from 'vitest';
-import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import { expect, test } from 'vitest';
 import { runCommand } from '#utils/command.ts';
 
 test('PROFILARR_API_KEY shorter than 32 characters fails config import', async () => {
@@ -10,11 +9,11 @@ test('PROFILARR_API_KEY shorter than 32 characters fails config import', async (
 		{ env: { PROFILARR_API_KEY: 'too-short' } }
 	);
 
-	assertEquals(result.code, 1);
+	expect(result.code).toStrictEqual(1);
 	const stderr = new TextDecoder().decode(result.stderr);
-	assertStringIncludes(stderr, 'PROFILARR_API_KEY must be at least 32 characters long');
+	expect(stderr).toContain('PROFILARR_API_KEY must be at least 32 characters long');
 	// Printed as a log line, not an uncaught error with a stack trace
-	assertStringIncludes(stderr, 'ERROR');
-	assertStringIncludes(stderr, '[Config]');
-	assert(!/\n\s+at /.test(stderr), stderr);
+	expect(stderr).toContain('ERROR');
+	expect(stderr).toContain('[Config]');
+	expect(!/\n\s+at /.test(stderr), stderr).toBeTruthy();
 });

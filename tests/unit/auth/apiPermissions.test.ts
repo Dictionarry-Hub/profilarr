@@ -2,8 +2,7 @@
  * Tests for API key permission lookup and enforcement
  */
 
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import {
 	API_AREAS,
 	checkApiKeyAccess,
@@ -19,86 +18,88 @@ function key(permissions: ApiKeyPermissions) {
 // --- routeIdToSpecPath ---
 
 test('routeIdToSpecPath: converts params to spec form', () => {
-	assertEquals(routeIdToSpecPath('/api/v1/databases/[id]/sync'), '/databases/{id}/sync');
+	expect(routeIdToSpecPath('/api/v1/databases/[id]/sync')).toStrictEqual('/databases/{id}/sync');
 });
 
 test('routeIdToSpecPath: keeps dotted segments', () => {
-	assertEquals(routeIdToSpecPath('/api/v1/openapi.json'), '/openapi.json');
+	expect(routeIdToSpecPath('/api/v1/openapi.json')).toStrictEqual('/openapi.json');
 });
 
 test('routeIdToSpecPath: drops route groups', () => {
-	assertEquals(routeIdToSpecPath('/api/v1/(internal)/jobs/[id]'), '/jobs/{id}');
+	expect(routeIdToSpecPath('/api/v1/(internal)/jobs/[id]')).toStrictEqual('/jobs/{id}');
 });
 
 test('routeIdToSpecPath: rejects rest, optional, and matcher params', () => {
-	assertEquals(routeIdToSpecPath('/api/v1/files/[...rest]'), null);
-	assertEquals(routeIdToSpecPath('/api/v1/files/[[page]]'), null);
-	assertEquals(routeIdToSpecPath('/api/v1/jobs/[id=integer]'), null);
+	expect(routeIdToSpecPath('/api/v1/files/[...rest]')).toStrictEqual(null);
+	expect(routeIdToSpecPath('/api/v1/files/[[page]]')).toStrictEqual(null);
+	expect(routeIdToSpecPath('/api/v1/jobs/[id=integer]')).toStrictEqual(null);
 });
 
 test('routeIdToSpecPath: rejects routes outside /api/v1', () => {
-	assertEquals(routeIdToSpecPath('/settings/security'), null);
-	assertEquals(routeIdToSpecPath('/api/v10/status'), null);
+	expect(routeIdToSpecPath('/settings/security')).toStrictEqual(null);
+	expect(routeIdToSpecPath('/api/v10/status')).toStrictEqual(null);
 });
 
 // --- getApiRequirement ---
 
 test('getApiRequirement: reads area and access from the spec', () => {
-	assertEquals(getApiRequirement('/api/v1/databases/[id]', 'PATCH'), {
+	expect(getApiRequirement('/api/v1/databases/[id]', 'PATCH')).toStrictEqual({
 		area: 'databases',
 		access: 'write'
 	});
-	assertEquals(getApiRequirement('/api/v1/databases', 'GET'), {
+	expect(getApiRequirement('/api/v1/databases', 'GET')).toStrictEqual({
 		area: 'databases',
 		access: 'read'
 	});
 });
 
 test('getApiRequirement: ignores parameter names', () => {
-	assertEquals(getApiRequirement('/api/v1/databases/[databaseId]', 'GET'), {
+	expect(getApiRequirement('/api/v1/databases/[databaseId]', 'GET')).toStrictEqual({
 		area: 'databases',
 		access: 'read'
 	});
 });
 
 test('getApiRequirement: treats HEAD as GET', () => {
-	assertEquals(getApiRequirement('/api/v1/status', 'HEAD'), { area: 'system', access: 'read' });
+	expect(getApiRequirement('/api/v1/status', 'HEAD')).toStrictEqual({
+		area: 'system',
+		access: 'read'
+	});
 });
 
 test('getApiRequirement: public and unknown operations have no requirement', () => {
-	assertEquals(getApiRequirement('/api/v1/health', 'GET'), null);
-	assertEquals(getApiRequirement('/api/v1/status', 'DELETE'), null);
-	assertEquals(getApiRequirement('/api/v1/nope', 'GET'), null);
+	expect(getApiRequirement('/api/v1/health', 'GET')).toStrictEqual(null);
+	expect(getApiRequirement('/api/v1/status', 'DELETE')).toStrictEqual(null);
+	expect(getApiRequirement('/api/v1/nope', 'GET')).toStrictEqual(null);
 });
 
 // --- checkApiKeyAccess ---
 
 test('checkApiKeyAccess: full access passes everything', () => {
-	assertEquals(checkApiKeyAccess(key('all'), '/api/v1/databases/[id]', 'DELETE'), null);
-	assertEquals(checkApiKeyAccess(key('all'), '/api/v1/nope', 'GET'), null);
+	expect(checkApiKeyAccess(key('all'), '/api/v1/databases/[id]', 'DELETE')).toStrictEqual(null);
+	expect(checkApiKeyAccess(key('all'), '/api/v1/nope', 'GET')).toStrictEqual(null);
 });
 
 test('checkApiKeyAccess: write includes read', () => {
-	assertEquals(checkApiKeyAccess(key({ databases: 'write' }), '/api/v1/databases', 'GET'), null);
-});
-
-test('checkApiKeyAccess: read does not include write', () => {
-	assertEquals(
-		checkApiKeyAccess(key({ databases: 'read' }), '/api/v1/databases/[id]', 'PATCH'),
-		'API key does not have write access to Databases'
+	expect(checkApiKeyAccess(key({ databases: 'write' }), '/api/v1/databases', 'GET')).toStrictEqual(
+		null
 	);
 });
 
+test('checkApiKeyAccess: read does not include write', () => {
+	expect(
+		checkApiKeyAccess(key({ databases: 'read' }), '/api/v1/databases/[id]', 'PATCH')
+	).toStrictEqual('API key does not have write access to Databases');
+});
+
 test('checkApiKeyAccess: other areas are denied', () => {
-	assertEquals(
-		checkApiKeyAccess(key({ databases: 'write' }), '/api/v1/status', 'GET'),
+	expect(checkApiKeyAccess(key({ databases: 'write' }), '/api/v1/status', 'GET')).toStrictEqual(
 		'API key does not have read access to System'
 	);
 });
 
 test('checkApiKeyAccess: unlabelled operations are denied to scoped keys', () => {
-	assertEquals(
-		checkApiKeyAccess(key({ system: 'read' }), '/api/v1/nope', 'GET'),
+	expect(checkApiKeyAccess(key({ system: 'read' }), '/api/v1/nope', 'GET')).toStrictEqual(
 		'API key does not have access to this endpoint'
 	);
 });
@@ -107,7 +108,7 @@ test('checkApiKeyAccess: unlabelled operations are denied to scoped keys', () =>
 
 test('API_AREAS: one area per spec tag, writable only where a write exists', () => {
 	const areas = Object.fromEntries(API_AREAS.map((area) => [area.id, area.writable]));
-	assertEquals(areas, {
+	expect(areas).toStrictEqual({
 		system: false,
 		jobs: false,
 		backups: true,

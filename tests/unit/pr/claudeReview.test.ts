@@ -2,8 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { test } from 'vitest';
-import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import { expect, test } from 'vitest';
 import { runCommand } from '#utils/command.ts';
 // eslint-disable-next-line profilarr/import-paths -- the review renderer lives in .github/, outside every alias
 import {
@@ -36,22 +35,22 @@ function render(results: Record<string, Result | undefined>, websiteSha?: string
 
 function row(comment: string, title: string): string {
 	const line = comment.split('\n').find((l) => l.startsWith(`| ${title} |`));
-	assert(line, `missing row for ${title}`);
-	return line;
+	expect(line, `missing row for ${title}`).toBeTruthy();
+	return line!;
 }
 
 test('clean reviews render as one table with N/A findings', () => {
 	const comment = render(passing);
 	const lines = comment.split('\n');
 
-	assertEquals(lines[0], MARKER);
-	assertEquals(lines[1], '| Review | Result | Findings |');
-	assertEquals(lines.at(-1), '<sub>Re-run with <code>@claude review</code></sub>');
+	expect(lines[0]).toStrictEqual(MARKER);
+	expect(lines[1]).toStrictEqual('| Review | Result | Findings |');
+	expect(lines.at(-1)).toStrictEqual('<sub>Re-run with <code>@claude review</code></sub>');
 	for (const title of ['User-facing docs', 'Technical docs', 'Tests', 'Code']) {
-		assertEquals(row(comment, title).split(' | ').slice(1), ['Passed', 'N/A |']);
+		expect(row(comment, title).split(' | ').slice(1)).toStrictEqual(['Passed', 'N/A |']);
 	}
-	assert(!comment.includes('---'));
-	assert(!comment.includes('###'));
+	expect(!comment.includes('---')).toBeTruthy();
+	expect(!comment.includes('###')).toBeTruthy();
 });
 
 test('statuses map to Passed, Warning, or Failed', () => {
@@ -62,10 +61,10 @@ test('statuses map to Passed, Warning, or Failed', () => {
 		code: { status: 'issues', findings: [finding({ category: 'bug' })] }
 	});
 
-	assertStringIncludes(row(comment, 'User-facing docs'), '| Warning |');
-	assertStringIncludes(row(comment, 'Technical docs'), '| Warning |');
-	assertStringIncludes(row(comment, 'Tests'), '| Passed |');
-	assertStringIncludes(row(comment, 'Code'), '| Failed |');
+	expect(row(comment, 'User-facing docs')).toContain('| Warning |');
+	expect(row(comment, 'Technical docs')).toContain('| Warning |');
+	expect(row(comment, 'Tests')).toContain('| Passed |');
+	expect(row(comment, 'Code')).toContain('| Failed |');
 });
 
 test('missing or unknown results render as failed reviews', () => {
@@ -73,8 +72,8 @@ test('missing or unknown results render as failed reviews', () => {
 
 	for (const title of ['Tests', 'Code']) {
 		const line = row(comment, title);
-		assertStringIncludes(line, '| Failed |');
-		assertStringIncludes(line, '[workflow run](https://run)');
+		expect(line).toContain('| Failed |');
+		expect(line).toContain('[workflow run](https://run)');
 	}
 });
 
@@ -87,8 +86,7 @@ test('findings render as bullets with a category and one trailing period', () =>
 		}
 	});
 
-	assertStringIncludes(
-		row(comment, 'Code'),
+	expect(row(comment, 'Code')).toContain(
 		'<ul><li>**Data loss: Ops dropped.** The loop exits on the first failure. '
 	);
 });
@@ -97,7 +95,7 @@ test('findings are capped at five', () => {
 	const findings = Array.from({ length: 7 }, (_, i) => finding({ title: `Finding ${i}` }));
 	const comment = render({ ...passing, code: { status: 'issues', findings } });
 
-	assertEquals(row(comment, 'Code').match(/<li>/g)?.length, 5);
+	expect(row(comment, 'Code').match(/<li>/g)?.length).toStrictEqual(5);
 });
 
 test('model text cannot add HTML, table cells, line breaks, or mentions', () => {
@@ -110,8 +108,8 @@ test('model text cannot add HTML, table cells, line breaks, or mentions', () => 
 	});
 	const line = row(comment, 'Code');
 
-	assertStringIncludes(line, 'Ping @​someone &lt;b&gt;now&lt;/b&gt; \\| extra cell');
-	assertEquals(comment.split('\n').length, 9);
+	expect(line).toContain('Ping @​someone &lt;b&gt;now&lt;/b&gt; \\| extra cell');
+	expect(comment.split('\n').length).toStrictEqual(9);
 });
 
 test('links point at the PR head or the reviewed website commit', () => {
@@ -127,12 +125,10 @@ test('links point at the PR head or the reviewed website commit', () => {
 		'site123'
 	);
 
-	assertStringIncludes(
-		row(comment, 'User-facing docs'),
+	expect(row(comment, 'User-facing docs')).toContain(
 		'[+page.svx#L3](https://github.com/Dictionarry-Hub/profilarr.com/blob/site123/src/routes/%28docs%29/sync/+page.svx#L3 "src/routes/(docs)/sync/+page.svx")'
 	);
-	assertStringIncludes(
-		row(comment, 'Code'),
+	expect(row(comment, 'Code')).toContain(
 		'[app.ts#L7](https://github.com/Dictionarry-Hub/profilarr/blob/abc1234def/src/app.ts#L7 "src/app.ts")'
 	);
 });
@@ -164,27 +160,26 @@ test('CLI reads result files and environment, and fails rows it cannot read', as
 			);
 
 		const output = await run([directory]);
-		assertEquals(output.code, 0, decode(output.stderr));
+		expect(output.code, decode(output.stderr)).toStrictEqual(0);
 		const comment = decode(output.stdout);
-		assertStringIncludes(row(comment, 'User-facing docs'), '| Warning |');
-		assertStringIncludes(
-			row(comment, 'User-facing docs'),
+		expect(row(comment, 'User-facing docs')).toContain('| Warning |');
+		expect(row(comment, 'User-facing docs')).toContain(
 			'https://github.com/Dictionarry-Hub/profilarr.com/blob/site123/src/a.svx#L42'
 		);
-		assertStringIncludes(row(comment, 'Technical docs'), '| Passed | N/A |');
+		expect(row(comment, 'Technical docs')).toContain('| Passed | N/A |');
 		for (const title of ['Tests', 'Code']) {
-			assertStringIncludes(row(comment, title), '| Failed |');
-			assertStringIncludes(row(comment, title), '[workflow run](https://run)');
+			expect(row(comment, title)).toContain('| Failed |');
+			expect(row(comment, title)).toContain('[workflow run](https://run)');
 		}
 
 		const usage = await run([]);
-		assertEquals(usage.code, 1);
-		assertStringIncludes(decode(usage.stderr), 'Usage: render.ts <results-dir>');
+		expect(usage.code).toStrictEqual(1);
+		expect(decode(usage.stderr)).toContain('Usage: render.ts <results-dir>');
 
 		// The sandbox only lets it read the results: outside them every row fails
 		const denied = decode((await run([directory], `${directory}/missing`)).stdout);
 		for (const title of ['User-facing docs', 'Technical docs']) {
-			assertStringIncludes(row(denied, title), '| Failed |');
+			expect(row(denied, title)).toContain('| Failed |');
 		}
 	} finally {
 		await rm(directory, { recursive: true, force: true });

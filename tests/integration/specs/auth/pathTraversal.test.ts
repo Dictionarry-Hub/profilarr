@@ -19,11 +19,10 @@
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, login } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 
@@ -102,11 +101,10 @@ for (const payload of PAYLOADS) {
 			{ headers: { Origin: ORIGIN } }
 		);
 		const body = await res.json();
-		assertEquals(
+		expect(
 			body.status,
-			400,
 			`Expected inner status 400 for ${payload.name}, got ${body.status}`
-		);
+		).toStrictEqual(400);
 	});
 }
 
@@ -120,11 +118,10 @@ for (const payload of PAYLOADS) {
 			{ headers: { Origin: ORIGIN } }
 		);
 		const body = await res.json();
-		assertEquals(
+		expect(
 			body.status,
-			400,
 			`Expected inner status 400 for ${payload.name}, got ${body.status}`
-		);
+		).toStrictEqual(400);
 	});
 }
 
@@ -139,11 +136,10 @@ test('commit action rejects symlink escape', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await res.json();
-	assertEquals(
+	expect(
 		body.status,
-		400,
 		`Expected inner status 400 for symlink escape, got ${body.status}`
-	);
+	).toStrictEqual(400);
 });
 
 test('preview action rejects symlink escape', async () => {
@@ -153,9 +149,8 @@ test('preview action rejects symlink escape', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await res.json();
-	assertEquals(
+	expect(
 		body.status,
-		400,
 		`Expected inner status 400 for symlink escape, got ${body.status}`
-	);
+	).toStrictEqual(400);
 });

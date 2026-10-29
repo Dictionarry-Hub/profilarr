@@ -29,8 +29,7 @@ import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
-import { assert, assertEquals, assertNotEquals } from '@std/assert';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, login } from '#integration/harness/setup.ts';
@@ -159,7 +158,7 @@ async function downloadAndExtractBackup(
 	client: TestClient
 ): Promise<{ dbPath: string; infoPath: string }> {
 	const createRes = await client.post('/api/v1/backups', {});
-	assertEquals(createRes.status, 202, 'Backup creation should return 202');
+	expect(createRes.status, 'Backup creation should return 202').toStrictEqual(202);
 	const { jobId } = await createRes.json();
 
 	for (let i = 0; i < 30; i++) {
@@ -171,7 +170,7 @@ async function downloadAndExtractBackup(
 	}
 
 	const listRes = await client.get('/api/v1/backups');
-	assertEquals(listRes.status, 200, 'Backup list should return 200');
+	expect(listRes.status, 'Backup list should return 200').toStrictEqual(200);
 	const backups = await listRes.json();
 	if (backups.length === 0) {
 		throw new Error('No backup files found after job completed');
@@ -184,7 +183,7 @@ async function downloadAndExtractBackup(
 
 	// Download triggers sanitize-on-egress.
 	const res = await client.get(`/api/v1/backups/${backupFilename}`);
-	assertEquals(res.status, 200, 'Backup download should return 200');
+	expect(res.status, 'Backup download should return 200').toStrictEqual(200);
 
 	// Capture bytes AFTER download. Should match exactly: the on-disk source
 	// is never mutated.
@@ -260,7 +259,7 @@ test('downloaded archive: arr_instances rows are deleted', () => {
 		const row = db.prepare('SELECT COUNT(*) as count FROM arr_instances').get() as {
 			count: number;
 		};
-		assertEquals(row.count, 0, 'arr_instances should be empty in downloaded archive');
+		expect(row.count, 'arr_instances should be empty in downloaded archive').toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -272,7 +271,9 @@ test('downloaded archive: notification_services rows are deleted', () => {
 		const row = db.prepare('SELECT COUNT(*) as count FROM notification_services').get() as {
 			count: number;
 		};
-		assertEquals(row.count, 0, 'notification_services should be empty in downloaded archive');
+		expect(row.count, 'notification_services should be empty in downloaded archive').toStrictEqual(
+			0
+		);
 	} finally {
 		db.close();
 	}
@@ -282,7 +283,7 @@ test('downloaded archive: users are deleted', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT * FROM users').all();
-		assertEquals(rows.length, 0);
+		expect(rows.length).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -292,7 +293,7 @@ test('downloaded archive: sessions are deleted', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT * FROM sessions').all();
-		assertEquals(rows.length, 0);
+		expect(rows.length).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -302,7 +303,7 @@ test('downloaded archive: login_attempts are deleted', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const rows = db.prepare('SELECT * FROM login_attempts').all();
-		assertEquals(rows.length, 0);
+		expect(rows.length).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -316,12 +317,14 @@ test('downloaded archive: database_instances rows preserved with PAT nulled', ()
 		const rows = db.prepare('SELECT personal_access_token FROM database_instances').all() as {
 			personal_access_token: string | null;
 		}[];
-		assert(
+		expect(
 			rows.length > 0,
 			'database_instances rows should be preserved (PCD repos remain linked)'
-		);
+		).toBeTruthy();
 		for (const row of rows) {
-			assertEquals(row.personal_access_token, null, 'PAT should be NULL in downloaded archive');
+			expect(row.personal_access_token, 'PAT should be NULL in downloaded archive').toStrictEqual(
+				null
+			);
 		}
 	} finally {
 		db.close();
@@ -338,18 +341,16 @@ test('downloaded archive: cloned repository git remotes have credentials strippe
 		'utf8'
 	);
 
-	assertEquals(
+	expect(
 		repoConfig.includes(GIT_REMOTE_PAT),
-		false,
 		'Repository remote PAT should be removed from .git/config'
-	);
-	assertEquals(
+	).toStrictEqual(false);
+	expect(
 		depConfig.includes(DEP_GIT_REMOTE_PAT),
-		false,
 		'Dependency remote PAT should be removed from .git/config'
-	);
-	assertEquals(repoConfig.includes('url = https://github.com/test/repo.git'), true);
-	assertEquals(depConfig.includes('url = https://github.com/test/schema.git'), true);
+	).toStrictEqual(false);
+	expect(repoConfig.includes('url = https://github.com/test/repo.git')).toStrictEqual(true);
+	expect(depConfig.includes('url = https://github.com/test/schema.git')).toStrictEqual(true);
 });
 
 test('downloaded archive: AI api_key is blanked', () => {
@@ -358,7 +359,7 @@ test('downloaded archive: AI api_key is blanked', () => {
 		const row = db.prepare('SELECT api_key FROM ai_settings WHERE id = 1').get() as
 			{ api_key: string } | undefined;
 		if (row) {
-			assertNotEquals(row.api_key, AI_API_KEY, 'AI api_key plaintext should be removed');
+			expect(row.api_key, 'AI api_key plaintext should be removed').not.toStrictEqual(AI_API_KEY);
 		}
 	} finally {
 		db.close();
@@ -371,7 +372,7 @@ test('downloaded archive: TMDB api_key is blanked', () => {
 		const row = db.prepare('SELECT api_key FROM tmdb_settings WHERE id = 1').get() as {
 			api_key: string;
 		};
-		assertNotEquals(row.api_key, TMDB_API_KEY, 'TMDB api_key plaintext should be removed');
+		expect(row.api_key, 'TMDB api_key plaintext should be removed').not.toStrictEqual(TMDB_API_KEY);
 	} finally {
 		db.close();
 	}
@@ -383,18 +384,18 @@ test('downloaded archive: api_keys rows are deleted', () => {
 	const db = openDb(backupDbPath);
 	try {
 		const row = db.prepare('SELECT COUNT(*) as count FROM api_keys').get() as { count: number };
-		assertEquals(row.count, 0, 'api_keys should be empty in the downloaded archive');
+		expect(row.count, 'api_keys should be empty in the downloaded archive').toStrictEqual(0);
 	} finally {
 		db.close();
 	}
 });
 
 test('live database api_keys are untouched by the download', () => {
-	assertEquals(liveApiKeyCount, 1, 'seeded API key should exist in the live DB');
+	expect(liveApiKeyCount, 'seeded API key should exist in the live DB').toStrictEqual(1);
 	const db = openDb(getDbPath(PORT));
 	try {
 		const row = db.prepare('SELECT COUNT(*) as count FROM api_keys').get() as { count: number };
-		assertEquals(row.count, liveApiKeyCount, 'live api_keys should be unchanged');
+		expect(row.count, 'live api_keys should be unchanged').toStrictEqual(liveApiKeyCount);
 	} finally {
 		db.close();
 	}
@@ -413,7 +414,10 @@ async function collectFiles(dir: string): Promise<string[]> {
 }
 
 test('downloaded archive: no secret bytes remain in any file', async () => {
-	assert(liveSessionIds.length > 0, 'login should have created a session to check for');
+	expect(
+		liveSessionIds.length > 0,
+		'login should have created a session to check for'
+	).toBeTruthy();
 
 	const secrets: Record<string, string> = {
 		'Arr API key': ARR_API_KEY,
@@ -435,7 +439,10 @@ test('downloaded archive: no secret bytes remain in any file', async () => {
 		}
 	}
 
-	assertEquals(found, [], 'secrets are recoverable from the raw bytes of the downloaded archive');
+	expect(
+		found,
+		'secrets are recoverable from the raw bytes of the downloaded archive'
+	).toStrictEqual([]);
 });
 
 // ─── INFO.json + on-disk integrity ───────────────────────────────────────────
@@ -443,13 +450,14 @@ test('downloaded archive: no secret bytes remain in any file', async () => {
 test('downloaded archive: INFO.json has sanitized=true', async () => {
 	const raw = await readFile(infoPath, 'utf8');
 	const info = JSON.parse(raw) as { sanitized?: boolean };
-	assertEquals(info.sanitized, true, 'INFO.json.sanitized should be flipped to true on download');
+	expect(info.sanitized, 'INFO.json.sanitized should be flipped to true on download').toStrictEqual(
+		true
+	);
 });
 
 test('local on-disk archive is bytewise unchanged after download', () => {
-	assertEquals(
+	expect(
 		bytesEqual(onDiskBytesBefore, onDiskBytesAfter),
-		true,
 		'Download must not modify the source archive on disk'
-	);
+	).toStrictEqual(true);
 });

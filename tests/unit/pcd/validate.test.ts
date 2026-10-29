@@ -1,5 +1,4 @@
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { validateLinkInput } from '#pcd/core/validate.ts';
 
 function branchFor(repositoryUrl: string, branch?: string): string | undefined {
@@ -25,14 +24,14 @@ test('validateLinkInput defaults first-party database links to v2', () => {
 	];
 
 	for (const url of urls) {
-		assertEquals(branchFor(url), 'v2', url);
+		expect(branchFor(url), url).toStrictEqual('v2');
 	}
 });
 
 test('validateLinkInput keeps explicit branch for first-party database links', () => {
-	assertEquals(branchFor('https://github.com/Dictionarry-Hub/database', 'main'), 'main');
+	expect(branchFor('https://github.com/Dictionarry-Hub/database', 'main')).toStrictEqual('main');
 });
 
 test('validateLinkInput does not default other database links', () => {
-	assertEquals(branchFor('https://github.com/TRaSH-Guides/Guides'), undefined);
+	expect(branchFor('https://github.com/TRaSH-Guides/Guides')).toStrictEqual(undefined);
 });

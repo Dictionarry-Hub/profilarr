@@ -12,8 +12,7 @@
  * 6. Positive cases: allowed markup must survive unchanged
  */
 
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { marked } from 'marked';
 import { sanitizeHtml } from '#shared/utils/sanitize.ts';
 
@@ -30,19 +29,17 @@ function hasAttr(html: string, attr: string): boolean {
 }
 
 function assertNoHandler(result: string, input: string) {
-	assertEquals(
+	expect(
 		hasEventHandler(result),
-		false,
 		`Event handler survived sanitization\n  input:  ${input}\n  output: ${result}`
-	);
+	).toStrictEqual(false);
 }
 
 function assertNoAttr(result: string, attr: string, input: string) {
-	assertEquals(
+	expect(
 		hasAttr(result, attr),
-		false,
 		`Attribute "${attr}" survived sanitization\n  input:  ${input}\n  output: ${result}`
-	);
+	).toStrictEqual(false);
 }
 
 function viaMarked(input: string): string {
@@ -56,13 +53,19 @@ test('sanitizeHtml: strips entity-encoded javascript: in href', () => {
 	// A regex-only sanitizer misses this because the literal string "javascript:" isn't present.
 	const input = '<a href="jav&#x61;script:alert(1)">click</a>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('href'), false, `Dangerous href survived sanitization -- ${result}`);
+	expect(
+		result.includes('href'),
+		`Dangerous href survived sanitization -- ${result}`
+	).toStrictEqual(false);
 });
 
 test('sanitizeHtml: strips case-varied javascript: in href', () => {
 	const input = '<a href="JaVaScRiPt:alert(1)">click</a>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('href'), false, `Dangerous href survived sanitization -- ${result}`);
+	expect(
+		result.includes('href'),
+		`Dangerous href survived sanitization -- ${result}`
+	).toStrictEqual(false);
 });
 
 test('sanitizeHtml: strips whitespace-obfuscated javascript: in href', () => {
@@ -70,7 +73,10 @@ test('sanitizeHtml: strips whitespace-obfuscated javascript: in href', () => {
 	// A regex-only sanitizer misses this because the literal match is broken by the newline.
 	const input = '<a href="java\nscript:alert(1)">click</a>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('href'), false, `Dangerous href survived sanitization -- ${result}`);
+	expect(
+		result.includes('href'),
+		`Dangerous href survived sanitization -- ${result}`
+	).toStrictEqual(false);
 });
 
 // --- Basic sanitizer behavior ---
@@ -78,47 +84,55 @@ test('sanitizeHtml: strips whitespace-obfuscated javascript: in href', () => {
 test('sanitizeHtml: preserves https href', () => {
 	const input = '<a href="https://example.com">link</a>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('https://example.com'), true, `Output lost https href -- ${result}`);
+	expect(
+		result.includes('https://example.com'),
+		`Output lost https href -- ${result}`
+	).toStrictEqual(true);
 });
 
 test('sanitizeHtml: strips script tags', () => {
 	const input = '<p>hello</p><script>alert(1)</script>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('<script'), false, `Output still contains script tag -- ${result}`);
-	assertEquals(
-		result.includes('alert(1)'),
-		false,
-		`Output still contains script body -- ${result}`
+	expect(result.includes('<script'), `Output still contains script tag -- ${result}`).toStrictEqual(
+		false
 	);
+	expect(
+		result.includes('alert(1)'),
+		`Output still contains script body -- ${result}`
+	).toStrictEqual(false);
 });
 
 test('sanitizeHtml: strips onerror event handler', () => {
 	const input = '<img src="x" onerror="alert(1)">';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('onerror'), false, `Output still contains onerror -- ${result}`);
+	expect(result.includes('onerror'), `Output still contains onerror -- ${result}`).toStrictEqual(
+		false
+	);
 });
 
 test('sanitizeHtml: preserves allowed tags', () => {
 	const input = '<p>text</p><strong>bold</strong><em>italic</em><code>mono</code>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('<p>'), true);
-	assertEquals(result.includes('<strong>'), true);
-	assertEquals(result.includes('<em>'), true);
-	assertEquals(result.includes('<code>'), true);
+	expect(result.includes('<p>')).toStrictEqual(true);
+	expect(result.includes('<strong>')).toStrictEqual(true);
+	expect(result.includes('<em>')).toStrictEqual(true);
+	expect(result.includes('<code>')).toStrictEqual(true);
 });
 
 test('sanitizeHtml: unwraps links to text when links are disabled', () => {
 	const input = 'Uses the <a href="https://dictionarry.dev/wiki/gppi"><strong>GPPI</strong></a>.';
-	assertEquals(sanitizeHtml(input, { links: false }), 'Uses the <strong>GPPI</strong>.');
+	expect(sanitizeHtml(input, { links: false })).toStrictEqual('Uses the <strong>GPPI</strong>.');
 	const kept = sanitizeHtml(input);
-	assertEquals(kept.includes('href="https://dictionarry.dev/wiki/gppi"'), true, kept);
+	expect(kept.includes('href="https://dictionarry.dev/wiki/gppi"'), kept).toStrictEqual(true);
 });
 
 test('sanitizeHtml: strips disallowed tags', () => {
 	const input = '<div>content</div><iframe src="evil"></iframe>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('<div'), false, `Output still contains div -- ${result}`);
-	assertEquals(result.includes('<iframe'), false, `Output still contains iframe -- ${result}`);
+	expect(result.includes('<div'), `Output still contains div -- ${result}`).toStrictEqual(false);
+	expect(result.includes('<iframe'), `Output still contains iframe -- ${result}`).toStrictEqual(
+		false
+	);
 });
 
 // --- Unquoted-attribute bypasses from the external report ---
@@ -243,13 +257,13 @@ test('sanitizeHtml: unquoted handler is dropped when links are disabled', () => 
 	const input = '<a href=https://ok.example onclick=alert(1)>x</a><img src=x onerror=alert(1)>';
 	const result = sanitizeHtml(input, { links: false });
 	assertNoHandler(result, input);
-	assertEquals(result.includes('<a'), false, result);
+	expect(result.includes('<a'), result).toStrictEqual(false);
 });
 
 test('sanitizeHtml: disallowed tag with unquoted handler is removed entirely', () => {
 	const input = '<details open ontoggle=alert(1)>x</details>';
 	const result = sanitizeHtml(input);
-	assertEquals(result.includes('<details'), false, result);
+	expect(result.includes('<details'), result).toStrictEqual(false);
 	assertNoHandler(result, input);
 });
 
@@ -258,7 +272,7 @@ test('sanitizeHtml: disallowed tag with unquoted handler is removed entirely', (
 test('sanitizeHtml: markdown link with javascript: href is stripped', () => {
 	const result = sanitizeHtml(viaMarked('[click](javascript:alert(1))'));
 	assertNoAttr(result, 'href', '[click](javascript:alert(1))');
-	assertEquals(result.includes('click'), true, result);
+	expect(result.includes('click'), result).toStrictEqual(true);
 });
 
 test('sanitizeHtml: markdown image with javascript: src is stripped', () => {
@@ -270,28 +284,28 @@ test('sanitizeHtml: raw img inside markdown paragraph loses unquoted handler', (
 	const input = 'Benign text <img src=x onerror=window.xssFired++> more text';
 	const result = sanitizeHtml(viaMarked(input));
 	assertNoHandler(result, input);
-	assertEquals(result.includes('Benign text'), true, result);
+	expect(result.includes('Benign text'), result).toStrictEqual(true);
 });
 
 // --- Positive cases: allowed markup must survive ---
 
 test('sanitizeHtml: keeps href and title on links', () => {
 	const result = sanitizeHtml('<a href="https://example.com/a" title="Example">x</a>');
-	assertEquals(result.includes('href="https://example.com/a"'), true, result);
-	assertEquals(result.includes('title="Example"'), true, result);
+	expect(result.includes('href="https://example.com/a"'), result).toStrictEqual(true);
+	expect(result.includes('title="Example"'), result).toStrictEqual(true);
 });
 
 test('sanitizeHtml: keeps src, alt and title on images', () => {
 	const result = sanitizeHtml('<img src="https://example.com/i.png" alt="An image" title="T">');
-	assertEquals(result.includes('src="https://example.com/i.png"'), true, result);
-	assertEquals(result.includes('alt="An image"'), true, result);
-	assertEquals(result.includes('title="T"'), true, result);
+	expect(result.includes('src="https://example.com/i.png"'), result).toStrictEqual(true);
+	expect(result.includes('alt="An image"'), result).toStrictEqual(true);
+	expect(result.includes('title="T"'), result).toStrictEqual(true);
 });
 
 test('sanitizeHtml: keeps relative, fragment and mailto hrefs', () => {
 	for (const href of ['/docs/page', '#section', 'mailto:someone@example.com']) {
 		const result = sanitizeHtml(`<a href="${href}">x</a>`);
-		assertEquals(result.includes(`href="${href}"`), true, result);
+		expect(result.includes(`href="${href}"`), result).toStrictEqual(true);
 	}
 });
 
@@ -308,11 +322,11 @@ test('sanitizeHtml: keeps allowed structural tags from marked output', () => {
 		'<table>',
 		'<td>'
 	]) {
-		assertEquals(result.includes(tag), true, `Missing ${tag} -- ${result}`);
+		expect(result.includes(tag), `Missing ${tag} -- ${result}`).toStrictEqual(true);
 	}
 });
 
 test('sanitizeHtml: escaped text that looks like a tag stays escaped', () => {
 	const result = sanitizeHtml('<p>&lt;img src=x onerror=alert(1)&gt;</p>');
-	assertEquals(result, '<p>&lt;img src=x onerror=alert(1)&gt;</p>');
+	expect(result).toStrictEqual('<p>&lt;img src=x onerror=alert(1)&gt;</p>');
 });

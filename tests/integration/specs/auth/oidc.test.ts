@@ -16,11 +16,10 @@
  * 8. Full OIDC flow works through reverse proxy (Caddy)
  */
 
-import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { queryDb, createUserDirect } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { completeOidcLogin, OIDC_SETTINGS } from '#integration/harness/oidc.ts';
 
@@ -59,15 +58,15 @@ test('full OIDC flow succeeds', async () => {
 	const client = new TestClient(ORIGIN);
 	const { callbackRes } = await completeOidcLogin(client);
 
-	assertEquals(callbackRes.status, 303, 'Callback should redirect to home');
-	assertEquals(callbackRes.headers.get('location'), '/');
+	expect(callbackRes.status, 'Callback should redirect to home').toStrictEqual(303);
+	expect(callbackRes.headers.get('location')).toStrictEqual('/');
 
 	const session = client.getCookie('session');
-	assertNotEquals(session, undefined, 'Session cookie should be set');
+	expect(session, 'Session cookie should be set').not.toStrictEqual(undefined);
 
 	// Verify we can access a protected page
 	const pageRes = await client.get('/databases');
-	assertNotEquals(pageRes.status, 303, 'Should not redirect to login');
+	expect(pageRes.status, 'Should not redirect to login').not.toStrictEqual(303);
 });
 
 test('redirect_uri matches configured ORIGIN', async () => {
@@ -78,12 +77,10 @@ test('redirect_uri matches configured ORIGIN', async () => {
 	const params = new URL(authUrl).searchParams;
 	const redirectUri = params.get('redirect_uri')!;
 
-	assertStringIncludes(
-		redirectUri,
-		ORIGIN,
-		`redirect_uri should use ORIGIN (${ORIGIN}), got: ${redirectUri}`
+	expect(redirectUri, `redirect_uri should use ORIGIN (${ORIGIN}), got: ${redirectUri}`).toContain(
+		ORIGIN
 	);
-	assertStringIncludes(redirectUri, '/auth/oidc/callback');
+	expect(redirectUri).toContain('/auth/oidc/callback');
 });
 
 test('OIDC user created in DB with correct sub', async () => {
@@ -96,8 +93,8 @@ test('OIDC user created in DB with correct sub', async () => {
 		username: string;
 	}[];
 
-	assertEquals(rows.length, 1, 'User oidc:test should exist in DB');
-	assertEquals(rows[0].username, 'oidc:test');
+	expect(rows.length, 'User oidc:test should exist in DB').toStrictEqual(1);
+	expect(rows[0].username).toStrictEqual('oidc:test');
 });
 
 // --- Security checks ---
@@ -107,11 +104,11 @@ test('tampered state parameter → 400', async () => {
 
 	// Start the flow to get oidc_state and oidc_nonce cookies
 	const loginRes = await client.get('/auth/oidc/login');
-	assertEquals(loginRes.status, 302);
+	expect(loginRes.status).toStrictEqual(302);
 
 	// Hit callback with wrong state
 	const callbackRes = await client.get('/auth/oidc/callback?code=fake&state=tampered-state');
-	assertEquals(callbackRes.status, 400, 'Tampered state should be rejected');
+	expect(callbackRes.status, 'Tampered state should be rejected').toStrictEqual(400);
 });
 
 test('callback without cookies → 400', async () => {
@@ -131,23 +128,21 @@ test('callback without cookies → 400', async () => {
 	// This tests that the state/nonce cookie verification rejects the request
 	const freshClient = new TestClient(ORIGIN);
 	const callbackRes = await freshClient.get(callbackUrl);
-	assertEquals(callbackRes.status, 400, 'Callback without cookies should be rejected');
+	expect(callbackRes.status, 'Callback without cookies should be rejected').toStrictEqual(400);
 });
 
 test("OIDC login disabled when SSO isn't configured → 400", async () => {
 	const client = new TestClient(AUTH_ON_ORIGIN);
 	const res = await client.get('/auth/oidc/login');
-	assertEquals(res.status, 400, "OIDC login should be rejected when SSO isn't configured");
+	expect(res.status, "OIDC login should be rejected when SSO isn't configured").toStrictEqual(400);
 });
 
 test('unauthenticated request redirects to /auth/login', async () => {
 	const client = new TestClient(ORIGIN);
 	const res = await client.get('/databases');
-	assertEquals(res.status, 303);
-	assertStringIncludes(
-		res.headers.get('location') ?? '',
-		'/auth/login',
-		'Should redirect to login page'
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location') ?? '', 'Should redirect to login page').toContain(
+		'/auth/login'
 	);
 });
 
@@ -160,18 +155,17 @@ test('full OIDC flow through reverse proxy', async () => {
 	// Verify redirect_uri in the auth URL uses the proxy origin
 	const params = new URL(authUrl).searchParams;
 	const redirectUri = params.get('redirect_uri')!;
-	assertStringIncludes(
+	expect(
 		redirectUri,
-		PROXY_ORIGIN,
 		`redirect_uri should use proxy ORIGIN (${PROXY_ORIGIN}), got: ${redirectUri}`
-	);
+	).toContain(PROXY_ORIGIN);
 
-	assertEquals(callbackRes.status, 303, 'Callback should redirect to home');
+	expect(callbackRes.status, 'Callback should redirect to home').toStrictEqual(303);
 
 	const session = client.getCookie('session');
-	assertNotEquals(session, undefined, 'Session cookie should be set through proxy');
+	expect(session, 'Session cookie should be set through proxy').not.toStrictEqual(undefined);
 
 	// Verify authenticated access works through proxy
 	const pageRes = await client.get('/databases');
-	assertNotEquals(pageRes.status, 303, 'Should not redirect to login through proxy');
+	expect(pageRes.status, 'Should not redirect to login through proxy').not.toStrictEqual(303);
 });

@@ -4,7 +4,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals, assert } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	selectors,
 	getSelector,
@@ -69,44 +69,44 @@ class SelectorsTest extends BaseTest {
 
 		this.test('getSelector returns correct selector', () => {
 			const selector = getSelector('random');
-			assertEquals(selector?.id, 'random');
-			assertEquals(selector?.label, 'Random');
+			expect(selector?.id).toStrictEqual('random');
+			expect(selector?.label).toStrictEqual('Random');
 		});
 
 		this.test('getSelector returns undefined for invalid id', () => {
 			const selector = getSelector('nonexistent');
-			assertEquals(selector, undefined);
+			expect(selector).toStrictEqual(undefined);
 		});
 
 		this.test('isValidSelector returns true for valid ids', () => {
-			assertEquals(isValidSelector('random'), true);
-			assertEquals(isValidSelector('oldest'), true);
-			assertEquals(isValidSelector('newest'), true);
-			assertEquals(isValidSelector('lowest_score'), true);
-			assertEquals(isValidSelector('size_desc'), true);
-			assertEquals(isValidSelector('size_asc'), true);
-			assertEquals(isValidSelector('most_popular'), true);
-			assertEquals(isValidSelector('least_popular'), true);
+			expect(isValidSelector('random')).toStrictEqual(true);
+			expect(isValidSelector('oldest')).toStrictEqual(true);
+			expect(isValidSelector('newest')).toStrictEqual(true);
+			expect(isValidSelector('lowest_score')).toStrictEqual(true);
+			expect(isValidSelector('size_desc')).toStrictEqual(true);
+			expect(isValidSelector('size_asc')).toStrictEqual(true);
+			expect(isValidSelector('most_popular')).toStrictEqual(true);
+			expect(isValidSelector('least_popular')).toStrictEqual(true);
 		});
 
 		this.test('isValidSelector returns false for invalid ids', () => {
-			assertEquals(isValidSelector('nonexistent'), false);
-			assertEquals(isValidSelector(''), false);
+			expect(isValidSelector('nonexistent')).toStrictEqual(false);
+			expect(isValidSelector('')).toStrictEqual(false);
 		});
 
 		this.test('getAllSelectorIds returns all selector ids', () => {
 			const ids = getAllSelectorIds();
-			assertEquals(ids.length, 10);
-			assert(ids.includes('random'));
-			assert(ids.includes('oldest'));
-			assert(ids.includes('newest'));
-			assert(ids.includes('lowest_score'));
-			assert(ids.includes('size_desc'));
-			assert(ids.includes('size_asc'));
-			assert(ids.includes('most_popular'));
-			assert(ids.includes('least_popular'));
-			assert(ids.includes('alphabetical_asc'));
-			assert(ids.includes('alphabetical_desc'));
+			expect(ids.length).toStrictEqual(10);
+			expect(ids.includes('random')).toBeTruthy();
+			expect(ids.includes('oldest')).toBeTruthy();
+			expect(ids.includes('newest')).toBeTruthy();
+			expect(ids.includes('lowest_score')).toBeTruthy();
+			expect(ids.includes('size_desc')).toBeTruthy();
+			expect(ids.includes('size_asc')).toBeTruthy();
+			expect(ids.includes('most_popular')).toBeTruthy();
+			expect(ids.includes('least_popular')).toBeTruthy();
+			expect(ids.includes('alphabetical_asc')).toBeTruthy();
+			expect(ids.includes('alphabetical_desc')).toBeTruthy();
 		});
 
 		// =====================
@@ -127,18 +127,9 @@ class SelectorsTest extends BaseTest {
 			const selected = selector.select(items, 10);
 			const limited = selector.select(items, 2);
 
-			assertEquals(
-				selected.map((item) => item.id),
-				[2, 1, 3, 4, 5, 6]
-			);
-			assertEquals(
-				limited.map((item) => item.id),
-				[2, 1]
-			);
-			assertEquals(
-				items.map((item) => item.id),
-				originalOrder
-			);
+			expect(selected.map((item) => item.id)).toStrictEqual([2, 1, 3, 4, 5, 6]);
+			expect(limited.map((item) => item.id)).toStrictEqual([2, 1]);
+			expect(items.map((item) => item.id)).toStrictEqual(originalOrder);
 		});
 
 		this.test('size_asc: selects smallest positive sizes and puts unusable sizes last', () => {
@@ -151,10 +142,7 @@ class SelectorsTest extends BaseTest {
 			];
 			const selected = getSelector('size_asc')!.select(items, 10);
 
-			assertEquals(
-				selected.map((item) => item.id),
-				[4, 2, 1, 3, 5]
-			);
+			expect(selected.map((item) => item.id)).toStrictEqual([4, 2, 1, 3, 5]);
 		});
 
 		// =====================
@@ -165,20 +153,20 @@ class SelectorsTest extends BaseTest {
 			const items = this.createMockItems();
 			const selector = getSelector('random')!;
 			const selected = selector.select(items, 3);
-			assertEquals(selected.length, 3);
+			expect(selected.length).toStrictEqual(3);
 		});
 
 		this.test('random: handles count larger than items', () => {
 			const items = this.createMockItems();
 			const selector = getSelector('random')!;
 			const selected = selector.select(items, 10);
-			assertEquals(selected.length, 5); // Only 5 items available
+			expect(selected.length).toStrictEqual(5); // Only 5 items available
 		});
 
 		this.test('random: returns empty array for empty input', () => {
 			const selector = getSelector('random')!;
 			const selected = selector.select([], 5);
-			assertEquals(selected.length, 0);
+			expect(selected.length).toStrictEqual(0);
 		});
 
 		this.test('random: does not modify original array', () => {
@@ -186,8 +174,8 @@ class SelectorsTest extends BaseTest {
 			const originalFirst = items[0];
 			const selector = getSelector('random')!;
 			selector.select(items, 3);
-			assertEquals(items[0], originalFirst);
-			assertEquals(items.length, 5);
+			expect(items[0]).toStrictEqual(originalFirst);
+			expect(items.length).toStrictEqual(5);
 		});
 
 		// =====================
@@ -199,14 +187,14 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('oldest')!;
 			const selected = selector.select(items, 3);
 
-			assertEquals(selected.length, 3);
+			expect(selected.length).toStrictEqual(3);
 			// Movie C (2022-03-10) is oldest
-			assertEquals(selected[0].id, 3);
-			assertEquals(selected[0].title, 'Movie C');
+			expect(selected[0].id).toStrictEqual(3);
+			expect(selected[0].title).toStrictEqual('Movie C');
 			// Movie A (2023-01-15) is second oldest
-			assertEquals(selected[1].id, 1);
+			expect(selected[1].id).toStrictEqual(1);
 			// Movie B (2023-06-20) is third oldest
-			assertEquals(selected[2].id, 2);
+			expect(selected[2].id).toStrictEqual(2);
 		});
 
 		this.test('oldest: handles items with same date', () => {
@@ -218,8 +206,8 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('oldest')!;
 			const selected = selector.select(items, 2);
 
-			assertEquals(selected.length, 2);
-			assertEquals(selected[0].id, 3); // Oldest first
+			expect(selected.length).toStrictEqual(2);
+			expect(selected[0].id).toStrictEqual(3); // Oldest first
 		});
 
 		this.test('oldest: handles missing dateAdded', () => {
@@ -230,9 +218,9 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('oldest')!;
 			const selected = selector.select(items, 2);
 
-			assertEquals(selected.length, 2);
+			expect(selected.length).toStrictEqual(2);
 			// Item without dateAdded should be treated as epoch (very old)
-			assertEquals(selected[0].id, 1);
+			expect(selected[0].id).toStrictEqual(1);
 		});
 
 		// =====================
@@ -244,14 +232,14 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('newest')!;
 			const selected = selector.select(items, 3);
 
-			assertEquals(selected.length, 3);
+			expect(selected.length).toStrictEqual(3);
 			// Movie D (2024-01-01) is newest
-			assertEquals(selected[0].id, 4);
-			assertEquals(selected[0].title, 'Movie D');
+			expect(selected[0].id).toStrictEqual(4);
+			expect(selected[0].title).toStrictEqual('Movie D');
 			// Movie E (2023-09-05) is second newest
-			assertEquals(selected[1].id, 5);
+			expect(selected[1].id).toStrictEqual(5);
 			// Movie B (2023-06-20) is third newest
-			assertEquals(selected[2].id, 2);
+			expect(selected[2].id).toStrictEqual(2);
 		});
 
 		this.test('newest: handles count of 1', () => {
@@ -259,8 +247,8 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('newest')!;
 			const selected = selector.select(items, 1);
 
-			assertEquals(selected.length, 1);
-			assertEquals(selected[0].id, 4); // Movie D is newest
+			expect(selected.length).toStrictEqual(1);
+			expect(selected[0].id).toStrictEqual(4); // Movie D is newest
 		});
 
 		// =====================
@@ -272,16 +260,16 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('lowest_score')!;
 			const selected = selector.select(items, 3);
 
-			assertEquals(selected.length, 3);
+			expect(selected.length).toStrictEqual(3);
 			// Movie C (score: 25) has lowest score
-			assertEquals(selected[0].id, 3);
-			assertEquals(selected[0].score, 25);
+			expect(selected[0].id).toStrictEqual(3);
+			expect(selected[0].score).toStrictEqual(25);
 			// Movie A (score: 50) has second lowest
-			assertEquals(selected[1].id, 1);
-			assertEquals(selected[1].score, 50);
+			expect(selected[1].id).toStrictEqual(1);
+			expect(selected[1].score).toStrictEqual(50);
 			// Movie E (score: 60) has third lowest
-			assertEquals(selected[2].id, 5);
-			assertEquals(selected[2].score, 60);
+			expect(selected[2].id).toStrictEqual(5);
+			expect(selected[2].score).toStrictEqual(60);
 		});
 
 		this.test('lowest_score: handles zero scores', () => {
@@ -293,9 +281,9 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('lowest_score')!;
 			const selected = selector.select(items, 2);
 
-			assertEquals(selected.length, 2);
-			assertEquals(selected[0].id, 3); // Negative is lowest
-			assertEquals(selected[1].id, 1); // Zero is next
+			expect(selected.length).toStrictEqual(2);
+			expect(selected[0].id).toStrictEqual(3); // Negative is lowest
+			expect(selected[1].id).toStrictEqual(1); // Zero is next
 		});
 
 		this.test('lowest_score: handles missing score', () => {
@@ -306,9 +294,9 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('lowest_score')!;
 			const selected = selector.select(items, 2);
 
-			assertEquals(selected.length, 2);
+			expect(selected.length).toStrictEqual(2);
 			// Item without score (treated as 0) should be first
-			assertEquals(selected[0].id, 1);
+			expect(selected[0].id).toStrictEqual(1);
 		});
 
 		// =====================
@@ -320,16 +308,16 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('most_popular')!;
 			const selected = selector.select(items, 3);
 
-			assertEquals(selected.length, 3);
+			expect(selected.length).toStrictEqual(3);
 			// Movie E (popularity: 300) is most popular
-			assertEquals(selected[0].id, 5);
-			assertEquals(selected[0].popularity, 300);
+			expect(selected[0].id).toStrictEqual(5);
+			expect(selected[0].popularity).toStrictEqual(300);
 			// Movie B (popularity: 200) is second
-			assertEquals(selected[1].id, 2);
-			assertEquals(selected[1].popularity, 200);
+			expect(selected[1].id).toStrictEqual(2);
+			expect(selected[1].popularity).toStrictEqual(200);
 			// Movie C (popularity: 150) is third
-			assertEquals(selected[2].id, 3);
-			assertEquals(selected[2].popularity, 150);
+			expect(selected[2].id).toStrictEqual(3);
+			expect(selected[2].popularity).toStrictEqual(150);
 		});
 
 		this.test('most_popular: handles same popularity', () => {
@@ -341,8 +329,8 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('most_popular')!;
 			const selected = selector.select(items, 2);
 
-			assertEquals(selected.length, 2);
-			assertEquals(selected[0].id, 3); // Most popular first
+			expect(selected.length).toStrictEqual(2);
+			expect(selected[0].id).toStrictEqual(3); // Most popular first
 		});
 
 		// =====================
@@ -354,16 +342,16 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('least_popular')!;
 			const selected = selector.select(items, 3);
 
-			assertEquals(selected.length, 3);
+			expect(selected.length).toStrictEqual(3);
 			// Movie D (popularity: 50) is least popular
-			assertEquals(selected[0].id, 4);
-			assertEquals(selected[0].popularity, 50);
+			expect(selected[0].id).toStrictEqual(4);
+			expect(selected[0].popularity).toStrictEqual(50);
 			// Movie A (popularity: 100) is second least
-			assertEquals(selected[1].id, 1);
-			assertEquals(selected[1].popularity, 100);
+			expect(selected[1].id).toStrictEqual(1);
+			expect(selected[1].popularity).toStrictEqual(100);
 			// Movie C (popularity: 150) is third least
-			assertEquals(selected[2].id, 3);
-			assertEquals(selected[2].popularity, 150);
+			expect(selected[2].id).toStrictEqual(3);
+			expect(selected[2].popularity).toStrictEqual(150);
 		});
 
 		this.test('least_popular: handles missing popularity', () => {
@@ -374,9 +362,9 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('least_popular')!;
 			const selected = selector.select(items, 2);
 
-			assertEquals(selected.length, 2);
+			expect(selected.length).toStrictEqual(2);
 			// Item without popularity (treated as 0) should be first (least popular)
-			assertEquals(selected[0].id, 1);
+			expect(selected[0].id).toStrictEqual(1);
 		});
 
 		// =====================
@@ -387,7 +375,10 @@ class SelectorsTest extends BaseTest {
 			const items = this.createMockItems();
 			for (const selector of selectors) {
 				const selected = selector.select(items, 0);
-				assertEquals(selected.length, 0, `${selector.id} should return empty array for count=0`);
+				expect(
+					selected.length,
+					`${selector.id} should return empty array for count=0`
+				).toStrictEqual(0);
 			}
 		});
 
@@ -395,11 +386,10 @@ class SelectorsTest extends BaseTest {
 			const items = this.createMockItems();
 			for (const selector of selectors) {
 				const selected = selector.select(items, -5);
-				assertEquals(
+				expect(
 					selected.length,
-					0,
 					`${selector.id} should return empty array for negative count`
-				);
+				).toStrictEqual(0);
 			}
 		});
 
@@ -410,8 +400,8 @@ class SelectorsTest extends BaseTest {
 
 			for (const selector of selectors) {
 				const selected = selector.select(items, 1);
-				assertEquals(selected.length, 1, `${selector.id} should return 1 item`);
-				assertEquals(selected[0].id, 1, `${selector.id} should return the only item`);
+				expect(selected.length, `${selector.id} should return 1 item`).toStrictEqual(1);
+				expect(selected[0].id, `${selector.id} should return the only item`).toStrictEqual(1);
 			}
 		});
 
@@ -449,10 +439,10 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('lowest_score')!;
 			const toUpgrade = selector.select(filteredItems, 2);
 
-			assertEquals(toUpgrade.length, 2);
+			expect(toUpgrade.length).toStrictEqual(2);
 			// Should select the two with lowest scores for upgrade
-			assertEquals(toUpgrade[0].id, 30); // score: 10
-			assertEquals(toUpgrade[1].id, 10); // score: 30
+			expect(toUpgrade[0].id).toStrictEqual(30); // score: 10
+			expect(toUpgrade[1].id).toStrictEqual(10); // score: 30
 		});
 
 		this.test('scenario: upgrade workflow with oldest selector', () => {
@@ -466,9 +456,9 @@ class SelectorsTest extends BaseTest {
 			const selector = getSelector('oldest')!;
 			const toUpgrade = selector.select(filteredItems, 2);
 
-			assertEquals(toUpgrade.length, 2);
-			assertEquals(toUpgrade[0].id, 30); // Very Old (2018)
-			assertEquals(toUpgrade[1].id, 20); // Old (2020)
+			expect(toUpgrade.length).toStrictEqual(2);
+			expect(toUpgrade[0].id).toStrictEqual(30); // Very Old (2018)
+			expect(toUpgrade[1].id).toStrictEqual(20); // Old (2020)
 		});
 	}
 }

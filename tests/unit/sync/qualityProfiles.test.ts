@@ -4,7 +4,7 @@
  * sizes land on quality rows and group members and nowhere else.
  */
 
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import type { ArrQualityProfileItem } from '#arr/types.ts';
 import {
@@ -63,9 +63,9 @@ class QualityProfileTransformerTest extends BaseTest {
 		this.test('without a size map no item carries size keys', () => {
 			const result = transformQualityProfile(profile(), 'sonarr', new Map(), new Map());
 			for (const item of flatten(result.items)) {
-				assertEquals('minSize' in item, false);
-				assertEquals('maxSize' in item, false);
-				assertEquals('preferredSize' in item, false);
+				expect('minSize' in item).toStrictEqual(false);
+				expect('maxSize' in item).toStrictEqual(false);
+				expect('preferredSize' in item).toStrictEqual(false);
 			}
 		});
 
@@ -77,20 +77,20 @@ class QualityProfileTransformerTest extends BaseTest {
 			const result = transformQualityProfile(profile(), 'sonarr', new Map(), new Map(), sizes);
 
 			const single = byName(result.items, 'WEBDL-1080p');
-			assertEquals(single.minSize, 15);
-			assertEquals(single.maxSize, null);
-			assertEquals(single.preferredSize, 995);
+			expect(single.minSize).toStrictEqual(15);
+			expect(single.maxSize).toStrictEqual(null);
+			expect(single.preferredSize).toStrictEqual(995);
 
 			const member = byName(result.items, 'HDTV-1080p');
-			assertEquals(member.minSize, 4);
-			assertEquals(member.maxSize, 125);
-			assertEquals(member.preferredSize, 95);
+			expect(member.minSize).toStrictEqual(4);
+			expect(member.maxSize).toStrictEqual(125);
+			expect(member.preferredSize).toStrictEqual(95);
 
 			const group = byName(result.items, 'HD');
-			assertEquals('minSize' in group, false, 'group rows carry no sizes');
+			expect('minSize' in group, 'group rows carry no sizes').toStrictEqual(false);
 
 			const unmapped = byName(result.items, 'WEBRip-1080p');
-			assertEquals('minSize' in unmapped, false, 'qualities not in the map are untouched');
+			expect('minSize' in unmapped, 'qualities not in the map are untouched').toStrictEqual(false);
 		});
 
 		this.test('the rest of the payload is unchanged by the size map', () => {
@@ -102,10 +102,9 @@ class QualityProfileTransformerTest extends BaseTest {
 				new Map(),
 				new Map([['webdl-1080p', { minSize: 1, maxSize: 2, preferredSize: 1 }]])
 			);
-			assertEquals(sized.cutoff, plain.cutoff);
-			assertEquals(sized.items.length, plain.items.length);
-			assertEquals(
-				sized.items.map((i) => i.quality?.name ?? i.name),
+			expect(sized.cutoff).toStrictEqual(plain.cutoff);
+			expect(sized.items.length).toStrictEqual(plain.items.length);
+			expect(sized.items.map((i) => i.quality?.name ?? i.name)).toStrictEqual(
 				plain.items.map((i) => i.quality?.name ?? i.name)
 			);
 		});

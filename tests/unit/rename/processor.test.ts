@@ -5,7 +5,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import type { ArrCommand, ArrTag, RenamePreviewItem } from '#arr/types.ts';
 import type { RenameSettings } from '#db/queries/arrRenameSettings.ts';
 import type { ArrInstance } from '#db/queries/arrInstances.ts';
@@ -260,26 +260,25 @@ class RenameProcessorTest extends BaseTest {
 
 	testParseRenamedCount(): void {
 		this.test('parseRenamedCount: extracts count from Radarr message', () => {
-			assertEquals(parseRenamedCount('1 movie files renamed for 28 Years Later'), 1);
+			expect(parseRenamedCount('1 movie files renamed for 28 Years Later')).toStrictEqual(1);
 		});
 
 		this.test('parseRenamedCount: extracts count from Sonarr message', () => {
-			assertEquals(
-				parseRenamedCount('6 episode files renamed for A Knight of the Seven Kingdoms'),
-				6
-			);
+			expect(
+				parseRenamedCount('6 episode files renamed for A Knight of the Seven Kingdoms')
+			).toStrictEqual(6);
 		});
 
 		this.test('parseRenamedCount: returns 0 for no-op', () => {
-			assertEquals(parseRenamedCount('0 movie files renamed'), 0);
+			expect(parseRenamedCount('0 movie files renamed')).toStrictEqual(0);
 		});
 
 		this.test('parseRenamedCount: returns 0 for undefined', () => {
-			assertEquals(parseRenamedCount(undefined), 0);
+			expect(parseRenamedCount(undefined)).toStrictEqual(0);
 		});
 
 		this.test('parseRenamedCount: returns 0 for non-numeric message', () => {
-			assertEquals(parseRenamedCount('no numbers here'), 0);
+			expect(parseRenamedCount('no numbers here')).toStrictEqual(0);
 		});
 	}
 
@@ -292,24 +291,24 @@ class RenameProcessorTest extends BaseTest {
 			const items: LibraryItem[] = [RADARR_MOVIE, { ...TAGGED_MOVIE, tags: [] }];
 			const groups = groupByRootFolder(items);
 
-			assertEquals(groups.size, 1);
-			assertEquals(groups.get('/data/media/movies')?.length, 2);
-			assertEquals(groups.get('/data/media/movies')?.includes(1422), true);
-			assertEquals(groups.get('/data/media/movies')?.includes(999), true);
+			expect(groups.size).toStrictEqual(1);
+			expect(groups.get('/data/media/movies')?.length).toStrictEqual(2);
+			expect(groups.get('/data/media/movies')?.includes(1422)).toStrictEqual(true);
+			expect(groups.get('/data/media/movies')?.includes(999)).toStrictEqual(true);
 		});
 
 		this.test('groupByRootFolder: multiple root folders', () => {
 			const items: LibraryItem[] = [RADARR_MOVIE, ALT_ROOT_MOVIE];
 			const groups = groupByRootFolder(items);
 
-			assertEquals(groups.size, 2);
-			assertEquals(groups.get('/data/media/movies'), [1422]);
-			assertEquals(groups.get('/data/media/movies-4k'), [500]);
+			expect(groups.size).toStrictEqual(2);
+			expect(groups.get('/data/media/movies')).toStrictEqual([1422]);
+			expect(groups.get('/data/media/movies-4k')).toStrictEqual([500]);
 		});
 
 		this.test('groupByRootFolder: empty list', () => {
 			const groups = groupByRootFolder([]);
-			assertEquals(groups.size, 0);
+			expect(groups.size).toStrictEqual(0);
 		});
 	}
 
@@ -323,19 +322,19 @@ class RenameProcessorTest extends BaseTest {
 			const settings = makeSettings({ renameFolders: true, ignoreTag: 'profilarr-ignore' });
 			const log = createLog(instance, settings, true, false);
 
-			assertEquals(log.instanceId, 1);
-			assertEquals(log.instanceName, 'Test Radarr');
-			assertEquals(log.instanceType, 'radarr');
-			assertEquals(log.status, 'success');
-			assertEquals(log.config.dryRun, false);
-			assertEquals(log.config.renameFolders, true);
-			assertEquals(log.config.ignoreTag, 'profilarr-ignore');
-			assertEquals(log.config.manual, true);
-			assertEquals(log.results.filesRenamed, 0);
-			assertEquals(log.results.errors.length, 0);
-			assertEquals(log.renamedItems.length, 0);
-			assertEquals(typeof log.id, 'string');
-			assertEquals(log.id.length > 0, true);
+			expect(log.instanceId).toStrictEqual(1);
+			expect(log.instanceName).toStrictEqual('Test Radarr');
+			expect(log.instanceType).toStrictEqual('radarr');
+			expect(log.status).toStrictEqual('success');
+			expect(log.config.dryRun).toStrictEqual(false);
+			expect(log.config.renameFolders).toStrictEqual(true);
+			expect(log.config.ignoreTag).toStrictEqual('profilarr-ignore');
+			expect(log.config.manual).toStrictEqual(true);
+			expect(log.results.filesRenamed).toStrictEqual(0);
+			expect(log.results.errors.length).toStrictEqual(0);
+			expect(log.renamedItems.length).toStrictEqual(0);
+			expect(typeof log.id).toStrictEqual('string');
+			expect(log.id.length > 0).toStrictEqual(true);
 		});
 	}
 
@@ -353,14 +352,13 @@ class RenameProcessorTest extends BaseTest {
 
 			await processDryRun(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.filesNeedingRename, 1);
-			assertEquals(log.results.filesRenamed, 0);
-			assertEquals(log.renamedItems.length, 1);
-			assertEquals(log.renamedItems[0].id, 1422);
-			assertEquals(log.renamedItems[0].title, '28 Years Later');
-			assertEquals(log.renamedItems[0].files.length, 1);
-			assertEquals(
-				log.renamedItems[0].files[0].existingPath,
+			expect(log.results.filesNeedingRename).toStrictEqual(1);
+			expect(log.results.filesRenamed).toStrictEqual(0);
+			expect(log.renamedItems.length).toStrictEqual(1);
+			expect(log.renamedItems[0].id).toStrictEqual(1422);
+			expect(log.renamedItems[0].title).toStrictEqual('28 Years Later');
+			expect(log.renamedItems[0].files.length).toStrictEqual(1);
+			expect(log.renamedItems[0].files[0].existingPath).toStrictEqual(
 				'28 Years Later (2025)/28 Years Later (2025).mkv'
 			);
 		});
@@ -371,8 +369,8 @@ class RenameProcessorTest extends BaseTest {
 
 			await processDryRun(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.filesNeedingRename, 0);
-			assertEquals(log.renamedItems.length, 0);
+			expect(log.results.filesNeedingRename).toStrictEqual(0);
+			expect(log.renamedItems.length).toStrictEqual(0);
 		});
 	}
 
@@ -391,11 +389,11 @@ class RenameProcessorTest extends BaseTest {
 
 			await processDryRun(adapter, [SONARR_SERIES], log);
 
-			assertEquals(log.results.filesNeedingRename, 6);
-			assertEquals(log.renamedItems.length, 1);
-			assertEquals(log.renamedItems[0].id, 77);
-			assertEquals(log.renamedItems[0].title, 'A Knight of the Seven Kingdoms');
-			assertEquals(log.renamedItems[0].files.length, 6);
+			expect(log.results.filesNeedingRename).toStrictEqual(6);
+			expect(log.renamedItems.length).toStrictEqual(1);
+			expect(log.renamedItems[0].id).toStrictEqual(77);
+			expect(log.renamedItems[0].title).toStrictEqual('A Knight of the Seven Kingdoms');
+			expect(log.renamedItems[0].files.length).toStrictEqual(6);
 		});
 	}
 
@@ -416,11 +414,11 @@ class RenameProcessorTest extends BaseTest {
 
 			await processDryRun(adapter, [RADARR_MOVIE, ALT_ROOT_MOVIE], log);
 
-			assertEquals(log.results.filesNeedingRename, 1);
-			assertEquals(log.renamedItems.length, 1);
-			assertEquals(log.results.errors.length, 1);
-			assertEquals(log.results.errors[0].includes('Alt Root Movie'), true);
-			assertEquals(log.results.errors[0].includes('Connection refused'), true);
+			expect(log.results.filesNeedingRename).toStrictEqual(1);
+			expect(log.renamedItems.length).toStrictEqual(1);
+			expect(log.results.errors.length).toStrictEqual(1);
+			expect(log.results.errors[0].includes('Alt Root Movie')).toStrictEqual(true);
+			expect(log.results.errors[0].includes('Connection refused')).toStrictEqual(true);
 		});
 	}
 
@@ -435,9 +433,9 @@ class RenameProcessorTest extends BaseTest {
 
 			await processDryRun(adapter, [], log);
 
-			assertEquals(log.results.filesNeedingRename, 0);
-			assertEquals(log.renamedItems.length, 0);
-			assertEquals(log.results.errors.length, 0);
+			expect(log.results.filesNeedingRename).toStrictEqual(0);
+			expect(log.renamedItems.length).toStrictEqual(0);
+			expect(log.results.errors.length).toStrictEqual(0);
 		});
 	}
 
@@ -460,11 +458,11 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFileRename(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.filesRenamed, 1);
-			assertEquals(log.results.commandsTriggered, 1);
-			assertEquals(log.results.commandsCompleted, 1);
-			assertEquals(log.results.commandsFailed, 0);
-			assertEquals(log.results.errors.length, 0);
+			expect(log.results.filesRenamed).toStrictEqual(1);
+			expect(log.results.commandsTriggered).toStrictEqual(1);
+			expect(log.results.commandsCompleted).toStrictEqual(1);
+			expect(log.results.commandsFailed).toStrictEqual(0);
+			expect(log.results.errors.length).toStrictEqual(0);
 		});
 	}
 
@@ -488,9 +486,9 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFileRename(adapter, [SONARR_SERIES], log);
 
-			assertEquals(log.results.filesRenamed, 6);
-			assertEquals(log.results.commandsTriggered, 1);
-			assertEquals(log.results.commandsCompleted, 1);
+			expect(log.results.filesRenamed).toStrictEqual(6);
+			expect(log.results.commandsTriggered).toStrictEqual(1);
+			expect(log.results.commandsCompleted).toStrictEqual(1);
 		});
 	}
 
@@ -513,10 +511,10 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFileRename(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.filesRenamed, 0);
-			assertEquals(log.results.commandsTriggered, 1);
-			assertEquals(log.results.commandsCompleted, 1);
-			assertEquals(log.results.errors.length, 0);
+			expect(log.results.filesRenamed).toStrictEqual(0);
+			expect(log.results.commandsTriggered).toStrictEqual(1);
+			expect(log.results.commandsCompleted).toStrictEqual(1);
+			expect(log.results.errors.length).toStrictEqual(0);
 		});
 	}
 
@@ -533,10 +531,10 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFileRename(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.commandsFailed, 1);
-			assertEquals(log.results.filesRenamed, 0);
-			assertEquals(log.results.errors.length, 1);
-			assertEquals(log.results.errors[0].includes('API connection timeout'), true);
+			expect(log.results.commandsFailed).toStrictEqual(1);
+			expect(log.results.filesRenamed).toStrictEqual(0);
+			expect(log.results.errors.length).toStrictEqual(1);
+			expect(log.results.errors[0].includes('API connection timeout')).toStrictEqual(true);
 		});
 	}
 
@@ -551,11 +549,11 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFolderRename(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.commandsTriggered, 1);
-			assertEquals(log.results.commandsCompleted, 1);
-			assertEquals(adapter._folderRenameCalls.length, 1);
-			assertEquals(adapter._folderRenameCalls[0].ids, [1422]);
-			assertEquals(adapter._folderRenameCalls[0].rootFolderPath, '/data/media/movies');
+			expect(log.results.commandsTriggered).toStrictEqual(1);
+			expect(log.results.commandsCompleted).toStrictEqual(1);
+			expect(adapter._folderRenameCalls.length).toStrictEqual(1);
+			expect(adapter._folderRenameCalls[0].ids).toStrictEqual([1422]);
+			expect(adapter._folderRenameCalls[0].rootFolderPath).toStrictEqual('/data/media/movies');
 		});
 	}
 
@@ -570,7 +568,7 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFolderRename(adapter, [RADARR_MOVIE, ALT_ROOT_MOVIE], log);
 
-			assertEquals(adapter._folderRenameCalls.length, 2);
+			expect(adapter._folderRenameCalls.length).toStrictEqual(2);
 
 			const movieCall = adapter._folderRenameCalls.find(
 				(c) => c.rootFolderPath === '/data/media/movies'
@@ -579,9 +577,9 @@ class RenameProcessorTest extends BaseTest {
 				(c) => c.rootFolderPath === '/data/media/movies-4k'
 			);
 
-			assertEquals(movieCall?.ids, [1422]);
-			assertEquals(altCall?.ids, [500]);
-			assertEquals(log.results.commandsTriggered, 2);
+			expect(movieCall?.ids).toStrictEqual([1422]);
+			expect(altCall?.ids).toStrictEqual([500]);
+			expect(log.results.commandsTriggered).toStrictEqual(2);
 		});
 	}
 
@@ -598,10 +596,10 @@ class RenameProcessorTest extends BaseTest {
 
 			await processFolderRename(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.commandsFailed, 1);
-			assertEquals(log.results.errors.length, 1);
-			assertEquals(log.results.errors[0].includes('Permission denied'), true);
-			assertEquals(log.results.errors[0].includes('/data/media/movies'), true);
+			expect(log.results.commandsFailed).toStrictEqual(1);
+			expect(log.results.errors.length).toStrictEqual(1);
+			expect(log.results.errors[0].includes('Permission denied')).toStrictEqual(true);
+			expect(log.results.errors[0].includes('/data/media/movies')).toStrictEqual(true);
 		});
 	}
 
@@ -624,7 +622,7 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(snapshot, snapshot);
-			assertEquals(diff.length, 0);
+			expect(diff.length).toStrictEqual(0);
 		});
 	}
 
@@ -655,12 +653,12 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(before, after);
-			assertEquals(diff.length, 1);
-			assertEquals(diff[0].id, 1422);
-			assertEquals(diff[0].folder, undefined);
-			assertEquals(diff[0].files.length, 1);
-			assertEquals(diff[0].files[0].oldPath, '28 Years Latera (2025).mkv');
-			assertEquals(diff[0].files[0].newPath, '28 Years Later (2025).mkv');
+			expect(diff.length).toStrictEqual(1);
+			expect(diff[0].id).toStrictEqual(1422);
+			expect(diff[0].folder).toStrictEqual(undefined);
+			expect(diff[0].files.length).toStrictEqual(1);
+			expect(diff[0].files[0].oldPath).toStrictEqual('28 Years Latera (2025).mkv');
+			expect(diff[0].files[0].newPath).toStrictEqual('28 Years Later (2025).mkv');
 		});
 	}
 
@@ -691,10 +689,10 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(before, after);
-			assertEquals(diff.length, 1);
-			assertEquals(diff[0].folder?.oldPath, '/data/media/movies/28 Years Latera (2025)');
-			assertEquals(diff[0].folder?.newPath, '/data/media/movies/28 Years Later (2025)');
-			assertEquals(diff[0].files.length, 0);
+			expect(diff.length).toStrictEqual(1);
+			expect(diff[0].folder?.oldPath).toStrictEqual('/data/media/movies/28 Years Latera (2025)');
+			expect(diff[0].folder?.newPath).toStrictEqual('/data/media/movies/28 Years Later (2025)');
+			expect(diff[0].files.length).toStrictEqual(0);
 		});
 	}
 
@@ -725,9 +723,9 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(before, after);
-			assertEquals(diff.length, 1);
-			assertEquals(diff[0].folder !== undefined, true);
-			assertEquals(diff[0].files.length, 1);
+			expect(diff.length).toStrictEqual(1);
+			expect(diff[0].folder !== undefined).toStrictEqual(true);
+			expect(diff[0].files.length).toStrictEqual(1);
 		});
 	}
 
@@ -776,8 +774,8 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(before, after);
-			assertEquals(diff.length, 1);
-			assertEquals(diff[0].id, 1422);
+			expect(diff.length).toStrictEqual(1);
+			expect(diff[0].id).toStrictEqual(1422);
 		});
 	}
 
@@ -808,9 +806,9 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(before, after);
-			assertEquals(diff.length, 1);
-			assertEquals(diff[0].folder !== undefined, true);
-			assertEquals(diff[0].files.length, 0);
+			expect(diff.length).toStrictEqual(1);
+			expect(diff[0].folder !== undefined).toStrictEqual(true);
+			expect(diff[0].files.length).toStrictEqual(0);
 		});
 	}
 
@@ -855,10 +853,10 @@ class RenameProcessorTest extends BaseTest {
 			]);
 
 			const diff = diffSnapshots(before, after);
-			assertEquals(diff.length, 1);
-			assertEquals(diff[0].id, 77);
-			assertEquals(diff[0].files.length, 6);
-			assertEquals(diff[0].folder, undefined);
+			expect(diff.length).toStrictEqual(1);
+			expect(diff[0].id).toStrictEqual(77);
+			expect(diff[0].files.length).toStrictEqual(6);
+			expect(diff[0].folder).toStrictEqual(undefined);
 		});
 	}
 
@@ -883,10 +881,10 @@ class RenameProcessorTest extends BaseTest {
 			await processFolderRename(adapter, [RADARR_MOVIE, ALT_ROOT_MOVIE], log);
 
 			// File rename
-			assertEquals(log.results.filesRenamed, 1);
-			assertEquals(log.results.commandsCompleted, 3); // 1 file + 2 folder
-			assertEquals(log.results.commandsTriggered, 3);
-			assertEquals(log.results.errors.length, 0);
+			expect(log.results.filesRenamed).toStrictEqual(1);
+			expect(log.results.commandsCompleted).toStrictEqual(3); // 1 file + 2 folder
+			expect(log.results.commandsTriggered).toStrictEqual(3);
+			expect(log.results.errors.length).toStrictEqual(0);
 		});
 	}
 
@@ -904,10 +902,10 @@ class RenameProcessorTest extends BaseTest {
 			await processFileRename(adapter, [RADARR_MOVIE], log);
 			await processFolderRename(adapter, [RADARR_MOVIE], log);
 
-			assertEquals(log.results.filesRenamed, 0);
-			assertEquals(log.results.commandsFailed, 1);
-			assertEquals(log.results.commandsCompleted, 1);
-			assertEquals(log.results.errors.length, 1);
+			expect(log.results.filesRenamed).toStrictEqual(0);
+			expect(log.results.commandsFailed).toStrictEqual(1);
+			expect(log.results.commandsCompleted).toStrictEqual(1);
+			expect(log.results.errors.length).toStrictEqual(1);
 		});
 	}
 

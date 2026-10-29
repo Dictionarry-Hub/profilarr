@@ -2,9 +2,8 @@
  * PCD write tests: regex update.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -76,7 +75,7 @@ test('scalar fields split into independent grouped ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 3);
+	expect(ops.length).toStrictEqual(3);
 	assertOnlyField(ops, 'pattern');
 	assertOnlyField(ops, 'description');
 	assertOnlyField(ops, 'regex101_id');
@@ -122,12 +121,12 @@ test('clearing nullable scalar fields writes null desired state', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
-	assertEquals(parseDesiredState(opForChangedField(ops, 'description')).description, {
+	expect(ops.length).toStrictEqual(2);
+	expect(parseDesiredState(opForChangedField(ops, 'description')).description).toStrictEqual({
 		from: 'Old',
 		to: null
 	});
-	assertEquals(parseDesiredState(opForChangedField(ops, 'regex101_id')).regex101_id, {
+	expect(parseDesiredState(opForChangedField(ops, 'regex101_id')).regex101_id).toStrictEqual({
 		from: 'old101',
 		to: null
 	});
@@ -172,12 +171,12 @@ test('tags add and remove in one tags op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = opForChangedField(ops, 'tags');
-	assertEquals(parseDesiredState(op).tags, { add: ['New'], remove: ['Old'] });
+	expect(parseDesiredState(op).tags).toStrictEqual({ add: ['New'], remove: ['Old'] });
 	const sql = normalizeSql(op.sql);
-	assert(sql.includes('DELETE FROM regular_expression_tags'));
-	assert(sql.includes(`'Tagged Regex', 'New'`));
+	expect(sql.includes('DELETE FROM regular_expression_tags')).toBeTruthy();
+	expect(sql.includes(`'Tagged Regex', 'New'`)).toBeTruthy();
 });
 
 /**
@@ -221,5 +220,5 @@ test('unchanged fields and tag reorder write no ops', async () => {
 		tags: ['B', 'A']
 	});
 
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

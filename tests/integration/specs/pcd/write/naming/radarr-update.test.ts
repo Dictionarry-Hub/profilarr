@@ -6,9 +6,8 @@
  * mirroring the regex / delay-profile / media-settings pattern.
  */
 
-import { assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -82,7 +81,7 @@ test('representative scalar fields split into grouped ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	assertOnlyField(ops, 'movie_format');
 	assertOnlyField(ops, 'replace_illegal_characters');
 	assertSameGroup(ops);
@@ -130,15 +129,15 @@ test('rename plus scalar change emits grouped split ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	assertOnlyField(ops, 'movie_format');
 	assertOnlyField(ops, 'name');
 	assertSameGroup(ops);
 	const renameOp = opForChangedField(ops, 'name');
 	const metadata = parseMetadata(renameOp);
-	assertEquals(metadata.name, 'New Naming');
-	assertEquals(metadata.previousName, 'Old Naming');
-	assertEquals(parseDesiredState(renameOp).name, { from: 'Old Naming', to: 'New Naming' });
+	expect(metadata.name).toStrictEqual('New Naming');
+	expect(metadata.previousName).toStrictEqual('Old Naming');
+	expect(parseDesiredState(renameOp).name).toStrictEqual({ from: 'Old Naming', to: 'New Naming' });
 });
 
 /**
@@ -183,13 +182,13 @@ test('pure rename emits one ungrouped rename op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const renameOp = opForChangedField(ops, 'name');
 	const metadata = parseMetadata(renameOp);
-	assertEquals(metadata.group_id, undefined);
-	assertEquals(metadata.name, 'Renamed');
-	assertEquals(metadata.previousName, 'Pure Rename');
-	assertEquals(parseDesiredState(renameOp).name, { from: 'Pure Rename', to: 'Renamed' });
+	expect(metadata.group_id).toStrictEqual(undefined);
+	expect(metadata.name).toStrictEqual('Renamed');
+	expect(metadata.previousName).toStrictEqual('Pure Rename');
+	expect(parseDesiredState(renameOp).name).toStrictEqual({ from: 'Pure Rename', to: 'Renamed' });
 });
 
 /**
@@ -222,5 +221,5 @@ test('unchanged submit writes no ops', async () => {
 		colonReplacementFormat: 'delete'
 	});
 
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

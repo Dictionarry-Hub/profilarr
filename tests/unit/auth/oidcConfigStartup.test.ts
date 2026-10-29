@@ -1,7 +1,6 @@
-import { test } from 'vitest';
+import { expect, test } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
-import { assert, assertEquals, assertStringIncludes } from '@std/assert';
 import type { CommandResult } from '#utils/command.ts';
 
 function importConfig(env: Record<string, string>): CommandResult {
@@ -29,16 +28,16 @@ test('partial OIDC settings fail config import and name the missing settings', a
 		OIDC_CLIENT_ID: 'profilarr'
 	});
 
-	assertEquals(result.code, 1);
+	expect(result.code).toStrictEqual(1);
 	const stderr = new TextDecoder().decode(result.stderr);
-	assertStringIncludes(stderr, 'OIDC is partially configured. Missing: OIDC_CLIENT_SECRET.');
+	expect(stderr).toContain('OIDC is partially configured. Missing: OIDC_CLIENT_SECRET.');
 	// Printed as a log line, not an uncaught error with a stack trace
-	assertStringIncludes(stderr, 'ERROR');
-	assertStringIncludes(stderr, '[Config]');
-	assert(!/\n\s+at /.test(stderr), stderr);
+	expect(stderr).toContain('ERROR');
+	expect(stderr).toContain('[Config]');
+	expect(!/\n\s+at /.test(stderr), stderr).toBeTruthy();
 });
 
 test('partial OIDC settings with AUTH=off do not fail config import', async () => {
 	const result = await importConfig({ AUTH: 'off', OIDC_CLIENT_ID: 'profilarr' });
-	assertEquals(result.code, 0, new TextDecoder().decode(result.stderr));
+	expect(result.code, new TextDecoder().decode(result.stderr)).toStrictEqual(0);
 });

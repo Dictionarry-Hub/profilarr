@@ -2,10 +2,9 @@
  * Backup notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -93,28 +92,28 @@ function makeFailedParams(overrides: Partial<BackupFailedParams> = {}): BackupFa
 // =========================================================================
 
 test('success: type is backup.success', () => {
-	assertEquals(backupSuccess(makeSuccessParams()).type, 'backup.success');
+	expect(backupSuccess(makeSuccessParams()).type).toStrictEqual('backup.success');
 });
 
 test('success: severity is success', () => {
-	assertEquals(backupSuccess(makeSuccessParams()).severity, 'success');
+	expect(backupSuccess(makeSuccessParams()).severity).toStrictEqual('success');
 });
 
 test('success: title is Backup Created', () => {
-	assertEquals(backupSuccess(makeSuccessParams()).title, 'Backup Created');
+	expect(backupSuccess(makeSuccessParams()).title).toStrictEqual('Backup Created');
 });
 
 test('success: message is filename', () => {
 	const notification = backupSuccess(makeSuccessParams());
-	assertEquals(notification.message, 'backup-2026-04-17-120000.tar.gz');
+	expect(notification.message).toStrictEqual('backup-2026-04-17-120000.tar.gz');
 });
 
 test('success: size field uses MB with two decimals', () => {
 	const notification = backupSuccess(makeSuccessParams());
 	const sizeField = notification.blocks?.find((b) => b.kind === 'field' && b.label === 'Size');
-	assertExists(sizeField);
+	expect(sizeField).not.toBeOneOf([null, undefined]);
 	if (sizeField?.kind === 'field') {
-		assertEquals(sizeField.value, '12.00 MB');
+		expect(sizeField.value).toStrictEqual('12.00 MB');
 	}
 });
 
@@ -123,9 +122,9 @@ test('success: duration field included when provided', () => {
 	const durationField = notification.blocks?.find(
 		(b) => b.kind === 'field' && b.label === 'Duration'
 	);
-	assertExists(durationField);
+	expect(durationField).not.toBeOneOf([null, undefined]);
 	if (durationField?.kind === 'field') {
-		assertEquals(durationField.value, '3.5s');
+		expect(durationField.value).toStrictEqual('3.5s');
 	}
 });
 
@@ -134,7 +133,7 @@ test('success: duration field omitted when not provided', () => {
 	const durationField = notification.blocks?.find(
 		(b) => b.kind === 'field' && b.label === 'Duration'
 	);
-	assertEquals(durationField, undefined);
+	expect(durationField).toStrictEqual(undefined);
 });
 
 test('success: duration formats ms under one second', () => {
@@ -143,7 +142,7 @@ test('success: duration formats ms under one second', () => {
 		(b) => b.kind === 'field' && b.label === 'Duration'
 	);
 	if (durationField?.kind === 'field') {
-		assertEquals(durationField.value, '250ms');
+		expect(durationField.value).toStrictEqual('250ms');
 	}
 });
 
@@ -153,7 +152,7 @@ test('success: duration formats minutes and seconds for long backups', () => {
 		(b) => b.kind === 'field' && b.label === 'Duration'
 	);
 	if (durationField?.kind === 'field') {
-		assertEquals(durationField.value, '2m 5s');
+		expect(durationField.value).toStrictEqual('2m 5s');
 	}
 });
 
@@ -162,20 +161,20 @@ test('success: duration formats minutes and seconds for long backups', () => {
 // =========================================================================
 
 test('failed: type is backup.failed', () => {
-	assertEquals(backupFailed(makeFailedParams()).type, 'backup.failed');
+	expect(backupFailed(makeFailedParams()).type).toStrictEqual('backup.failed');
 });
 
 test('failed: severity is error', () => {
-	assertEquals(backupFailed(makeFailedParams()).severity, 'error');
+	expect(backupFailed(makeFailedParams()).severity).toStrictEqual('error');
 });
 
 test('failed: title is Backup Failed', () => {
-	assertEquals(backupFailed(makeFailedParams()).title, 'Backup Failed');
+	expect(backupFailed(makeFailedParams()).title).toStrictEqual('Backup Failed');
 });
 
 test('failed: message is first line of error', () => {
 	const notification = backupFailed(makeFailedParams({ error: 'tar failed\nSee log for details' }));
-	assertEquals(notification.message, 'tar failed');
+	expect(notification.message).toStrictEqual('tar failed');
 });
 
 test('failed: full error text in section block', () => {
@@ -183,10 +182,10 @@ test('failed: full error text in section block', () => {
 		makeFailedParams({ error: 'tar failed\nstderr: permission denied' })
 	);
 	const errorBlock = notification.blocks?.find((b) => b.kind === 'section' && b.title === 'Error');
-	assertExists(errorBlock);
+	expect(errorBlock).not.toBeOneOf([null, undefined]);
 	if (errorBlock?.kind === 'section') {
-		assertEquals(errorBlock.content.includes('tar failed'), true);
-		assertEquals(errorBlock.content.includes('permission denied'), true);
+		expect(errorBlock.content.includes('tar failed')).toStrictEqual(true);
+		expect(errorBlock.content.includes('permission denied')).toStrictEqual(true);
 	}
 });
 
@@ -203,7 +202,7 @@ test('discord: success uses success color', async () => {
 	});
 	await notifier.notify(backupSuccess(makeSuccessParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.SUCCESS);
 });
 
 test('discord: failed uses error color', async () => {
@@ -215,7 +214,7 @@ test('discord: failed uses error color', async () => {
 	});
 	await notifier.notify(backupFailed(makeFailedParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.ERROR);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 test('discord: success embed includes filename and size', async () => {
@@ -232,8 +231,8 @@ test('discord: success embed includes filename and size', async () => {
 	const descriptions = embeds.map((e) => e.description as string).filter(Boolean);
 
 	const allText = [...allFields.map((f) => `${f.name} ${f.value}`), ...descriptions].join(' ');
-	assertEquals(allText.includes('backup-2026-04-17-120000.tar.gz'), true);
-	assertEquals(allText.includes('12.00 MB'), true);
+	expect(allText.includes('backup-2026-04-17-120000.tar.gz')).toStrictEqual(true);
+	expect(allText.includes('12.00 MB')).toStrictEqual(true);
 });
 
 test('discord: success wraps filename description in a code block', async () => {
@@ -246,9 +245,9 @@ test('discord: success wraps filename description in a code block', async () => 
 	await notifier.notify(backupSuccess(makeSuccessParams()));
 
 	const description = getAllEmbeds()[0]?.description as string;
-	assertEquals(description.startsWith('```\n'), true);
-	assertEquals(description.endsWith('\n```'), true);
-	assertEquals(description.includes('backup-2026-04-17-120000.tar.gz'), true);
+	expect(description.startsWith('```\n')).toStrictEqual(true);
+	expect(description.endsWith('\n```')).toStrictEqual(true);
+	expect(description.includes('backup-2026-04-17-120000.tar.gz')).toStrictEqual(true);
 });
 
 test('discord: failed description is plain (no code block)', async () => {
@@ -261,7 +260,7 @@ test('discord: failed description is plain (no code block)', async () => {
 	await notifier.notify(backupFailed(makeFailedParams()));
 
 	const description = getAllEmbeds()[0]?.description as string;
-	assertEquals(description.startsWith('```'), false);
+	expect(description.startsWith('```')).toStrictEqual(false);
 });
 
 test('discord: failed embed includes error text', async () => {
@@ -278,7 +277,7 @@ test('discord: failed embed includes error text', async () => {
 	const descriptions = embeds.map((e) => e.description as string).filter(Boolean);
 
 	const allText = [...allFields.map((f) => `${f.name} ${f.value}`), ...descriptions].join(' ');
-	assertEquals(allText.includes('permission denied'), true);
+	expect(allText.includes('permission denied')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -294,8 +293,8 @@ test('ntfy: success maps to priority 3', async () => {
 	await notifier.notify(backupSuccess(makeSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
-	assertEquals(payload?.tags, ['white_check_mark']);
+	expect(payload?.priority).toStrictEqual(3);
+	expect(payload?.tags).toStrictEqual(['white_check_mark']);
 });
 
 test('ntfy: failed maps to priority 5', async () => {
@@ -307,8 +306,8 @@ test('ntfy: failed maps to priority 5', async () => {
 	await notifier.notify(backupFailed(makeFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 5);
-	assertEquals(payload?.tags, ['x']);
+	expect(payload?.priority).toStrictEqual(5);
+	expect(payload?.tags).toStrictEqual(['x']);
 });
 
 test('ntfy: success message includes filename as plain text (no code fences)', async () => {
@@ -321,8 +320,8 @@ test('ntfy: success message includes filename as plain text (no code fences)', a
 
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const message = payload?.message as string;
-	assertEquals(message.includes('backup-2026-04-17-120000.tar.gz'), true);
-	assertEquals(message.includes('```'), false);
+	expect(message.includes('backup-2026-04-17-120000.tar.gz')).toStrictEqual(true);
+	expect(message.includes('```')).toStrictEqual(false);
 });
 
 // =========================================================================
@@ -337,20 +336,14 @@ test('webhook: success sends full notification with field blocks', async () => {
 	await notifier.notify(backupSuccess(makeSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'backup.success');
-	assertEquals(payload?.severity, 'success');
+	expect(payload?.type).toStrictEqual('backup.success');
+	expect(payload?.severity).toStrictEqual('success');
 	const blocks = payload?.blocks as { kind: string; label?: string; value?: string }[];
-	assertExists(blocks);
+	expect(blocks).not.toBeOneOf([null, undefined]);
 	const fields = blocks.filter((b) => b.kind === 'field');
-	assertEquals(fields.length, 2);
-	assertEquals(
-		fields.some((f) => f.label === 'Size'),
-		true
-	);
-	assertEquals(
-		fields.some((f) => f.label === 'Duration'),
-		true
-	);
+	expect(fields.length).toStrictEqual(2);
+	expect(fields.some((f) => f.label === 'Size')).toStrictEqual(true);
+	expect(fields.some((f) => f.label === 'Duration')).toStrictEqual(true);
 });
 
 test('webhook: success without duration has single field block', async () => {
@@ -363,8 +356,8 @@ test('webhook: success without duration has single field block', async () => {
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const blocks = payload?.blocks as { kind: string; label?: string }[];
 	const fields = blocks.filter((b) => b.kind === 'field');
-	assertEquals(fields.length, 1);
-	assertEquals(fields[0].label, 'Size');
+	expect(fields.length).toStrictEqual(1);
+	expect(fields[0].label).toStrictEqual('Size');
 });
 
 test('webhook: failed has error section block', async () => {
@@ -375,11 +368,11 @@ test('webhook: failed has error section block', async () => {
 	await notifier.notify(backupFailed(makeFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'backup.failed');
+	expect(payload?.type).toStrictEqual('backup.failed');
 	const blocks = payload?.blocks as { kind: string; title?: string; content?: string }[];
 	const errorBlock = blocks.find((b) => b.kind === 'section' && b.title === 'Error');
-	assertExists(errorBlock);
-	assertEquals(errorBlock?.content?.includes('permission denied'), true);
+	expect(errorBlock).not.toBeOneOf([null, undefined]);
+	expect(errorBlock?.content?.includes('permission denied')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -398,7 +391,7 @@ test('telegram: success has ✅ prefix', async () => {
 	await notifier.notify(backupSuccess(makeSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2705'), true);
+	expect(text.startsWith('\u2705')).toStrictEqual(true);
 });
 
 test('telegram: failed has ❌ prefix', async () => {
@@ -411,7 +404,7 @@ test('telegram: failed has ❌ prefix', async () => {
 	await notifier.notify(backupFailed(makeFailedParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 test('telegram: success includes filename as plain text (no code fences)', async () => {
@@ -424,8 +417,8 @@ test('telegram: success includes filename as plain text (no code fences)', async
 	await notifier.notify(backupSuccess(makeSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.includes('backup-2026-04-17-120000.tar.gz'), true);
-	assertEquals(text.includes('```'), false);
+	expect(text.includes('backup-2026-04-17-120000.tar.gz')).toStrictEqual(true);
+	expect(text.includes('```')).toStrictEqual(false);
 });
 
 // =========================================================================

@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -68,16 +67,19 @@ test('description update from null guards with is null', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = opForChangedField(ops, 'description');
-	assertEquals(parseDesiredState(op).description, {
+	expect(parseDesiredState(op).description).toStrictEqual({
 		from: null,
 		to: 'Local description'
 	});
 
 	const sql = normalizeSql(op.sql).toLowerCase();
-	assert(sql.includes('description" is null'), `Expected NULL guard, got ${sql}`);
-	assert(!sql.includes(`description = ''`), `Expected no empty-string guard, got ${sql}`);
+	expect(sql.includes('description" is null'), `Expected NULL guard, got ${sql}`).toBeTruthy();
+	expect(
+		!sql.includes(`description = ''`),
+		`Expected no empty-string guard, got ${sql}`
+	).toBeTruthy();
 });
 
 /**
@@ -116,15 +118,14 @@ test('description update from null applies cleanly', async () => {
 	const op = opForChangedField(userOpsSince(ctx, checkpoint), 'description');
 	assertLatestHistory(ctx, op.id, 'applied');
 	assertNoPendingConflicts(ctx);
-	assertEquals(
-		compiledQualityProfileDescription(ctx, 'Applied Nullable Profile'),
+	expect(compiledQualityProfileDescription(ctx, 'Applied Nullable Profile')).toStrictEqual(
 		'Applied description'
 	);
 });
 
 function assertLatestHistory(ctx: PcdTestContext, opId: number, status: string): void {
 	const row = latestHistory(ctx, opId);
-	assertEquals(row.status, status);
+	expect(row.status).toStrictEqual(status);
 }
 
 function latestHistory(ctx: PcdTestContext, opId: number): { status: string } {
@@ -140,7 +141,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): { status: string } {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as { status: string } | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -163,7 +164,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -202,7 +203,7 @@ function compiledQualityProfileDescription(ctx: PcdTestContext, name: string): s
 		const row = replay
 			.prepare('SELECT description FROM quality_profiles WHERE name = ?')
 			.get(name) as { description: string | null } | undefined;
-		assertExists(row, `Expected quality profile ${name}`);
+		expect(row, `Expected quality profile ${name}`).not.toBeOneOf([null, undefined]);
 		return row.description;
 	} finally {
 		replay.close();

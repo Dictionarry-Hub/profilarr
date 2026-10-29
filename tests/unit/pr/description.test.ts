@@ -3,8 +3,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { test } from 'vitest';
-import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import { expect, test } from 'vitest';
 import { runCommand } from '#utils/command.ts';
 import { validatePrDescription } from '#scripts/check-pr-description.ts';
 
@@ -20,8 +19,8 @@ function replaceSection(body: string, title: string, content: string): string {
 for (const name of ['docs', 'feature', 'visual']) {
 	test(`PR description: accepts a complete ${name} PR`, () => {
 		const result = validatePrDescription(fixture(name));
-		assertEquals(result.errors, []);
-		assertEquals(result.warnings, []);
+		expect(result.errors).toStrictEqual([]);
+		expect(result.warnings).toStrictEqual([]);
 	});
 }
 
@@ -34,7 +33,9 @@ for (const title of [
 ]) {
 	test(`PR description: requires ${title}`, () => {
 		const body = docs.replace(new RegExp(`## ${title}\\n[\\s\\S]*?(?=\\n## |$)`), '');
-		assert(validatePrDescription(body).errors.includes(`Add the "## ${title}" section.`));
+		expect(
+			validatePrDescription(body).errors.includes(`Add the "## ${title}" section.`)
+		).toBeTruthy();
 	});
 }
 
@@ -42,54 +43,57 @@ for (const title of ['Description', 'User-facing docs', 'Technical docs', 'Testi
 	for (const content of ['', '<!-- Answer goes here. -->', '### Details', 'N/A', 'TBD']) {
 		test(`PR description: rejects an unanswered ${title}: ${JSON.stringify(content)}`, () => {
 			const result = validatePrDescription(replaceSection(docs, title, content));
-			assert(result.errors.some((error) => error.startsWith(`Answer "${title}"`)));
+			expect(result.errors.some((error) => error.startsWith(`Answer "${title}"`))).toBeTruthy();
 		});
 	}
 }
 
 test('PR description: absent body fails all required sections', () => {
-	assertEquals(validatePrDescription(null).errors.length, 5);
+	expect(validatePrDescription(null).errors.length).toStrictEqual(5);
 });
 
 test('PR description: optional sections can be absent or empty', () => {
-	assertEquals(
-		validatePrDescription(`${docs}\n## Related issue\n\n## Upgrade impact\n`).errors,
-		[]
-	);
+	expect(
+		validatePrDescription(`${docs}\n## Related issue\n\n## Upgrade impact\n`).errors
+	).toStrictEqual([]);
 });
 
 test('PR description: honestly reporting missing verification is accepted', () => {
 	const body = replaceSection(docs, 'Testing', "I haven't verified this change yet.");
-	assertEquals(validatePrDescription(body).errors, []);
+	expect(validatePrDescription(body).errors).toStrictEqual([]);
 });
 
 test('PR description: ignores heading case, CRLF, and closing hashes', () => {
 	const body = docs
 		.replace(/^## (.+)$/gm, (_, title) => `  ## ${title.toUpperCase()} ##`)
 		.replace(/\n/g, '\r\n');
-	assertEquals(validatePrDescription(body).errors, []);
+	expect(validatePrDescription(body).errors).toStrictEqual([]);
 });
 
 test('PR description: duplicate required or optional sections fail', () => {
 	for (const title of ['Description', 'Related issue', 'Upgrade impact', 'Confirmation']) {
 		const body = `${fixture('feature')}\n## ${title}\nMore context.\n`;
-		assert(validatePrDescription(body).errors.includes(`Keep only one "${title}" section.`));
+		expect(
+			validatePrDescription(body).errors.includes(`Keep only one "${title}" section.`)
+		).toBeTruthy();
 	}
 });
 
 test('PR description: unexpected top-level headings fail with a useful location', () => {
 	for (const heading of ['## Generated summary', '# Implementation']) {
 		const errors = validatePrDescription(`${docs}\n${heading}\nExtra detail.`).errors;
-		assert(errors.some((error) => error.startsWith('Unexpected') && error.includes('line')));
+		expect(
+			errors.some((error) => error.startsWith('Unexpected') && error.includes('line'))
+		).toBeTruthy();
 	}
 });
 
 test('PR description: introductory text must go under Description', () => {
-	assert(
+	expect(
 		validatePrDescription(`A generated preamble.\n${docs}`).errors.some((e) =>
 			e.includes('introductory')
 		)
-	);
+	).toBeTruthy();
 });
 
 test('PR description: ignores multiline comments and preserves adjacent text', () => {
@@ -98,28 +102,26 @@ test('PR description: ignores multiline comments and preserves adjacent text', (
 		'Description',
 		'Clarify<!--\n## Generated summary\n- [ ] Example\n--> the OIDC settings.'
 	);
-	assertEquals(validatePrDescription(body).errors, []);
+	expect(validatePrDescription(body).errors).toStrictEqual([]);
 });
 
 for (const delimiter of ['```', '~~~~']) {
 	test(`PR description: ${delimiter} code samples cannot add headings or confirmations`, () => {
 		const example = `${delimiter}markdown\n## Generated summary\n${delimiter}`;
-		assertEquals(
-			validatePrDescription(replaceSection(docs, 'Description', `Clarify docs.\n${example}`))
-				.errors,
-			[]
-		);
+		expect(
+			validatePrDescription(replaceSection(docs, 'Description', `Clarify docs.\n${example}`)).errors
+		).toStrictEqual([]);
 		const checklist = docs.split('## Confirmation\n')[1];
 		const result = validatePrDescription(
 			replaceSection(docs, 'Confirmation', `${delimiter}markdown\n${checklist}${delimiter}`)
 		);
-		assertEquals(result.errors.length, 3);
+		expect(result.errors.length).toStrictEqual(3);
 	});
 }
 
 test('PR description: HTML comment examples in code do not hide later sections', () => {
 	const body = replaceSection(docs, 'Description', 'Clarify docs.\n```html\n<!-- Example\n```');
-	assertEquals(validatePrDescription(body).errors, []);
+	expect(validatePrDescription(body).errors).toStrictEqual([]);
 });
 
 test('PR description: shorter or mismatched fences do not end a code sample', () => {
@@ -128,7 +130,7 @@ test('PR description: shorter or mismatched fences do not end a code sample', ()
 		'Description',
 		'Clarify docs.\n````markdown\n```\n~~~\n## Generated summary\n````'
 	);
-	assertEquals(validatePrDescription(body).errors, []);
+	expect(validatePrDescription(body).errors).toStrictEqual([]);
 });
 
 test('PR description: unchecked, missing, or replaced confirmations fail', () => {
@@ -138,10 +140,9 @@ test('PR description: unchecked, missing, or replaced confirmations fail', () =>
 		checklist.replace(/^- \[x\] I have read.*\n/m, ''),
 		checklist.replace('I have read and followed', 'I disagree with')
 	]) {
-		assertEquals(
-			validatePrDescription(replaceSection(docs, 'Confirmation', content)).errors.length,
-			1
-		);
+		expect(
+			validatePrDescription(replaceSection(docs, 'Confirmation', content)).errors.length
+		).toStrictEqual(1);
 	}
 });
 
@@ -151,26 +152,25 @@ test('PR description: checked lookalikes elsewhere do not satisfy confirmations'
 		'Confirmation',
 		'<!-- Confirmations are above. -->'
 	);
-	assertEquals(validatePrDescription(misplaced).errors.length, 3);
+	expect(validatePrDescription(misplaced).errors.length).toStrictEqual(3);
 });
 
 test('PR description: confirmations in comments cannot satisfy the checklist', () => {
 	const checklist = docs.split('## Confirmation\n')[1];
-	assertEquals(
+	expect(
 		validatePrDescription(replaceSection(docs, 'Confirmation', `<!--\n${checklist}\n-->`)).errors
-			.length,
-		3
-	);
+			.length
+	).toStrictEqual(3);
 });
 
 test('PR description: duplicate confirmations fail', () => {
 	const body = `${docs}\n- [x] I have read and followed the contribution guidelines.\n`;
-	assertEquals(validatePrDescription(body).errors.length, 1);
+	expect(validatePrDescription(body).errors.length).toStrictEqual(1);
 });
 
 test('PR description: uppercase checks and unwrapped confirmation text are accepted', () => {
 	const body = docs.replace(/\[x\]/g, '[X]').replace(/\n {6}/g, ' ');
-	assertEquals(validatePrDescription(body).errors, []);
+	expect(validatePrDescription(body).errors).toStrictEqual([]);
 });
 
 test('PR description: untouched repository template fails for empty answers and unchecked boxes', () => {
@@ -179,8 +179,8 @@ test('PR description: untouched repository template fails for empty answers and 
 		'utf8'
 	);
 	const result = validatePrDescription(template);
-	assertEquals(result.errors.length, 7);
-	assertEquals(result.wordCounts, { description: 0, body: 0 });
+	expect(result.errors.length).toStrictEqual(7);
+	expect(result.wordCounts).toStrictEqual({ description: 0, body: 0 });
 });
 
 test('PR description: description warning starts above 150 words and does not fail', () => {
@@ -188,9 +188,9 @@ test('PR description: description warning starts above 150 words and does not fa
 		const result = validatePrDescription(
 			replaceSection(docs, 'Description', 'word '.repeat(count))
 		);
-		assertEquals(result.errors, []);
-		assertEquals(result.wordCounts.description, count);
-		assertEquals(result.warnings.length, count > 150 ? 1 : 0);
+		expect(result.errors).toStrictEqual([]);
+		expect(result.wordCounts.description).toStrictEqual(count);
+		expect(result.warnings.length).toStrictEqual(count > 150 ? 1 : 0);
 	}
 });
 
@@ -200,9 +200,9 @@ test('PR description: total warning starts above 400 words and excludes confirma
 		const result = validatePrDescription(
 			`${docs}\n## Upgrade impact\n${'word '.repeat(count - baseline)}`
 		);
-		assertEquals(result.errors, []);
-		assertEquals(result.wordCounts.body, count);
-		assertEquals(result.warnings.length, count > 400 ? 1 : 0);
+		expect(result.errors).toStrictEqual([]);
+		expect(result.wordCounts.body).toStrictEqual(count);
+		expect(result.warnings.length).toStrictEqual(count > 400 ? 1 : 0);
 	}
 });
 
@@ -211,7 +211,7 @@ test('PR description: long hidden instructions and link destinations do not infl
 	const body = docs
 		.replace('which OIDC settings', `which <!-- ${'word '.repeat(500)} -->OIDC settings`)
 		.replace('required for SSO.', 'required for [SSO](https://example.com/a/very/long/link).');
-	assertEquals(validatePrDescription(body).wordCounts, baseline);
+	expect(validatePrDescription(body).wordCounts).toStrictEqual(baseline);
 });
 
 test('PR description CLI: valid input succeeds, warnings succeed, invalid input fails', async () => {
@@ -238,16 +238,16 @@ test('PR description CLI: valid input succeeds, warnings succeed, invalid input 
 		]) {
 			await writeFile(path, sample.body);
 			const output = await check(path, path);
-			assertEquals(output.code, sample.code, decode(output.stderr));
-			assertStringIncludes(decode(output.stdout), sample.message);
+			expect(output.code, decode(output.stderr)).toStrictEqual(sample.code);
+			expect(decode(output.stdout)).toContain(sample.message);
 		}
 
 		// The sandbox only lets it read the allowed file
 		const other = `${directory}/other.md`;
 		await writeFile(other, docs);
 		const denied = await check(path, other);
-		assertEquals(denied.code, 1);
-		assertStringIncludes(decode(denied.stderr), 'ERR_ACCESS_DENIED');
+		expect(denied.code).toStrictEqual(1);
+		expect(decode(denied.stderr)).toContain('ERR_ACCESS_DENIED');
 	} finally {
 		await rm(directory, { recursive: true, force: true });
 	}

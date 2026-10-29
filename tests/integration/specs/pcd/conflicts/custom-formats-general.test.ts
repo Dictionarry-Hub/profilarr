@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -96,12 +95,12 @@ test('matching upstream include_in_rename value auto-aligns user op', async () =
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['include_in_rename']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertCustomFormat(ctx, 'Include Auto Align');
-		assertEquals(row.include_in_rename, 1);
+		expect(row.include_in_rename).toStrictEqual(1);
 	}
 });
 
@@ -193,12 +192,12 @@ test('local rename applies after upstream description change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['name']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertCustomFormat(ctx, 'Rename Clean User');
-		assertEquals(row.description, 'Upstream description');
+		expect(row.description).toStrictEqual('Upstream description');
 		assertNoCustomFormat(ctx, 'Rename Clean');
 	}
 });
@@ -247,8 +246,7 @@ test('description conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertCustomFormat(ctx, 'Description Conflict');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local description edit' : 'Dev description edit'
 		);
 	}
@@ -294,7 +292,9 @@ test('description conflict follows upstream rename by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertCustomFormat(ctx, 'Description Renamed Upstream');
-		assertEquals(row.description, strategy === 'override' ? 'Local description edit' : 'Original');
+		expect(row.description).toStrictEqual(
+			strategy === 'override' ? 'Local description edit' : 'Original'
+		);
 		assertNoCustomFormat(ctx, 'Description Renamed');
 	}
 });
@@ -338,7 +338,7 @@ test('create duplicate conflict resolves by strategy', async () => {
 		const ops = opsSince(ctx, checkpoint);
 		const op = firstOpForOperation(ops, 'create');
 		if (strategy === 'override') {
-			assertEquals(op.state, 'dropped');
+			expect(op.state).toStrictEqual('dropped');
 			assertLatestHistory(ctx, op, 'dropped');
 			const descriptionOp = firstOpForChangedFields(ops, ['description']);
 			assertStrategyOutcome(ctx, descriptionOp, strategy, 'guard_mismatch');
@@ -347,8 +347,7 @@ test('create duplicate conflict resolves by strategy', async () => {
 		}
 
 		const row = assertCustomFormat(ctx, 'Create Duplicate');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local create description' : 'Upstream create description'
 		);
 	}
@@ -396,13 +395,13 @@ test('tags-only update applies after upstream description change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['tags']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertCustomFormat(ctx, 'Tags No Conflict');
-		assertEquals(row.description, 'Upstream description edit');
-		assertEquals(compiledCustomFormatTags(ctx, 'Tags No Conflict'), ['LocalTag']);
+		expect(row.description).toStrictEqual('Upstream description edit');
+		expect(compiledCustomFormatTags(ctx, 'Tags No Conflict')).toStrictEqual(['LocalTag']);
 	}
 });
 
@@ -443,10 +442,10 @@ test('tag removal applies after upstream adds a different tag', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['tags']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledCustomFormatTags(ctx, 'Tags Diverge'), ['DevTag', 'KeepTag']);
+		expect(compiledCustomFormatTags(ctx, 'Tags Diverge')).toStrictEqual(['DevTag', 'KeepTag']);
 	}
 });
 
@@ -500,12 +499,11 @@ test('description conflict preserves upstream include and tags by strategy', asy
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertCustomFormat(ctx, 'General Multi');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local multi description' : 'Upstream multi description'
 		);
-		assertEquals(row.include_in_rename, 1);
-		assertEquals(compiledCustomFormatTags(ctx, 'General Multi'), ['UpstreamMultiTag']);
+		expect(row.include_in_rename).toStrictEqual(1);
+		expect(compiledCustomFormatTags(ctx, 'General Multi')).toStrictEqual(['UpstreamMultiTag']);
 	}
 });
 
@@ -541,7 +539,7 @@ test('delete missing target via upstream rename auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 		assertCustomFormat(ctx, 'Delete Renamed Upstream');
@@ -580,7 +578,7 @@ test('delete missing target via upstream delete auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 		assertNoCustomFormat(ctx, 'Delete Both');
@@ -627,7 +625,7 @@ test('local update conflicts when upstream deletes row', async () => {
 
 		if (strategy === 'override') {
 			const row = assertCustomFormat(ctx, 'Update Deleted');
-			assertEquals(row.description, 'Local deleted description');
+			expect(row.description).toStrictEqual('Local deleted description');
 		} else {
 			assertNoCustomFormat(ctx, 'Update Deleted');
 		}
@@ -681,12 +679,11 @@ test('local rename and description conflict with upstream description by strateg
 		const descriptionOp = firstOpForChangedFields(ops, ['description']);
 		const renameOp = firstOpForChangedFields(ops, ['name']);
 		assertStrategyOutcome(ctx, descriptionOp, strategy, 'guard_mismatch');
-		assertEquals(renameOp.state, 'published');
+		expect(renameOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, renameOp, 'applied');
 
 		const row = assertCustomFormat(ctx, 'Rename Description User');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local rename description' : 'Upstream rename description'
 		);
 		assertNoCustomFormat(ctx, 'Rename Description');
@@ -734,13 +731,13 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user ${operation} op`);
+	expect(op, `Expected a user ${operation} op`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -757,19 +754,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assertExists(op.superseded_by_op_id, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(op.superseded_by_op_id, 'Expected override to link a replacement op').not.toBeOneOf([
+		null,
+		undefined
+	]);
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -780,9 +780,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -799,7 +799,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -822,7 +822,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -830,13 +830,13 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 
 function assertCustomFormat(ctx: PcdTestContext, name: string): CustomFormatRow {
 	const row = compiledCustomFormats(ctx).find((format) => format.name === name);
-	assertExists(row, `Expected custom format ${name}`);
+	expect(row, `Expected custom format ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoCustomFormat(ctx: PcdTestContext, name: string): void {
 	const row = compiledCustomFormats(ctx).find((format) => format.name === name);
-	assertEquals(row, undefined);
+	expect(row).toStrictEqual(undefined);
 }
 
 function compiledCustomFormats(ctx: PcdTestContext): CustomFormatRow[] {

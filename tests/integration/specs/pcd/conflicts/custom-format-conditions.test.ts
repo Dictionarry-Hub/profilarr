@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import type { ConditionData } from '#shared/pcd/display.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
@@ -279,7 +278,7 @@ test('multiple condition changes isolate overlapping conflict', async () => {
 
 		const userOps = opsSince(ctx, checkpoint);
 		const opA = firstOpForCondition(userOps, CONDITION_A);
-		assertEquals(opA.state, 'published');
+		expect(opA.state).toStrictEqual('published');
 		assertLatestHistory(ctx, opA, 'applied');
 
 		const opB = firstOpForCondition(userOps, CONDITION_B);
@@ -330,7 +329,7 @@ test('condition rename conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, deleteOp, strategy, 'guard_mismatch');
 
 		const addOp = firstOpForCondition(userOps, RENAMED_CONDITION);
-		assertEquals(addOp.state, 'published');
+		expect(addOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, addOp, 'applied');
 
 		assertConditionResolution(ctx, FORMAT_NAME, RENAMED_CONDITION, ORIGINAL_RESOLUTION);
@@ -478,7 +477,7 @@ test('condition update applies when referenced regex changes upstream', async ()
 		await compilePcd(ctx);
 
 		const op = firstOpForCondition(opsSince(ctx, checkpoint), REGEX_DEP_CONDITION);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
@@ -659,7 +658,7 @@ test('local condition update applies when upstream adds different condition', as
 		await compilePcd(ctx);
 
 		const op = firstOpForCondition(opsSince(ctx, checkpoint), CONDITION_NAME);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
@@ -835,7 +834,7 @@ function firstOpForCondition(ops: OpRow[], conditionName: string): OpRow {
 	const op = ops.find((candidate) =>
 		changedFields(candidate).includes(`condition:${conditionName}`)
 	);
-	assertExists(op, `Expected a user op for condition ${conditionName}`);
+	expect(op, `Expected a user op for condition ${conditionName}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -852,19 +851,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assertExists(op.superseded_by_op_id, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(op.superseded_by_op_id, 'Expected override to link a replacement op').not.toBeOneOf([
+		null,
+		undefined
+	]);
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -875,9 +877,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -894,7 +896,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -917,7 +919,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -934,8 +936,8 @@ function assertConditionResolution(
 		(candidate) =>
 			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
 	);
-	assertExists(row, `Expected resolution for ${conditionName}`);
-	assertEquals(row.resolution, resolution);
+	expect(row, `Expected resolution for ${conditionName}`).not.toBeOneOf([null, undefined]);
+	expect(row.resolution).toStrictEqual(resolution);
 }
 
 function assertConditionSource(
@@ -945,13 +947,13 @@ function assertConditionSource(
 	source: string
 ): void {
 	const condition = assertCondition(ctx, formatName, conditionName);
-	assertEquals(condition.type, 'source');
+	expect(condition.type).toStrictEqual('source');
 	const row = compiledConditionState(ctx).sources.find(
 		(candidate) =>
 			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
 	);
-	assertExists(row, `Expected source for ${conditionName}`);
-	assertEquals(row.source, source);
+	expect(row, `Expected source for ${conditionName}`).not.toBeOneOf([null, undefined]);
+	expect(row.source).toStrictEqual(source);
 }
 
 function assertConditionPattern(
@@ -961,19 +963,19 @@ function assertConditionPattern(
 	regexName: string
 ): void {
 	const condition = assertCondition(ctx, formatName, conditionName);
-	assertEquals(condition.type, 'release_title');
+	expect(condition.type).toStrictEqual('release_title');
 	const row = compiledConditionState(ctx).patterns.find(
 		(candidate) =>
 			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
 	);
-	assertExists(row, `Expected pattern for ${conditionName}`);
-	assertEquals(row.regular_expression_name, regexName);
+	expect(row, `Expected pattern for ${conditionName}`).not.toBeOneOf([null, undefined]);
+	expect(row.regular_expression_name).toStrictEqual(regexName);
 }
 
 function assertRegexPattern(ctx: PcdTestContext, regexName: string, pattern: string): void {
 	const row = compiledConditionState(ctx).regexes.find((candidate) => candidate.name === regexName);
-	assertExists(row, `Expected regex ${regexName}`);
-	assertEquals(row.pattern, pattern);
+	expect(row, `Expected regex ${regexName}`).not.toBeOneOf([null, undefined]);
+	expect(row.pattern).toStrictEqual(pattern);
 }
 
 function assertConditionLanguage(
@@ -983,14 +985,14 @@ function assertConditionLanguage(
 	language: string
 ): void {
 	const condition = assertCondition(ctx, formatName, conditionName);
-	assertEquals(condition.type, 'language');
+	expect(condition.type).toStrictEqual('language');
 	const row = compiledConditionState(ctx).languages.find(
 		(candidate) =>
 			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
 	);
-	assertExists(row, `Expected language for ${conditionName}`);
-	assertEquals(row.language_name, language);
-	assertEquals(row.except_language, 0);
+	expect(row, `Expected language for ${conditionName}`).not.toBeOneOf([null, undefined]);
+	expect(row.language_name).toStrictEqual(language);
+	expect(row.except_language).toStrictEqual(0);
 }
 
 function assertConditionSize(
@@ -1000,14 +1002,14 @@ function assertConditionSize(
 	minBytes: number
 ): void {
 	const condition = assertCondition(ctx, formatName, conditionName);
-	assertEquals(condition.type, 'size');
+	expect(condition.type).toStrictEqual('size');
 	const row = compiledConditionState(ctx).sizes.find(
 		(candidate) =>
 			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
 	);
-	assertExists(row, `Expected size for ${conditionName}`);
-	assertEquals(row.min_bytes, minBytes);
-	assertEquals(row.max_bytes, null);
+	expect(row, `Expected size for ${conditionName}`).not.toBeOneOf([null, undefined]);
+	expect(row.min_bytes).toStrictEqual(minBytes);
+	expect(row.max_bytes).toStrictEqual(null);
 }
 
 function assertConditionYear(
@@ -1017,14 +1019,14 @@ function assertConditionYear(
 	minYear: number
 ): void {
 	const condition = assertCondition(ctx, formatName, conditionName);
-	assertEquals(condition.type, 'year');
+	expect(condition.type).toStrictEqual('year');
 	const row = compiledConditionState(ctx).years.find(
 		(candidate) =>
 			candidate.custom_format_name === formatName && candidate.condition_name === conditionName
 	);
-	assertExists(row, `Expected year for ${conditionName}`);
-	assertEquals(row.min_year, minYear);
-	assertEquals(row.max_year, null);
+	expect(row, `Expected year for ${conditionName}`).not.toBeOneOf([null, undefined]);
+	expect(row.min_year).toStrictEqual(minYear);
+	expect(row.max_year).toStrictEqual(null);
 }
 
 function assertConditionBase(
@@ -1039,10 +1041,10 @@ function assertConditionBase(
 	}
 ): void {
 	const row = assertCondition(ctx, formatName, conditionName);
-	assertEquals(row.type, expected.type);
-	assertEquals(row.arr_type, expected.arrType);
-	assertEquals(row.negate, expected.negate ? 1 : 0);
-	assertEquals(row.required, expected.required ? 1 : 0);
+	expect(row.type).toStrictEqual(expected.type);
+	expect(row.arr_type).toStrictEqual(expected.arrType);
+	expect(row.negate).toStrictEqual(expected.negate ? 1 : 0);
+	expect(row.required).toStrictEqual(expected.required ? 1 : 0);
 }
 
 function assertCondition(
@@ -1053,7 +1055,7 @@ function assertCondition(
 	const row = compiledConditionState(ctx).conditions.find(
 		(candidate) => candidate.custom_format_name === formatName && candidate.name === conditionName
 	);
-	assertExists(row, `Expected condition ${conditionName}`);
+	expect(row, `Expected condition ${conditionName}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
@@ -1061,7 +1063,7 @@ function assertNoCondition(ctx: PcdTestContext, formatName: string, conditionNam
 	const row = compiledConditionState(ctx).conditions.find(
 		(candidate) => candidate.custom_format_name === formatName && candidate.name === conditionName
 	);
-	assertEquals(row, undefined);
+	expect(row).toStrictEqual(undefined);
 }
 
 function compiledConditionState(ctx: PcdTestContext): {

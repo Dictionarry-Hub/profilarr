@@ -12,11 +12,10 @@
  * 4. Cookie has an expiration date
  */
 
-import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUser, createUserDirect, login } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 // Caddy serves HTTPS with a self-signed cert on localhost, so skip TLS verification here.
@@ -55,27 +54,27 @@ test('HTTPS origin — Secure flag present', async () => {
 	const client = new TestClient(`http://localhost:${HTTPS_PORT}`);
 	await login(client, 'admin', 'password123', HTTPS_ORIGIN);
 	const attrs = client.getCookieAttributes('session');
-	assertEquals(attrs?.['secure'], 'true');
+	expect(attrs?.['secure']).toStrictEqual('true');
 });
 
 test('HTTP login — Secure flag absent', async () => {
 	const client = new TestClient(HTTP_ORIGIN);
 	await login(client, 'admin', 'password123', HTTP_ORIGIN);
 	const attrs = client.getCookieAttributes('session');
-	assertEquals(attrs?.['secure'], undefined);
+	expect(attrs?.['secure']).toStrictEqual(undefined);
 });
 
 test('login cookie has HttpOnly and SameSite=Lax', async () => {
 	const client = new TestClient(HTTP_ORIGIN);
 	await login(client, 'admin', 'password123', HTTP_ORIGIN);
 	const attrs = client.getCookieAttributes('session');
-	assertEquals(attrs?.['httponly'], 'true');
-	assertEquals(attrs?.['samesite'], 'Lax');
+	expect(attrs?.['httponly']).toStrictEqual('true');
+	expect(attrs?.['samesite']).toStrictEqual('Lax');
 });
 
 test('login cookie has expiration date', async () => {
 	const client = new TestClient(HTTP_ORIGIN);
 	await login(client, 'admin', 'password123', HTTP_ORIGIN);
 	const attrs = client.getCookieAttributes('session');
-	assertNotEquals(attrs?.['expires'], undefined);
+	expect(attrs?.['expires']).not.toStrictEqual(undefined);
 });

@@ -6,8 +6,7 @@
  * Every path that talks to the instance has to send both.
  */
 
-import { assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { TestClient } from '#integration/harness/client.ts';
 import { openDb } from '#integration/harness/db.ts';
 import { serve, type MockHttpServer } from '#integration/harness/http.ts';
@@ -158,8 +157,8 @@ test('Test Connection succeeds with Basic Auth', async () => {
 		},
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 200);
-	assertEquals((await res.json()).version, FAKE_VERSION);
+	expect(res.status).toStrictEqual(200);
+	expect((await res.json()).version).toStrictEqual(FAKE_VERSION);
 });
 
 test('Test Connection fails without Basic Auth', async () => {
@@ -168,8 +167,8 @@ test('Test Connection fails without Basic Auth', async () => {
 		{ type: 'sonarr', url: FAKE_URL, apiKey: FAKE_KEY },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 400);
-	assertEquals((await res.json()).success, false);
+	expect(res.status).toStrictEqual(400);
+	expect((await res.json()).success).toStrictEqual(false);
 });
 
 test('creating an instance stores the credentials and records its version', async () => {
@@ -187,20 +186,20 @@ test('creating an instance stores the credentials and records its version', asyn
 		},
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const row = readInstance('Proxied Sonarr');
-	assertEquals(row?.basic_auth_username, PROXY_USER);
-	assertEquals(row?.basic_auth_password, PROXY_PASSWORD);
-	assertEquals(row?.detected_version, FAKE_VERSION);
+	expect(row?.basic_auth_username).toStrictEqual(PROXY_USER);
+	expect(row?.basic_auth_password).toStrictEqual(PROXY_PASSWORD);
+	expect(row?.detected_version).toStrictEqual(FAKE_VERSION);
 });
 
 test('logs load through Basic Auth', async () => {
 	const row = readInstance('Proxied Sonarr')!;
 	const res = await client.get(`/arr/${row.id}/logs`);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(body.records[0].message, 'hello');
+	expect(body.records[0].message).toStrictEqual('hello');
 });
 
 test('creating an instance rejects a password without a username', async () => {
@@ -208,8 +207,8 @@ test('creating an instance rejects a password without a username', async () => {
 		url: 'http://password-only.invalid',
 		basic_auth_password: PROXY_PASSWORD
 	});
-	assertEquals(result.status, 400);
-	assertEquals(readInstance('Password Only'), undefined);
+	expect(result.status).toStrictEqual(400);
+	expect(readInstance('Password Only')).toStrictEqual(undefined);
 });
 
 test('creating an instance rejects a username without a password', async () => {
@@ -217,8 +216,8 @@ test('creating an instance rejects a username without a password', async () => {
 		url: 'http://username-only.invalid',
 		basic_auth_username: PROXY_USER
 	});
-	assertEquals(result.status, 400);
-	assertEquals(readInstance('Username Only'), undefined);
+	expect(result.status).toStrictEqual(400);
+	expect(readInstance('Username Only')).toStrictEqual(undefined);
 });
 
 test('editing rejects clearing only the username', async () => {
@@ -226,11 +225,11 @@ test('editing rejects clearing only the username', async () => {
 	const result = await updateInstance(row.id, 'Proxied Sonarr', {
 		basic_auth_username_touched: '1'
 	});
-	assertEquals(result.status, 400);
+	expect(result.status).toStrictEqual(400);
 
 	const after = readInstance('Proxied Sonarr');
-	assertEquals(after?.basic_auth_username, PROXY_USER);
-	assertEquals(after?.basic_auth_password, PROXY_PASSWORD);
+	expect(after?.basic_auth_username).toStrictEqual(PROXY_USER);
+	expect(after?.basic_auth_password).toStrictEqual(PROXY_PASSWORD);
 });
 
 test('editing only the password keeps the saved username', async () => {
@@ -239,11 +238,11 @@ test('editing only the password keeps the saved username', async () => {
 		basic_auth_password: 'new-proxy-password',
 		basic_auth_password_touched: '1'
 	});
-	assertEquals(result.status, 200);
+	expect(result.status).toStrictEqual(200);
 
 	const after = readInstance('Proxied Sonarr');
-	assertEquals(after?.basic_auth_username, PROXY_USER);
-	assertEquals(after?.basic_auth_password, 'new-proxy-password');
+	expect(after?.basic_auth_username).toStrictEqual(PROXY_USER);
+	expect(after?.basic_auth_password).toStrictEqual('new-proxy-password');
 });
 
 /** Create an instance with saved Basic Auth at a URL nothing answers on */
@@ -254,7 +253,7 @@ async function createSavedInstance(name: string, host: string): Promise<number> 
 		basic_auth_password: PROXY_PASSWORD
 	});
 	// A successful create redirects to the instance list
-	assertEquals(result.status, 303);
+	expect(result.status).toStrictEqual(303);
 	return readInstance(name)!.id;
 }
 
@@ -264,11 +263,11 @@ test('changing the URL clears saved credentials left blank', async () => {
 		url: 'http://moved-blank-new.invalid',
 		api_key: FAKE_KEY
 	});
-	assertEquals(result.status, 200);
+	expect(result.status).toStrictEqual(200);
 
 	const after = readInstance('Moved Blank');
-	assertEquals(after?.basic_auth_username, null);
-	assertEquals(after?.basic_auth_password, null);
+	expect(after?.basic_auth_username).toStrictEqual(null);
+	expect(after?.basic_auth_password).toStrictEqual(null);
 });
 
 test('changing the URL saves re-entered credentials', async () => {
@@ -281,11 +280,11 @@ test('changing the URL saves re-entered credentials', async () => {
 		basic_auth_username_touched: '1',
 		basic_auth_password_touched: '1'
 	});
-	assertEquals(result.status, 200);
+	expect(result.status).toStrictEqual(200);
 
 	const after = readInstance('Moved Reentered');
-	assertEquals(after?.basic_auth_username, 'new-user');
-	assertEquals(after?.basic_auth_password, 'new-password');
+	expect(after?.basic_auth_username).toStrictEqual('new-user');
+	expect(after?.basic_auth_password).toStrictEqual('new-password');
 });
 
 test('changing the URL rejects re-entering only the username', async () => {
@@ -296,11 +295,11 @@ test('changing the URL rejects re-entering only the username', async () => {
 		basic_auth_username: PROXY_USER,
 		basic_auth_username_touched: '1'
 	});
-	assertEquals(result.status, 400);
+	expect(result.status).toStrictEqual(400);
 
 	const after = readInstance('Moved Partial');
-	assertEquals(after?.basic_auth_username, PROXY_USER);
-	assertEquals(after?.basic_auth_password, PROXY_PASSWORD);
+	expect(after?.basic_auth_username).toStrictEqual(PROXY_USER);
+	expect(after?.basic_auth_password).toStrictEqual(PROXY_PASSWORD);
 });
 
 /** The fake under its IP, so an instance there is not a duplicate of FAKE_URL */
@@ -312,7 +311,7 @@ test('Test Connection uses the saved Basic Auth of an existing instance', async 
 		basic_auth_username: PROXY_USER,
 		basic_auth_password: PROXY_PASSWORD
 	});
-	assertEquals(created.status, 303);
+	expect(created.status).toStrictEqual(303);
 	const row = readInstance('Saved Test')!;
 
 	const res = await client.post(
@@ -320,8 +319,8 @@ test('Test Connection uses the saved Basic Auth of an existing instance', async 
 		{ type: 'sonarr', url: FAKE_IP_URL, apiKey: FAKE_KEY, instanceId: row.id },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 200);
-	assertEquals((await res.json()).version, FAKE_VERSION);
+	expect(res.status).toStrictEqual(200);
+	expect((await res.json()).version).toStrictEqual(FAKE_VERSION);
 });
 
 test('Test Connection never sends saved Basic Auth to a different URL', async () => {
@@ -333,5 +332,5 @@ test('Test Connection never sends saved Basic Auth to a different URL', async ()
 		{ type: 'sonarr', url: FAKE_URL, apiKey: FAKE_KEY, instanceId: row.id },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });

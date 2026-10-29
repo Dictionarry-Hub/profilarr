@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -126,15 +125,15 @@ test('quality enabled toggle applies after upstream minimum score change', async
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`quality_item:quality:${QUALITY_A}`
 		]);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const profile = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(profile.minimum_custom_format_score, 9);
+		expect(profile.minimum_custom_format_score).toStrictEqual(9);
 		const quality = assertQualityItem(ctx, PROFILE_NAME, 'quality', QUALITY_A);
-		assertEquals(quality.enabled, 0);
-		assertEquals(quality.position, 0);
+		expect(quality.enabled).toStrictEqual(0);
+		expect(quality.position).toStrictEqual(0);
 	}
 });
 
@@ -185,12 +184,12 @@ test('matching upstream quality enabled toggle auto-aligns user op', async () =>
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`quality_item:quality:${QUALITY_A}`
 		]);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const quality = assertQualityItem(ctx, PROFILE_NAME, 'quality', QUALITY_A);
-		assertEquals(quality.enabled, 0);
+		expect(quality.enabled).toStrictEqual(0);
 	}
 });
 
@@ -246,7 +245,7 @@ test('quality enabled toggle after upstream rename resolves by strategy', async 
 
 		assertNoQualityProfile(ctx, PROFILE_NAME);
 		const quality = assertQualityItem(ctx, 'Qualities Profile Upstream', 'quality', QUALITY_A);
-		assertEquals(quality.enabled, strategy === 'override' ? 0 : 1);
+		expect(quality.enabled).toStrictEqual(strategy === 'override' ? 0 : 1);
 	}
 });
 
@@ -307,8 +306,7 @@ test('quality reorder conflict resolves by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledQualityOrder(ctx, PROFILE_NAME),
+		expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual(
 			strategy === 'override'
 				? [QUALITY_B, QUALITY_A, QUALITY_C]
 				: [QUALITY_B, QUALITY_C, QUALITY_A]
@@ -375,11 +373,18 @@ test('quality group add conflicts with upstream reorder', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		if (strategy === 'override') {
-			assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [GROUP_NAME, QUALITY_C]);
-			assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME), [QUALITY_A, QUALITY_B]);
+			expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([GROUP_NAME, QUALITY_C]);
+			expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual([
+				QUALITY_A,
+				QUALITY_B
+			]);
 		} else {
-			assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [QUALITY_B, QUALITY_C, QUALITY_A]);
-			assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME), []);
+			expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
+				QUALITY_B,
+				QUALITY_C,
+				QUALITY_A
+			]);
+			expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual([]);
 		}
 	}
 });
@@ -446,16 +451,23 @@ test('quality group remove conflicts with upstream reorder', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		if (strategy === 'override') {
-			assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [
+			expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
 				QUALITY_A,
 				QUALITY_B,
 				QUALITY_C,
 				QUALITY_D
 			]);
-			assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME), []);
+			expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual([]);
 		} else {
-			assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [QUALITY_C, QUALITY_D, GROUP_NAME]);
-			assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME), [QUALITY_A, QUALITY_B]);
+			expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
+				QUALITY_C,
+				QUALITY_D,
+				GROUP_NAME
+			]);
+			expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual([
+				QUALITY_A,
+				QUALITY_B
+			]);
 		}
 	}
 });
@@ -516,8 +528,7 @@ test('quality upgrade-until move conflict resolves by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
 
-		assertEquals(
-			compiledUpgradeUntilName(ctx, PROFILE_NAME),
+		expect(compiledUpgradeUntilName(ctx, PROFILE_NAME)).toStrictEqual(
 			strategy === 'override' ? QUALITY_B : QUALITY_C
 		);
 	}
@@ -580,11 +591,19 @@ test('quality enabled toggle conflicts with upstream reorder', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		if (strategy === 'override') {
-			assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [QUALITY_A, QUALITY_B, QUALITY_C]);
-			assertEquals(assertQualityItem(ctx, PROFILE_NAME, 'quality', QUALITY_A).enabled, 0);
+			expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
+				QUALITY_A,
+				QUALITY_B,
+				QUALITY_C
+			]);
+			expect(assertQualityItem(ctx, PROFILE_NAME, 'quality', QUALITY_A).enabled).toStrictEqual(0);
 		} else {
-			assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [QUALITY_B, QUALITY_C, QUALITY_A]);
-			assertEquals(assertQualityItem(ctx, PROFILE_NAME, 'quality', QUALITY_A).enabled, 1);
+			expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
+				QUALITY_B,
+				QUALITY_C,
+				QUALITY_A
+			]);
+			expect(assertQualityItem(ctx, PROFILE_NAME, 'quality', QUALITY_A).enabled).toStrictEqual(1);
 		}
 	}
 });
@@ -642,8 +661,7 @@ test('quality group member reorder conflict resolves by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME),
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual(
 			strategy === 'override'
 				? [QUALITY_C, QUALITY_A, QUALITY_B]
 				: [QUALITY_B, QUALITY_C, QUALITY_A]
@@ -698,10 +716,10 @@ test('matching upstream group member reorder auto-aligns user op', async () => {
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`quality_item:group:${GROUP_NAME}`
 		]);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME), [
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual([
 			QUALITY_C,
 			QUALITY_A,
 			QUALITY_B
@@ -745,7 +763,7 @@ test('legacy group member ops without position compile cleanly', async () => {
 		]);
 
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledGroupMemberRows(ctx, 'Legacy Group Profile', 'Legacy Group'), [
+		expect(compiledGroupMemberRows(ctx, 'Legacy Group Profile', 'Legacy Group')).toStrictEqual([
 			{ quality_name: 'DVD', position: 0 },
 			{ quality_name: 'SDTV', position: 0 },
 			{ quality_name: 'WEBDL-480p', position: 0 }
@@ -800,8 +818,7 @@ test('quality group member reorder conflicts with upstream member add', async ()
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME),
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual(
 			strategy === 'override'
 				? [QUALITY_C, QUALITY_A, QUALITY_B]
 				: [QUALITY_A, QUALITY_B, QUALITY_C, QUALITY_D]
@@ -854,8 +871,7 @@ test('quality group member add conflicts with upstream member reorder', async ()
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME),
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual(
 			strategy === 'override'
 				? [QUALITY_A, QUALITY_B, QUALITY_C, QUALITY_D]
 				: [QUALITY_C, QUALITY_A, QUALITY_B]
@@ -912,12 +928,16 @@ test('quality group collapse applies after upstream member reorder', async () =>
 			`quality_item:quality:${QUALITY_B}`,
 			`quality_item:quality:${QUALITY_C}`
 		]);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
-		assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [QUALITY_A, QUALITY_B, QUALITY_C]);
-		assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME), []);
+		expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
+			QUALITY_A,
+			QUALITY_B,
+			QUALITY_C
+		]);
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual([]);
 	}
 });
 
@@ -970,8 +990,7 @@ test('different quality group member adds conflict by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME),
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, GROUP_NAME)).toStrictEqual(
 			strategy === 'override'
 				? [QUALITY_A, QUALITY_B, QUALITY_C]
 				: [QUALITY_A, QUALITY_B, QUALITY_D]
@@ -1020,7 +1039,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -1037,9 +1056,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -1050,19 +1069,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assertExists(op.superseded_by_op_id, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(op.superseded_by_op_id, 'Expected override to link a replacement op').not.toBeOneOf([
+		null,
+		undefined
+	]);
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -1079,7 +1101,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -1102,7 +1124,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -1110,13 +1132,13 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 
 function assertQualityProfile(ctx: PcdTestContext, name: string): QualityProfileRow {
 	const row = compiledQualityProfileState(ctx).profiles.find((profile) => profile.name === name);
-	assertExists(row, `Expected quality profile ${name}`);
+	expect(row, `Expected quality profile ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoQualityProfile(ctx: PcdTestContext, name: string): void {
 	const row = compiledQualityProfileState(ctx).profiles.find((profile) => profile.name === name);
-	assertEquals(row, undefined, `Expected no quality profile ${name}`);
+	expect(row, `Expected no quality profile ${name}`).toStrictEqual(undefined);
 }
 
 function assertQualityItem(
@@ -1128,7 +1150,7 @@ function assertQualityItem(
 	const row = compiledQualityProfileState(ctx).qualityItems.find(
 		(item) => item.quality_profile_name === profileName && item.type === type && item.name === name
 	);
-	assertExists(row, `Expected quality item ${type}:${name}`);
+	expect(row, `Expected quality item ${type}:${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
