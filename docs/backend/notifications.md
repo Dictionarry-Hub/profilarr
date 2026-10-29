@@ -231,16 +231,18 @@ The tier is a design-time decision baked into the renderer, not a runtime config
 ## Testing
 
 ```
-tests/integration/notifications/
+tests/integration/specs/notifications/
   harness/
-    mock-server.ts       - Deno.serve() that captures HTTP requests
-  specs/
-    test.test.ts         - test notification (definition + all notifiers)
-    upgrade.test.ts      - upgrade notification (definition + all notifiers)
-    rename.test.ts       - rename notification (definition + all notifiers)
-    arrSync.test.ts      - arr sync notification (definition + all notifiers)
-    arrDrift.test.ts     - arr drift notification (definition + all notifiers)
-    pcdSync.test.ts      - PCD sync notification (definition + all notifiers)
+    mock-server.ts       - mock HTTP server that captures requests
+  test.test.ts           - test notification (definition + all notifiers)
+  upgrade.test.ts        - upgrade notification (definition + all notifiers)
+  rename.test.ts         - rename notification (definition + all notifiers)
+  arrSync.test.ts        - arr sync notification (definition + all notifiers)
+  arrDrift.test.ts       - arr drift notification (definition + all notifiers)
+  pcdSync.test.ts        - PCD sync notification (definition + all notifiers)
+  arrCleanup.test.ts     - arr cleanup notification (definition + all notifiers)
+  backup.test.ts         - backup notification (definition + all notifiers)
+  announcement.test.ts   - announcement notification (definition + all notifiers)
 ```
 
 Tests are organized by event, not by notifier. Each spec covers definition
@@ -248,14 +250,15 @@ output, rendering for all notifiers (Discord, Ntfy, Webhook, Telegram) via
 mock server, and optionally real sends.
 
 ```bash
-deno task test integration notifications              # all
-deno task test integration notifications test         # test event only
-deno task test integration notifications upgrade      # upgrade only
-deno task test integration notifications telegram     # (no standalone file — telegram tests are in each event spec)
+deno task test:integration tests/integration/specs/notifications                  # all
+deno task test:integration tests/integration/specs/notifications/test.test.ts     # test event only
+deno task test:integration tests/integration/specs/notifications/upgrade.test.ts  # upgrade only
 ```
 
-Real send tests are skipped without `.env`. Copy `.env.example` and fill in
-values for visual verification. Not part of CI. Telegram requires
+Telegram has no standalone spec; its tests are in each event spec.
+
+Real send tests are skipped without a `.env` in the spec folder. Copy
+`.env.example` and fill in values for visual verification. Not part of CI. Telegram requires
 `TEST_TELEGRAM_BOT_TOKEN` and `TEST_TELEGRAM_CHAT_ID`.
 
 ## Adding a New Service

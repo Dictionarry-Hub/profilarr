@@ -2,13 +2,13 @@
  * Run the flow test suite (tests/flows) inside the official Playwright image,
  * so nobody needs browsers installed locally.
  *
- *   deno task flows                  run every scenario
- *   deno task flows --grep "score"   run matching scenarios (any Playwright flag works)
- *   deno task flows --ui             Playwright UI mode at http://localhost:8080
- *   deno task flows --build          rebuild the app first (otherwise only when missing)
- *   deno task flows --online         give the container network, so @online tests run too
- *   deno task flows --quiet          print only the end-of-run summary, no line per test
- *   deno task flows --deal=2/4       run the 2nd of 4 sets of spec files split by run time, as CI shard 2 does
+ *   deno task test:flows                  run every scenario
+ *   deno task test:flows --grep "score"   run matching scenarios (any Playwright flag works)
+ *   deno task test:flows --ui             Playwright UI mode at http://localhost:8080
+ *   deno task test:flows --build          rebuild the app first (otherwise only when missing)
+ *   deno task test:flows --online         give the container network, so @online tests run too
+ *   deno task test:flows --quiet          print only the end-of-run summary, no line per test
+ *   deno task test:flows --deal=2/4       run the 2nd of 4 sets of spec files split by run time, as CI shard 2 does
  *
  * FLOWS_WORKERS overrides how many scenarios run at once. FLOWS_VIDEO=1 records
  * a full-size video of every test for the trace viewer to play.

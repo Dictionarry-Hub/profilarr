@@ -11,7 +11,7 @@ export default defineConfig({
 	// Every *.spec.ts is a test file: scenarios under scenarios/, and each
 	// helper's own spec next to it under helpers/. Folders group the output.
 	testDir: '.',
-	// Shared with `deno task flows --deal`, which lists spec files the same way
+	// Shared with `deno task test:flows --deal`, which lists spec files the same way
 	testIgnore: TEST_IGNORE,
 
 	// Builds the seeded "golden" data folder once, before any test runs.

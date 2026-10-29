@@ -22,13 +22,13 @@ see [pcd-tests.md](./pcd-tests.md).
 ## Running
 
 ```bash
-deno task flows                    # every test
-deno task flows --grep "score"     # matching tests; any Playwright flag works
-deno task flows --ui               # Playwright UI mode at http://localhost:8080
-deno task flows --build            # rebuild the app first
-deno task flows --online           # give the container network, so @online tests run too
-deno task flows --quiet            # print only the end-of-run summary, no line per test
-deno task flows --deal=2/4         # the 2nd of 4 sets of spec files, as CI shard 2 runs
+deno task test:flows                    # every test
+deno task test:flows --grep "score"     # matching tests; any Playwright flag works
+deno task test:flows --ui               # Playwright UI mode at http://localhost:8080
+deno task test:flows --build            # rebuild the app first
+deno task test:flows --online           # give the container network, so @online tests run too
+deno task test:flows --quiet            # print only the end-of-run summary, no line per test
+deno task test:flows --deal=2/4         # the 2nd of 4 sets of spec files, as CI shard 2 runs
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are
@@ -133,8 +133,8 @@ test.use({
   the browser ignores certificate errors.
 - **Real services.** Entries marked `needsDocker` run in a container that
   shares the test container's network namespace. They stay offline and reach
-  the app on `127.0.0.1` (`harness/docker.ts`). `deno task flows` mounts the
-  Docker socket and pulls any missing images pinned in
+  the app on `127.0.0.1` (`harness/docker.ts`). `deno task test:flows` mounts
+  the Docker socket and pulls any missing images pinned in
   `tests/flows/services.Dockerfile`, which Dependabot keeps current. Their
   tests carry the `@docker` tag, and they're skipped when the host has no
   Docker socket. A failed test gets their logs attached.

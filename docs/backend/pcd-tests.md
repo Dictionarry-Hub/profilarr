@@ -34,7 +34,7 @@ compiled cache, not the UI. The suite verifies five contracts:
 PCD tests live in the integration test tree:
 
 ```text
-tests/integration/pcd/
+tests/integration/specs/pcd/
   harness/
   write/
   conflicts/
@@ -94,7 +94,7 @@ Each write test follows the same shape:
    SQL shape using the helpers in `harness/pcd.ts` and the colocated
    `helpers.ts` for the entity.
 
-Example, taken from `tests/integration/pcd/write/regex/update.test.ts`:
+Example, taken from `tests/integration/specs/pcd/write/regex/update.test.ts`:
 
 ```ts
 test('scalar fields split into independent grouped ops', async () => {
@@ -127,8 +127,8 @@ test('scalar fields split into independent grouped ops', async () => {
 `seededPcd` and `userOpsSince` come from a per-entity `helpers.ts`
 (`createScenarioFactory` binds the spec's port and counter). `base.regex`,
 `opCheckpoint`, `assertOnlyField`, and `assertSameGroup` come from the
-shared harness. Each spec file owns its port (one server boot per file)
-and runs in parallel with siblings.
+shared harness. Each spec file owns its port, boots one server in
+`beforeAll`, and runs in its own Vitest worker in parallel with siblings.
 
 ### Doc Comment Format
 

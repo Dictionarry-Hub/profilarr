@@ -13,9 +13,15 @@
  * Requires: compiled binary (deno task build), Docker
  *
  * Usage:
- *   deno task test zap --baseline
- *   deno task test zap --full
+ *   deno task scan:zap --baseline
+ *   deno task scan:zap --full
  */
+
+import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
+import { chmod, mkdir, mkdtemp, rm, stat } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const BINARY = './dist/build/profilarr';
 const ZAP_IMAGE = 'zaproxy/zap-stable';
@@ -23,58 +29,68 @@ const ZAP_IMAGE = 'zaproxy/zap-stable';
 type ScanMode = 'baseline' | 'full' | 'api';
 
 interface ServerHandle {
-	process: Deno.ChildProcess;
+	child: ChildProcess;
+	exited: Promise<void>;
 	port: number;
 	basePath: string;
 }
 
 const servers: ServerHandle[] = [];
 
-function parseScanMode(): ScanMode {
-	if (Deno.args.includes('--baseline')) return 'baseline';
-	if (Deno.args.includes('--full')) return 'full';
-	if (Deno.args.includes('--api')) return 'api';
+/**
+ * Run a command to completion and resolve with its exit code. A process killed
+ * by a signal resolves as 1. Rejects if the command cannot be spawned.
+ */
+function run(command: string, args: string[], stdio: 'ignore' | 'inherit'): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const child = spawn(command, args, { stdio });
+		child.on('error', reject);
+		child.on('close', (code) => resolve(code ?? 1));
+	});
+}
 
-	console.error('Usage: deno task test zap <mode>\n');
+function parseScanMode(): ScanMode {
+	const args = process.argv.slice(2);
+	if (args.includes('--baseline')) return 'baseline';
+	if (args.includes('--full')) return 'full';
+	if (args.includes('--api')) return 'api';
+
+	console.error('Usage: deno task scan:zap <mode>\n');
 	console.error('Modes:');
 	console.error('  --baseline   Passive scan only (spider + check responses)');
 	console.error('  --full       Passive + active attacks (SQLi, XSS, etc.)');
 	console.error('  --api        API scan against OpenAPI spec (not yet implemented)');
-	Deno.exit(1);
+	process.exit(1);
 }
 
 async function checkPrereqs(): Promise<void> {
 	try {
-		await Deno.stat(BINARY);
+		await stat(BINARY);
 	} catch {
 		console.error(`Build not found at ${BINARY}. Run "deno task build" first.`);
-		Deno.exit(1);
+		process.exit(1);
 	}
 
-	const docker = new Deno.Command('docker', {
-		args: ['info'],
-		stdout: 'null',
-		stderr: 'null'
-	});
-	const { code } = await docker.output();
+	const code = await run('docker', ['info'], 'ignore').catch(() => 1);
 	if (code !== 0) {
 		console.error('Docker is not running.');
-		Deno.exit(1);
+		process.exit(1);
 	}
 }
 
 async function startServer(port: number, envOverrides: Record<string, string>): Promise<void> {
 	const basePath = `./dist/zap-${port}`;
 
-	await Deno.mkdir(`${basePath}/data/databases`, { recursive: true });
-	await Deno.mkdir(`${basePath}/logs`, { recursive: true });
-	await Deno.mkdir(`${basePath}/backups`, { recursive: true });
+	await mkdir(`${basePath}/data/databases`, { recursive: true });
+	await mkdir(`${basePath}/logs`, { recursive: true });
+	await mkdir(`${basePath}/backups`, { recursive: true });
 
 	console.log(`Starting server on port ${port}...`);
 
-	const cmd = new Deno.Command(BINARY, {
+	// Server output is discarded
+	const child = spawn(BINARY, [], {
 		env: {
-			...Deno.env.toObject(),
+			...process.env,
 			PORT: String(port),
 			HOST: '0.0.0.0',
 			APP_BASE_PATH: basePath,
@@ -83,14 +99,15 @@ async function startServer(port: number, envOverrides: Record<string, string>): 
 			ORIGIN: `http://localhost:${port}`,
 			...envOverrides
 		},
-		stdout: 'piped',
-		stderr: 'piped'
+		stdio: 'ignore'
 	});
 
-	const process = cmd.spawn();
-	drainStream(process.stdout);
-	drainStream(process.stderr);
-	servers.push({ process, port, basePath });
+	// A spawn failure emits 'error' and may never emit 'exit'
+	const exited = new Promise<void>((resolve) => {
+		child.on('exit', () => resolve());
+		child.on('error', () => resolve());
+	});
+	servers.push({ child, exited, port, basePath });
 
 	await waitForReady(`http://localhost:${port}`, 60_000);
 	console.log(`Server ready on port ${port}`);
@@ -113,20 +130,6 @@ async function waitForReady(url: string, timeoutMs: number): Promise<void> {
 	throw new Error(`Server at ${url} did not become ready within ${timeoutMs}ms`);
 }
 
-function drainStream(stream: ReadableStream<Uint8Array>): void {
-	const reader = stream.getReader();
-	(async () => {
-		try {
-			while (true) {
-				const { done } = await reader.read();
-				if (done) break;
-			}
-		} catch {
-			// Stream closed
-		}
-	})();
-}
-
 function getZapCommand(mode: ScanMode): string {
 	switch (mode) {
 		case 'baseline':
@@ -144,12 +147,13 @@ async function runZap(target: string, label: string, mode: ScanMode): Promise<nu
 	console.log(` Target: ${target}`);
 	console.log(`${'='.repeat(60)}\n`);
 
-	// ZAP runs as uid 1000 inside the container — needs a writable work dir
-	const wrkDir = await Deno.makeTempDir({ prefix: 'zap-wrk-' });
-	await Deno.chmod(wrkDir, 0o777);
+	// ZAP runs as uid 1000 inside the container, so it needs a writable work dir
+	const wrkDir = await mkdtemp(join(tmpdir(), 'zap-wrk-'));
+	await chmod(wrkDir, 0o777);
 
-	const cmd = new Deno.Command('docker', {
-		args: [
+	const code = await run(
+		'docker',
+		[
 			'run',
 			'--rm',
 			'--network',
@@ -162,13 +166,10 @@ async function runZap(target: string, label: string, mode: ScanMode): Promise<nu
 			target,
 			'-I' // don't fail on warnings, only on errors
 		],
-		stdout: 'inherit',
-		stderr: 'inherit'
-	});
-
-	const { code } = await cmd.output();
+		'inherit'
+	);
 	try {
-		await Deno.remove(wrkDir, { recursive: true });
+		await rm(wrkDir, { recursive: true, force: true });
 	} catch {
 		// Cleanup best-effort
 	}
@@ -179,13 +180,13 @@ async function cleanup(): Promise<void> {
 	for (const server of servers) {
 		console.log(`Stopping server on port ${server.port}...`);
 		try {
-			server.process.kill('SIGTERM');
-			await server.process.status;
+			server.child.kill('SIGTERM');
+			await server.exited;
 		} catch {
 			// Already dead
 		}
 		try {
-			await Deno.remove(server.basePath, { recursive: true });
+			await rm(server.basePath, { recursive: true, force: true });
 		} catch {
 			// May not exist
 		}
@@ -199,7 +200,7 @@ const mode = parseScanMode();
 if (mode === 'api') {
 	console.error('API scan is not yet implemented.');
 	console.error('Requires the API overhaul (see docs/todo/api-overhaul.md).');
-	Deno.exit(1);
+	process.exit(1);
 }
 
 await checkPrereqs();
@@ -224,4 +225,4 @@ try {
 	await cleanup();
 }
 
-Deno.exit(exitCode);
+process.exit(exitCode);

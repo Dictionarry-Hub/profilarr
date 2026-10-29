@@ -1,7 +1,7 @@
 /**
  * Every container image a real service in the flow suite runs, read from
  * tests/flows/services.Dockerfile, where Dependabot keeps the pins current.
- * `deno task flows` pulls any that are missing on the host before the run,
+ * `deno task test:flows` pulls any that are missing on the host before the run,
  * because the test container has no network. Imports only Node built-ins, so
  * the runner script can read it outside the test container.
  */

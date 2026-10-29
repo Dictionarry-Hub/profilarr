@@ -26,7 +26,7 @@ export function skipWithoutDocker(entry: { id: string; needsDocker: boolean }): 
 	);
 }
 
-/** Whether this run's container has network access (`deno task flows --online`) */
+/** Whether this run's container has network access (`deno task test:flows --online`) */
 export function networkAvailable(): boolean {
 	return process.env.FLOWS_ONLINE === '1';
 }
@@ -35,6 +35,6 @@ export function networkAvailable(): boolean {
 export function skipWithoutNetwork(): void {
 	test.skip(
 		!networkAvailable(),
-		'This test reaches the internet, and this run has no network (deno task flows --online)'
+		'This test reaches the internet, and this run has no network (deno task test:flows --online)'
 	);
 }

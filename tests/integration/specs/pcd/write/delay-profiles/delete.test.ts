@@ -1,0 +1,92 @@
+/**
+ * PCD write tests: delay profile delete.
+ */
+
+import { assert, assertEquals } from '@std/assert';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
+import {
+	normalizeSql,
+	opCheckpoint,
+	parseDesiredState,
+	parseMetadata
+} from '#integration/specs/pcd/harness/pcd.ts';
+import { write } from '#integration/specs/pcd/harness/write.ts';
+import { createScenarioFactory, userOpsSince } from './helpers.ts';
+
+const PORT = PORTS.pcd.writeDelayProfilesDelete;
+const ORIGIN = `http://localhost:${PORT}`;
+
+const { seededPcd } = createScenarioFactory(PORT, 'pcd-write-delay-profile-delete');
+
+beforeAll(async () => {
+	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
+});
+
+afterAll(async () => {
+	await stopServer(PORT);
+});
+
+/**
+ * Context
+ *   Base layer seeded with one delay profile via base.delayProfile():
+ *     name='Delete Delay', preferredProtocol='prefer_torrent',
+ *     usenetDelay=15, torrentDelay=5, bypassIfHighestQuality=true,
+ *     bypassIfAboveCfScore=true, minimumCfScore=80
+ *   Compiled.
+ *
+ * Submit
+ *   POST /delay-profiles/{ctx.dbId}/Delete%20Delay?/delete with form fields:
+ *     layer = 'user'
+ *
+ * Expect
+ *   - userOpsSince(checkpoint).length === 1
+ *   - op.metadata.operation      === 'delete'
+ *   - op.metadata.entity         === 'delay_profile'
+ *   - op.metadata.name           === 'Delete Delay'
+ *   - op.metadata.changed_fields === ['deleted']
+ *   - op.desired_state.deleted   === true
+ *   - op.desired_state.name      === 'Delete Delay'
+ *   - op.desired_state.preferred_protocol === 'prefer_torrent'
+ *   - op.desired_state.usenet_delay       === 15
+ *   - op.desired_state.torrent_delay      === 5
+ *   - op.desired_state.minimum_custom_format_score === 80
+ *   - op.sql matches /delete from "?delay_profiles"?/i
+ */
+test('delay profile emits one delete op', async () => {
+	const ctx = await seededPcd('simple', [
+		base.delayProfile({
+			name: 'Delete Delay',
+			preferredProtocol: 'prefer_torrent',
+			usenetDelay: 15,
+			torrentDelay: 5,
+			bypassIfHighestQuality: true,
+			bypassIfAboveCfScore: true,
+			minimumCfScore: 80
+		})
+	]);
+	const checkpoint = opCheckpoint(ctx);
+
+	await write.delayProfile.remove(ctx, 'Delete Delay');
+
+	const ops = userOpsSince(ctx, checkpoint);
+	assertEquals(ops.length, 1);
+	const op = ops[0];
+	const metadata = parseMetadata(op);
+	assertEquals(metadata.operation, 'delete');
+	assertEquals(metadata.entity, 'delay_profile');
+	assertEquals(metadata.name, 'Delete Delay');
+	assertEquals(metadata.changed_fields, ['deleted']);
+	const desired = parseDesiredState(op);
+	assertEquals(desired.deleted, true);
+	assertEquals(desired.name, 'Delete Delay');
+	assertEquals(desired.preferred_protocol, 'prefer_torrent');
+	assertEquals(desired.usenet_delay, 15);
+	assertEquals(desired.torrent_delay, 5);
+	assertEquals(desired.bypass_if_highest_quality, true);
+	assertEquals(desired.bypass_if_above_custom_format_score, true);
+	assertEquals(desired.minimum_custom_format_score, 80);
+	assert(/delete from "?delay_profiles"?/i.test(normalizeSql(op.sql)));
+});

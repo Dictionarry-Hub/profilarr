@@ -720,36 +720,37 @@ needed.
 | `sanitize.test.ts` | Output filter: quoted and unquoted event handlers, obfuscated `javascript:` URLs, disallowed attributes and tags; each payload checked raw and after `marked`; allowed markup kept |
 | `markdown.test.ts` | Renderer: raw HTML escaped in block and inline mode, link and image scheme checks, `links: false`, GFM features intact                                                             |
 
-### Integration Tests (`tests/integration/auth/specs/`)
+### Integration Tests (`tests/integration/specs/auth/`)
 
 Each spec boots an isolated server instance and tests a specific auth behaviour
-end-to-end over HTTP. Uses a custom test harness with `TestClient` (cookie jar),
-`ServerManager`, and Docker Compose for OIDC/TLS scenarios. Specs auto-discover
-and run in parallel via `deno task test integration`.
+end-to-end over HTTP. Uses the shared harness with `TestClient` (cookie jar),
+server lifecycle helpers, and Docker Compose for OIDC/TLS scenarios. Specs run
+in parallel under Vitest via `deno task test:integration`.
 
-| File                         | Port             | Tests                                                                                                                                     |
-| ---------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `health.test.ts`             | 7001             | Public health vs authenticated diagnostics, no info disclosure                                                                            |
-| `csrf.test.ts`               | 7002, 7012, 7014 | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                                                              |
-| `cookie.test.ts`             | 7003, 7013       | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                                                         |
-| `apiKey.test.ts`             | 7000             | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management                                                  |
-| `apiKeyPermissions.test.ts`  | 7020             | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                                                     |
-| `envApiKey.test.ts`          | 7018             | Env key works alongside stored keys, "Environment" name reserved                                                                          |
-| `session.test.ts`            | 7005             | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection                                            |
-| `oidc.test.ts`               | 7006, 7009, 7010 | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                                                        |
-| `loginMethods.test.ts`       | 7021-7027, 7029  | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout                                          |
-| `localAccount.test.ts`       | 7028             | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts                                       |
-| `rateLimit.test.ts`          | 7007             | Suspicious/typo thresholds, successful login clears, window expiry                                                                        |
-| `proxy.test.ts`              | 7008             | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                                                                |
-| `xForwardedFor.test.ts`      | 7015             | Spoofed header limited to session metadata; login throttling uses real TCP                                                                |
-| `secretExposure.test.ts`     | 7016             | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                                                            |
-| `backupSecrets.test.ts`      | 7017             | 9 checks - backup DB copy has all secrets stripped, auth tables emptied                                                                   |
-| `pathTraversal.test.ts`      | 7018             | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                                                          |
-| `localBypass.test.ts`        | 7019             | Local bypass removal: requests from local addresses require auth                                                                          |
-| `xss.test.ts`                | 7032             | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML                                     |
-| `secretDestinations.test.ts` | 7033             | Arr, Ntfy and webhook updates that change the destination are rejected unless the secret is re-entered                                    |
-| `apiKeyConfirmation.test.ts` | 7034             | Key creation needs a confirmed session: window edges, wrong and right password, sessions stay separate, password change, rate limit       |
-| `oidcReauth.test.ts`         | 7035, 7036       | SSO re-authentication: `max_age` sent, same session kept and confirmed, wrong account rejected, provider without `auth_time` fails closed |
+| File                             | Port                  | Tests                                                                                                                                     |
+| -------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `health.test.ts`                 | 7006                  | Public health vs authenticated diagnostics, no info disclosure                                                                            |
+| `csrf.test.ts`                   | 7003, 7004, 7005      | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                                                              |
+| `cookie.test.ts`                 | 7001, 7002            | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                                                         |
+| `apiKey.test.ts`                 | 7000                  | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management                                                  |
+| `apiKeyPermissions.test.ts`      | 7020                  | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                                                     |
+| `envApiKey.test.ts`              | 7018                  | Env key works alongside stored keys, "Environment" name reserved                                                                          |
+| `session.test.ts`                | 7016                  | Redirect flow, expiration, sliding expiration halfway extend, 401 JSON, logout CSRF protection                                            |
+| `oidc.test.ts`                   | 7007, 7008, 7009      | Full OIDC flow, state/nonce tampering, rejected when SSO isn't enabled, proxy flow                                                        |
+| `loginMethods.test.ts`           | 7021-7027, 7029, 7031 | One server per login scenario: setup, login page options, sign-in, `oidc` alias warning, lockout                                          |
+| `localAccount.test.ts`           | 7028, 7030            | Create Local Account from an SSO session, refusals, change password guard, sessions across accounts                                       |
+| `rateLimit.test.ts`              | 7012                  | Suspicious/typo thresholds, successful login clears, window expiry                                                                        |
+| `proxy.test.ts`                  | 7011                  | Full flow through Caddy TLS, X-Forwarded-For recording, CSRF through proxy                                                                |
+| `xForwardedFor.test.ts`          | 7017                  | Spoofed header limited to session metadata; login throttling uses real TCP                                                                |
+| `secretExposure.test.ts`         | 7015                  | 16 page checks - no raw secrets in frontend responses (assumes stolen session)                                                            |
+| `pathTraversal.test.ts`          | 7010                  | 15 checks - ../ , absolute path, and symlink escape rejection across 3 endpoints                                                          |
+| `localBypass.test.ts`            | 7019                  | Local bypass removal: requests from local addresses require auth                                                                          |
+| `xss.test.ts`                    | 7032                  | Seeded PCD descriptions with an unquoted event handler never reach custom format or profile page HTML                                     |
+| `secretDestinations.test.ts`     | 7033                  | Arr, Ntfy and webhook updates that change the destination are rejected unless the secret is re-entered                                    |
+| `apiKeyConfirmation.test.ts`     | 7034                  | Key creation needs a confirmed session: window edges, wrong and right password, sessions stay separate, password change, rate limit       |
+| `oidcReauth.test.ts`             | 7035, 7036            | SSO re-authentication: `max_age` sent, same session kept and confirmed, wrong account rejected, provider without `auth_time` fails closed |
+| `reverseProxy502.test.ts`        | 7013                  | Login and SSR pages through nginx with a small `proxy_buffer_size`; nginx never logs an oversized upstream header                         |
+| `reverseProxy502-manual.test.ts` | 7014                  | Interactive version of the above for browser checks; skipped unless `INTEGRATION_MANUAL=1`                                                |
 
 ### Browser Tests (`tests/flows/`)
 
@@ -760,7 +761,7 @@ never runs, server-rendered and client-rendered.
 
 ### Security Scans (`tests/scan/`)
 
-Security scans run via the test runner. Semgrep is intended to run in CI/CD as a
+Security scans run via `deno task scan:*`. Semgrep is intended to run in CI/CD as a
 blocking check. ZAP is manual-only, run periodically for spot checks.
 
 #### SAST - Semgrep
@@ -769,8 +770,8 @@ Static Application Security Testing. Scans source code for vulnerabilities
 without running the application.
 
 ```bash
-deno task test semgrep          # full scan: custom rules + community rulesets
-deno task test semgrep --quick  # custom rules only (faster, for iteration)
+deno task scan:semgrep          # full scan: custom rules + community rulesets
+deno task scan:semgrep --quick  # custom rules only (faster, for iteration)
 ```
 
 The full scan uses `--error` so it exits non-zero on any finding. The goal is
@@ -785,13 +786,13 @@ positive to suppress with a justification comment.
 
 **Custom rulesets** (`tests/scan/semgrep/`):
 
-| File          | What it catches                                                                       |
-| ------------- | ------------------------------------------------------------------------------------- |
-| `xss.yml`     | `{@html}` usage, `marked` imported outside the shared renderer, unescaped table cells |
-| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)                   |
-| `secrets.yml` | Sensitive field names in logger metadata                                              |
-| `deno.yml`    | Deno-specific patterns (file I/O review)                                              |
-| `csharp.yml`  | C# parser service patterns (file I/O review)                                          |
+| File          | What it catches                                                                        |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `xss.yml`     | `{@html}` usage, `marked` imported outside the shared renderer, unescaped table cells  |
+| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)                    |
+| `secrets.yml` | Sensitive field names in logger metadata                                               |
+| `node.yml`    | Template literal command paths, `eval`, request-derived file paths, env values in logs |
+| `csharp.yml`  | C# parser service patterns (file I/O review)                                           |
 
 **Suppressing false positives**: Use `nosemgrep` with the full rule ID and a
 justification. The comment must be on the matched line or the line immediately
@@ -854,9 +855,9 @@ Profilarr instances to find runtime vulnerabilities (missing headers, cookie
 issues, information disclosure, etc.). Requires `deno task build` and Docker.
 
 ```bash
-deno task test zap --baseline  # passive scan (spider + check responses)
-deno task test zap --full      # passive + active attacks (SQLi, XSS, etc.)
-deno task test zap --api       # API scan against OpenAPI spec (not yet implemented)
+deno task scan:zap --baseline  # passive scan (spider + check responses)
+deno task scan:zap --full      # passive + active attacks (SQLi, XSS, etc.)
+deno task scan:zap --api       # API scan against OpenAPI spec (not yet implemented)
 ```
 
 Each mode starts two servers and runs ZAP against both:
@@ -872,9 +873,10 @@ scan - only errors do.
 
 ### Infrastructure
 
-- **Test harness**: custom runner, `TestClient` with cookie jar, `ServerManager`
-  for isolated instances
+- **Test harness**: `tests/integration/harness/`, `TestClient` with cookie jar,
+  `startServer`/`stopServer` for isolated instances
 - **Docker Compose**: mock-oauth2-server (port 9090) + Caddy (TLS termination)
-  for OIDC and proxy tests
-- **Runner**: `tests/runner.ts` - unified CLI (`deno task test`) handles unit,
-  integration, and security scans with subcommands
+  for OIDC and proxy tests, started once per run by Vitest's global setup
+  (`INTEGRATION_DOCKER=0` skips it)
+- **Tasks**: `deno task test:unit` and `deno task test:integration` run the
+  Vitest suites; `deno task scan:semgrep` and `deno task scan:zap` run the scans
