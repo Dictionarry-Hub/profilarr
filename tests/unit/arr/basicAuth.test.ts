@@ -1,23 +1,23 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
 
 class BasicAuthPairTest extends BaseTest {
 	runTests(): void {
 		this.test('accepts both fields', () => {
-			assertEquals(basicAuthPairError(true, true), null);
+			expect(basicAuthPairError(true, true)).toStrictEqual(null);
 		});
 
 		this.test('accepts neither field', () => {
-			assertEquals(basicAuthPairError(false, false), null);
+			expect(basicAuthPairError(false, false)).toStrictEqual(null);
 		});
 
 		this.test('rejects a username without a password', () => {
-			assertEquals(typeof basicAuthPairError(true, false), 'string');
+			expect(typeof basicAuthPairError(true, false)).toStrictEqual('string');
 		});
 
 		this.test('rejects a password without a username', () => {
-			assertEquals(typeof basicAuthPairError(false, true), 'string');
+			expect(typeof basicAuthPairError(false, true)).toStrictEqual('string');
 		});
 	}
 }

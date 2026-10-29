@@ -11,11 +11,10 @@
  * 7. API key cannot create API keys (so a key can never widen its own access)
  */
 
-import { assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUser, setApiKey } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.apiKey;
@@ -40,7 +39,7 @@ test('valid API key returns 200', async () => {
 	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('invalid API key returns 401', async () => {
@@ -48,19 +47,19 @@ test('invalid API key returns 401', async () => {
 	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': 'wrong-key' }
 	});
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 test('no auth returns 401', async () => {
 	const unauthClient = new TestClient(ORIGIN);
 	const res = await unauthClient.get('/api/v1/status');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 test('API key in query param returns 401', async () => {
 	const unauthClient = new TestClient(ORIGIN);
 	const res = await unauthClient.get(`/api/v1/status?apikey=${API_KEY}`);
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // --- API key scoping: only /api/v1 paths, not browser pages or form actions ---
@@ -72,7 +71,9 @@ test('API key rejected for browser pages', async () => {
 	const res = await c.get('/databases', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 403, `Expected 403 for browser page with API key, got ${res.status}`);
+	expect(res.status, `Expected 403 for browser page with API key, got ${res.status}`).toStrictEqual(
+		403
+	);
 });
 
 test('API key rejected for form actions', async () => {
@@ -84,7 +85,9 @@ test('API key rejected for form actions', async () => {
 		{ id: '1' },
 		{ headers: { Origin: ORIGIN, 'X-Api-Key': API_KEY } }
 	);
-	assertEquals(res.status, 403, `Expected 403 for form action with API key, got ${res.status}`);
+	expect(res.status, `Expected 403 for form action with API key, got ${res.status}`).toStrictEqual(
+		403
+	);
 });
 
 test('API key cannot create API keys', async () => {
@@ -96,5 +99,7 @@ test('API key cannot create API keys', async () => {
 		{ name: 'escalated', expiry: 'never', fullAccess: 'on', permissions: '{}' },
 		{ headers: { Origin: ORIGIN, 'X-Api-Key': API_KEY } }
 	);
-	assertEquals(res.status, 403, `Expected 403 for key creation with API key, got ${res.status}`);
+	expect(res.status, `Expected 403 for key creation with API key, got ${res.status}`).toStrictEqual(
+		403
+	);
 });

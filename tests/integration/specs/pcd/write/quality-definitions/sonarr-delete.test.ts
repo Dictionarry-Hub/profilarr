@@ -5,9 +5,8 @@
  * converted to a single name-only DELETE statement (covered by task #14).
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -63,31 +62,31 @@ test('sonarr quality definitions delete emits one name-guarded op', async () => 
 	await write.qualityDefSonarr.remove(ctx, 'Delete QD');
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'delete');
-	assertEquals(metadata.entity, 'sonarr_quality_definitions');
-	assertEquals(metadata.changed_fields, ['deleted']);
+	expect(metadata.operation).toStrictEqual('delete');
+	expect(metadata.entity).toStrictEqual('sonarr_quality_definitions');
+	expect(metadata.changed_fields).toStrictEqual(['deleted']);
 	const desired = parseDesiredState(op);
-	assertEquals(desired.deleted, true);
-	assertEquals(desired.name, 'Delete QD');
+	expect(desired.deleted).toStrictEqual(true);
+	expect(desired.name).toStrictEqual('Delete QD');
 
 	const sql = normalizeSql(op.sql);
 	const lowerSql = sql.toLowerCase();
-	assert(/delete from "?sonarr_quality_definitions"?/i.test(sql));
+	expect(/delete from "?sonarr_quality_definitions"?/i.test(sql)).toBeTruthy();
 
 	const deleteIndex = lowerSql.indexOf('delete from "sonarr_quality_definitions"');
-	assert(deleteIndex >= 0, 'expected sonarr_quality_definitions delete in SQL');
+	expect(deleteIndex >= 0, 'expected sonarr_quality_definitions delete in SQL').toBeTruthy();
 	const deleteClause = sql.slice(deleteIndex);
-	assert(/where "?name"? = /i.test(deleteClause));
+	expect(/where "?name"? = /i.test(deleteClause)).toBeTruthy();
 
 	const forbidden = ['quality_name', 'min_size', 'max_size', 'preferred_size'];
 	for (const field of forbidden) {
 		const pattern = new RegExp(`where[^;]*"?${field}"?\\s*=`, 'i');
-		assert(
+		expect(
 			!pattern.test(deleteClause),
 			`${field} should not appear in delete WHERE clause, got: ${deleteClause}`
-		);
+		).toBeTruthy();
 	}
 });

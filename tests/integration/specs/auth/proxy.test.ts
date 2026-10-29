@@ -13,11 +13,10 @@
  * (X-Forwarded-For spoofing tests are in xForwardedFor.test.ts)
  */
 
-import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, queryDb } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 // Caddy serves HTTPS with a self-signed cert on localhost, so skip TLS verification here.
@@ -46,18 +45,18 @@ test('full login flow through proxy', async () => {
 	);
 
 	// SvelteKit form action returns 200 with redirect in body
-	assertEquals(loginRes.status, 200);
+	expect(loginRes.status).toStrictEqual(200);
 	const body = await loginRes.text();
-	assertStringIncludes(body, '"type":"redirect"');
+	expect(body).toContain('"type":"redirect"');
 
 	// Session cookie should be set
 	const session = client.getCookie('session');
-	assertNotEquals(session, undefined);
+	expect(session).not.toStrictEqual(undefined);
 
 	// Access a protected page with the session
 	const pageRes = await client.get('/');
 	// Should get 200 (or a page load), not a redirect to login
-	assertNotEquals(pageRes.status, 303);
+	expect(pageRes.status).not.toStrictEqual(303);
 });
 
 test('unauthenticated request redirects to proxy URL', async () => {
@@ -66,14 +65,14 @@ test('unauthenticated request redirects to proxy URL', async () => {
 	// Hit a protected page without a session
 	const res = await client.get('/databases');
 
-	assertEquals(res.status, 303);
+	expect(res.status).toStrictEqual(303);
 	const location = res.headers.get('location');
 	// Location should be relative or use the proxy origin, not http://localhost:7008
 	if (location?.startsWith('http')) {
-		assertStringIncludes(location, 'localhost:7444');
+		expect(location).toContain('localhost:7444');
 	}
 	// Either way it should point to /auth/login
-	assertStringIncludes(location ?? '', '/auth/login');
+	expect(location ?? '').toContain('/auth/login');
 });
 
 test('X-Forwarded-For recorded as session IP through proxy', async () => {
@@ -88,15 +87,15 @@ test('X-Forwarded-For recorded as session IP through proxy', async () => {
 	);
 
 	const sessionId = client.getCookie('session');
-	assertNotEquals(sessionId, undefined);
+	expect(sessionId).not.toStrictEqual(undefined);
 
 	// Check the DB — an IP should be recorded (not null)
 	const rows = queryDb(getDbPath(PORT), 'SELECT ip_address FROM sessions WHERE id = ?', [
 		sessionId!
 	]) as { ip_address: string | null }[];
 
-	assertEquals(rows.length, 1);
-	assertNotEquals(rows[0].ip_address, null);
+	expect(rows.length).toStrictEqual(1);
+	expect(rows[0].ip_address).not.toStrictEqual(null);
 });
 
 test('POST with mismatched Origin through proxy returns 403', async () => {
@@ -106,5 +105,5 @@ test('POST with mismatched Origin through proxy returns 403', async () => {
 		{ username: 'admin', password: 'password123' },
 		{ headers: { Origin: 'http://evil.com' } }
 	);
-	assertEquals(res.status, 403);
+	expect(res.status).toStrictEqual(403);
 });

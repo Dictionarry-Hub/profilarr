@@ -2,10 +2,9 @@
  * Arr cleanup notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -158,44 +157,44 @@ function makeSkippedOnlyWithDeletionParams(): ArrCleanupNotificationParams {
 // =========================================================================
 
 test('type includes status', () => {
-	assertEquals(arrCleanup(makeSuccessParams()).type, 'arr.cleanup.success');
-	assertEquals(arrCleanup(makePartialParams()).type, 'arr.cleanup.partial');
-	assertEquals(arrCleanup(makeFailedParams()).type, 'arr.cleanup.failed');
-	assertEquals(arrCleanup(makeHardErrorParams()).type, 'arr.cleanup.failed');
+	expect(arrCleanup(makeSuccessParams()).type).toStrictEqual('arr.cleanup.success');
+	expect(arrCleanup(makePartialParams()).type).toStrictEqual('arr.cleanup.partial');
+	expect(arrCleanup(makeFailedParams()).type).toStrictEqual('arr.cleanup.failed');
+	expect(arrCleanup(makeHardErrorParams()).type).toStrictEqual('arr.cleanup.failed');
 });
 
 test('severity maps correctly', () => {
-	assertEquals(arrCleanup(makeSuccessParams()).severity, 'success');
-	assertEquals(arrCleanup(makePartialParams()).severity, 'warning');
-	assertEquals(arrCleanup(makeFailedParams()).severity, 'error');
-	assertEquals(arrCleanup(makeHardErrorParams()).severity, 'error');
+	expect(arrCleanup(makeSuccessParams()).severity).toStrictEqual('success');
+	expect(arrCleanup(makePartialParams()).severity).toStrictEqual('warning');
+	expect(arrCleanup(makeFailedParams()).severity).toStrictEqual('error');
+	expect(arrCleanup(makeHardErrorParams()).severity).toStrictEqual('error');
 });
 
 test('title includes instance name', () => {
-	assertEquals(arrCleanup(makeSuccessParams()).title.includes('Movies'), true);
-	assertEquals(arrCleanup(makePartialParams()).title.includes('TV'), true);
+	expect(arrCleanup(makeSuccessParams()).title.includes('Movies')).toStrictEqual(true);
+	expect(arrCleanup(makePartialParams()).title.includes('TV')).toStrictEqual(true);
 });
 
 test('title includes instance type', () => {
-	assertEquals(arrCleanup(makeSuccessParams()).title.includes('Radarr'), true);
-	assertEquals(arrCleanup(makePartialParams()).title.includes('Sonarr'), true);
+	expect(arrCleanup(makeSuccessParams()).title.includes('Radarr')).toStrictEqual(true);
+	expect(arrCleanup(makePartialParams()).title.includes('Sonarr')).toStrictEqual(true);
 });
 
 test('title reflects status', () => {
-	assertEquals(arrCleanup(makeSuccessParams()).title.includes('Complete'), true);
-	assertEquals(arrCleanup(makePartialParams()).title.includes('Partial'), true);
-	assertEquals(arrCleanup(makeFailedParams()).title.includes('Failed'), true);
-	assertEquals(arrCleanup(makeHardErrorParams()).title.includes('Failed'), true);
+	expect(arrCleanup(makeSuccessParams()).title.includes('Complete')).toStrictEqual(true);
+	expect(arrCleanup(makePartialParams()).title.includes('Partial')).toStrictEqual(true);
+	expect(arrCleanup(makeFailedParams()).title.includes('Failed')).toStrictEqual(true);
+	expect(arrCleanup(makeHardErrorParams()).title.includes('Failed')).toStrictEqual(true);
 });
 
 test('entity label: Radarr -> Movies', () => {
 	const notification = arrCleanup(makeSuccessParams());
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 	const deleted = sections.find((s) => s.kind === 'section' && s.title === 'Deleted');
-	assertExists(deleted);
+	expect(deleted).not.toBeOneOf([null, undefined]);
 	if (deleted?.kind === 'section') {
 		const moviesGroup = deleted.items?.find((g) => g.label === 'Movies');
-		assertExists(moviesGroup);
+		expect(moviesGroup).not.toBeOneOf([null, undefined]);
 	}
 });
 
@@ -203,12 +202,12 @@ test('deleted section labels are capitalized', () => {
 	const notification = arrCleanup(makeSuccessParams());
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 	const deleted = sections.find((s) => s.kind === 'section' && s.title === 'Deleted');
-	assertExists(deleted);
+	expect(deleted).not.toBeOneOf([null, undefined]);
 	if (deleted?.kind === 'section') {
 		const labels = deleted.items?.map((g) => g.label) ?? [];
-		assertEquals(labels.includes('Profiles'), true);
-		assertEquals(labels.includes('Formats'), true);
-		assertEquals(labels.includes('Movies'), true);
+		expect(labels.includes('Profiles')).toStrictEqual(true);
+		expect(labels.includes('Formats')).toStrictEqual(true);
+		expect(labels.includes('Movies')).toStrictEqual(true);
 	}
 });
 
@@ -216,13 +215,13 @@ test('entity label: Sonarr -> Series', () => {
 	const notification = arrCleanup(makePartialParams());
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 	const failedSection = sections.find((s) => s.kind === 'section' && s.title === 'Failed Series');
-	assertExists(failedSection);
+	expect(failedSection).not.toBeOneOf([null, undefined]);
 });
 
 test('skipped QPs flip success to partial even with deletions', () => {
 	const notification = arrCleanup(makeSkippedOnlyWithDeletionParams());
-	assertEquals(notification.type, 'arr.cleanup.partial');
-	assertEquals(notification.severity, 'warning');
+	expect(notification.type).toStrictEqual('arr.cleanup.partial');
+	expect(notification.severity).toStrictEqual('warning');
 });
 
 test('skipped QPs only with no deletions yields failed', () => {
@@ -238,17 +237,17 @@ test('skipped QPs only with no deletions yields failed', () => {
 		failedEntities: []
 	};
 	const notification = arrCleanup(params);
-	assertEquals(notification.type, 'arr.cleanup.failed');
-	assertEquals(notification.severity, 'error');
+	expect(notification.type).toStrictEqual('arr.cleanup.failed');
+	expect(notification.severity).toStrictEqual('error');
 });
 
 test('hard error variant emits Error section with full error text', () => {
 	const notification = arrCleanup(makeHardErrorParams());
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 	const errorSection = sections.find((s) => s.kind === 'section' && s.title === 'Error');
-	assertExists(errorSection);
+	expect(errorSection).not.toBeOneOf([null, undefined]);
 	if (errorSection?.kind === 'section') {
-		assertEquals(errorSection.content.includes('ECONNREFUSED'), true);
+		expect(errorSection.content.includes('ECONNREFUSED')).toStrictEqual(true);
 	}
 });
 
@@ -258,52 +257,52 @@ test('hard error message is first line of error', () => {
 		error: 'fetch failed: ECONNREFUSED\nstack trace follows\n...'
 	};
 	const notification = arrCleanup(params);
-	assertEquals(notification.message, 'fetch failed: ECONNREFUSED');
+	expect(notification.message).toStrictEqual('fetch failed: ECONNREFUSED');
 });
 
 test('definition emits no field blocks (counts only live in message + sections)', () => {
 	for (const params of [makeSuccessParams(), makePartialParams(), makeFailedParams()]) {
 		const notification = arrCleanup(params);
 		const fields = notification.blocks?.filter((b) => b.kind === 'field') ?? [];
-		assertEquals(fields.length, 0);
+		expect(fields.length).toStrictEqual(0);
 	}
 });
 
 test('hard error single-line message equals error text', () => {
 	const notification = arrCleanup(makeHardErrorParams());
-	assertEquals(notification.message.includes('ECONNREFUSED'), true);
+	expect(notification.message.includes('ECONNREFUSED')).toStrictEqual(true);
 });
 
 test('success message reports deleted total', () => {
 	const notification = arrCleanup(makeSuccessParams());
 	// 2 CFs + 1 QP + 3 entities = 6
-	assertEquals(notification.message.includes('6'), true);
+	expect(notification.message.includes('6')).toStrictEqual(true);
 });
 
 test('partial message reports both counts', () => {
 	const notification = arrCleanup(makePartialParams());
 	// deleted: 1 CF + 2 entities = 3. non-successes: 2 skipped + 1 failed = 3.
-	assertEquals(notification.message.includes('3'), true);
-	assertEquals(notification.message.toLowerCase().includes('not deleted'), true);
+	expect(notification.message.includes('3')).toStrictEqual(true);
+	expect(notification.message.toLowerCase().includes('not deleted')).toStrictEqual(true);
 });
 
 test('failed (soft) message reports non-success count', () => {
 	const notification = arrCleanup(makeFailedParams());
 	// 1 skipped + 1 failed = 2
-	assertEquals(notification.message.includes('2'), true);
+	expect(notification.message.includes('2')).toStrictEqual(true);
 });
 
 test('deleted section lists item names', () => {
 	const notification = arrCleanup(makeSuccessParams());
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 	const deletedSection = sections.find((s) => s.kind === 'section' && s.title === 'Deleted');
-	assertExists(deletedSection);
+	expect(deletedSection).not.toBeOneOf([null, undefined]);
 	if (deletedSection?.kind === 'section') {
-		assertExists(deletedSection.items);
+		expect(deletedSection.items).not.toBeOneOf([null, undefined]);
 		const allNames = deletedSection.items!.flatMap((g) => g.items);
-		assertEquals(allNames.includes('HDR'), true);
-		assertEquals(allNames.includes('Any'), true);
-		assertEquals(allNames.includes('Movie A'), true);
+		expect(allNames.includes('HDR')).toStrictEqual(true);
+		expect(allNames.includes('Any')).toStrictEqual(true);
+		expect(allNames.includes('Movie A')).toStrictEqual(true);
 	}
 });
 
@@ -313,14 +312,14 @@ test('skipped section groups by reason', () => {
 	const skippedSection = sections.find(
 		(s) => s.kind === 'section' && s.title === 'Skipped Profiles'
 	);
-	assertExists(skippedSection);
+	expect(skippedSection).not.toBeOneOf([null, undefined]);
 	if (skippedSection?.kind === 'section') {
-		assertExists(skippedSection.items);
+		expect(skippedSection.items).not.toBeOneOf([null, undefined]);
 		const group = skippedSection.items!.find((g) => g.label === 'Profile is assigned to media');
-		assertExists(group);
-		assertEquals(group!.items.length, 2);
-		assertEquals(group!.items.includes('Any'), true);
-		assertEquals(group!.items.includes('Custom'), true);
+		expect(group).not.toBeOneOf([null, undefined]);
+		expect(group!.items.length).toStrictEqual(2);
+		expect(group!.items.includes('Any')).toStrictEqual(true);
+		expect(group!.items.includes('Custom')).toStrictEqual(true);
 	}
 });
 
@@ -328,12 +327,12 @@ test('failed entities section groups by reason', () => {
 	const notification = arrCleanup(makePartialParams());
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 	const failedSection = sections.find((s) => s.kind === 'section' && s.title === 'Failed Series');
-	assertExists(failedSection);
+	expect(failedSection).not.toBeOneOf([null, undefined]);
 	if (failedSection?.kind === 'section') {
-		assertExists(failedSection.items);
+		expect(failedSection.items).not.toBeOneOf([null, undefined]);
 		const group = failedSection.items!.find((g) => g.label === 'HTTP 500');
-		assertExists(group);
-		assertEquals(group!.items.includes('Show C'), true);
+		expect(group).not.toBeOneOf([null, undefined]);
+		expect(group!.items.includes('Show C')).toStrictEqual(true);
 	}
 });
 
@@ -350,7 +349,7 @@ test('discord: success uses correct color', async () => {
 	});
 	await notifier.notify(arrCleanup(makeSuccessParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.SUCCESS);
 });
 
 test('discord: partial uses warning color', async () => {
@@ -362,7 +361,7 @@ test('discord: partial uses warning color', async () => {
 	});
 	await notifier.notify(arrCleanup(makePartialParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.WARNING);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.WARNING);
 });
 
 test('discord: failed uses error color', async () => {
@@ -374,7 +373,7 @@ test('discord: failed uses error color', async () => {
 	});
 	await notifier.notify(arrCleanup(makeFailedParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.ERROR);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 test('discord: hard error uses error color', async () => {
@@ -386,7 +385,7 @@ test('discord: hard error uses error color', async () => {
 	});
 	await notifier.notify(arrCleanup(makeHardErrorParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.ERROR);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 test('discord: section items render with names', async () => {
@@ -406,7 +405,7 @@ test('discord: section items render with names', async () => {
 	const deletedSection = allFields.find(
 		(f) => f.value.includes('HDR') && f.value.includes('Movie A')
 	);
-	assertExists(deletedSection);
+	expect(deletedSection).not.toBeOneOf([null, undefined]);
 });
 
 test('discord: skipped reason labels appear', async () => {
@@ -421,7 +420,7 @@ test('discord: skipped reason labels appear', async () => {
 	const embeds = getAllEmbeds();
 	const allFields = embeds.flatMap((e) => (e.fields as { name: string; value: string }[]) ?? []);
 	const skippedSection = allFields.find((f) => f.value.includes('Profile is assigned to media'));
-	assertExists(skippedSection);
+	expect(skippedSection).not.toBeOneOf([null, undefined]);
 });
 
 // =========================================================================
@@ -437,8 +436,8 @@ test('ntfy: success maps to priority 3', async () => {
 	await notifier.notify(arrCleanup(makeSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
-	assertEquals(payload?.tags, ['white_check_mark']);
+	expect(payload?.priority).toStrictEqual(3);
+	expect(payload?.tags).toStrictEqual(['white_check_mark']);
 });
 
 test('ntfy: partial maps to priority 4', async () => {
@@ -450,8 +449,8 @@ test('ntfy: partial maps to priority 4', async () => {
 	await notifier.notify(arrCleanup(makePartialParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 4);
-	assertEquals(payload?.tags, ['warning']);
+	expect(payload?.priority).toStrictEqual(4);
+	expect(payload?.tags).toStrictEqual(['warning']);
 });
 
 test('ntfy: failed maps to priority 5', async () => {
@@ -463,8 +462,8 @@ test('ntfy: failed maps to priority 5', async () => {
 	await notifier.notify(arrCleanup(makeFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 5);
-	assertEquals(payload?.tags, ['x']);
+	expect(payload?.priority).toStrictEqual(5);
+	expect(payload?.tags).toStrictEqual(['x']);
 });
 
 test('ntfy: message carries summary, omits section item names', async () => {
@@ -478,11 +477,11 @@ test('ntfy: message carries summary, omits section item names', async () => {
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const message = payload?.message as string;
 	// Summary message survives
-	assertEquals(message.includes('Deleted'), true);
-	assertEquals(message.includes('6'), true);
+	expect(message.includes('Deleted')).toStrictEqual(true);
+	expect(message.includes('6')).toStrictEqual(true);
 	// Section item names should not appear
-	assertEquals(message.includes('HDR'), false);
-	assertEquals(message.includes('Movie A'), false);
+	expect(message.includes('HDR')).toStrictEqual(false);
+	expect(message.includes('Movie A')).toStrictEqual(false);
 });
 
 // =========================================================================
@@ -497,13 +496,13 @@ test('webhook: sends full notification with blocks and items', async () => {
 	await notifier.notify(arrCleanup(makeSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'arr.cleanup.success');
-	assertEquals(payload?.severity, 'success');
+	expect(payload?.type).toStrictEqual('arr.cleanup.success');
+	expect(payload?.severity).toStrictEqual('success');
 	const blocks = payload?.blocks as { kind: string; items?: unknown[] }[];
-	assertExists(blocks);
+	expect(blocks).not.toBeOneOf([null, undefined]);
 	const withItems = blocks.filter((b) => b.kind === 'section' && b.items);
 	// At least the "Deleted" section should have items
-	assertEquals(withItems.length >= 1, true);
+	expect(withItems.length >= 1).toStrictEqual(true);
 });
 
 test('webhook: hard error passes through message + Error section', async () => {
@@ -514,12 +513,12 @@ test('webhook: hard error passes through message + Error section', async () => {
 	await notifier.notify(arrCleanup(makeHardErrorParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'arr.cleanup.failed');
-	assertEquals((payload?.message as string).includes('ECONNREFUSED'), true);
+	expect(payload?.type).toStrictEqual('arr.cleanup.failed');
+	expect((payload?.message as string).includes('ECONNREFUSED')).toStrictEqual(true);
 	const blocks = payload?.blocks as { kind: string; title?: string; content?: string }[];
 	const errorBlock = blocks.find((b) => b.kind === 'section' && b.title === 'Error');
-	assertExists(errorBlock);
-	assertEquals(errorBlock!.content?.includes('ECONNREFUSED'), true);
+	expect(errorBlock).not.toBeOneOf([null, undefined]);
+	expect(errorBlock!.content?.includes('ECONNREFUSED')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -538,7 +537,7 @@ test('telegram: success has ✅ prefix', async () => {
 	await notifier.notify(arrCleanup(makeSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2705'), true);
+	expect(text.startsWith('\u2705')).toStrictEqual(true);
 });
 
 test('telegram: partial has ⚠️ prefix', async () => {
@@ -551,7 +550,7 @@ test('telegram: partial has ⚠️ prefix', async () => {
 	await notifier.notify(arrCleanup(makePartialParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u26A0\uFE0F'), true);
+	expect(text.startsWith('\u26A0\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: failed has ❌ prefix', async () => {
@@ -564,7 +563,7 @@ test('telegram: failed has ❌ prefix', async () => {
 	await notifier.notify(arrCleanup(makeFailedParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 test('telegram: message includes instance name but omits item names', async () => {
@@ -577,9 +576,9 @@ test('telegram: message includes instance name but omits item names', async () =
 	await notifier.notify(arrCleanup(makeSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.includes('Movies'), true);
-	assertEquals(text.includes('HDR'), false);
-	assertEquals(text.includes('Movie A'), false);
+	expect(text.includes('Movies')).toStrictEqual(true);
+	expect(text.includes('HDR')).toStrictEqual(false);
+	expect(text.includes('Movie A')).toStrictEqual(false);
 });
 
 // =========================================================================

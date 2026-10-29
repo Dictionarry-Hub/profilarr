@@ -18,7 +18,6 @@
  * | I      | AUTH=on         | nothing (concurrent setup submissions) |
  */
 
-import { assert, assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import {
 	startServer,
@@ -34,7 +33,7 @@ import {
 	queryDb
 } from '#integration/harness/setup.ts';
 import { completeOidcLogin, OIDC_SETTINGS } from '#integration/harness/oidc.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const A = PORTS.auth.loginPasswordSetup;
@@ -60,7 +59,7 @@ const LEFTOVER_ACCOUNT_WARNING = 'local password account exists';
 async function loginPage(port: number): Promise<{ password: boolean; sso: boolean }> {
 	const client = new TestClient(origin(port));
 	const res = await client.get('/auth/login');
-	assertEquals(res.status, 200, 'Login page should render');
+	expect(res.status, 'Login page should render').toStrictEqual(200);
 	const html = await res.text();
 	return {
 		password: html.includes('name="password"'),
@@ -126,90 +125,90 @@ afterAll(async () => {
 test('A: first visit redirects to setup', async () => {
 	const client = new TestClient(origin(A));
 	const res = await client.get('/');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/auth/setup');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/auth/setup');
 });
 
 test('A: login page redirects to setup', async () => {
 	const client = new TestClient(origin(A));
 	const res = await client.get('/auth/login');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/auth/setup');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/auth/setup');
 });
 
 test('A: setup refuses usernames starting with oidc: in any case', async () => {
 	for (const username of ['oidc:admin', 'OIDC:admin']) {
 		const client = new TestClient(origin(A));
 		const res = await createUser(client, username, 'password123', origin(A));
-		assertEquals((await formResult(res)).status, 400, `setup should refuse '${username}'`);
-		assertEquals(client.getCookie('session'), undefined, 'No session should be created');
+		expect((await formResult(res)).status, `setup should refuse '${username}'`).toStrictEqual(400);
+		expect(client.getCookie('session'), 'No session should be created').toStrictEqual(undefined);
 	}
 	const rows = queryDb(getDbPath(A), 'SELECT COUNT(*) as count FROM users') as {
 		count: number;
 	}[];
-	assertEquals(rows[0].count, 0, 'No account should be created');
+	expect(rows[0].count, 'No account should be created').toStrictEqual(0);
 });
 
 test('A: setup creates the password account and signs in', async () => {
 	const client = new TestClient(origin(A));
 	const res = await createUser(client, 'admin', 'password123', origin(A));
-	assertEquals(await formResult(res), { status: 303, location: '/' });
-	assertNotEquals(client.getCookie('session'), undefined);
+	expect(await formResult(res)).toStrictEqual({ status: 303, location: '/' });
+	expect(client.getCookie('session')).not.toStrictEqual(undefined);
 
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
-	assertEquals(localAccountCount(A), 1);
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
+	expect(localAccountCount(A)).toStrictEqual(1);
 });
 
 test('A: setup is closed once the account exists', async () => {
 	const client = new TestClient(origin(A));
 	const res = await client.get('/auth/setup');
-	assertEquals(res.status, 303);
-	assertNotEquals(res.headers.get('location'), '/auth/setup');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).not.toStrictEqual('/auth/setup');
 });
 
 // --- B: AUTH=on, no SSO, password account ---
 
 test('B: login page shows only the password form', async () => {
-	assertEquals(await loginPage(B), { password: true, sso: false });
+	expect(await loginPage(B)).toStrictEqual({ password: true, sso: false });
 });
 
 test('B: password sign-in works', async () => {
 	const client = new TestClient(origin(B));
 	const res = await login(client, 'admin', 'password123', origin(B));
-	assertEquals(await formResult(res), { status: 303, location: '/' });
+	expect(await formResult(res)).toStrictEqual({ status: 303, location: '/' });
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 test('B: sidebar shows Log Out', async () => {
 	const client = new TestClient(origin(B));
 	await login(client, 'admin', 'password123', origin(B));
 	const res = await client.get('/databases');
-	assertEquals(res.status, 200);
-	assertStringIncludes(await res.text(), LOGOUT_LINK);
+	expect(res.status).toStrictEqual(200);
+	expect(await res.text()).toContain(LOGOUT_LINK);
 });
 
 test('B: SSO login endpoint is refused when SSO is not configured', async () => {
 	const client = new TestClient(origin(B));
 	const res = await client.get('/auth/oidc/login');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('B: SSO callback is refused when SSO is not configured', async () => {
 	const res = await callbackWithValidState(B);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('B: setup page is closed', async () => {
 	const client = new TestClient(origin(B));
 	const res = await client.get('/auth/setup');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/');
 });
 
 test('B: no deprecation warning at startup', () => {
-	assert(!getServerOutput(B).includes(DEPRECATION_WARNING));
+	expect(!getServerOutput(B).includes(DEPRECATION_WARNING)).toBeTruthy();
 });
 
 // --- C: AUTH=on + SSO, no accounts ---
@@ -217,140 +216,140 @@ test('B: no deprecation warning at startup', () => {
 test('C: first visit goes to login, not setup', async () => {
 	const client = new TestClient(origin(C));
 	const res = await client.get('/');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/auth/login');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/auth/login');
 });
 
 test('C: setup page is closed', async () => {
 	const client = new TestClient(origin(C));
 	const res = await client.get('/auth/setup');
-	assertEquals(res.status, 303);
-	assertNotEquals(res.headers.get('location'), '/auth/setup');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).not.toStrictEqual('/auth/setup');
 });
 
 test('C: submitting the setup form directly does not create an account', async () => {
 	const client = new TestClient(origin(C));
 	await createUser(client, 'intruder', 'password123', origin(C));
-	assertEquals(localAccountCount(C), 0);
-	assertEquals(client.getCookie('session'), undefined);
+	expect(localAccountCount(C)).toStrictEqual(0);
+	expect(client.getCookie('session')).toStrictEqual(undefined);
 });
 
 test('C: login page shows only the SSO button', async () => {
-	assertEquals(await loginPage(C), { password: false, sso: true });
+	expect(await loginPage(C)).toStrictEqual({ password: false, sso: true });
 });
 
 test('C: password sign-in is refused', async () => {
 	const client = new TestClient(origin(C));
 	const res = await login(client, 'admin', 'password123', origin(C));
-	assertEquals((await formResult(res)).status, 400);
-	assertEquals(client.getCookie('session'), undefined);
+	expect((await formResult(res)).status).toStrictEqual(400);
+	expect(client.getCookie('session')).toStrictEqual(undefined);
 });
 
 test('C: SSO sign-in works', async () => {
 	const client = new TestClient(origin(C));
 	const { callbackRes } = await completeOidcLogin(client, 'carol');
-	assertEquals(callbackRes.status, 303);
-	assertEquals(callbackRes.headers.get('location'), '/');
+	expect(callbackRes.status).toStrictEqual(303);
+	expect(callbackRes.headers.get('location')).toStrictEqual('/');
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 test('C: SSO accounts cannot sign in with a password', async () => {
 	// oidc:carol exists after the SSO sign-in above, with a placeholder hash
 	const client = new TestClient(origin(C));
 	const res = await login(client, 'oidc:carol', 'OIDC_NO_PASSWORD', origin(C));
-	assertEquals((await formResult(res)).status, 400);
-	assertEquals(client.getCookie('session'), undefined);
+	expect((await formResult(res)).status).toStrictEqual(400);
+	expect(client.getCookie('session')).toStrictEqual(undefined);
 });
 
 test('C: no deprecation warning at startup', () => {
-	assert(!getServerOutput(C).includes(DEPRECATION_WARNING));
+	expect(!getServerOutput(C).includes(DEPRECATION_WARNING)).toBeTruthy();
 });
 
 // --- D: AUTH=on + SSO, password account ---
 
 test('D: login page shows both the password form and the SSO button', async () => {
-	assertEquals(await loginPage(D), { password: true, sso: true });
+	expect(await loginPage(D)).toStrictEqual({ password: true, sso: true });
 });
 
 test('D: password sign-in works', async () => {
 	const client = new TestClient(origin(D));
 	const res = await login(client, 'admin', 'password123', origin(D));
-	assertEquals(await formResult(res), { status: 303, location: '/' });
+	expect(await formResult(res)).toStrictEqual({ status: 303, location: '/' });
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 test('D: SSO sign-in works', async () => {
 	const client = new TestClient(origin(D));
 	const { callbackRes } = await completeOidcLogin(client, 'dave');
-	assertEquals(callbackRes.status, 303);
+	expect(callbackRes.status).toStrictEqual(303);
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 // --- E: AUTH=oidc (deprecated) + SSO, no accounts ---
 
 test('E: startup logs the deprecation warning', () => {
-	assertStringIncludes(getServerOutput(E), DEPRECATION_WARNING);
+	expect(getServerOutput(E)).toContain(DEPRECATION_WARNING);
 });
 
 test('E: warning does not mention a password account when none exists', () => {
-	assert(!getServerOutput(E).includes(LEFTOVER_ACCOUNT_WARNING));
+	expect(!getServerOutput(E).includes(LEFTOVER_ACCOUNT_WARNING)).toBeTruthy();
 });
 
 test('E: first visit goes to login, not setup', async () => {
 	const client = new TestClient(origin(E));
 	const res = await client.get('/');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/auth/login');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/auth/login');
 });
 
 test('E: setup page is closed', async () => {
 	const client = new TestClient(origin(E));
 	const res = await client.get('/auth/setup');
-	assertEquals(res.status, 303);
-	assertNotEquals(res.headers.get('location'), '/auth/setup');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).not.toStrictEqual('/auth/setup');
 });
 
 test('E: login page shows only the SSO button', async () => {
-	assertEquals(await loginPage(E), { password: false, sso: true });
+	expect(await loginPage(E)).toStrictEqual({ password: false, sso: true });
 });
 
 test('E: SSO sign-in works', async () => {
 	const client = new TestClient(origin(E));
 	const { callbackRes } = await completeOidcLogin(client, 'erin');
-	assertEquals(callbackRes.status, 303);
+	expect(callbackRes.status).toStrictEqual(303);
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 // --- F: AUTH=oidc (deprecated) + SSO, leftover password account ---
 
 test('F: startup warning mentions the password account', () => {
 	const output = getServerOutput(F);
-	assertStringIncludes(output, DEPRECATION_WARNING);
-	assertStringIncludes(output, LEFTOVER_ACCOUNT_WARNING);
+	expect(output).toContain(DEPRECATION_WARNING);
+	expect(output).toContain(LEFTOVER_ACCOUNT_WARNING);
 });
 
 test('F: login page shows both the password form and the SSO button', async () => {
-	assertEquals(await loginPage(F), { password: true, sso: true });
+	expect(await loginPage(F)).toStrictEqual({ password: true, sso: true });
 });
 
 test('F: password sign-in works', async () => {
 	const client = new TestClient(origin(F));
 	const res = await login(client, 'admin', 'password123', origin(F));
-	assertEquals(await formResult(res), { status: 303, location: '/' });
+	expect(await formResult(res)).toStrictEqual({ status: 303, location: '/' });
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 test('F: SSO sign-in works', async () => {
 	const client = new TestClient(origin(F));
 	const { callbackRes } = await completeOidcLogin(client, 'frank');
-	assertEquals(callbackRes.status, 303);
+	expect(callbackRes.status).toStrictEqual(303);
 	const page = await client.get('/databases');
-	assertNotEquals(page.status, 303, 'Should be signed in');
+	expect(page.status, 'Should be signed in').not.toStrictEqual(303);
 });
 
 // --- G: AUTH=off, SSO settings present ---
@@ -358,35 +357,38 @@ test('F: SSO sign-in works', async () => {
 test('G: pages load without signing in', async () => {
 	const client = new TestClient(origin(G));
 	const res = await client.get('/databases');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('G: no redirect to setup or login', async () => {
 	const client = new TestClient(origin(G));
 	const res = await client.get('/');
 	const location = res.headers.get('location') ?? '';
-	assert(!location.startsWith('/auth/'), `Unexpected redirect to ${location}`);
+	expect(!location.startsWith('/auth/'), `Unexpected redirect to ${location}`).toBeTruthy();
 });
 
 test('G: login page redirects home', async () => {
 	// Nothing to sign in to with AUTH=off, e.g. an old bookmark to /auth/login
 	const client = new TestClient(origin(G));
 	const res = await client.get('/auth/login');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/');
 });
 
 test('G: sidebar hides Log Out', async () => {
 	const client = new TestClient(origin(G));
 	const res = await client.get('/databases');
-	assertEquals(res.status, 200);
-	assert(!(await res.text()).includes(LOGOUT_LINK), 'Log Out should be hidden with AUTH=off');
+	expect(res.status).toStrictEqual(200);
+	expect(
+		!(await res.text()).includes(LOGOUT_LINK),
+		'Log Out should be hidden with AUTH=off'
+	).toBeTruthy();
 });
 
 test('G: SSO settings are ignored', async () => {
 	const client = new TestClient(origin(G));
 	const res = await client.get('/auth/oidc/login');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 // --- H: AUTH=on, SSO settings removed, only SSO accounts ---
@@ -399,8 +401,8 @@ test('H: refuses to start instead of opening setup', async () => {
 	} catch {
 		// Expected: the process exits before its health check passes
 	}
-	assert(!started, 'Server should refuse to start');
-	assertStringIncludes(getServerOutput(H), LOCKED_OUT_ERROR);
+	expect(!started, 'Server should refuse to start').toBeTruthy();
+	expect(getServerOutput(H)).toContain(LOCKED_OUT_ERROR);
 });
 
 // --- I: concurrent first-run setup submissions ---
@@ -413,7 +415,7 @@ test('I: two setup submissions at once create only one account', async () => {
 		createUser(clients[1], 'second', 'password123', origin(I))
 	]);
 
-	assertEquals(localAccountCount(I), 1, 'Only one password account may exist');
+	expect(localAccountCount(I), 'Only one password account may exist').toStrictEqual(1);
 	const signedIn = clients.filter((c) => c.getCookie('session') !== undefined);
-	assertEquals(signedIn.length, 1, 'Only the winning submission should be signed in');
+	expect(signedIn.length, 'Only the winning submission should be signed in').toStrictEqual(1);
 });

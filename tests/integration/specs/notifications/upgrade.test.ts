@@ -2,10 +2,9 @@
  * Upgrade notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -259,41 +258,43 @@ function makeSonarrLog(overrides: Partial<UpgradeJobLog> = {}): UpgradeJobLog {
 // =========================================================================
 
 test('type includes status', () => {
-	assertEquals(upgrade({ log: makeLog({ status: 'success' }) }).type, 'upgrade.success');
-	assertEquals(upgrade({ log: makeLog({ status: 'failed' }) }).type, 'upgrade.failed');
-	assertEquals(upgrade({ log: makeLog({ status: 'partial' }) }).type, 'upgrade.partial');
-	assertEquals(upgrade({ log: makeLog({ status: 'skipped' }) }).type, 'upgrade.skipped');
+	expect(upgrade({ log: makeLog({ status: 'success' }) }).type).toStrictEqual('upgrade.success');
+	expect(upgrade({ log: makeLog({ status: 'failed' }) }).type).toStrictEqual('upgrade.failed');
+	expect(upgrade({ log: makeLog({ status: 'partial' }) }).type).toStrictEqual('upgrade.partial');
+	expect(upgrade({ log: makeLog({ status: 'skipped' }) }).type).toStrictEqual('upgrade.skipped');
 });
 
 test('severity maps correctly', () => {
-	assertEquals(upgrade({ log: makeLog({ status: 'success' }) }).severity, 'success');
-	assertEquals(upgrade({ log: makeLog({ status: 'failed' }) }).severity, 'error');
-	assertEquals(upgrade({ log: makeLog({ status: 'partial' }) }).severity, 'warning');
-	assertEquals(upgrade({ log: makeLog({ status: 'skipped' }) }).severity, 'info');
+	expect(upgrade({ log: makeLog({ status: 'success' }) }).severity).toStrictEqual('success');
+	expect(upgrade({ log: makeLog({ status: 'failed' }) }).severity).toStrictEqual('error');
+	expect(upgrade({ log: makeLog({ status: 'partial' }) }).severity).toStrictEqual('warning');
+	expect(upgrade({ log: makeLog({ status: 'skipped' }) }).severity).toStrictEqual('info');
 });
 
 test('title includes instance name', () => {
-	assertEquals(upgrade({ log: makeLog() }).title.includes('Movies'), true);
+	expect(upgrade({ log: makeLog() }).title.includes('Movies')).toStrictEqual(true);
 });
 
 test('manual flag changes title', () => {
-	assertEquals(upgrade({ log: makeLog(), manual: false }).title.includes('Automatic'), true);
-	assertEquals(upgrade({ log: makeLog(), manual: true }).title.includes('Manual'), true);
+	expect(upgrade({ log: makeLog(), manual: false }).title.includes('Automatic')).toStrictEqual(
+		true
+	);
+	expect(upgrade({ log: makeLog(), manual: true }).title.includes('Manual')).toStrictEqual(true);
 });
 
 test('message includes upgrade count', () => {
-	assertEquals(upgrade({ log: makeLog() }).message.includes('2 upgrade'), true);
+	expect(upgrade({ log: makeLog() }).message.includes('2 upgrade')).toStrictEqual(true);
 });
 
 test('stats section has filter, selector, upgrades, funnel', () => {
 	const n = upgrade({ log: makeLog() });
 	const stats = n.blocks?.find((b) => b.kind === 'section' && b.title === 'Stats');
-	assertExists(stats);
+	expect(stats).not.toBeOneOf([null, undefined]);
 	if (stats?.kind === 'section') {
-		assertEquals(stats.content.includes('Quality Upgrade'), true);
-		assertEquals(stats.content.includes('Random'), true);
-		assertEquals(stats.content.includes('2/3'), true);
-		assertEquals(stats.content.includes('847 library'), true);
+		expect(stats.content.includes('Quality Upgrade')).toStrictEqual(true);
+		expect(stats.content.includes('Random')).toStrictEqual(true);
+		expect(stats.content.includes('2/3')).toStrictEqual(true);
+		expect(stats.content.includes('847 library')).toStrictEqual(true);
 	}
 });
 
@@ -301,7 +302,7 @@ test('dry run shows in stats', () => {
 	const log = makeLog({ config: { cron: '', filterMode: '', selectedFilter: '', dryRun: true } });
 	const stats = upgrade({ log }).blocks?.find((b) => b.kind === 'section' && b.title === 'Stats');
 	if (stats?.kind === 'section') {
-		assertEquals(stats.content.includes('Dry Run'), true);
+		expect(stats.content.includes('Dry Run')).toStrictEqual(true);
 	}
 });
 
@@ -309,7 +310,7 @@ test('only items with upgrades get sections', () => {
 	const items = upgrade({ log: makeLog() }).blocks?.filter(
 		(b) => b.kind === 'section' && b.title !== 'Stats'
 	);
-	assertEquals(items!.length, 2);
+	expect(items!.length).toStrictEqual(2);
 });
 
 test('item sections have imageUrl', () => {
@@ -317,7 +318,7 @@ test('item sections have imageUrl', () => {
 		(b) => b.kind === 'section' && b.title !== 'Stats'
 	);
 	for (const item of items!) {
-		if (item.kind === 'section') assertExists(item.imageUrl);
+		if (item.kind === 'section') expect(item.imageUrl).not.toBeOneOf([null, undefined]);
 	}
 });
 
@@ -325,11 +326,11 @@ test('item content has release, scores, and formats', () => {
 	const n = upgrade({ log: makeLog() });
 	const section = n.blocks?.find((b) => b.kind === 'section' && b.title === 'Interstellar');
 	if (section?.kind === 'section') {
-		assertEquals(section.content.includes('Interstellar.2014.2160p'), true);
-		assertEquals(section.content.includes('Current: 72'), true);
-		assertEquals(section.content.includes('Upgrade: 145'), true);
-		assertEquals(section.content.includes('Bluray'), true);
-		assertEquals(section.content.includes('Remux'), true);
+		expect(section.content.includes('Interstellar.2014.2160p')).toStrictEqual(true);
+		expect(section.content.includes('Current: 72')).toStrictEqual(true);
+		expect(section.content.includes('Upgrade: 145')).toStrictEqual(true);
+		expect(section.content.includes('Bluray')).toStrictEqual(true);
+		expect(section.content.includes('Remux')).toStrictEqual(true);
 	}
 });
 
@@ -337,7 +338,7 @@ test('no items produces stats-only notification', () => {
 	const log = makeLog({
 		selection: { method: 'random', requestedCount: 5, actualCount: 0, items: [] }
 	});
-	assertEquals(upgrade({ log }).message.includes('No items to search'), true);
+	expect(upgrade({ log }).message.includes('No items to search')).toStrictEqual(true);
 });
 
 test('errors appear as field block', () => {
@@ -346,16 +347,16 @@ test('errors appear as field block', () => {
 		results: { searchesTriggered: 5, successful: 2, failed: 1, errors: ['Failed: timeout'] }
 	});
 	const err = upgrade({ log }).blocks?.find((b) => b.kind === 'field' && b.label === 'Errors');
-	assertExists(err);
+	expect(err).not.toBeOneOf([null, undefined]);
 });
 
 test('sonarr: flattens series into per-season sections', () => {
 	const n = upgrade({ log: makeSonarrLog() });
 	const items = n.blocks?.filter((b) => b.kind === 'section' && b.title !== 'Stats');
-	assertEquals(items!.length, 2);
+	expect(items!.length).toStrictEqual(2);
 	const titles = items!.map((b) => (b as { title: string }).title);
-	assertEquals(titles.includes('Breaking Bad - Season 3'), true);
-	assertEquals(titles.includes('Breaking Bad - Season 4'), true);
+	expect(titles.includes('Breaking Bad - Season 3')).toStrictEqual(true);
+	expect(titles.includes('Breaking Bad - Season 4')).toStrictEqual(true);
 });
 
 test('sonarr: season sections carry imageUrl from parent series', () => {
@@ -363,8 +364,8 @@ test('sonarr: season sections carry imageUrl from parent series', () => {
 	const items = n.blocks?.filter((b) => b.kind === 'section' && b.title !== 'Stats');
 	for (const item of items!) {
 		if (item.kind === 'section') {
-			assertExists(item.imageUrl);
-			assertEquals(item.imageUrl!.includes('tmdb.org'), true);
+			expect(item.imageUrl).not.toBeOneOf([null, undefined]);
+			expect(item.imageUrl!.includes('tmdb.org')).toStrictEqual(true);
 		}
 	}
 });
@@ -372,10 +373,10 @@ test('sonarr: season sections carry imageUrl from parent series', () => {
 test('sonarr: season content includes episode count and score', () => {
 	const n = upgrade({ log: makeSonarrLog() });
 	const s3 = n.blocks?.find((b) => b.kind === 'section' && b.title === 'Breaking Bad - Season 3');
-	assertExists(s3);
+	expect(s3).not.toBeOneOf([null, undefined]);
 	if (s3?.kind === 'section') {
-		assertEquals(s3.content.includes('120'), true);
-		assertEquals(s3.content.includes('Remux'), true);
+		expect(s3.content.includes('120')).toStrictEqual(true);
+		expect(s3.content.includes('Remux')).toStrictEqual(true);
 	}
 });
 
@@ -392,7 +393,7 @@ test('discord: summary embed has success color', async () => {
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.SUCCESS);
 });
 
 test('discord: item embeds have poster thumbnails', async () => {
@@ -405,7 +406,7 @@ test('discord: item embeds have poster thumbnails', async () => {
 	await notifier.notify(upgrade({ log: makeLog() }));
 
 	const withThumbnails = getAllEmbeds().filter((e) => e.thumbnail);
-	assertEquals(withThumbnails.length, 2);
+	expect(withThumbnails.length).toStrictEqual(2);
 });
 
 test('discord: item embeds have titles matching movie names', async () => {
@@ -420,8 +421,8 @@ test('discord: item embeds have titles matching movie names', async () => {
 	const titles = getAllEmbeds()
 		.map((e) => e.title)
 		.filter(Boolean);
-	assertEquals(titles.includes('Interstellar'), true);
-	assertEquals(titles.includes('The Grand Budapest Hotel'), true);
+	expect(titles.includes('Interstellar')).toStrictEqual(true);
+	expect(titles.includes('The Grand Budapest Hotel')).toStrictEqual(true);
 });
 
 test('discord: failed status uses error color', async () => {
@@ -433,7 +434,7 @@ test('discord: failed status uses error color', async () => {
 	});
 	await notifier.notify(upgrade({ log: makeLog({ status: 'failed' }) }));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.ERROR);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 // =========================================================================
@@ -449,8 +450,8 @@ test('ntfy: success maps to priority 3', async () => {
 	await notifier.notify(upgrade({ log: makeLog() }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
-	assertEquals(payload?.tags, ['white_check_mark']);
+	expect(payload?.priority).toStrictEqual(3);
+	expect(payload?.tags).toStrictEqual(['white_check_mark']);
 });
 
 test('ntfy: warning maps to priority 4', async () => {
@@ -462,8 +463,8 @@ test('ntfy: warning maps to priority 4', async () => {
 	await notifier.notify(upgrade({ log: makeLog({ status: 'partial' }) }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 4);
-	assertEquals(payload?.tags, ['warning']);
+	expect(payload?.priority).toStrictEqual(4);
+	expect(payload?.tags).toStrictEqual(['warning']);
 });
 
 test('ntfy: message includes title but omits section blocks', async () => {
@@ -475,8 +476,8 @@ test('ntfy: message includes title but omits section blocks', async () => {
 	await notifier.notify(upgrade({ log: makeLog() }));
 
 	const message = (captured[0]?.body as Record<string, unknown>)?.message as string;
-	assertEquals(message.includes('upgrade'), true);
-	assertEquals(message.includes('Interstellar.2014.2160p'), false);
+	expect(message.includes('upgrade')).toStrictEqual(true);
+	expect(message.includes('Interstellar.2014.2160p')).toStrictEqual(false);
 });
 
 // =========================================================================
@@ -491,12 +492,12 @@ test('webhook: sends full notification with all blocks', async () => {
 	await notifier.notify(upgrade({ log: makeLog() }));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'upgrade.success');
-	assertEquals(payload?.severity, 'success');
+	expect(payload?.type).toStrictEqual('upgrade.success');
+	expect(payload?.severity).toStrictEqual('success');
 	const blocks = payload?.blocks as { kind: string; imageUrl?: string }[];
-	assertExists(blocks);
+	expect(blocks).not.toBeOneOf([null, undefined]);
 	const sections = blocks.filter((b) => b.kind === 'section' && b.imageUrl);
-	assertEquals(sections.length, 2);
+	expect(sections.length).toStrictEqual(2);
 });
 
 // =========================================================================
@@ -515,7 +516,7 @@ test('telegram: success has ✅ prefix', async () => {
 	await notifier.notify(upgrade({ log: makeLog() }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2705'), true);
+	expect(text.startsWith('\u2705')).toStrictEqual(true);
 });
 
 test('telegram: failed has ❌ prefix', async () => {
@@ -528,7 +529,7 @@ test('telegram: failed has ❌ prefix', async () => {
 	await notifier.notify(upgrade({ log: makeLog({ status: 'failed' }) }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 test('telegram: message includes title but omits section blocks', async () => {
@@ -541,9 +542,9 @@ test('telegram: message includes title but omits section blocks', async () => {
 	await notifier.notify(upgrade({ log: makeLog() }));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.includes('Movies'), true);
+	expect(text.includes('Movies')).toStrictEqual(true);
 	// Section content (release filenames) should not appear
-	assertEquals(text.includes('Interstellar.2014.2160p'), false);
+	expect(text.includes('Interstellar.2014.2160p')).toStrictEqual(false);
 });
 
 // =========================================================================

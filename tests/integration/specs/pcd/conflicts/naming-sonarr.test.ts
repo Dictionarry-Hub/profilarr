@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists, assertStringIncludes } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -123,9 +122,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		assertLatestHistory(ctx, multiOp, 'applied');
 
 		const row = assertSonarrNaming(ctx, 'Split Conflict');
-		assertEquals(row.multi_episode_style, multiEpisodeStyleToDb('range'));
-		assertEquals(
-			row.standard_episode_format,
+		expect(row.multi_episode_style).toStrictEqual(multiEpisodeStyleToDb('range'));
+		expect(row.standard_episode_format).toStrictEqual(
 			strategy === 'override'
 				? 'S{season}E{episode}'
 				: '{Series Title} - upstream S{season:00}E{episode:00}'
@@ -243,9 +241,9 @@ test('conflict page field details follow upstream rename', async () => {
 	await compilePcd(ctx);
 
 	const response = await ctx.client.get(`/databases/${ctx.dbId}/conflicts`);
-	assertEquals(response.status, 200);
+	expect(response.status).toStrictEqual(200);
 	const body = await response.text();
-	assertStringIncludes(body, 'Upstream Naming');
+	expect(body).toContain('Upstream Naming');
 });
 
 /**
@@ -304,14 +302,12 @@ test('create duplicate conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
 
 		const row = assertSonarrNaming(ctx, 'Create Conflict');
-		assertEquals(
-			row.standard_episode_format,
+		expect(row.standard_episode_format).toStrictEqual(
 			strategy === 'override'
 				? 'S{season}E{episode}'
 				: VALID_SONARR_NAMING_DEFAULTS.standardEpisodeFormat
 		);
-		assertEquals(
-			row.multi_episode_style,
+		expect(row.multi_episode_style).toStrictEqual(
 			strategy === 'override' ? multiEpisodeStyleToDb('range') : multiEpisodeStyleToDb('extend')
 		);
 	}
@@ -357,7 +353,7 @@ test('delete applies cleanly after upstream non-name field change', async () => 
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoSonarrNaming(ctx, 'Delete Conflict');
 	}
@@ -391,7 +387,7 @@ test('delete missing target auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoSonarrNaming(ctx, 'Already Deleted');
 	}
@@ -432,7 +428,7 @@ function opsSince(ctx: PcdTestContext, checkpoint: number): OpRow[] {
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user ${operation} op`);
+	expect(op, `Expected a user ${operation} op`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -444,7 +440,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -461,19 +457,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assert(op.superseded_by_op_id !== null, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(
+		op.superseded_by_op_id !== null,
+		'Expected override to link a replacement op'
+	).toBeTruthy();
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -484,9 +483,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -503,7 +502,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -512,13 +511,13 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 
 function assertSonarrNaming(ctx: PcdTestContext, name: string): SonarrNamingRow {
 	const row = compiledSonarrNaming(ctx).find((r) => r.name === name);
-	assertExists(row, `Expected sonarr naming ${name}`);
+	expect(row, `Expected sonarr naming ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoSonarrNaming(ctx: PcdTestContext, name: string): void {
 	const row = compiledSonarrNaming(ctx).find((r) => r.name === name);
-	assertEquals(row, undefined);
+	expect(row).toStrictEqual(undefined);
 }
 
 function compiledSonarrNaming(ctx: PcdTestContext): SonarrNamingRow[] {

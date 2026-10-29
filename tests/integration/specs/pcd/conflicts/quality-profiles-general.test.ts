@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -104,13 +103,13 @@ test('tags-only update applies after upstream description change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['tags']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(row.description, 'Upstream description');
-		assertEquals(compiledQualityProfileTags(ctx, PROFILE_NAME), ['LocalTag']);
+		expect(row.description).toStrictEqual('Upstream description');
+		expect(compiledQualityProfileTags(ctx, PROFILE_NAME)).toStrictEqual(['LocalTag']);
 	}
 });
 
@@ -158,12 +157,12 @@ test('local rename applies after upstream description change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['name']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfile(ctx, 'General Profile Local');
-		assertEquals(row.description, 'Upstream description');
+		expect(row.description).toStrictEqual('Upstream description');
 		assertNoQualityProfile(ctx, PROFILE_NAME);
 	}
 });
@@ -206,13 +205,13 @@ test('description update applies after upstream adds a tag', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['description']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(row.description, 'Local description');
-		assertEquals(compiledQualityProfileTags(ctx, PROFILE_NAME), ['UpstreamTag']);
+		expect(row.description).toStrictEqual('Local description');
+		expect(compiledQualityProfileTags(ctx, PROFILE_NAME)).toStrictEqual(['UpstreamTag']);
 	}
 });
 
@@ -260,12 +259,12 @@ test('matching upstream description value auto-aligns user op', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['description']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(row.description, 'Shared description');
+		expect(row.description).toStrictEqual('Shared description');
 	}
 });
 
@@ -302,7 +301,7 @@ test('delete missing target via upstream delete auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 		assertNoQualityProfile(ctx, PROFILE_NAME);
@@ -343,7 +342,7 @@ test('delete missing target via upstream rename auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 		assertQualityProfile(ctx, 'General Profile Upstream');
@@ -441,7 +440,9 @@ test('description update after upstream rename resolves by strategy', async () =
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfile(ctx, 'General Profile Upstream');
-		assertEquals(row.description, strategy === 'override' ? 'Local description' : 'Original');
+		expect(row.description).toStrictEqual(
+			strategy === 'override' ? 'Local description' : 'Original'
+		);
 		assertNoQualityProfile(ctx, PROFILE_NAME);
 	}
 });
@@ -493,15 +494,14 @@ test('rename survives when same-save description conflicts', async () => {
 
 		const ops = opsSince(ctx, checkpoint);
 		const renameOp = firstOpForChangedFields(ops, ['name']);
-		assertEquals(renameOp.state, 'published');
+		expect(renameOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, renameOp, 'applied');
 
 		const descriptionOp = firstOpForChangedFields(ops, ['description']);
 		assertStrategyOutcome(ctx, descriptionOp, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfile(ctx, 'General Profile Local');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local description' : 'Upstream description'
 		);
 		assertNoQualityProfile(ctx, PROFILE_NAME);
@@ -554,8 +554,7 @@ test('description conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local description' : 'Upstream description'
 		);
 	}
@@ -601,8 +600,7 @@ test('language conflict resolves by strategy', async () => {
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['language']);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledQualityProfileLanguage(ctx, PROFILE_NAME),
+		expect(compiledQualityProfileLanguage(ctx, PROFILE_NAME)).toStrictEqual(
 			strategy === 'override' ? 'French' : 'German'
 		);
 	}
@@ -646,10 +644,13 @@ test('different tag additions merge without conflict', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['tags']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledQualityProfileTags(ctx, PROFILE_NAME), ['LocalTag', 'UpstreamTag']);
+		expect(compiledQualityProfileTags(ctx, PROFILE_NAME)).toStrictEqual([
+			'LocalTag',
+			'UpstreamTag'
+		]);
 	}
 });
 
@@ -701,18 +702,17 @@ test('tag update survives when same-save description conflicts', async () => {
 
 		const ops = opsSince(ctx, checkpoint);
 		const tagsOp = firstOpForChangedFields(ops, ['tags']);
-		assertEquals(tagsOp.state, 'published');
+		expect(tagsOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, tagsOp, 'applied');
 
 		const descriptionOp = firstOpForChangedFields(ops, ['description']);
 		assertStrategyOutcome(ctx, descriptionOp, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local description' : 'Upstream description'
 		);
-		assertEquals(compiledQualityProfileTags(ctx, PROFILE_NAME), ['LocalTag']);
+		expect(compiledQualityProfileTags(ctx, PROFILE_NAME)).toStrictEqual(['LocalTag']);
 	}
 });
 
@@ -759,8 +759,7 @@ test('create duplicate conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
 
 		const row = assertQualityProfile(ctx, 'Create Duplicate');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local create description' : 'Upstream create description'
 		);
 	}
@@ -808,7 +807,7 @@ test('local update conflicts when upstream deletes row', async () => {
 
 		if (strategy === 'override') {
 			const row = assertQualityProfile(ctx, 'Update Deleted');
-			assertEquals(row.description, 'Local deleted description');
+			expect(row.description).toStrictEqual('Local deleted description');
 		} else {
 			assertNoQualityProfile(ctx, 'Update Deleted');
 		}
@@ -855,7 +854,7 @@ test('delete applies after upstream description change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 		assertNoQualityProfile(ctx, PROFILE_NAME);
@@ -903,13 +902,13 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user op for operation ${operation}`);
+	expect(op, `Expected a user op for operation ${operation}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -926,19 +925,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assertExists(op.superseded_by_op_id, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(op.superseded_by_op_id, 'Expected override to link a replacement op').not.toBeOneOf([
+		null,
+		undefined
+	]);
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -949,9 +951,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -968,7 +970,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -991,7 +993,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -999,13 +1001,13 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 
 function assertQualityProfile(ctx: PcdTestContext, name: string): QualityProfileRow {
 	const row = compiledQualityProfiles(ctx).find((profile) => profile.name === name);
-	assertExists(row, `Expected quality profile ${name}`);
+	expect(row, `Expected quality profile ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoQualityProfile(ctx: PcdTestContext, name: string): void {
 	const row = compiledQualityProfiles(ctx).find((profile) => profile.name === name);
-	assertEquals(row, undefined, `Expected no quality profile ${name}`);
+	expect(row, `Expected no quality profile ${name}`).toStrictEqual(undefined);
 }
 
 function compiledQualityProfiles(ctx: PcdTestContext): QualityProfileRow[] {

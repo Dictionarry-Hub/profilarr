@@ -3,57 +3,54 @@
  * security page, and for telling SSO accounts apart from password accounts.
  */
 
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { Database } from '#db/sqlite.ts';
 import { isOidcUsername, validateNewLocalAccount } from '#utils/auth/loginOptions.ts';
 
 // --- validateNewLocalAccount ---
 
 test('validateNewLocalAccount: valid account passes', () => {
-	assertEquals(validateNewLocalAccount('admin', 'password123', 'password123'), null);
+	expect(validateNewLocalAccount('admin', 'password123', 'password123')).toStrictEqual(null);
 });
 
 test('validateNewLocalAccount: username is required', () => {
-	assertEquals(validateNewLocalAccount('', 'password123', 'password123'), 'Username is required');
+	expect(validateNewLocalAccount('', 'password123', 'password123')).toStrictEqual(
+		'Username is required'
+	);
 });
 
 test('validateNewLocalAccount: username must be at least 3 characters', () => {
-	assertEquals(
-		validateNewLocalAccount('ab', 'password123', 'password123'),
+	expect(validateNewLocalAccount('ab', 'password123', 'password123')).toStrictEqual(
 		'Username must be at least 3 characters'
 	);
 });
 
 test('validateNewLocalAccount: password is required', () => {
-	assertEquals(validateNewLocalAccount('admin', '', ''), 'Password is required');
+	expect(validateNewLocalAccount('admin', '', '')).toStrictEqual('Password is required');
 });
 
 test('validateNewLocalAccount: password must be at least 8 characters', () => {
-	assertEquals(
-		validateNewLocalAccount('admin', 'short', 'short'),
+	expect(validateNewLocalAccount('admin', 'short', 'short')).toStrictEqual(
 		'Password must be at least 8 characters'
 	);
 });
 
 test('validateNewLocalAccount: passwords must match', () => {
-	assertEquals(
-		validateNewLocalAccount('admin', 'password123', 'password124'),
+	expect(validateNewLocalAccount('admin', 'password123', 'password124')).toStrictEqual(
 		'Passwords do not match'
 	);
 });
 
 for (const username of ['oidc:admin', 'OIDC:admin', 'Oidc:admin', 'oidc:']) {
 	test(`validateNewLocalAccount: rejects reserved username '${username}'`, () => {
-		assertEquals(
-			validateNewLocalAccount(username, 'password123', 'password123'),
+		expect(validateNewLocalAccount(username, 'password123', 'password123')).toStrictEqual(
 			"Usernames starting with 'oidc:' are reserved for SSO accounts"
 		);
 	});
 }
 
 test('validateNewLocalAccount: oidc without a colon is allowed', () => {
-	assertEquals(validateNewLocalAccount('oidcadmin', 'password123', 'password123'), null);
+	expect(validateNewLocalAccount('oidcadmin', 'password123', 'password123')).toStrictEqual(null);
 });
 
 // --- isOidcUsername ---
@@ -71,10 +68,12 @@ const SAMPLES = [
 ];
 
 test('isOidcUsername: matches the oidc: prefix ignoring case', () => {
-	assertEquals(
-		SAMPLES.filter((name) => isOidcUsername(name)),
-		['oidc:abc', 'OIDC:abc', 'Oidc:abc', 'oidc:']
-	);
+	expect(SAMPLES.filter((name) => isOidcUsername(name))).toStrictEqual([
+		'oidc:abc',
+		'OIDC:abc',
+		'Oidc:abc',
+		'oidc:'
+	]);
 });
 
 test('isOidcUsername agrees with the SQL used by usersQueries.existsLocal', () => {
@@ -90,10 +89,7 @@ test('isOidcUsername agrees with the SQL used by usersQueries.existsLocal', () =
 			.all<{ username: string }>()
 			.map((r) => r.username);
 
-		assertEquals(
-			local,
-			SAMPLES.filter((name) => !isOidcUsername(name))
-		);
+		expect(local).toStrictEqual(SAMPLES.filter((name) => !isOidcUsername(name)));
 	} finally {
 		db.close();
 	}

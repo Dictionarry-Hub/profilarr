@@ -8,10 +8,9 @@
  */
 
 import { mkdir, realpath, stat, writeFile } from 'node:fs/promises';
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import {
 	compilePcd,
@@ -104,7 +103,7 @@ test('ordinary base op still applies', async () => {
 	const [opId] = seedBase(s.ctx, [`INSERT INTO tags (name) VALUES ('control tag');`]);
 	await compilePcd(s.ctx);
 
-	assertEquals(latestOpHistory(s, opId)?.status, 'applied');
+	expect(latestOpHistory(s, opId)?.status).toStrictEqual('applied');
 });
 
 /**
@@ -126,11 +125,10 @@ for (const form of ATTACH_FORMS) {
 		await compilePcd(s.ctx);
 
 		assertBlockedByAttachLimit(s, opId);
-		assertEquals(
+		expect(
 			appTableExists(s, s.marker),
-			false,
 			`${form.name} created ${s.marker} in the app database`
-		);
+		).toStrictEqual(false);
 	});
 }
 
@@ -162,10 +160,10 @@ test('base op cannot copy app database values into the cache', async () => {
 	assertBlockedByAttachLimit(s, opId);
 	const response = await s.ctx.client.get(`/regular-expressions/${s.ctx.dbId}`);
 	const body = await response.text();
-	assert(
+	expect(
 		!body.includes(`leaked-${uuid}`),
 		'The regex list page shows a value copied from the app database'
-	);
+	).toBeTruthy();
 });
 
 /**
@@ -188,7 +186,7 @@ test('base op cannot create a new database file with ATTACH', async () => {
 	await compilePcd(s.ctx);
 
 	assertBlockedByAttachLimit(s, opId);
-	assertEquals(await fileExists(target), false, `ATTACH created ${target}`);
+	expect(await fileExists(target), `ATTACH created ${target}`).toStrictEqual(false);
 });
 
 /**
@@ -209,7 +207,7 @@ test('base op cannot write a copy of the cache with VACUUM INTO', async () => {
 	await compilePcd(s.ctx);
 
 	assertBlockedByAttachLimit(s, opId);
-	assertEquals(await fileExists(target), false, `VACUUM INTO wrote ${target}`);
+	expect(await fileExists(target), `VACUUM INTO wrote ${target}`).toStrictEqual(false);
 });
 
 /**
@@ -246,7 +244,7 @@ test('schema file cannot write to the app database', async () => {
 	await writeFile(`${s.ctx.pcdPath}/deps/schema/ops/1.attach.sql`, plainAttach(s));
 	await compilePcd(s.ctx);
 
-	assertEquals(appTableExists(s, s.marker), false, `schema file created ${s.marker}`);
+	expect(appTableExists(s, s.marker), `schema file created ${s.marker}`).toStrictEqual(false);
 });
 
 /**
@@ -265,7 +263,7 @@ test('tweak file cannot write to the app database', async () => {
 	await writeFile(`${s.ctx.pcdPath}/tweaks/1.attach.sql`, plainAttach(s));
 	await compilePcd(s.ctx);
 
-	assertEquals(appTableExists(s, s.marker), false, `tweak file created ${s.marker}`);
+	expect(appTableExists(s, s.marker), `tweak file created ${s.marker}`).toStrictEqual(false);
 });
 
 /**
@@ -285,7 +283,7 @@ test('user op cannot write to the app database', async () => {
 	await compilePcd(s.ctx);
 
 	assertBlockedByAttachLimit(s, opId);
-	assertEquals(appTableExists(s, s.marker), false, `user op created ${s.marker}`);
+	expect(appTableExists(s, s.marker), `user op created ${s.marker}`).toStrictEqual(false);
 });
 
 async function scenario(label: string, uuid?: string): Promise<Scenario> {
@@ -336,11 +334,11 @@ async function fileExists(path: string): Promise<boolean> {
 /** Proves the op ran and SQLite refused the attach, rather than the op never running. */
 function assertBlockedByAttachLimit(s: Scenario, opId: number): void {
 	const history = latestOpHistory(s, opId);
-	assertEquals(history?.status, 'error', `Expected op ${opId} to be recorded as an error`);
-	assert(
+	expect(history?.status, `Expected op ${opId} to be recorded as an error`).toStrictEqual('error');
+	expect(
 		history?.error?.includes('too many attached databases'),
 		`Expected the attach limit error, got ${history?.error ?? 'no error'}`
-	);
+	).toBeTruthy();
 }
 
 function latestOpHistory(

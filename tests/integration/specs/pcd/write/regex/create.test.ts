@@ -2,9 +2,8 @@
  * PCD write tests: regex create.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -66,18 +65,18 @@ test('minimal regex emits one create op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
-	assertEquals(parseMetadata(op).operation, 'create');
-	assertEquals(parseMetadata(op).entity, 'regular_expression');
-	assertEquals(parseMetadata(op).name, 'Created Regex');
+	expect(parseMetadata(op).operation).toStrictEqual('create');
+	expect(parseMetadata(op).entity).toStrictEqual('regular_expression');
+	expect(parseMetadata(op).name).toStrictEqual('Created Regex');
 	const desired = parseDesiredState(op);
-	assertEquals(desired.name, 'Created Regex');
-	assertEquals(desired.pattern, '\\bcreated\\b');
-	assertEquals(desired.description, null);
-	assertEquals(desired.regex101_id, null);
-	assertEquals(desired.tags, []);
-	assert(/insert into "?regular_expressions"?/i.test(normalizeSql(op.sql)));
+	expect(desired.name).toStrictEqual('Created Regex');
+	expect(desired.pattern).toStrictEqual('\\bcreated\\b');
+	expect(desired.description).toStrictEqual(null);
+	expect(desired.regex101_id).toStrictEqual(null);
+	expect(desired.tags).toStrictEqual([]);
+	expect(/insert into "?regular_expressions"?/i.test(normalizeSql(op.sql))).toBeTruthy();
 });
 
 /**
@@ -117,17 +116,17 @@ test('details and tags are persisted in one create op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const desired = parseDesiredState(op);
-	assertEquals(desired.description, 'Detailed description');
-	assertEquals(desired.regex101_id, 'abc123');
-	assertEquals(desired.tags, ['Anime', 'HDR']);
+	expect(desired.description).toStrictEqual('Detailed description');
+	expect(desired.regex101_id).toStrictEqual('abc123');
+	expect(desired.tags).toStrictEqual(['Anime', 'HDR']);
 	const sql = normalizeSql(op.sql);
-	assert(sql.includes("'Anime'"));
-	assert(sql.includes("'HDR'"));
-	assertEquals(countOccurrences(sql, `'Detailed Regex', 'Anime'`), 1);
-	assertEquals(countOccurrences(sql, `'Detailed Regex', 'HDR'`), 1);
+	expect(sql.includes("'Anime'")).toBeTruthy();
+	expect(sql.includes("'HDR'")).toBeTruthy();
+	expect(countOccurrences(sql, `'Detailed Regex', 'Anime'`)).toStrictEqual(1);
+	expect(countOccurrences(sql, `'Detailed Regex', 'HDR'`)).toStrictEqual(1);
 });
 
 /**
@@ -161,7 +160,7 @@ test('duplicate name fails without writing ops', async () => {
 	});
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 function countOccurrences(value: string, search: string): number {

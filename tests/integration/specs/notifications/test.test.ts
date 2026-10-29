@@ -2,10 +2,9 @@
  * Test notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -63,21 +62,21 @@ afterAll(async () => {
 // =========================================================================
 
 test('type is test', () => {
-	assertEquals(testDef().type, 'test');
+	expect(testDef().type).toStrictEqual('test');
 });
 
 test('severity is info', () => {
-	assertEquals(testDef().severity, 'info');
+	expect(testDef().severity).toStrictEqual('info');
 });
 
 test('has title and message', () => {
 	const n = testDef();
-	assertExists(n.title);
-	assertExists(n.message);
+	expect(n.title).not.toBeOneOf([null, undefined]);
+	expect(n.message).not.toBeOneOf([null, undefined]);
 });
 
 test('has no blocks', () => {
-	assertEquals(testDef().blocks, undefined);
+	expect(testDef().blocks).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -93,11 +92,11 @@ test('discord: renders single embed with info color', async () => {
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured.length, 1);
+	expect(captured.length).toStrictEqual(1);
 	const embed = (captured[0]?.body as { embeds?: Record<string, unknown>[] })?.embeds?.[0];
-	assertEquals(embed?.color, Colors.INFO);
-	assertEquals(embed?.title, testDef().title);
-	assertEquals(embed?.description, testDef().message);
+	expect(embed?.color).toStrictEqual(Colors.INFO);
+	expect(embed?.title).toStrictEqual(testDef().title);
+	expect(embed?.description).toStrictEqual(testDef().message);
 });
 
 // =========================================================================
@@ -113,8 +112,10 @@ test('ntfy: sends title and message', async () => {
 	await notifier.notify(testDef());
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.title, 'Test Notification');
-	assertEquals((payload?.message as string).includes('test notification from Profilarr'), true);
+	expect(payload?.title).toStrictEqual('Test Notification');
+	expect((payload?.message as string).includes('test notification from Profilarr')).toStrictEqual(
+		true
+	);
 });
 
 test('ntfy: info severity maps to priority 3 and information_source tag', async () => {
@@ -126,8 +127,8 @@ test('ntfy: info severity maps to priority 3 and information_source tag', async 
 	await notifier.notify(testDef());
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
-	assertEquals(payload?.tags, ['information_source']);
+	expect(payload?.priority).toStrictEqual(3);
+	expect(payload?.tags).toStrictEqual(['information_source']);
 });
 
 test('ntfy: POSTs to server root with topic in payload', async () => {
@@ -138,9 +139,9 @@ test('ntfy: POSTs to server root with topic in payload', async () => {
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured[0]?.method, 'POST');
-	assertEquals(captured[0]?.path, '/');
-	assertEquals((captured[0]?.body as Record<string, unknown>)?.topic, 'test-topic');
+	expect(captured[0]?.method).toStrictEqual('POST');
+	expect(captured[0]?.path).toStrictEqual('/');
+	expect((captured[0]?.body as Record<string, unknown>)?.topic).toStrictEqual('test-topic');
 });
 
 test('ntfy: sends Authorization header when access_token configured', async () => {
@@ -152,7 +153,7 @@ test('ntfy: sends Authorization header when access_token configured', async () =
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured[0]?.headers['authorization'], 'Bearer tk_abc123');
+	expect(captured[0]?.headers['authorization']).toStrictEqual('Bearer tk_abc123');
 });
 
 test('ntfy: no Authorization header when access_token absent', async () => {
@@ -163,7 +164,7 @@ test('ntfy: no Authorization header when access_token absent', async () => {
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured[0]?.headers['authorization'], undefined);
+	expect(captured[0]?.headers['authorization']).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -178,10 +179,10 @@ test('webhook: sends raw Notification as JSON', async () => {
 	await notifier.notify(testDef());
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'test');
-	assertEquals(payload?.severity, 'info');
-	assertEquals(payload?.title, 'Test Notification');
-	assertEquals(payload?.blocks, undefined);
+	expect(payload?.type).toStrictEqual('test');
+	expect(payload?.severity).toStrictEqual('info');
+	expect(payload?.title).toStrictEqual('Test Notification');
+	expect(payload?.blocks).toStrictEqual(undefined);
 });
 
 test('webhook: POSTs with application/json content-type', async () => {
@@ -191,8 +192,8 @@ test('webhook: POSTs with application/json content-type', async () => {
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured[0]?.method, 'POST');
-	assertEquals(captured[0]?.headers['content-type'], 'application/json');
+	expect(captured[0]?.method).toStrictEqual('POST');
+	expect(captured[0]?.headers['content-type']).toStrictEqual('application/json');
 });
 
 test('webhook: sends Authorization header when auth_header configured', async () => {
@@ -203,7 +204,7 @@ test('webhook: sends Authorization header when auth_header configured', async ()
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured[0]?.headers['authorization'], 'Bearer my-secret-token');
+	expect(captured[0]?.headers['authorization']).toStrictEqual('Bearer my-secret-token');
 });
 
 test('webhook: no Authorization header when auth_header absent', async () => {
@@ -213,7 +214,7 @@ test('webhook: no Authorization header when auth_header absent', async () => {
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured[0]?.headers['authorization'], undefined);
+	expect(captured[0]?.headers['authorization']).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -231,9 +232,9 @@ test('telegram: POSTs to /bot{token}/sendMessage', async () => {
 	});
 	await notifier.notify(testDef());
 
-	assertEquals(captured.length, 1);
-	assertEquals(captured[0]?.method, 'POST');
-	assertEquals(captured[0]?.path, `/bot${MOCK_TOKEN}/sendMessage`);
+	expect(captured.length).toStrictEqual(1);
+	expect(captured[0]?.method).toStrictEqual('POST');
+	expect(captured[0]?.path).toStrictEqual(`/bot${MOCK_TOKEN}/sendMessage`);
 });
 
 test('telegram: payload has chat_id, text, and parse_mode HTML', async () => {
@@ -246,9 +247,9 @@ test('telegram: payload has chat_id, text, and parse_mode HTML', async () => {
 	await notifier.notify(testDef());
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.chat_id, '123456');
-	assertEquals(payload?.parse_mode, 'HTML');
-	assertEquals(typeof payload?.text, 'string');
+	expect(payload?.chat_id).toStrictEqual('123456');
+	expect(payload?.parse_mode).toStrictEqual('HTML');
+	expect(typeof payload?.text).toStrictEqual('string');
 });
 
 test('telegram: info severity has emoji prefix', async () => {
@@ -261,7 +262,7 @@ test('telegram: info severity has emoji prefix', async () => {
 	await notifier.notify(testDef());
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2139\uFE0F'), true);
+	expect(text.startsWith('\u2139\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: renders title in bold HTML', async () => {
@@ -274,7 +275,7 @@ test('telegram: renders title in bold HTML', async () => {
 	await notifier.notify(testDef());
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.includes(`<b>${testDef().title}</b>`), true);
+	expect(text.includes(`<b>${testDef().title}</b>`)).toStrictEqual(true);
 });
 
 // =========================================================================

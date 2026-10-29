@@ -12,13 +12,12 @@
  * other backups is enough.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { execFile } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { createUser, login } from '#integration/harness/setup.ts';
@@ -76,16 +75,16 @@ test('restoreBackup writes a sentinel pointing at the resolved archive path', as
 	);
 	// SvelteKit form actions reply with 200/303 depending on Accept negotiation.
 	// We don't depend on a specific status; we depend on the side effect.
-	assert(res.status < 400, `Expected non-error status, got ${res.status}`);
+	expect(res.status < 400, `Expected non-error status, got ${res.status}`).toBeTruthy();
 	await res.body?.cancel();
 
-	assertEquals(await exists(SENTINEL_PATH), true, 'sentinel should be written');
+	expect(await exists(SENTINEL_PATH), 'sentinel should be written').toStrictEqual(true);
 
 	const contents = (await readFile(SENTINEL_PATH, 'utf8')).trim();
-	assert(
+	expect(
 		contents.endsWith(`/backups/${BACKUP_FILENAME}`),
 		`sentinel should point at the archive (got ${contents})`
-	);
+	).toBeTruthy();
 });
 
 test('cancelRestore removes the sentinel', async () => {
@@ -99,10 +98,10 @@ test('cancelRestore removes the sentinel', async () => {
 		{},
 		{ headers: { Origin: ORIGIN } }
 	);
-	assert(res.status < 400, `Expected non-error status, got ${res.status}`);
+	expect(res.status < 400, `Expected non-error status, got ${res.status}`).toBeTruthy();
 	await res.body?.cancel();
 
-	assertEquals(await exists(SENTINEL_PATH), false, 'sentinel should be removed');
+	expect(await exists(SENTINEL_PATH), 'sentinel should be removed').toStrictEqual(false);
 });
 
 test('cancelRestore is idempotent when no sentinel exists', async () => {
@@ -114,8 +113,8 @@ test('cancelRestore is idempotent when no sentinel exists', async () => {
 		{},
 		{ headers: { Origin: ORIGIN } }
 	);
-	assert(res.status < 400, `Expected non-error status, got ${res.status}`);
+	expect(res.status < 400, `Expected non-error status, got ${res.status}`).toBeTruthy();
 	await res.body?.cancel();
 
-	assertEquals(await exists(SENTINEL_PATH), false);
+	expect(await exists(SENTINEL_PATH)).toStrictEqual(false);
 });

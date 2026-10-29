@@ -7,8 +7,7 @@
 import { Buffer } from 'node:buffer';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { describe, test } from 'vitest';
-import { assert, assertEquals, assertInstanceOf, assertRejects } from '@std/assert';
+import { describe, expect, test } from 'vitest';
 import { BaseArrClient } from '#arr/base.ts';
 import { BaseHttpClient } from '#utils/http/client.ts';
 import { HtmlResponseError, HttpError } from '#utils/http/types.ts';
@@ -57,16 +56,14 @@ describe('HTML responses to JSON requests', () => {
 					() => Response.redirect(`${portal}/?rd=status`, 302),
 					(arr) =>
 						withClient(new BaseHttpClient(arr, { retries: 0 }), async (client) => {
-							const error = await assertRejects(
-								() => client.get('/api/v3/system/status'),
-								HtmlResponseError
-							);
+							const request = client.get('/api/v3/system/status');
+							const error = (await request.catch((e: unknown) => e)) as HtmlResponseError;
+							expect(error).toBeInstanceOf(HtmlResponseError);
 							const host = new URL(portal).host;
-							assertEquals(
-								error.message,
+							expect(error.message).toStrictEqual(
 								`Expected JSON but got a web page from ${host} after a redirect. A reverse proxy may be asking for a login.`
 							);
-							assertEquals(error.status, 200);
+							expect(error.status).toStrictEqual(200);
 						})
 				)
 		);
@@ -77,8 +74,9 @@ describe('HTML responses to JSON requests', () => {
 			() => html(LOGIN_PAGE),
 			(origin) =>
 				withClient(new BaseHttpClient(origin, { retries: 0 }), async (client) => {
-					const error = await assertRejects(() => client.get('/api'), HtmlResponseError);
-					assert(!error.message.includes('after a redirect'));
+					const error = (await client.get('/api').catch((e: unknown) => e)) as HtmlResponseError;
+					expect(error).toBeInstanceOf(HtmlResponseError);
+					expect(!error.message.includes('after a redirect')).toBeTruthy();
 				})
 		);
 	});
@@ -88,10 +86,11 @@ describe('HTML responses to JSON requests', () => {
 			() => html('<html>Not Found</html>', 404),
 			(origin) =>
 				withClient(new BaseHttpClient(origin, { retries: 0 }), async (client) => {
-					const error = await assertRejects(() => client.get('/missing'), HttpError);
-					assert(!(error instanceof HtmlResponseError));
-					assertEquals(error.status, 404);
-					assertEquals(error.message, 'HTTP 404: Not Found');
+					const error = (await client.get('/missing').catch((e: unknown) => e)) as HttpError;
+					expect(error).toBeInstanceOf(HttpError);
+					expect(!(error instanceof HtmlResponseError)).toBeTruthy();
+					expect(error.status).toStrictEqual(404);
+					expect(error.message).toStrictEqual('HTTP 404: Not Found');
 				})
 		);
 	});
@@ -101,7 +100,7 @@ describe('HTML responses to JSON requests', () => {
 			() => Response.json({ ok: true }),
 			(origin) =>
 				withClient(new BaseHttpClient(origin, { retries: 0 }), async (client) => {
-					assertEquals(await client.get('/status'), { ok: true });
+					expect(await client.get('/status')).toStrictEqual({ ok: true });
 				})
 		);
 	});
@@ -111,8 +110,8 @@ describe('HTML responses to JSON requests', () => {
 			() => html(LOGIN_PAGE),
 			(origin) =>
 				withClient(new BaseArrClient(origin, 'test-api-key', { retries: 0 }), async (client) => {
-					const error = await assertRejects(() => client.detectVersion());
-					assertInstanceOf(error, HtmlResponseError);
+					const error = await client.detectVersion().catch((e: unknown) => e);
+					expect(error).toBeInstanceOf(HtmlResponseError);
 				})
 		);
 	});

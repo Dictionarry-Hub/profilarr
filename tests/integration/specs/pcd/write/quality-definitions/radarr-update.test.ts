@@ -7,9 +7,8 @@
  * naming pattern.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -81,11 +80,11 @@ test('representative per-tier modifications split into grouped ops', async () =>
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	const blurayOp = findOpForQualityName(ops, 'Bluray-1080p');
 	const webdlOp = findOpForQualityName(ops, 'WEBDL-720p');
-	assert(blurayOp, 'expected per-tier op for Bluray-1080p');
-	assert(webdlOp, 'expected per-tier op for WEBDL-720p');
+	expect(blurayOp, 'expected per-tier op for Bluray-1080p').toBeTruthy();
+	expect(webdlOp, 'expected per-tier op for WEBDL-720p').toBeTruthy();
 	assertSameGroup(ops);
 });
 
@@ -117,14 +116,14 @@ test('rename plus tier modification emits grouped ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	const renameOp = opForChangedField(ops, 'name');
 	const renameMeta = parseMetadata(renameOp);
-	assertEquals(renameMeta.previousName, 'Old QD');
-	assertEquals(renameMeta.name, 'New QD');
-	assertEquals(parseDesiredState(renameOp).name, { from: 'Old QD', to: 'New QD' });
+	expect(renameMeta.previousName).toStrictEqual('Old QD');
+	expect(renameMeta.name).toStrictEqual('New QD');
+	expect(parseDesiredState(renameOp).name).toStrictEqual({ from: 'Old QD', to: 'New QD' });
 	const blurayOp = findOpForQualityName(ops, 'Bluray-1080p');
-	assert(blurayOp, 'expected per-tier op for Bluray-1080p');
+	expect(blurayOp, 'expected per-tier op for Bluray-1080p').toBeTruthy();
 	assertSameGroup(ops);
 });
 
@@ -155,19 +154,25 @@ test('pure rename emits one ungrouped name op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.changed_fields, ['name']);
-	assertEquals(metadata.previousName, 'Pure Rename QD');
-	assertEquals(metadata.group_id, undefined);
+	expect(metadata.changed_fields).toStrictEqual(['name']);
+	expect(metadata.previousName).toStrictEqual('Pure Rename QD');
+	expect(metadata.group_id).toStrictEqual(undefined);
 	const sql = normalizeSql(op.sql).toLowerCase();
-	assert(
+	expect(
 		/update\s+"?radarr_quality_definitions"?\s+set\s+"?name"?\s*=/i.test(sql),
 		`expected single UPDATE name=... statement, got: ${sql}`
-	);
-	assert(!/delete from/i.test(sql), `expected no DELETE in pure-rename SQL, got: ${sql}`);
-	assert(!/insert into/i.test(sql), `expected no INSERT in pure-rename SQL, got: ${sql}`);
+	).toBeTruthy();
+	expect(
+		!/delete from/i.test(sql),
+		`expected no DELETE in pure-rename SQL, got: ${sql}`
+	).toBeTruthy();
+	expect(
+		!/insert into/i.test(sql),
+		`expected no INSERT in pure-rename SQL, got: ${sql}`
+	).toBeTruthy();
 });
 
 /**
@@ -190,5 +195,5 @@ test('unchanged submit writes no ops', async () => {
 		entries: SEED_TIERS
 	});
 
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

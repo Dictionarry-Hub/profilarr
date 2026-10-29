@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -108,8 +107,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		assertLatestHistory(ctx, descriptionOp, 'applied');
 
 		const row = assertRegex(ctx, 'Split Conflict');
-		assertEquals(row.pattern, strategy === 'override' ? '\\buser\\b' : '\\bupstream\\b');
-		assertEquals(row.description, 'User edit');
+		expect(row.pattern).toStrictEqual(strategy === 'override' ? '\\buser\\b' : '\\bupstream\\b');
+		expect(row.description).toStrictEqual('User edit');
 	}
 });
 
@@ -198,7 +197,7 @@ test('pattern conflict follows upstream rename by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertRegex(ctx, 'Rename Pattern Upstream');
-		assertEquals(row.pattern, strategy === 'override' ? '\\blocal\\b' : '\\boriginal\\b');
+		expect(row.pattern).toStrictEqual(strategy === 'override' ? '\\blocal\\b' : '\\boriginal\\b');
 		assertNoRegex(ctx, 'Rename Pattern');
 	}
 });
@@ -251,8 +250,7 @@ test('description conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertRegex(ctx, 'Description Conflict');
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override' ? 'Local description' : 'Upstream description'
 		);
 	}
@@ -292,7 +290,7 @@ test('create duplicate conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
 
 		const row = assertRegex(ctx, 'Create Conflict');
-		assertEquals(row.pattern, strategy === 'override' ? '\\buser\\b' : '\\bupstream\\b');
+		expect(row.pattern).toStrictEqual(strategy === 'override' ? '\\buser\\b' : '\\bupstream\\b');
 	}
 });
 
@@ -324,7 +322,7 @@ test('delete missing target via upstream delete auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoRegex(ctx, 'Already Deleted');
 	}
@@ -361,7 +359,7 @@ test('delete missing target via upstream rename auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertRegex(ctx, 'Now Different');
 		assertNoRegex(ctx, 'Renamed Away');
@@ -410,13 +408,13 @@ test('tags-only update applies after upstream pattern change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['tags']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertRegex(ctx, 'Tags No Conflict');
-		assertEquals(row.pattern, '\\bupstream\\b');
-		assertEquals(compiledRegexTags(ctx, 'Tags No Conflict'), ['LocalTag']);
+		expect(row.pattern).toStrictEqual('\\bupstream\\b');
+		expect(compiledRegexTags(ctx, 'Tags No Conflict')).toStrictEqual(['LocalTag']);
 	}
 });
 
@@ -460,11 +458,11 @@ test('matching upstream value auto-aligns user op', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['pattern']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 
 		const row = assertRegex(ctx, 'Convergent');
-		assertEquals(row.pattern, '\\bsame\\b');
+		expect(row.pattern).toStrictEqual('\\bsame\\b');
 	}
 });
 
@@ -504,7 +502,7 @@ test('delete applies cleanly after upstream pattern change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoRegex(ctx, 'Pattern Change');
 	}
@@ -549,7 +547,7 @@ function userOpsSince(ctx: PcdTestContext, checkpoint: number): OpRow[] {
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user ${operation} op`);
+	expect(op, `Expected a user ${operation} op`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -561,7 +559,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -578,19 +576,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assert(op.superseded_by_op_id !== null, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(
+		op.superseded_by_op_id !== null,
+		'Expected override to link a replacement op'
+	).toBeTruthy();
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -601,9 +602,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -620,7 +621,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -629,13 +630,13 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 
 function assertRegex(ctx: PcdTestContext, name: string): RegexRow {
 	const row = compiledRegexes(ctx).find((regex) => regex.name === name);
-	assertExists(row, `Expected regex ${name}`);
+	expect(row, `Expected regex ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoRegex(ctx: PcdTestContext, name: string): void {
 	const row = compiledRegexes(ctx).find((regex) => regex.name === name);
-	assertEquals(row, undefined);
+	expect(row).toStrictEqual(undefined);
 }
 
 function compiledRegexes(ctx: PcdTestContext): RegexRow[] {
@@ -728,7 +729,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}

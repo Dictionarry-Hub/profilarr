@@ -2,10 +2,9 @@
  * PCD conflict tests: engine regressions.
  */
 
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import {
 	compilePcd,
@@ -58,8 +57,8 @@ test('sequential user edits keep the local chain intact', async () => {
 		await compilePcd(ctx);
 
 		assertNoPendingConflicts(ctx);
-		assertEquals(opById(ctx, firstOpId).state, 'published');
-		assertEquals(opById(ctx, secondOpId).state, 'published');
+		expect(opById(ctx, firstOpId).state).toStrictEqual('published');
+		expect(opById(ctx, secondOpId).state).toStrictEqual('published');
 		assertLatestHistory(ctx, firstOpId, 'applied');
 		assertLatestHistory(ctx, secondOpId, 'applied');
 	}
@@ -90,34 +89,34 @@ test('upstream invalidates a sequential user edit chain by strategy', async () =
 		await compilePcd(ctx);
 
 		if (strategy === 'ask') {
-			assertEquals(opById(ctx, firstOpId).state, 'published');
-			assertEquals(opById(ctx, secondOpId).state, 'published');
+			expect(opById(ctx, firstOpId).state).toStrictEqual('published');
+			expect(opById(ctx, secondOpId).state).toStrictEqual('published');
 			assertLatestHistory(ctx, firstOpId, 'conflicted_pending', 'guard_mismatch');
 			assertLatestHistory(ctx, secondOpId, 'conflicted_pending', 'guard_mismatch');
 			continue;
 		}
 
 		if (strategy === 'align') {
-			assertEquals(opById(ctx, firstOpId).state, 'dropped');
-			assertEquals(opById(ctx, secondOpId).state, 'dropped');
+			expect(opById(ctx, firstOpId).state).toStrictEqual('dropped');
+			expect(opById(ctx, secondOpId).state).toStrictEqual('dropped');
 			assertNoPendingConflicts(ctx);
 			continue;
 		}
 
 		const firstState = opById(ctx, firstOpId).state;
 		const secondState = opById(ctx, secondOpId).state;
-		assert(
+		expect(
 			['dropped', 'superseded'].includes(firstState),
 			`Unexpected first op state ${firstState}`
-		);
-		assert(
+		).toBeTruthy();
+		expect(
 			['dropped', 'superseded'].includes(secondState),
 			`Unexpected second op state ${secondState}`
-		);
-		assert(
+		).toBeTruthy();
+		expect(
 			publishedUserOps(ctx).some((op) => op.id !== firstOpId && op.id !== secondOpId),
 			'Expected override to create at least one replacement user op'
-		);
+		).toBeTruthy();
 		assertNoPendingConflicts(ctx);
 	}
 });
@@ -206,7 +205,7 @@ function opById(ctx: PcdTestContext, opId: number): OpRow {
 		const op = db
 			.prepare('SELECT * FROM pcd_ops WHERE database_id = ? AND id = ?')
 			.get(ctx.dbId, opId) as OpRow | undefined;
-		assertExists(op, `Expected op ${opId}`);
+		expect(op, `Expected op ${opId}`).not.toBeOneOf([null, undefined]);
 		return op;
 	} finally {
 		db.close();
@@ -238,9 +237,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, opId);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -257,7 +256,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -280,7 +279,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}

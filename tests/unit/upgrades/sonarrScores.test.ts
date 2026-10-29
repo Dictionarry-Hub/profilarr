@@ -1,4 +1,4 @@
-import { assertEquals, assertRejects } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import type { SonarrClient } from '#arr/clients/sonarr.ts';
 import type { SonarrEpisodeFile, SonarrSeries } from '#arr/types.ts';
@@ -70,15 +70,17 @@ class SonarrScoresTest extends BaseTest {
 				this.createEpisodeFile(3, 1, 2, -50)
 			];
 
-			assertEquals(averageEpisodeFileScore(files), 250 / 3);
-			assertEquals(averageEpisodeFileScore(files, 1), 150);
-			assertEquals(averageEpisodeFileScore(files, 3), 0);
+			expect(averageEpisodeFileScore(files)).toStrictEqual(250 / 3);
+			expect(averageEpisodeFileScore(files, 1)).toStrictEqual(150);
+			expect(averageEpisodeFileScore(files, 3)).toStrictEqual(0);
 		});
 
 		this.test('detects cutoff rules and the lowest-score selector', () => {
-			assertEquals(filterNeedsSonarrScores(this.createFilter('random', 'cutoff_met')), true);
-			assertEquals(filterNeedsSonarrScores(this.createFilter('lowest_score')), true);
-			assertEquals(filterNeedsSonarrScores(this.createFilter('random')), false);
+			expect(filterNeedsSonarrScores(this.createFilter('random', 'cutoff_met'))).toStrictEqual(
+				true
+			);
+			expect(filterNeedsSonarrScores(this.createFilter('lowest_score'))).toStrictEqual(true);
+			expect(filterNeedsSonarrScores(this.createFilter('random'))).toStrictEqual(false);
 		});
 
 		this.test('loads file-bearing series and skips series without files', async () => {
@@ -95,9 +97,9 @@ class SonarrScoresTest extends BaseTest {
 				this.createSeries(2, 0)
 			]);
 
-			assertEquals(calls, [1]);
-			assertEquals(result.get(1)?.length, 1);
-			assertEquals(result.get(2), []);
+			expect(calls).toStrictEqual([1]);
+			expect(result.get(1)?.length).toStrictEqual(1);
+			expect(result.get(2)).toStrictEqual([]);
 		});
 
 		this.test('reuses existing episode files without another request', async () => {
@@ -112,8 +114,8 @@ class SonarrScoresTest extends BaseTest {
 
 			const result = await loadSonarrEpisodeFiles(client, [this.createSeries(1, 1)], existing);
 
-			assertEquals(calls, []);
-			assertEquals(result.get(1), existing.get(1));
+			expect(calls).toStrictEqual([]);
+			expect(result.get(1)).toStrictEqual(existing.get(1));
 		});
 
 		this.test('fetches when series statistics are unavailable', async () => {
@@ -130,7 +132,7 @@ class SonarrScoresTest extends BaseTest {
 
 			await loadSonarrEpisodeFiles(client, [series]);
 
-			assertEquals(calls, [1]);
+			expect(calls).toStrictEqual([1]);
 		});
 
 		this.test('identifies the series when episode-file loading fails', async () => {
@@ -138,9 +140,10 @@ class SonarrScoresTest extends BaseTest {
 				getEpisodeFiles: () => Promise.reject(new Error('unavailable'))
 			} as unknown as SonarrClient;
 
-			await assertRejects(
-				() => loadSonarrEpisodeFiles(client, [this.createSeries(3, 1)]),
-				Error,
+			await expect(loadSonarrEpisodeFiles(client, [this.createSeries(3, 1)])).rejects.toThrow(
+				Error
+			);
+			await expect(loadSonarrEpisodeFiles(client, [this.createSeries(3, 1)])).rejects.toThrow(
 				'Failed to fetch episode files for "Series 3": unavailable'
 			);
 		});

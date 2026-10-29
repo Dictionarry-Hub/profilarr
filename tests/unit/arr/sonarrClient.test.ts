@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { SonarrClient } from '#arr/clients/sonarr.ts';
 import type { ArrQualityProfile, SonarrSeries } from '#arr/types.ts';
@@ -66,9 +66,9 @@ class SonarrClientTest extends BaseTest {
 
 			const library = await client.getLibrary(new Set(['HD']));
 
-			assertEquals(library[0].qualityProfileName, 'HD');
-			assertEquals(library[0].isProfilarrProfile, true);
-			assertEquals(library[0].seasons[0], {
+			expect(library[0].qualityProfileName).toStrictEqual('HD');
+			expect(library[0].isProfilarrProfile).toStrictEqual(true);
+			expect(library[0].seasons[0]).toStrictEqual({
 				seasonNumber: 1,
 				monitored: true,
 				episodeCount: 0,
@@ -77,7 +77,7 @@ class SonarrClientTest extends BaseTest {
 				sizeOnDisk: 0,
 				percentOfEpisodes: 0
 			});
-			assertEquals(library[0].seasons[1].episodeCount, 8);
+			expect(library[0].seasons[1].episodeCount).toStrictEqual(8);
 		});
 	}
 }

@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -182,15 +181,13 @@ test('duplicate create with scoring and qualities resolves by strategy', async (
 		assertStrategyOutcome(ctx, createOp, strategy, 'duplicate_key');
 
 		const row = assertQualityProfile(ctx, profileName);
-		assertEquals(
-			row.description,
+		expect(row.description).toStrictEqual(
 			strategy === 'override'
 				? 'Local full payload description'
 				: 'Upstream full payload description'
 		);
-		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? 50 : 100);
-		assertEquals(
-			compiledQualityOrder(ctx, profileName),
+		expect(row.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? 50 : 100);
+		expect(compiledQualityOrder(ctx, profileName)).toStrictEqual(
 			strategy === 'override'
 				? [QUALITY_B, QUALITY_A, QUALITY_C]
 				: [QUALITY_B, QUALITY_C, QUALITY_A]
@@ -334,61 +331,57 @@ test('real-world multi-surface conflict resolves by strategy', async () => {
 			`quality_item:group:${QP_1080P}`,
 			`quality_item:group:${PRERELEASES}`
 		]);
-		assertEquals(qualitiesOp.state, 'published');
+		expect(qualitiesOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, qualitiesOp, 'applied');
 
 		if (strategy === 'ask') {
-			assertEquals(pendingConflictCountSince(ctx, checkpoint), 5);
+			expect(pendingConflictCountSince(ctx, checkpoint)).toStrictEqual(5);
 		} else {
 			assertNoPendingConflicts(ctx);
 		}
 
 		const profile = assertQualityProfile(ctx, PROFILE_NAME);
-		assertEquals(
-			profile.description,
+		expect(profile.description).toStrictEqual(
 			strategy === 'override' ? localDescription : upstreamDescription
 		);
-		assertEquals(profile.minimum_custom_format_score, strategy === 'override' ? 0 : 10000);
-		assertEquals(profile.upgrade_score_increment, 10000);
-		assertEquals(profile.upgrade_until_score, 50000);
+		expect(profile.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? 0 : 10000);
+		expect(profile.upgrade_score_increment).toStrictEqual(10000);
+		expect(profile.upgrade_until_score).toStrictEqual(50000);
 
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, SHO, 'radarr'),
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, SHO, 'radarr')).toStrictEqual(
 			strategy === 'override' ? 1000 : -250
 		);
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, SHO, 'sonarr'),
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, SHO, 'sonarr')).toStrictEqual(
 			strategy === 'override' ? 2000 : -250
 		);
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, DRPO, 'radarr'),
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, DRPO, 'radarr')).toStrictEqual(
 			strategy === 'override' ? 1000 : 150
 		);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, DRPO, 'sonarr'), 2000);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, MUBI, 'radarr'), 1000);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, MUBI, 'sonarr'), 2000);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, H265, 'radarr'), 0);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, X265, 'sonarr'), 0);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, NF, 'radarr'), 500);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, ATVP, 'sonarr'), 750);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, DRPO, 'sonarr')).toStrictEqual(2000);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, MUBI, 'radarr')).toStrictEqual(1000);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, MUBI, 'sonarr')).toStrictEqual(2000);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, H265, 'radarr')).toStrictEqual(0);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, X265, 'sonarr')).toStrictEqual(0);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, NF, 'radarr')).toStrictEqual(500);
+		expect(compiledCustomFormatScore(ctx, PROFILE_NAME, ATVP, 'sonarr')).toStrictEqual(750);
 
-		assertEquals(compiledQualityProfileTags(ctx, PROFILE_NAME), [
+		expect(compiledQualityProfileTags(ctx, PROFILE_NAME)).toStrictEqual([
 			'Recommended',
 			'Streaming Optimised'
 		]);
-		assertEquals(compiledQualityProfileLanguage(ctx, PROFILE_NAME), 'Chinese');
-		assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, QP_1080P), [
+		expect(compiledQualityProfileLanguage(ctx, PROFILE_NAME)).toStrictEqual('Chinese');
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, QP_1080P)).toStrictEqual([
 			'Bluray-1080p',
 			'WEBDL-1080p',
 			QP_HDTV
 		]);
-		assertEquals(compiledQualityOrder(ctx, PROFILE_NAME), [
+		expect(compiledQualityOrder(ctx, PROFILE_NAME)).toStrictEqual([
 			QP_1080P,
 			QP_720P,
 			QP_480P,
 			PRERELEASES
 		]);
-		assertEquals(compiledGroupMembers(ctx, PROFILE_NAME, PRERELEASES), PRERELEASE_MEMBERS);
+		expect(compiledGroupMembers(ctx, PROFILE_NAME, PRERELEASES)).toStrictEqual(PRERELEASE_MEMBERS);
 	}
 });
 
@@ -433,13 +426,13 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user op for operation ${operation}`);
+	expect(op, `Expected a user op for operation ${operation}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -456,19 +449,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assertExists(op.superseded_by_op_id, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(op.superseded_by_op_id, 'Expected override to link a replacement op').not.toBeOneOf([
+		null,
+		undefined
+	]);
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -480,9 +476,9 @@ function assertLatestHistory(
 ): void {
 	const history = latestHistory(ctx, op.id);
 	const label = JSON.stringify(parseMetadata(op));
-	assertEquals(history.status, status, label);
+	expect(history.status, label).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason, label);
+		expect(history.conflict_reason, label).toStrictEqual(reason);
 	}
 }
 
@@ -499,7 +495,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -522,7 +518,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -536,7 +532,7 @@ function pendingConflictCountSince(ctx: PcdTestContext, checkpoint: number): num
 
 function assertQualityProfile(ctx: PcdTestContext, name: string): QualityProfileRow {
 	const row = compiledQualityProfileState(ctx).profiles.find((profile) => profile.name === name);
-	assertExists(row, `Expected quality profile ${name}`);
+	expect(row, `Expected quality profile ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 

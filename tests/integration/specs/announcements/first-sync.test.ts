@@ -10,8 +10,7 @@
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
-import { assertEquals, assert } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
@@ -110,11 +109,11 @@ test('isFirstSync=true marks every insert as already-read and returns empty newl
 	const { reconcileFromWorkingCopy } = await loadMods();
 	const report = await reconcileFromWorkingCopy(databaseId, { isFirstSync: true });
 
-	assertEquals(report.status, 'ok');
-	assertEquals(report.firstSync, true);
-	assertEquals(report.newlyInserted.length, 0);
-	assert(readReadAt(databaseId, 'a-1') !== null, 'a-1 should be marked read');
-	assert(readReadAt(databaseId, 'a-2') !== null, 'a-2 should be marked read');
+	expect(report.status).toStrictEqual('ok');
+	expect(report.firstSync).toStrictEqual(true);
+	expect(report.newlyInserted.length).toStrictEqual(0);
+	expect(readReadAt(databaseId, 'a-1') !== null, 'a-1 should be marked read').toBeTruthy();
+	expect(readReadAt(databaseId, 'a-2') !== null, 'a-2 should be marked read').toBeTruthy();
 });
 
 test('isFirstSync=false fires for net-new entries even when the table was empty for this database', async () => {
@@ -131,11 +130,11 @@ test('isFirstSync=false fires for net-new entries even when the table was empty 
 	const { reconcileFromWorkingCopy } = await loadMods();
 	const report = await reconcileFromWorkingCopy(databaseId, { isFirstSync: false });
 
-	assertEquals(report.status, 'ok');
-	assertEquals(report.firstSync, false);
-	assertEquals(report.newlyInserted.length, 1);
-	assertEquals(report.newlyInserted[0].id, 'b-1');
-	assertEquals(readReadAt(databaseId, 'b-1'), null);
+	expect(report.status).toStrictEqual('ok');
+	expect(report.firstSync).toStrictEqual(false);
+	expect(report.newlyInserted.length).toStrictEqual(1);
+	expect(report.newlyInserted[0].id).toStrictEqual('b-1');
+	expect(readReadAt(databaseId, 'b-1')).toStrictEqual(null);
 });
 
 test('subsequent reconciles do not refire newlyInserted for unchanged ids', async () => {
@@ -148,8 +147,8 @@ test('subsequent reconciles do not refire newlyInserted for unchanged ids', asyn
 	const { reconcileFromWorkingCopy } = await loadMods();
 
 	const first = await reconcileFromWorkingCopy(databaseId, { isFirstSync: false });
-	assertEquals(first.newlyInserted.length, 1);
+	expect(first.newlyInserted.length).toStrictEqual(1);
 
 	const second = await reconcileFromWorkingCopy(databaseId, { isFirstSync: false });
-	assertEquals(second.newlyInserted.length, 0);
+	expect(second.newlyInserted.length).toStrictEqual(0);
 });

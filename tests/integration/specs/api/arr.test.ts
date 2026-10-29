@@ -9,11 +9,10 @@
  * 5. Detected version fields are present and null until a probe runs
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, setApiKey } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 
@@ -60,17 +59,17 @@ afterAll(async () => {
 test('GET /api/v1/arr returns 401 without auth', async () => {
 	const unauthClient = new TestClient(ORIGIN);
 	const res = await unauthClient.get('/api/v1/arr');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 test('GET /api/v1/arr returns 200 with empty array', async () => {
 	const res = await client.get('/api/v1/arr', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(Array.isArray(body), true);
-	assertEquals(body.length, 0);
+	expect(Array.isArray(body)).toStrictEqual(true);
+	expect(body.length).toStrictEqual(0);
 });
 
 test('GET /api/v1/arr returns seeded instance', async () => {
@@ -78,13 +77,13 @@ test('GET /api/v1/arr returns seeded instance', async () => {
 	const res = await client.get('/api/v1/arr', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(body.length, 1);
-	assertEquals(body[0].name, 'Test Radarr');
-	assertEquals(body[0].type, 'radarr');
-	assertEquals(body[0].url, 'http://localhost:7878');
-	assertExists(body[0].enabled);
+	expect(body.length).toStrictEqual(1);
+	expect(body[0].name).toStrictEqual('Test Radarr');
+	expect(body[0].type).toStrictEqual('radarr');
+	expect(body[0].url).toStrictEqual('http://localhost:7878');
+	expect(body[0].enabled).not.toBeOneOf([null, undefined]);
 });
 
 test('response does not contain stored credentials', async () => {
@@ -92,10 +91,10 @@ test('response does not contain stored credentials', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(body.length, 1);
-	assertEquals(body[0].api_key, undefined);
-	assertEquals(body[0].basic_auth_username, undefined);
-	assertEquals(body[0].basic_auth_password, undefined);
+	expect(body.length).toStrictEqual(1);
+	expect(body[0].api_key).toStrictEqual(undefined);
+	expect(body[0].basic_auth_username).toStrictEqual(undefined);
+	expect(body[0].basic_auth_password).toStrictEqual(undefined);
 });
 
 test('detected version fields are null until a probe runs', async () => {
@@ -103,9 +102,9 @@ test('detected version fields are null until a probe runs', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(body.length, 1);
-	assertEquals('detected_version' in body[0], true);
-	assertEquals(body[0].detected_version, null);
-	assertEquals(body[0].detected_api, null);
-	assertEquals(body[0].detected_at, null);
+	expect(body.length).toStrictEqual(1);
+	expect('detected_version' in body[0]).toStrictEqual(true);
+	expect(body[0].detected_version).toStrictEqual(null);
+	expect(body[0].detected_api).toStrictEqual(null);
+	expect(body[0].detected_at).toStrictEqual(null);
 });

@@ -38,11 +38,10 @@
  * 24. GET after delete returns 404
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, setApiKey } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 
@@ -81,17 +80,17 @@ afterAll(async () => {
 test('GET /api/v1/databases returns 401 without auth', async () => {
 	const unauthClient = new TestClient(ORIGIN);
 	const res = await unauthClient.get('/api/v1/databases');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 test('GET /api/v1/databases returns 200 with empty array', async () => {
 	const res = await client.get('/api/v1/databases', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(Array.isArray(body), true);
-	assertEquals(body.length, 0);
+	expect(Array.isArray(body)).toStrictEqual(true);
+	expect(body.length).toStrictEqual(0);
 });
 
 test('GET /api/v1/databases returns seeded database', async () => {
@@ -99,13 +98,13 @@ test('GET /api/v1/databases returns seeded database', async () => {
 	const res = await client.get('/api/v1/databases', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(body.length, 1);
-	assertEquals(body[0].name, 'Test DB');
-	assertEquals(body[0].repository_url, 'https://github.com/test/repo');
-	assertExists(body[0].hasPat);
-	assertEquals(body[0].hasPat, true);
+	expect(body.length).toStrictEqual(1);
+	expect(body[0].name).toStrictEqual('Test DB');
+	expect(body[0].repository_url).toStrictEqual('https://github.com/test/repo');
+	expect(body[0].hasPat).not.toBeOneOf([null, undefined]);
+	expect(body[0].hasPat).toStrictEqual(true);
 });
 
 test('response does not contain secrets or internal fields', async () => {
@@ -113,9 +112,9 @@ test('response does not contain secrets or internal fields', async () => {
 		headers: { 'X-Api-Key': API_KEY }
 	});
 	const body = await res.json();
-	assertEquals(body.length, 1);
-	assertEquals(body[0].personal_access_token, undefined);
-	assertEquals(body[0].local_path, undefined);
+	expect(body.length).toStrictEqual(1);
+	expect(body[0].personal_access_token).toStrictEqual(undefined);
+	expect(body[0].local_path).toStrictEqual(undefined);
 });
 
 // --- POST /api/v1/databases ---
@@ -129,7 +128,7 @@ test('POST /api/v1/databases returns 401 without auth', async () => {
 		name: 'No Auth DB',
 		repository_url: TEST_REPO
 	});
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 test('POST /api/v1/databases returns 400 when name is missing', async () => {
@@ -138,9 +137,9 @@ test('POST /api/v1/databases returns 400 when name is missing', async () => {
 		{ repository_url: TEST_REPO },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/databases returns 400 when repository_url is missing', async () => {
@@ -149,9 +148,9 @@ test('POST /api/v1/databases returns 400 when repository_url is missing', async 
 		{ name: 'Missing URL DB' },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/databases returns 400 when PAT set without git identity', async () => {
@@ -164,9 +163,9 @@ test('POST /api/v1/databases returns 400 when PAT set without git identity', asy
 		},
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/databases returns 400 when local_ops_enabled without PAT', async () => {
@@ -179,9 +178,9 @@ test('POST /api/v1/databases returns 400 when local_ops_enabled without PAT', as
 		},
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/databases returns 400 when conflict_strategy set with PAT but no local_ops', async () => {
@@ -197,9 +196,9 @@ test('POST /api/v1/databases returns 400 when conflict_strategy set with PAT but
 		},
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/databases returns 409 when name already exists', async () => {
@@ -209,9 +208,9 @@ test('POST /api/v1/databases returns 409 when name already exists', async () => 
 		{ name: 'Test DB', repository_url: TEST_REPO },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 409);
+	expect(res.status).toStrictEqual(409);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/databases returns 201 and links a real database', async () => {
@@ -224,29 +223,31 @@ test('POST /api/v1/databases returns 201 and links a real database', async () =>
 		},
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 201, `Expected 201, got ${res.status}: ${await res.clone().text()}`);
+	expect(res.status, `Expected 201, got ${res.status}: ${await res.clone().text()}`).toStrictEqual(
+		201
+	);
 	const body = await res.json();
 
 	// Required fields present
-	assertExists(body.id);
+	expect(body.id).not.toBeOneOf([null, undefined]);
 	linkedDbId = body.id;
-	assertExists(body.uuid);
-	assertEquals(body.name, 'API Linked DB');
-	assertEquals(body.repository_url, TEST_REPO);
-	assertExists(body.created_at);
-	assertExists(body.updated_at);
+	expect(body.uuid).not.toBeOneOf([null, undefined]);
+	expect(body.name).toStrictEqual('API Linked DB');
+	expect(body.repository_url).toStrictEqual(TEST_REPO);
+	expect(body.created_at).not.toBeOneOf([null, undefined]);
+	expect(body.updated_at).not.toBeOneOf([null, undefined]);
 
 	// Defaults applied
-	assertEquals(body.sync_strategy, 0);
-	assertEquals(body.auto_pull, 0);
-	assertEquals(body.enabled, 1);
-	assertEquals(body.local_ops_enabled, 0);
-	assertEquals(body.conflict_strategy, 'override');
-	assertEquals(body.hasPat, false);
+	expect(body.sync_strategy).toStrictEqual(0);
+	expect(body.auto_pull).toStrictEqual(0);
+	expect(body.enabled).toStrictEqual(1);
+	expect(body.local_ops_enabled).toStrictEqual(0);
+	expect(body.conflict_strategy).toStrictEqual('override');
+	expect(body.hasPat).toStrictEqual(false);
 
 	// Secrets stripped
-	assertEquals(body.personal_access_token, undefined);
-	assertEquals(body.local_path, undefined);
+	expect(body.personal_access_token).toStrictEqual(undefined);
+	expect(body.local_path).toStrictEqual(undefined);
 });
 
 // --- GET /api/v1/databases/{id} ---
@@ -255,24 +256,24 @@ test('GET /api/v1/databases/{id} returns 404 for non-existent ID', async () => {
 	const res = await client.get('/api/v1/databases/99999', {
 		headers: AUTH_HEADERS
 	});
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('GET /api/v1/databases/{id} returns 200 with database detail', async () => {
 	const res = await client.get(`/api/v1/databases/${linkedDbId}`, {
 		headers: AUTH_HEADERS
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 	const body = await res.json();
-	assertEquals(body.id, linkedDbId);
-	assertEquals(body.name, 'API Linked DB');
-	assertEquals(body.repository_url, TEST_REPO);
-	assertExists(body.created_at);
+	expect(body.id).toStrictEqual(linkedDbId);
+	expect(body.name).toStrictEqual('API Linked DB');
+	expect(body.repository_url).toStrictEqual(TEST_REPO);
+	expect(body.created_at).not.toBeOneOf([null, undefined]);
 	// Secrets stripped
-	assertEquals(body.personal_access_token, undefined);
-	assertEquals(body.local_path, undefined);
+	expect(body.personal_access_token).toStrictEqual(undefined);
+	expect(body.local_path).toStrictEqual(undefined);
 });
 
 // --- PATCH /api/v1/databases/{id} ---
@@ -283,14 +284,14 @@ test('PATCH /api/v1/databases/{id} returns 404 for non-existent ID', async () =>
 		{ name: 'Nope' },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });
 
 test('PATCH /api/v1/databases/{id} returns 400 for empty body', async () => {
 	const res = await client.patch(`/api/v1/databases/${linkedDbId}`, {}, { headers: AUTH_HEADERS });
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('PATCH /api/v1/databases/{id} returns 400 when PAT set without git identity', async () => {
@@ -299,9 +300,9 @@ test('PATCH /api/v1/databases/{id} returns 400 when PAT set without git identity
 		{ personal_access_token: 'ghp_fake' },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('PATCH /api/v1/databases/{id} returns 409 when name conflicts', async () => {
@@ -311,9 +312,9 @@ test('PATCH /api/v1/databases/{id} returns 409 when name conflicts', async () =>
 		{ name: 'Test DB' },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 409);
+	expect(res.status).toStrictEqual(409);
 	const body = await res.json();
-	assertExists(body.error);
+	expect(body.error).not.toBeOneOf([null, undefined]);
 });
 
 test('PATCH /api/v1/databases/{id} returns 200 and updates name', async () => {
@@ -322,20 +323,22 @@ test('PATCH /api/v1/databases/{id} returns 200 and updates name', async () => {
 		{ name: 'Renamed DB' },
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 200, `Expected 200, got ${res.status}: ${await res.clone().text()}`);
+	expect(res.status, `Expected 200, got ${res.status}: ${await res.clone().text()}`).toStrictEqual(
+		200
+	);
 	const body = await res.json();
-	assertEquals(body.name, 'Renamed DB');
-	assertEquals(body.id, linkedDbId);
+	expect(body.name).toStrictEqual('Renamed DB');
+	expect(body.id).toStrictEqual(linkedDbId);
 	// Secrets stripped
-	assertEquals(body.personal_access_token, undefined);
-	assertEquals(body.local_path, undefined);
+	expect(body.personal_access_token).toStrictEqual(undefined);
+	expect(body.local_path).toStrictEqual(undefined);
 });
 
 // --- POST /api/v1/databases/{id}/sync ---
 
 test('POST /api/v1/databases/{id}/sync returns 404 for non-existent ID', async () => {
 	const res = await client.post('/api/v1/databases/99999/sync', {}, { headers: AUTH_HEADERS });
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });
 
 test('POST /api/v1/databases/{id}/sync returns 202 with jobId', async () => {
@@ -344,27 +347,29 @@ test('POST /api/v1/databases/{id}/sync returns 202 with jobId', async () => {
 		{},
 		{ headers: AUTH_HEADERS }
 	);
-	assertEquals(res.status, 202, `Expected 202, got ${res.status}: ${await res.clone().text()}`);
+	expect(res.status, `Expected 202, got ${res.status}: ${await res.clone().text()}`).toStrictEqual(
+		202
+	);
 	const body = await res.json();
-	assertExists(body.jobId);
-	assertEquals(typeof body.jobId, 'number');
+	expect(body.jobId).not.toBeOneOf([null, undefined]);
+	expect(typeof body.jobId).toStrictEqual('number');
 });
 
 // --- DELETE /api/v1/databases/{id} ---
 
 test('DELETE /api/v1/databases/{id} returns 404 for non-existent ID', async () => {
 	const res = await client.delete('/api/v1/databases/99999', { headers: AUTH_HEADERS });
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });
 
 test('DELETE /api/v1/databases/{id} returns 204 and unlinks', async () => {
 	const res = await client.delete(`/api/v1/databases/${linkedDbId}`, { headers: AUTH_HEADERS });
-	assertEquals(res.status, 204);
+	expect(res.status).toStrictEqual(204);
 });
 
 test('GET /api/v1/databases/{id} returns 404 after delete', async () => {
 	const res = await client.get(`/api/v1/databases/${linkedDbId}`, {
 		headers: AUTH_HEADERS
 	});
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });

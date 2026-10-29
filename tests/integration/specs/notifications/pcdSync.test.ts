@@ -2,10 +2,9 @@
  * PCD sync notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -123,26 +122,31 @@ function makeSyncFailedParams(overrides: Partial<PcdSyncFailedParams> = {}): Pcd
 // =========================================================================
 
 test('updates_available: type is pcd.updates_available', () => {
-	assertEquals(pcdUpdatesAvailable(makeUpdatesAvailableParams()).type, 'pcd.updates_available');
-});
-
-test('updates_available: severity is info', () => {
-	assertEquals(pcdUpdatesAvailable(makeUpdatesAvailableParams()).severity, 'info');
-});
-
-test('updates_available: title includes database name', () => {
-	assertEquals(
-		pcdUpdatesAvailable(makeUpdatesAvailableParams()).title.includes('Dictionarry'),
-		true
+	expect(pcdUpdatesAvailable(makeUpdatesAvailableParams()).type).toStrictEqual(
+		'pcd.updates_available'
 	);
 });
 
+test('updates_available: severity is info', () => {
+	expect(pcdUpdatesAvailable(makeUpdatesAvailableParams()).severity).toStrictEqual('info');
+});
+
+test('updates_available: title includes database name', () => {
+	expect(
+		pcdUpdatesAvailable(makeUpdatesAvailableParams()).title.includes('Dictionarry')
+	).toStrictEqual(true);
+});
+
 test('updates_available: title includes Available', () => {
-	assertEquals(pcdUpdatesAvailable(makeUpdatesAvailableParams()).title.includes('Available'), true);
+	expect(
+		pcdUpdatesAvailable(makeUpdatesAvailableParams()).title.includes('Available')
+	).toStrictEqual(true);
 });
 
 test('updates_available: message includes commit count', () => {
-	assertEquals(pcdUpdatesAvailable(makeUpdatesAvailableParams()).message.includes('3'), true);
+	expect(pcdUpdatesAvailable(makeUpdatesAvailableParams()).message.includes('3')).toStrictEqual(
+		true
+	);
 });
 
 test('updates_available: changes section contains commit messages', () => {
@@ -150,11 +154,11 @@ test('updates_available: changes section contains commit messages', () => {
 	const changesBlock = notification.blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Changes'
 	);
-	assertExists(changesBlock);
+	expect(changesBlock).not.toBeOneOf([null, undefined]);
 	if (changesBlock?.kind === 'section') {
-		assertEquals(changesBlock.content.includes('add position to quality groups'), true);
-		assertEquals(changesBlock.content.includes('bluray scoring'), true);
-		assertEquals(changesBlock.content.includes('naming conventions'), true);
+		expect(changesBlock.content.includes('add position to quality groups')).toStrictEqual(true);
+		expect(changesBlock.content.includes('bluray scoring')).toStrictEqual(true);
+		expect(changesBlock.content.includes('naming conventions')).toStrictEqual(true);
 	}
 });
 
@@ -163,7 +167,7 @@ test('updates_available: no changes section when no commit messages', () => {
 	const changesBlock = notification.blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Changes'
 	);
-	assertEquals(changesBlock, undefined);
+	expect(changesBlock).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -171,23 +175,23 @@ test('updates_available: no changes section when no commit messages', () => {
 // =========================================================================
 
 test('sync_success: type is pcd.sync_success', () => {
-	assertEquals(pcdSyncSuccess(makeSyncSuccessParams()).type, 'pcd.sync_success');
+	expect(pcdSyncSuccess(makeSyncSuccessParams()).type).toStrictEqual('pcd.sync_success');
 });
 
 test('sync_success: severity is success', () => {
-	assertEquals(pcdSyncSuccess(makeSyncSuccessParams()).severity, 'success');
+	expect(pcdSyncSuccess(makeSyncSuccessParams()).severity).toStrictEqual('success');
 });
 
 test('sync_success: title includes database name', () => {
-	assertEquals(pcdSyncSuccess(makeSyncSuccessParams()).title.includes('Dictionarry'), true);
+	expect(pcdSyncSuccess(makeSyncSuccessParams()).title.includes('Dictionarry')).toStrictEqual(true);
 });
 
 test('sync_success: title includes Synced', () => {
-	assertEquals(pcdSyncSuccess(makeSyncSuccessParams()).title.includes('Synced'), true);
+	expect(pcdSyncSuccess(makeSyncSuccessParams()).title.includes('Synced')).toStrictEqual(true);
 });
 
 test('sync_success: message includes commit count', () => {
-	assertEquals(pcdSyncSuccess(makeSyncSuccessParams()).message.includes('3'), true);
+	expect(pcdSyncSuccess(makeSyncSuccessParams()).message.includes('3')).toStrictEqual(true);
 });
 
 test('sync_success: changes section contains commit messages', () => {
@@ -195,10 +199,10 @@ test('sync_success: changes section contains commit messages', () => {
 	const changesBlock = notification.blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Changes'
 	);
-	assertExists(changesBlock);
+	expect(changesBlock).not.toBeOneOf([null, undefined]);
 	if (changesBlock?.kind === 'section') {
-		assertEquals(changesBlock.content.includes('add position to quality groups'), true);
-		assertEquals(changesBlock.content.includes('bluray scoring'), true);
+		expect(changesBlock.content.includes('add position to quality groups')).toStrictEqual(true);
+		expect(changesBlock.content.includes('bluray scoring')).toStrictEqual(true);
 	}
 });
 
@@ -209,10 +213,10 @@ test('sync_success: schema section present when schema changed', () => {
 	const schemaBlock = notification.blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Schema Updated'
 	);
-	assertExists(schemaBlock);
+	expect(schemaBlock).not.toBeOneOf([null, undefined]);
 	if (schemaBlock?.kind === 'section') {
-		assertEquals(schemaBlock.content.includes('v1.0'), true);
-		assertEquals(schemaBlock.content.includes('v1.1'), true);
+		expect(schemaBlock.content.includes('v1.0')).toStrictEqual(true);
+		expect(schemaBlock.content.includes('v1.1')).toStrictEqual(true);
 	}
 });
 
@@ -221,7 +225,7 @@ test('sync_success: no schema section when schema did not change', () => {
 	const schemaBlock = notification.blocks?.find(
 		(b) => b.kind === 'section' && b.title === 'Schema Updated'
 	);
-	assertEquals(schemaBlock, undefined);
+	expect(schemaBlock).toStrictEqual(undefined);
 });
 
 // =========================================================================
@@ -229,31 +233,30 @@ test('sync_success: no schema section when schema did not change', () => {
 // =========================================================================
 
 test('sync_failed: type is pcd.sync_failed', () => {
-	assertEquals(pcdSyncFailed(makeSyncFailedParams()).type, 'pcd.sync_failed');
+	expect(pcdSyncFailed(makeSyncFailedParams()).type).toStrictEqual('pcd.sync_failed');
 });
 
 test('sync_failed: severity is error', () => {
-	assertEquals(pcdSyncFailed(makeSyncFailedParams()).severity, 'error');
+	expect(pcdSyncFailed(makeSyncFailedParams()).severity).toStrictEqual('error');
 });
 
 test('sync_failed: title includes database name', () => {
-	assertEquals(pcdSyncFailed(makeSyncFailedParams()).title.includes('Dictionarry'), true);
+	expect(pcdSyncFailed(makeSyncFailedParams()).title.includes('Dictionarry')).toStrictEqual(true);
 });
 
 test('sync_failed: title includes Failed', () => {
-	assertEquals(pcdSyncFailed(makeSyncFailedParams()).title.includes('Failed'), true);
+	expect(pcdSyncFailed(makeSyncFailedParams()).title.includes('Failed')).toStrictEqual(true);
 });
 
 test('sync_failed: message includes error', () => {
-	assertEquals(
-		pcdSyncFailed(makeSyncFailedParams()).message.includes('authentication failed'),
-		true
-	);
+	expect(
+		pcdSyncFailed(makeSyncFailedParams()).message.includes('authentication failed')
+	).toStrictEqual(true);
 });
 
 test('sync_failed: no blocks', () => {
 	const notification = pcdSyncFailed(makeSyncFailedParams());
-	assertEquals(notification.blocks?.length ?? 0, 0);
+	expect(notification.blocks?.length ?? 0).toStrictEqual(0);
 });
 
 // =========================================================================
@@ -269,7 +272,7 @@ test('discord: updates_available uses info color', async () => {
 	});
 	await notifier.notify(pcdUpdatesAvailable(makeUpdatesAvailableParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.INFO);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.INFO);
 });
 
 test('discord: sync_success uses success color', async () => {
@@ -281,7 +284,7 @@ test('discord: sync_success uses success color', async () => {
 	});
 	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.SUCCESS);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.SUCCESS);
 });
 
 test('discord: sync_failed uses error color', async () => {
@@ -293,7 +296,7 @@ test('discord: sync_failed uses error color', async () => {
 	});
 	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
 
-	assertEquals(getAllEmbeds()[0]?.color, Colors.ERROR);
+	expect(getAllEmbeds()[0]?.color).toStrictEqual(Colors.ERROR);
 });
 
 test('discord: changes section renders in embed', async () => {
@@ -311,7 +314,7 @@ test('discord: changes section renders in embed', async () => {
 
 	// Changes should appear somewhere in the embed (fields or description)
 	const allText = [...allFields.map((f) => `${f.name} ${f.value}`), ...descriptions].join(' ');
-	assertEquals(allText.includes('add position to quality groups'), true);
+	expect(allText.includes('add position to quality groups')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -327,7 +330,7 @@ test('ntfy: updates_available maps to priority 3', async () => {
 	await notifier.notify(pcdUpdatesAvailable(makeUpdatesAvailableParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
+	expect(payload?.priority).toStrictEqual(3);
 });
 
 test('ntfy: sync_success maps to priority 3', async () => {
@@ -339,7 +342,7 @@ test('ntfy: sync_success maps to priority 3', async () => {
 	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 3);
+	expect(payload?.priority).toStrictEqual(3);
 });
 
 test('ntfy: sync_failed maps to priority 5', async () => {
@@ -351,7 +354,7 @@ test('ntfy: sync_failed maps to priority 5', async () => {
 	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 5);
+	expect(payload?.priority).toStrictEqual(5);
 });
 
 // =========================================================================
@@ -366,12 +369,12 @@ test('webhook: sync_success sends full notification with blocks', async () => {
 	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'pcd.sync_success');
-	assertEquals(payload?.severity, 'success');
+	expect(payload?.type).toStrictEqual('pcd.sync_success');
+	expect(payload?.severity).toStrictEqual('success');
 	const blocks = payload?.blocks as { kind: string }[];
-	assertExists(blocks);
+	expect(blocks).not.toBeOneOf([null, undefined]);
 	const sections = blocks.filter((b) => b.kind === 'section');
-	assertEquals(sections.length, 1);
+	expect(sections.length).toStrictEqual(1);
 });
 
 test('webhook: sync_success with schema has two section blocks', async () => {
@@ -386,7 +389,7 @@ test('webhook: sync_success with schema has two section blocks', async () => {
 	const payload = captured[0]?.body as Record<string, unknown>;
 	const blocks = payload?.blocks as { kind: string }[];
 	const sections = blocks.filter((b) => b.kind === 'section');
-	assertEquals(sections.length, 2);
+	expect(sections.length).toStrictEqual(2);
 });
 
 test('webhook: sync_failed has empty blocks', async () => {
@@ -397,9 +400,9 @@ test('webhook: sync_failed has empty blocks', async () => {
 	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'pcd.sync_failed');
+	expect(payload?.type).toStrictEqual('pcd.sync_failed');
 	const blocks = payload?.blocks as { kind: string }[];
-	assertEquals(blocks.length, 0);
+	expect(blocks.length).toStrictEqual(0);
 });
 
 // =========================================================================
@@ -418,7 +421,7 @@ test('telegram: updates_available has ℹ️ prefix', async () => {
 	await notifier.notify(pcdUpdatesAvailable(makeUpdatesAvailableParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2139\uFE0F'), true);
+	expect(text.startsWith('\u2139\uFE0F')).toStrictEqual(true);
 });
 
 test('telegram: sync_success has ✅ prefix', async () => {
@@ -431,7 +434,7 @@ test('telegram: sync_success has ✅ prefix', async () => {
 	await notifier.notify(pcdSyncSuccess(makeSyncSuccessParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u2705'), true);
+	expect(text.startsWith('\u2705')).toStrictEqual(true);
 });
 
 test('telegram: sync_failed has ❌ prefix', async () => {
@@ -444,7 +447,7 @@ test('telegram: sync_failed has ❌ prefix', async () => {
 	await notifier.notify(pcdSyncFailed(makeSyncFailedParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u274C'), true);
+	expect(text.startsWith('\u274C')).toStrictEqual(true);
 });
 
 test('telegram: omits section block content', async () => {
@@ -458,7 +461,7 @@ test('telegram: omits section block content', async () => {
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
 	// Commit messages are in a section block — should be omitted
-	assertEquals(text.includes('add position to quality groups'), false);
+	expect(text.includes('add position to quality groups')).toStrictEqual(false);
 });
 
 // =========================================================================

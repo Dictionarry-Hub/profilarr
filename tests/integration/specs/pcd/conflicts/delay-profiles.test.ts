@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -105,8 +104,8 @@ test('split scalar conflicts resolve per field by strategy', async () => {
 		assertLatestHistory(ctx, torrentOp, 'applied');
 
 		const row = assertDelayProfile(ctx, 'Split Conflict');
-		assertEquals(row.usenet_delay, strategy === 'override' ? 15 : 12);
-		assertEquals(row.torrent_delay, 25);
+		expect(row.usenet_delay).toStrictEqual(strategy === 'override' ? 15 : 12);
+		expect(row.torrent_delay).toStrictEqual(25);
 	}
 });
 
@@ -159,11 +158,10 @@ test('protocol constrained pair conflicts atomically', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertDelayProfile(ctx, 'Protocol Pair');
-		assertEquals(
-			row.preferred_protocol,
+		expect(row.preferred_protocol).toStrictEqual(
 			strategy === 'override' ? 'only_torrent' : 'prefer_usenet'
 		);
-		assertEquals(row.usenet_delay, strategy === 'override' ? null : 12);
+		expect(row.usenet_delay).toStrictEqual(strategy === 'override' ? null : 12);
 	}
 });
 
@@ -225,8 +223,8 @@ test('bypass score constrained pair conflicts atomically', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertDelayProfile(ctx, 'Bypass Pair');
-		assertEquals(row.bypass_if_above_custom_format_score, strategy === 'override' ? 0 : 1);
-		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? null : 90);
+		expect(row.bypass_if_above_custom_format_score).toStrictEqual(strategy === 'override' ? 0 : 1);
+		expect(row.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? null : 90);
 	}
 });
 
@@ -316,7 +314,7 @@ test('create duplicate conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'duplicate_key');
 
 		const row = assertDelayProfile(ctx, 'Create Conflict');
-		assertEquals(row.usenet_delay, strategy === 'override' ? 10 : 20);
+		expect(row.usenet_delay).toStrictEqual(strategy === 'override' ? 10 : 20);
 	}
 });
 
@@ -351,7 +349,7 @@ test('delete applies cleanly after upstream non-name field change', async () => 
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoDelayProfile(ctx, 'Delete Conflict');
 	}
@@ -386,7 +384,7 @@ test('delete missing target auto-aligns', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForOperation(opsSince(ctx, checkpoint), 'delete');
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoDelayProfile(ctx, 'Already Deleted');
 	}
@@ -431,7 +429,7 @@ function userOpsSince(ctx: PcdTestContext, checkpoint: number): OpRow[] {
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user ${operation} op`);
+	expect(op, `Expected a user ${operation} op`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -443,7 +441,7 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -460,19 +458,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assert(op.superseded_by_op_id !== null, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(
+		op.superseded_by_op_id !== null,
+		'Expected override to link a replacement op'
+	).toBeTruthy();
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -483,9 +484,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -502,7 +503,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -511,13 +512,13 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 
 function assertDelayProfile(ctx: PcdTestContext, name: string): DelayProfileRow {
 	const row = compiledDelayProfiles(ctx).find((profile) => profile.name === name);
-	assertExists(row, `Expected delay profile ${name}`);
+	expect(row, `Expected delay profile ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoDelayProfile(ctx: PcdTestContext, name: string): void {
 	const row = compiledDelayProfiles(ctx).find((profile) => profile.name === name);
-	assertEquals(row, undefined);
+	expect(row).toStrictEqual(undefined);
 }
 
 function compiledDelayProfiles(ctx: PcdTestContext): DelayProfileRow[] {

@@ -4,13 +4,12 @@
  * Verifies listing, downloading, auth enforcement, and input validation.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { execFile } from 'node:child_process';
 import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -64,22 +63,22 @@ afterAll(async () => {
 
 test('GET /api/v1/backups with session returns 200 with array', async () => {
 	const res = await client.get('/api/v1/backups');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(Array.isArray(body), true);
+	expect(Array.isArray(body)).toStrictEqual(true);
 });
 
 test('GET /api/v1/backups with API key returns 200', async () => {
 	const res = await apiKeyClient.get('/api/v1/backups', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('GET /api/v1/backups without auth returns 401', async () => {
 	const res = await unauthClient.get('/api/v1/backups');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── List: Behavior ──────────────────────────────────────────────────────────
@@ -93,10 +92,10 @@ test('GET /api/v1/backups returns empty array when no backups exist', async () =
 	}
 
 	const res = await client.get('/api/v1/backups');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.length, 0);
+	expect(body.length).toStrictEqual(0);
 });
 
 test('GET /api/v1/backups returns sorted list with expected fields', async () => {
@@ -107,17 +106,17 @@ test('GET /api/v1/backups returns sorted list with expected fields', async () =>
 	await createDummyBackup('backup-2025-06-15-120000.tar.gz', 'newer');
 
 	const res = await client.get('/api/v1/backups');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.length >= 2, true);
+	expect(body.length >= 2).toStrictEqual(true);
 
 	// Check fields exist on first item
 	const first = body[0];
-	assertExists(first.filename);
-	assertExists(first.created);
-	assertExists(first.size);
-	assertExists(first.sizeFormatted);
+	expect(first.filename).not.toBeOneOf([null, undefined]);
+	expect(first.created).not.toBeOneOf([null, undefined]);
+	expect(first.size).not.toBeOneOf([null, undefined]);
+	expect(first.sizeFormatted).not.toBeOneOf([null, undefined]);
 
 	// Sorted newest first (by mtime, so the second file we created should be first)
 	const idx1 = body.findIndex(
@@ -126,7 +125,7 @@ test('GET /api/v1/backups returns sorted list with expected fields', async () =>
 	const idx2 = body.findIndex(
 		(b: { filename: string }) => b.filename === 'backup-2025-01-01-000000.tar.gz'
 	);
-	assertEquals(idx1 < idx2, true, 'newer backup should appear first');
+	expect(idx1 < idx2, 'newer backup should appear first').toStrictEqual(true);
 });
 
 // ─── Download: Success ───────────────────────────────────────────────────────
@@ -135,36 +134,36 @@ test('GET /api/v1/backups/{filename} returns 200 with binary content', async () 
 	await createDummyBackup('backup-download-test.tar.gz', 'download content');
 
 	const res = await client.get('/api/v1/backups/backup-download-test.tar.gz');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const contentType = res.headers.get('content-type');
-	assertEquals(contentType, 'application/gzip');
+	expect(contentType).toStrictEqual('application/gzip');
 });
 
 test('GET /api/v1/backups/{filename} returns Content-Disposition header', async () => {
 	await createDummyBackup('backup-disposition-test.tar.gz');
 
 	const res = await client.get('/api/v1/backups/backup-disposition-test.tar.gz');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const disposition = res.headers.get('content-disposition');
-	assertEquals(disposition, 'attachment; filename="backup-disposition-test.tar.gz"');
+	expect(disposition).toStrictEqual('attachment; filename="backup-disposition-test.tar.gz"');
 });
 
 // ─── Download: Errors ────────────────────────────────────────────────────────
 
 test('GET /api/v1/backups/{filename} returns 404 for non-existent file', async () => {
 	const res = await client.get('/api/v1/backups/backup-does-not-exist.tar.gz');
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });
 
 test('GET /api/v1/backups/{filename} returns 400 for invalid filename', async () => {
 	const res = await client.get('/api/v1/backups/notabackup.tar.gz');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('GET /api/v1/backups/{filename} returns 400 for path traversal', async () => {
 	// The filename itself contains traversal — should be caught by validation
 	const res = await client.get('/api/v1/backups/backup-..%2F..%2Fetc%2Fpasswd.tar.gz');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });

@@ -2,7 +2,7 @@
  * Shared scenario factory and op assertions for quality profile write specs.
  */
 
-import { assertExists } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	compilePcd,
 	parseMetadata,
@@ -59,6 +59,6 @@ export function opForChangedField(ops: OpRow[], field: string): OpRow {
 		const fields = changedFields(candidate);
 		return fields.length === 1 && fields[0] === field;
 	});
-	assertExists(op, `Expected a user op for ${field}`);
+	expect(op, `Expected a user op for ${field}`).not.toBeOneOf([null, undefined]);
 	return op;
 }

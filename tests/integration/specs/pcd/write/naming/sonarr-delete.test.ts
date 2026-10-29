@@ -6,9 +6,8 @@
  * before the implementation.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -83,28 +82,28 @@ test('sonarr naming delete emits one name-guarded op', async () => {
 	await write.namingSonarr.remove(ctx, 'Delete Naming');
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'delete');
-	assertEquals(metadata.entity, 'sonarr_naming');
-	assertEquals(metadata.name, 'Delete Naming');
-	assertEquals(metadata.changed_fields, ['deleted']);
+	expect(metadata.operation).toStrictEqual('delete');
+	expect(metadata.entity).toStrictEqual('sonarr_naming');
+	expect(metadata.name).toStrictEqual('Delete Naming');
+	expect(metadata.changed_fields).toStrictEqual(['deleted']);
 	const desired = parseDesiredState(op);
-	assertEquals(desired.deleted, true);
-	assertEquals(desired.name, 'Delete Naming');
-	assertEquals(desired.standard_episode_format, '{Series Title}');
-	assertEquals(desired.custom_colon_replacement_format, ' - ');
-	assertEquals(desired.multi_episode_style, 'range');
+	expect(desired.deleted).toStrictEqual(true);
+	expect(desired.name).toStrictEqual('Delete Naming');
+	expect(desired.standard_episode_format).toStrictEqual('{Series Title}');
+	expect(desired.custom_colon_replacement_format).toStrictEqual(' - ');
+	expect(desired.multi_episode_style).toStrictEqual('range');
 
 	const sql = normalizeSql(op.sql);
 	const lowerSql = sql.toLowerCase();
-	assert(/delete from "?sonarr_naming"?/i.test(sql));
+	expect(/delete from "?sonarr_naming"?/i.test(sql)).toBeTruthy();
 
 	const deleteIndex = lowerSql.indexOf('delete from "sonarr_naming"');
-	assert(deleteIndex >= 0, 'expected sonarr_naming delete in SQL');
+	expect(deleteIndex >= 0, 'expected sonarr_naming delete in SQL').toBeTruthy();
 	const deleteClause = sql.slice(deleteIndex);
-	assert(/where "?name"? = /i.test(deleteClause));
+	expect(/where "?name"? = /i.test(deleteClause)).toBeTruthy();
 
 	const forbidden = [
 		'rename',
@@ -120,9 +119,9 @@ test('sonarr naming delete emits one name-guarded op', async () => {
 	];
 	for (const field of forbidden) {
 		const pattern = new RegExp(`where[^;]*"?${field}"?\\s*=`, 'i');
-		assert(
+		expect(
 			!pattern.test(deleteClause),
 			`${field} should not appear in delete WHERE clause, got: ${deleteClause}`
-		);
+		).toBeTruthy();
 	}
 });

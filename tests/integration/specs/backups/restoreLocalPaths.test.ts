@@ -11,8 +11,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { Database } from '#db/sqlite.ts';
 import { config } from '#utils/config/config.ts';
 
@@ -91,6 +90,8 @@ test('restore rewrites database_instances.local_path for the current host', asyn
 
 	await applyPendingRestore();
 
-	assertEquals(readRestoredLocalPath(config.paths.database), `${config.paths.databases}/${uuid}`);
-	assertEquals(await readFile(`${config.paths.databases}/${uuid}/pcd.json`, 'utf8'), '{}');
+	expect(readRestoredLocalPath(config.paths.database)).toStrictEqual(
+		`${config.paths.databases}/${uuid}`
+	);
+	expect(await readFile(`${config.paths.databases}/${uuid}/pcd.json`, 'utf8')).toStrictEqual('{}');
 });

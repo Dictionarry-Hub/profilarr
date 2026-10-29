@@ -2,9 +2,8 @@
  * PCD write tests: media settings create (radarr + sonarr).
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -68,19 +67,19 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		await write.mediaSettings.create(ctx, arrType, { name: 'Created Media' });
 
 		const ops = userOpsSince(ctx, checkpoint);
-		assertEquals(ops.length, 1);
+		expect(ops.length).toStrictEqual(1);
 		const op = ops[0];
 		const metadata = parseMetadata(op);
-		assertEquals(metadata.operation, 'create');
-		assertEquals(metadata.entity, entityForArrType(arrType));
-		assertEquals(metadata.name, 'Created Media');
+		expect(metadata.operation).toStrictEqual('create');
+		expect(metadata.entity).toStrictEqual(entityForArrType(arrType));
+		expect(metadata.name).toStrictEqual('Created Media');
 		const desired = parseDesiredState(op);
-		assertEquals(desired.name, 'Created Media');
-		assertEquals(desired.propers_repacks, 'doNotPrefer');
-		assertEquals(desired.enable_media_info, false);
+		expect(desired.name).toStrictEqual('Created Media');
+		expect(desired.propers_repacks).toStrictEqual('doNotPrefer');
+		expect(desired.enable_media_info).toStrictEqual(false);
 		const sql = normalizeSql(op.sql);
 		const insertPattern = new RegExp(`insert into "?${tableForArrType(arrType)}"?`, 'i');
-		assert(insertPattern.test(sql));
+		expect(insertPattern.test(sql)).toBeTruthy();
 	});
 }
 
@@ -114,10 +113,10 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		});
 
 		const ops = userOpsSince(ctx, checkpoint);
-		assertEquals(ops.length, 1);
+		expect(ops.length).toStrictEqual(1);
 		const desired = parseDesiredState(ops[0]);
-		assertEquals(desired.propers_repacks, 'preferAndUpgrade');
-		assertEquals(desired.enable_media_info, true);
+		expect(desired.propers_repacks).toStrictEqual('preferAndUpgrade');
+		expect(desired.enable_media_info).toStrictEqual(true);
 	});
 }
 
@@ -151,6 +150,6 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		});
 
 		await assertActionFailed(response);
-		assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+		expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 	});
 }

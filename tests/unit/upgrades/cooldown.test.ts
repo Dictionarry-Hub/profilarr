@@ -5,7 +5,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	getFilterTagLabel,
 	isFilterTag,
@@ -88,32 +88,32 @@ class CooldownTest extends BaseTest {
 
 		this.test('getFilterTagLabel: simple name', () => {
 			const label = getFilterTagLabel('My Filter');
-			assertEquals(label, 'profilarr-my-filter');
+			expect(label).toStrictEqual('profilarr-my-filter');
 		});
 
 		this.test('getFilterTagLabel: name with apostrophe', () => {
 			const label = getFilterTagLabel("Things I Don't Want");
-			assertEquals(label, 'profilarr-things-i-dont-want');
+			expect(label).toStrictEqual('profilarr-things-i-dont-want');
 		});
 
 		this.test('getFilterTagLabel: name with special characters', () => {
 			const label = getFilterTagLabel('4K HDR (Dolby Vision)');
-			assertEquals(label, 'profilarr-4k-hdr-dolby-vision');
+			expect(label).toStrictEqual('profilarr-4k-hdr-dolby-vision');
 		});
 
 		this.test('getFilterTagLabel: name with multiple spaces', () => {
 			const label = getFilterTagLabel('Filter   With   Spaces');
-			assertEquals(label, 'profilarr-filter-with-spaces');
+			expect(label).toStrictEqual('profilarr-filter-with-spaces');
 		});
 
 		this.test('getFilterTagLabel: already lowercase', () => {
 			const label = getFilterTagLabel('already-lowercase');
-			assertEquals(label, 'profilarr-already-lowercase');
+			expect(label).toStrictEqual('profilarr-already-lowercase');
 		});
 
 		this.test('getFilterTagLabel: numbers preserved', () => {
 			const label = getFilterTagLabel('Filter 123');
-			assertEquals(label, 'profilarr-filter-123');
+			expect(label).toStrictEqual('profilarr-filter-123');
 		});
 
 		this.test('getFilterTagLabel: long name truncated to 50 chars', () => {
@@ -121,9 +121,9 @@ class CooldownTest extends BaseTest {
 				'This is a very long filter name that should be truncated to fifty characters';
 			const label = getFilterTagLabel(longName);
 			// profilarr- prefix (10 chars) + 50 char max slug = 60 max
-			assertEquals(label.length <= 60, true);
-			assertEquals(label.startsWith('profilarr-'), true);
-			assertEquals(label, 'profilarr-this-is-a-very-long-filter-name-that-should-be-tru');
+			expect(label.length <= 60).toStrictEqual(true);
+			expect(label.startsWith('profilarr-')).toStrictEqual(true);
+			expect(label).toStrictEqual('profilarr-this-is-a-very-long-filter-name-that-should-be-tru');
 		});
 
 		// =====================
@@ -132,27 +132,27 @@ class CooldownTest extends BaseTest {
 
 		this.test('resolveTagLabel: uses custom tag when set', () => {
 			const label = resolveTagLabel({ name: 'My Filter', tag: 'my-custom-tag' });
-			assertEquals(label, 'my-custom-tag');
+			expect(label).toStrictEqual('my-custom-tag');
 		});
 
 		this.test('resolveTagLabel: falls back to auto-generated when tag is empty', () => {
 			const label = resolveTagLabel({ name: 'My Filter', tag: '' });
-			assertEquals(label, 'profilarr-my-filter');
+			expect(label).toStrictEqual('profilarr-my-filter');
 		});
 
 		this.test('resolveTagLabel: falls back to auto-generated when tag is undefined', () => {
 			const label = resolveTagLabel({ name: 'My Filter' });
-			assertEquals(label, 'profilarr-my-filter');
+			expect(label).toStrictEqual('profilarr-my-filter');
 		});
 
 		this.test('resolveTagLabel: trims whitespace from custom tag', () => {
 			const label = resolveTagLabel({ name: 'My Filter', tag: '  my-tag  ' });
-			assertEquals(label, 'my-tag');
+			expect(label).toStrictEqual('my-tag');
 		});
 
 		this.test('resolveTagLabel: whitespace-only tag falls back to auto-generated', () => {
 			const label = resolveTagLabel({ name: 'My Filter', tag: '   ' });
-			assertEquals(label, 'profilarr-my-filter');
+			expect(label).toStrictEqual('profilarr-my-filter');
 		});
 
 		// =====================
@@ -160,15 +160,15 @@ class CooldownTest extends BaseTest {
 		// =====================
 
 		this.test('isFilterTag: matches profilarr tag', () => {
-			assertEquals(isFilterTag('profilarr-my-filter'), true);
+			expect(isFilterTag('profilarr-my-filter')).toStrictEqual(true);
 		});
 
 		this.test('isFilterTag: rejects non-profilarr tag', () => {
-			assertEquals(isFilterTag('some-other-tag'), false);
+			expect(isFilterTag('some-other-tag')).toStrictEqual(false);
 		});
 
 		this.test('isFilterTag: rejects empty string', () => {
-			assertEquals(isFilterTag(''), false);
+			expect(isFilterTag('')).toStrictEqual(false);
 		});
 
 		// =====================
@@ -181,7 +181,7 @@ class CooldownTest extends BaseTest {
 				{ id: 2, label: 'other-tag' }
 			];
 			const itemTagIds = [1, 2];
-			assertEquals(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('My Filter')), true);
+			expect(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('My Filter'))).toStrictEqual(true);
 		});
 
 		this.test('hasFilterTag: returns false when tag not present', () => {
@@ -190,20 +190,24 @@ class CooldownTest extends BaseTest {
 				{ id: 2, label: 'other-tag' }
 			];
 			const itemTagIds = [1, 2];
-			assertEquals(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('My Filter')), false);
+			expect(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('My Filter'))).toStrictEqual(
+				false
+			);
 		});
 
 		this.test('hasFilterTag: returns false when item has no tags', () => {
 			const allTags: ArrTag[] = [{ id: 1, label: 'profilarr-my-filter' }];
 			const itemTagIds: number[] = [];
-			assertEquals(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('My Filter')), false);
+			expect(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('My Filter'))).toStrictEqual(
+				false
+			);
 		});
 
 		this.test('hasFilterTag: handles case-insensitive filter name', () => {
 			const allTags: ArrTag[] = [{ id: 1, label: 'profilarr-my-filter' }];
 			const itemTagIds = [1];
 			// getFilterTagLabel lowercases, so "MY FILTER" -> "profilarr-my-filter"
-			assertEquals(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('MY FILTER')), true);
+			expect(hasFilterTag(itemTagIds, allTags, getFilterTagLabel('MY FILTER'))).toStrictEqual(true);
 		});
 
 		// =====================
@@ -219,9 +223,9 @@ class CooldownTest extends BaseTest {
 			];
 
 			const result = filterByFilterTag(items, allTags, getFilterTagLabel('My Filter'));
-			assertEquals(result.length, 2);
-			assertEquals(result[0].title, 'Untagged Movie');
-			assertEquals(result[1].title, 'Other Tagged');
+			expect(result.length).toStrictEqual(2);
+			expect(result[0].title).toStrictEqual('Untagged Movie');
+			expect(result[1].title).toStrictEqual('Other Tagged');
 		});
 
 		this.test('filterByFilterTag: returns all items when none tagged', () => {
@@ -232,7 +236,7 @@ class CooldownTest extends BaseTest {
 			];
 
 			const result = filterByFilterTag(items, allTags, getFilterTagLabel('My Filter'));
-			assertEquals(result.length, 2);
+			expect(result.length).toStrictEqual(2);
 		});
 
 		this.test('filterByFilterTag: returns empty when all tagged', () => {
@@ -243,7 +247,7 @@ class CooldownTest extends BaseTest {
 			];
 
 			const result = filterByFilterTag(items, allTags, getFilterTagLabel('My Filter'));
-			assertEquals(result.length, 0);
+			expect(result.length).toStrictEqual(0);
 		});
 
 		// =====================
@@ -257,7 +261,7 @@ class CooldownTest extends BaseTest {
 				{ id: 2, _tags: [1] }
 			];
 
-			assertEquals(isFilterExhausted(items, allTags, getFilterTagLabel('My Filter')), true);
+			expect(isFilterExhausted(items, allTags, getFilterTagLabel('My Filter'))).toStrictEqual(true);
 		});
 
 		this.test('isFilterExhausted: false when some items untagged', () => {
@@ -267,14 +271,18 @@ class CooldownTest extends BaseTest {
 				{ id: 2, _tags: [] }
 			];
 
-			assertEquals(isFilterExhausted(items, allTags, getFilterTagLabel('My Filter')), false);
+			expect(isFilterExhausted(items, allTags, getFilterTagLabel('My Filter'))).toStrictEqual(
+				false
+			);
 		});
 
 		this.test('isFilterExhausted: false when no items matched', () => {
 			const allTags: ArrTag[] = [{ id: 1, label: 'profilarr-my-filter' }];
 			const items: { id: number; _tags: number[] }[] = [];
 
-			assertEquals(isFilterExhausted(items, allTags, getFilterTagLabel('My Filter')), false);
+			expect(isFilterExhausted(items, allTags, getFilterTagLabel('My Filter'))).toStrictEqual(
+				false
+			);
 		});
 
 		this.test('isFilterExhausted: true triggers reset cycle', () => {
@@ -291,7 +299,7 @@ class CooldownTest extends BaseTest {
 				allTags,
 				getFilterTagLabel('Upgrade Filter')
 			);
-			assertEquals(exhausted, true);
+			expect(exhausted).toStrictEqual(true);
 			// When exhausted, processor should call resetFilterCooldown()
 		});
 
@@ -314,30 +322,33 @@ class CooldownTest extends BaseTest {
 
 			// All items available (none tagged)
 			let available = filterByFilterTag(items, allTags, tagLabel);
-			assertEquals(available.length, 3, 'All 3 items should be available initially');
-			assertEquals(isFilterExhausted(items, allTags, tagLabel), false);
+			expect(available.length, 'All 3 items should be available initially').toStrictEqual(3);
+			expect(isFilterExhausted(items, allTags, tagLabel)).toStrictEqual(false);
 
 			// Step 2: First run - tag is created, 1 item searched and tagged
 			allTags = [{ id: tagId, label: tagLabel }];
 			items[0]._tags = [tagId]; // Movie A tagged
 
 			available = filterByFilterTag(items, allTags, tagLabel);
-			assertEquals(available.length, 2, '2 items should be available after first search');
-			assertEquals(isFilterExhausted(items, allTags, tagLabel), false);
+			expect(available.length, '2 items should be available after first search').toStrictEqual(2);
+			expect(isFilterExhausted(items, allTags, tagLabel)).toStrictEqual(false);
 
 			// Step 3: Second run - another item tagged
 			items[1]._tags = [tagId]; // Movie B tagged
 
 			available = filterByFilterTag(items, allTags, tagLabel);
-			assertEquals(available.length, 1, '1 item should be available');
-			assertEquals(isFilterExhausted(items, allTags, tagLabel), false);
+			expect(available.length, '1 item should be available').toStrictEqual(1);
+			expect(isFilterExhausted(items, allTags, tagLabel)).toStrictEqual(false);
 
 			// Step 4: Third run - last item tagged, filter exhausted
 			items[2]._tags = [tagId]; // Movie C tagged
 
 			available = filterByFilterTag(items, allTags, tagLabel);
-			assertEquals(available.length, 0, 'No items should be available');
-			assertEquals(isFilterExhausted(items, allTags, tagLabel), true, 'Filter should be exhausted');
+			expect(available.length, 'No items should be available').toStrictEqual(0);
+			expect(
+				isFilterExhausted(items, allTags, tagLabel),
+				'Filter should be exhausted'
+			).toStrictEqual(true);
 
 			// Step 5: Reset - tags removed (simulates resetFilterCooldown)
 			items[0]._tags = [];
@@ -345,12 +356,11 @@ class CooldownTest extends BaseTest {
 			items[2]._tags = [];
 
 			available = filterByFilterTag(items, allTags, tagLabel);
-			assertEquals(available.length, 3, 'All 3 items should be available after reset');
-			assertEquals(
+			expect(available.length, 'All 3 items should be available after reset').toStrictEqual(3);
+			expect(
 				isFilterExhausted(items, allTags, tagLabel),
-				false,
 				'Filter should not be exhausted after reset'
-			);
+			).toStrictEqual(false);
 		});
 
 		this.test('scenario: multiple filters operate independently', () => {
@@ -373,19 +383,19 @@ class CooldownTest extends BaseTest {
 
 			// Filter One sees: Movie B (not tagged by it), Movie D (not tagged)
 			const availableForFilter1 = filterByFilterTag(items, allTags, tag1Label);
-			assertEquals(availableForFilter1.length, 2);
-			assertEquals(availableForFilter1[0].title, 'Movie B');
-			assertEquals(availableForFilter1[1].title, 'Movie D');
+			expect(availableForFilter1.length).toStrictEqual(2);
+			expect(availableForFilter1[0].title).toStrictEqual('Movie B');
+			expect(availableForFilter1[1].title).toStrictEqual('Movie D');
 
 			// Filter Two sees: Movie A (not tagged by it), Movie D (not tagged)
 			const availableForFilter2 = filterByFilterTag(items, allTags, tag2Label);
-			assertEquals(availableForFilter2.length, 2);
-			assertEquals(availableForFilter2[0].title, 'Movie A');
-			assertEquals(availableForFilter2[1].title, 'Movie D');
+			expect(availableForFilter2.length).toStrictEqual(2);
+			expect(availableForFilter2[0].title).toStrictEqual('Movie A');
+			expect(availableForFilter2[1].title).toStrictEqual('Movie D');
 
 			// Neither filter is exhausted
-			assertEquals(isFilterExhausted(items, allTags, tag1Label), false);
-			assertEquals(isFilterExhausted(items, allTags, tag2Label), false);
+			expect(isFilterExhausted(items, allTags, tag1Label)).toStrictEqual(false);
+			expect(isFilterExhausted(items, allTags, tag2Label)).toStrictEqual(false);
 		});
 
 		this.test('scenario: new item added mid-cycle is picked up', () => {
@@ -399,21 +409,22 @@ class CooldownTest extends BaseTest {
 				{ id: 2, title: 'Old Movie 2', _tags: [tagId] }
 			];
 
-			assertEquals(isFilterExhausted(items, allTags, tagLabel), true, 'Should be exhausted');
-			assertEquals(filterByFilterTag(items, allTags, tagLabel).length, 0);
+			expect(isFilterExhausted(items, allTags, tagLabel), 'Should be exhausted').toStrictEqual(
+				true
+			);
+			expect(filterByFilterTag(items, allTags, tagLabel).length).toStrictEqual(0);
 
 			// User adds a new movie (no tag)
 			items = [...items, { id: 3, title: 'New Movie', _tags: [] }];
 
 			// Now filter is NOT exhausted - new item available
-			assertEquals(
+			expect(
 				isFilterExhausted(items, allTags, tagLabel),
-				false,
 				'Should not be exhausted after new item'
-			);
+			).toStrictEqual(false);
 			const available = filterByFilterTag(items, allTags, tagLabel);
-			assertEquals(available.length, 1);
-			assertEquals(available[0].title, 'New Movie');
+			expect(available.length).toStrictEqual(1);
+			expect(available[0].title).toStrictEqual('New Movie');
 		});
 
 		// =====================
@@ -436,16 +447,16 @@ class CooldownTest extends BaseTest {
 				filterTag.id
 			);
 
-			assertEquals(result.success, 3);
-			assertEquals(result.failed, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.success).toStrictEqual(3);
+			expect(result.failed).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Verify tags were applied
 			const updatedMovies = await client.getMovies();
-			assertEquals(updatedMovies[0].tags?.includes(filterTag.id), true);
-			assertEquals(updatedMovies[1].tags?.includes(filterTag.id), true);
-			assertEquals(updatedMovies[2].tags?.includes(filterTag.id), true);
-			assertEquals(updatedMovies[2].tags?.includes(99), true); // Original tag preserved
+			expect(updatedMovies[0].tags?.includes(filterTag.id)).toStrictEqual(true);
+			expect(updatedMovies[1].tags?.includes(filterTag.id)).toStrictEqual(true);
+			expect(updatedMovies[2].tags?.includes(filterTag.id)).toStrictEqual(true);
+			expect(updatedMovies[2].tags?.includes(99)).toStrictEqual(true); // Original tag preserved
 		});
 
 		this.test('applyFilterTagToMovies: skips already-tagged movies', async () => {
@@ -464,8 +475,8 @@ class CooldownTest extends BaseTest {
 			);
 
 			// Both succeed (one skipped, one added)
-			assertEquals(result.success, 2);
-			assertEquals(result.failed, 0);
+			expect(result.success).toStrictEqual(2);
+			expect(result.failed).toStrictEqual(0);
 		});
 
 		this.test('resetFilterCooldown: removes tags from all tagged movies', async () => {
@@ -484,16 +495,20 @@ class CooldownTest extends BaseTest {
 
 			const result = await resetFilterCooldown(client as unknown as RadarrClient, tagLabel);
 
-			assertEquals(result.reset, 2, 'Should reset 2 movies');
-			assertEquals(result.failed, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.reset, 'Should reset 2 movies').toStrictEqual(2);
+			expect(result.failed).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Verify tags were removed
 			const movies = await client.getMovies();
-			assertEquals(movies[0].tags?.includes(1), false, 'Tag should be removed from movie 1');
-			assertEquals(movies[1].tags?.includes(1), false, 'Tag should be removed from movie 2');
-			assertEquals((movies[2].tags ?? []).length, 0, 'Movie 3 should still have no tags');
-			assertEquals(movies[3].tags?.includes(2), true, 'Movie 4 should keep other tag');
+			expect(movies[0].tags?.includes(1), 'Tag should be removed from movie 1').toStrictEqual(
+				false
+			);
+			expect(movies[1].tags?.includes(1), 'Tag should be removed from movie 2').toStrictEqual(
+				false
+			);
+			expect((movies[2].tags ?? []).length, 'Movie 3 should still have no tags').toStrictEqual(0);
+			expect(movies[3].tags?.includes(2), 'Movie 4 should keep other tag').toStrictEqual(true);
 		});
 
 		this.test('resetFilterCooldown: handles no tag existing', async () => {
@@ -505,9 +520,9 @@ class CooldownTest extends BaseTest {
 				getFilterTagLabel('Non Existent Filter')
 			);
 
-			assertEquals(result.reset, 0);
-			assertEquals(result.failed, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.reset).toStrictEqual(0);
+			expect(result.failed).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 		});
 
 		this.test('resetFilterCooldown: handles no movies tagged', async () => {
@@ -524,8 +539,8 @@ class CooldownTest extends BaseTest {
 
 			const result = await resetFilterCooldown(client as unknown as RadarrClient, tagLabel);
 
-			assertEquals(result.reset, 0);
-			assertEquals(result.failed, 0);
+			expect(result.reset).toStrictEqual(0);
+			expect(result.failed).toStrictEqual(0);
 		});
 
 		this.test('integration: full cycle with mock client', async () => {
@@ -540,7 +555,7 @@ class CooldownTest extends BaseTest {
 
 			// Step 1: Create filter tag
 			const filterTag = await client.getOrCreateTag(tagLabel);
-			assertEquals(filterTag.label, tagLabel);
+			expect(filterTag.label).toStrictEqual(tagLabel);
 
 			// Step 2: Tag first 2 movies (simulating search)
 			const movies = await client.getMovies();
@@ -556,9 +571,9 @@ class CooldownTest extends BaseTest {
 			let items = currentMovies.map((m) => ({ ...m, _tags: m.tags ?? [] }));
 
 			let available = filterByFilterTag(items, tags, tagLabel);
-			assertEquals(available.length, 1, 'Should have 1 available');
-			assertEquals(available[0].title, 'Movie C');
-			assertEquals(isFilterExhausted(items, tags, tagLabel), false);
+			expect(available.length, 'Should have 1 available').toStrictEqual(1);
+			expect(available[0].title).toStrictEqual('Movie C');
+			expect(isFilterExhausted(items, tags, tagLabel)).toStrictEqual(false);
 
 			// Step 4: Tag last movie
 			await applyFilterTagToMovies(client as unknown as RadarrClient, [movies[2]], filterTag.id);
@@ -567,12 +582,12 @@ class CooldownTest extends BaseTest {
 			currentMovies = await client.getMovies();
 			items = currentMovies.map((m) => ({ ...m, _tags: m.tags ?? [] }));
 
-			assertEquals(isFilterExhausted(items, tags, tagLabel), true, 'Should be exhausted');
-			assertEquals(filterByFilterTag(items, tags, tagLabel).length, 0);
+			expect(isFilterExhausted(items, tags, tagLabel), 'Should be exhausted').toStrictEqual(true);
+			expect(filterByFilterTag(items, tags, tagLabel).length).toStrictEqual(0);
 
 			// Step 6: Reset
 			const resetResult = await resetFilterCooldown(client as unknown as RadarrClient, tagLabel);
-			assertEquals(resetResult.reset, 3, 'Should reset 3 movies');
+			expect(resetResult.reset, 'Should reset 3 movies').toStrictEqual(3);
 
 			// Step 7: All available again
 			currentMovies = await client.getMovies();
@@ -580,8 +595,8 @@ class CooldownTest extends BaseTest {
 			tags = await client.getTags();
 
 			available = filterByFilterTag(items, tags, tagLabel);
-			assertEquals(available.length, 3, 'All 3 should be available after reset');
-			assertEquals(isFilterExhausted(items, tags, tagLabel), false);
+			expect(available.length, 'All 3 should be available after reset').toStrictEqual(3);
+			expect(isFilterExhausted(items, tags, tagLabel)).toStrictEqual(false);
 		});
 	}
 }

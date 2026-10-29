@@ -2,9 +2,8 @@
  * PCD write tests: delay profile create.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -67,21 +66,21 @@ test('minimal delay profile emits one create op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'create');
-	assertEquals(metadata.entity, 'delay_profile');
-	assertEquals(metadata.name, 'Created Delay');
+	expect(metadata.operation).toStrictEqual('create');
+	expect(metadata.entity).toStrictEqual('delay_profile');
+	expect(metadata.name).toStrictEqual('Created Delay');
 	const desired = parseDesiredState(op);
-	assertEquals(desired.name, 'Created Delay');
-	assertEquals(desired.preferred_protocol, 'prefer_usenet');
-	assertEquals(desired.usenet_delay, 0);
-	assertEquals(desired.torrent_delay, 0);
-	assertEquals(desired.bypass_if_highest_quality, false);
-	assertEquals(desired.bypass_if_above_custom_format_score, false);
-	assertEquals(desired.minimum_custom_format_score, null);
-	assert(/insert into "?delay_profiles"?/i.test(normalizeSql(op.sql)));
+	expect(desired.name).toStrictEqual('Created Delay');
+	expect(desired.preferred_protocol).toStrictEqual('prefer_usenet');
+	expect(desired.usenet_delay).toStrictEqual(0);
+	expect(desired.torrent_delay).toStrictEqual(0);
+	expect(desired.bypass_if_highest_quality).toStrictEqual(false);
+	expect(desired.bypass_if_above_custom_format_score).toStrictEqual(false);
+	expect(desired.minimum_custom_format_score).toStrictEqual(null);
+	expect(/insert into "?delay_profiles"?/i.test(normalizeSql(op.sql))).toBeTruthy();
 });
 
 /**
@@ -118,11 +117,11 @@ test('protocol-constrained create stores ignored delay as null', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const desired = parseDesiredState(ops[0]);
-	assertEquals(desired.preferred_protocol, 'only_torrent');
-	assertEquals(desired.usenet_delay, null);
-	assertEquals(desired.torrent_delay, 10);
+	expect(desired.preferred_protocol).toStrictEqual('only_torrent');
+	expect(desired.usenet_delay).toStrictEqual(null);
+	expect(desired.torrent_delay).toStrictEqual(10);
 });
 
 /**
@@ -156,10 +155,10 @@ test('bypass-score-disabled create stores score as null', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const desired = parseDesiredState(ops[0]);
-	assertEquals(desired.bypass_if_above_custom_format_score, false);
-	assertEquals(desired.minimum_custom_format_score, null);
+	expect(desired.bypass_if_above_custom_format_score).toStrictEqual(false);
+	expect(desired.minimum_custom_format_score).toStrictEqual(null);
 });
 
 /**
@@ -192,5 +191,5 @@ test('duplicate name fails without writing ops', async () => {
 	});
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

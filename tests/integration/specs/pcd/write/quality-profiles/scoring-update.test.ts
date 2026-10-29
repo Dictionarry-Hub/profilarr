@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -45,16 +44,19 @@ test('upgrades allowed disable emits guarded op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = opForChangedField(ops, 'upgrades_allowed');
-	assertEquals(parseDesiredState(op).upgrades_allowed, {
+	expect(parseDesiredState(op).upgrades_allowed).toStrictEqual({
 		from: true,
 		to: false
 	});
 
 	const sql = normalizeSql(op.sql).toLowerCase();
-	assert(sql.includes('upgrades_allowed" = 0'), `Expected disabled value, got ${sql}`);
-	assert(sql.includes('upgrades_allowed" = 1'), `Expected current value guard, got ${sql}`);
+	expect(sql.includes('upgrades_allowed" = 0'), `Expected disabled value, got ${sql}`).toBeTruthy();
+	expect(
+		sql.includes('upgrades_allowed" = 1'),
+		`Expected current value guard, got ${sql}`
+	).toBeTruthy();
 });
 
 test('upgrades allowed enable applies cleanly', async () => {
@@ -71,11 +73,11 @@ test('upgrades allowed enable applies cleanly', async () => {
 	});
 
 	const op = opForChangedField(userOpsSince(ctx, checkpoint), 'upgrades_allowed');
-	assertEquals(parseDesiredState(op).upgrades_allowed, {
+	expect(parseDesiredState(op).upgrades_allowed).toStrictEqual({
 		from: false,
 		to: true
 	});
-	assertEquals(compiledUpgradesAllowed(ctx, 'Upgrade Toggle Profile'), 1);
+	expect(compiledUpgradesAllowed(ctx, 'Upgrade Toggle Profile')).toStrictEqual(1);
 });
 
 function compiledUpgradesAllowed(ctx: PcdTestContext, name: string): number {
@@ -111,7 +113,7 @@ function compiledUpgradesAllowed(ctx: PcdTestContext, name: string): number {
 		const row = replay
 			.prepare('SELECT upgrades_allowed FROM quality_profiles WHERE name = ?')
 			.get(name) as { upgrades_allowed: number } | undefined;
-		assertExists(row, `Expected quality profile ${name}`);
+		expect(row, `Expected quality profile ${name}`).not.toBeOneOf([null, undefined]);
 		return row.upgrades_allowed;
 	} finally {
 		replay.close();

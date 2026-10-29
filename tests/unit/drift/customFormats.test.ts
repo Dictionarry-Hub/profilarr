@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareCustomFormatDrift,
@@ -31,8 +31,8 @@ class CustomFormatDriftTest extends BaseTest {
 				[customFormat({ name: 'Streaming Tier' })]
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('ignores arr ids', () => {
@@ -41,15 +41,15 @@ class CustomFormatDriftTest extends BaseTest {
 				[customFormat({ name: 'Streaming Tier', id: 999 })]
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('reports missing expected custom format', () => {
 			const result = compareCustomFormatDrift([customFormat({ name: 'Streaming Tier' })], []);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.missing, [{ name: 'Streaming Tier' }]);
-			assertEquals(result.diff.modified, []);
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.missing).toStrictEqual([{ name: 'Streaming Tier' }]);
+			expect(result.diff.modified).toStrictEqual([]);
 		});
 
 		this.test('reports include in rename mismatch', () => {
@@ -58,8 +58,8 @@ class CustomFormatDriftTest extends BaseTest {
 				[customFormat({ name: 'Streaming Tier', includeCustomFormatWhenRenaming: false })]
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'Streaming Tier',
 					fields: [
@@ -94,7 +94,7 @@ class CustomFormatDriftTest extends BaseTest {
 				[customFormat({ name: 'Streaming Tier', specifications: [second, first] })]
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('ignores field order', () => {
@@ -135,7 +135,7 @@ class CustomFormatDriftTest extends BaseTest {
 				]
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('treats missing optional false fields as clean', () => {
@@ -173,7 +173,7 @@ class CustomFormatDriftTest extends BaseTest {
 				]
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('reports optional true fields missing from expected', () => {
@@ -211,8 +211,8 @@ class CustomFormatDriftTest extends BaseTest {
 				]
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'Not Original or English',
 					fields: [
@@ -245,8 +245,8 @@ class CustomFormatDriftTest extends BaseTest {
 				]
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'Streaming Tier',
 					fields: [
@@ -266,7 +266,7 @@ class CustomFormatDriftTest extends BaseTest {
 				[customFormat({ name: 'Streaming Tier' }), customFormat({ name: 'Unmanaged' })]
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('hash is stable for equivalent object key order', async () => {
@@ -301,8 +301,7 @@ class CustomFormatDriftTest extends BaseTest {
 				missing: []
 			};
 
-			assertEquals(
-				await hashDriftDiff({ custom_formats: first }),
+			expect(await hashDriftDiff({ custom_formats: first })).toStrictEqual(
 				await hashDriftDiff({ custom_formats: second })
 			);
 		});
@@ -310,8 +309,8 @@ class CustomFormatDriftTest extends BaseTest {
 		this.test('clean with no expected custom formats', () => {
 			const result = compareCustomFormatDrift([], [customFormat({ name: 'Unmanaged' })]);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({ missing: [], modified: [] });
 		});
 	}
 }

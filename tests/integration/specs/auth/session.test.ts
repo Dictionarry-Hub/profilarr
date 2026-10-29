@@ -14,7 +14,6 @@
  * 7. POST /auth/logout without Origin → 403 (SvelteKit CSRF)
  */
 
-import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import {
@@ -24,7 +23,7 @@ import {
 	setSessionExpiry,
 	getSessionExpiry
 } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.session;
@@ -43,15 +42,15 @@ afterAll(async () => {
 test('no cookies — redirect to /auth/login', async () => {
 	const client = new TestClient(ORIGIN);
 	const res = await client.get('/');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/auth/login');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/auth/login');
 });
 
 test('valid session — access protected page', async () => {
 	const client = new TestClient(ORIGIN);
 	await login(client, 'admin', 'password123', ORIGIN);
 	const res = await client.get('/databases');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('expired session — redirect to /auth/login', async () => {
@@ -63,16 +62,16 @@ test('expired session — redirect to /auth/login', async () => {
 	expireSession(getDbPath(PORT), sessionId);
 
 	const res = await client.get('/');
-	assertEquals(res.status, 303);
-	assertEquals(res.headers.get('location'), '/auth/login');
+	expect(res.status).toStrictEqual(303);
+	expect(res.headers.get('location')).toStrictEqual('/auth/login');
 });
 
 test('unauthenticated API route — 401 JSON', async () => {
 	const client = new TestClient(ORIGIN);
 	const res = await client.get('/api/v1/status');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 	const body = await res.json();
-	assertEquals(body.error, 'Unauthorized');
+	expect(body.error).toStrictEqual('Unauthorized');
 });
 
 test('sliding expiration — session past halfway gets extended', async () => {
@@ -88,10 +87,10 @@ test('sliding expiration — session past halfway gets extended', async () => {
 
 	// Make a request — middleware should extend the session
 	const res = await client.get('/databases');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const expiryAfter = getSessionExpiry(dbPath, sessionId)!;
-	assertNotEquals(expiryBefore, expiryAfter);
+	expect(expiryBefore).not.toStrictEqual(expiryAfter);
 });
 
 // --- Logout CSRF protection (SA-07) ---
@@ -100,7 +99,7 @@ test('GET /auth/logout — 405 method not allowed', async () => {
 	const client = new TestClient(ORIGIN);
 	await login(client, 'admin', 'password123', ORIGIN);
 	const res = await client.get('/auth/logout');
-	assertEquals(res.status, 405, `Expected 405 for GET logout, got ${res.status}`);
+	expect(res.status, `Expected 405 for GET logout, got ${res.status}`).toStrictEqual(405);
 });
 
 test('POST /auth/logout without Origin — blocked by CSRF', async () => {
@@ -108,5 +107,5 @@ test('POST /auth/logout without Origin — blocked by CSRF', async () => {
 	await login(client, 'admin', 'password123', ORIGIN);
 	// No Origin header = SvelteKit CSRF rejection
 	const res = await client.postForm('/auth/logout', {});
-	assertEquals(res.status, 403, `Expected 403 for POST without Origin, got ${res.status}`);
+	expect(res.status, `Expected 403 for POST without Origin, got ${res.status}`).toStrictEqual(403);
 });

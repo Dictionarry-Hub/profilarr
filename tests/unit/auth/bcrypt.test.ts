@@ -1,5 +1,4 @@
-import { test } from 'vitest';
-import { assert, assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { BCRYPT_COST, hash, verify } from '#utils/auth/bcrypt.ts';
 
 // Made by @felix/bcrypt (the native library Profilarr used before bcryptjs) at
@@ -8,12 +7,12 @@ const NATIVE_HASH = '$2b$12$Ji1Al6Uk9OmcjThzIePDEehODWjO..hiVNY30ukZUmvN8SVwHbky
 const NATIVE_SECRET = 'profilarr-compat-check';
 
 test('bcrypt: a hash made by @felix/bcrypt verifies', async () => {
-	assert(await verify(NATIVE_SECRET, NATIVE_HASH));
-	assert(!(await verify('wrong-secret', NATIVE_HASH)));
+	expect(await verify(NATIVE_SECRET, NATIVE_HASH)).toBeTruthy();
+	expect(!(await verify('wrong-secret', NATIVE_HASH))).toBeTruthy();
 });
 
 test('bcrypt: new hashes use cost 12, like @felix/bcrypt', async () => {
 	const hashed = await hash('a-new-secret');
-	assertEquals(hashed.slice(0, 7), `$2b$${BCRYPT_COST}$`);
-	assert(await verify('a-new-secret', hashed));
+	expect(hashed.slice(0, 7)).toStrictEqual(`$2b$${BCRYPT_COST}$`);
+	expect(await verify('a-new-secret', hashed)).toBeTruthy();
 });

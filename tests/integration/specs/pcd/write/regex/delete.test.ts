@@ -2,9 +2,8 @@
  * PCD write tests: regex delete.
  */
 
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -64,14 +63,14 @@ test('unreferenced regex emits one delete op', async () => {
 	await write.regex.remove(ctx, 1);
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
-	assertEquals(parseMetadata(op).operation, 'delete');
-	assertEquals(parseMetadata(op).changed_fields, ['deleted']);
-	assertEquals(parseDesiredState(op).deleted, true);
+	expect(parseMetadata(op).operation).toStrictEqual('delete');
+	expect(parseMetadata(op).changed_fields).toStrictEqual(['deleted']);
+	expect(parseDesiredState(op).deleted).toStrictEqual(true);
 	const sql = normalizeSql(op.sql);
-	assert(/delete from "?regular_expressions"?/i.test(sql));
-	assert(!sql.includes('regular_expression_tags'));
+	expect(/delete from "?regular_expressions"?/i.test(sql)).toBeTruthy();
+	expect(!sql.includes('regular_expression_tags')).toBeTruthy();
 });
 
 /**
@@ -107,25 +106,25 @@ test('regex delete SQL guards by name only', async () => {
 	await write.regex.remove(ctx, 1);
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const sql = normalizeSql(op.sql);
 	const lowerSql = sql.toLowerCase();
 	const regexDeleteIndex = lowerSql.indexOf('delete from "regular_expressions"');
-	assert(regexDeleteIndex >= 0, 'expected regex delete in SQL');
+	expect(regexDeleteIndex >= 0, 'expected regex delete in SQL').toBeTruthy();
 	const regexDeleteClause = sql.slice(regexDeleteIndex);
-	assert(/where "?name"? = /i.test(regexDeleteClause));
-	assert(
+	expect(/where "?name"? = /i.test(regexDeleteClause)).toBeTruthy();
+	expect(
 		!/where[^;]*"?pattern"?\s*=/i.test(regexDeleteClause),
 		`pattern should not appear in regex delete WHERE clause, got: ${regexDeleteClause}`
-	);
-	assert(
+	).toBeTruthy();
+	expect(
 		!/where[^;]*"?description"?\s*=/i.test(regexDeleteClause),
 		`description should not appear in regex delete WHERE clause, got: ${regexDeleteClause}`
-	);
+	).toBeTruthy();
 	const desired = parseDesiredState(op);
-	assertEquals(desired.pattern, '\\bguarded\\b');
-	assertEquals(desired.description, 'Original');
+	expect(desired.pattern).toStrictEqual('\\bguarded\\b');
+	expect(desired.description).toStrictEqual('Original');
 });
 
 /**
@@ -154,16 +153,16 @@ test('regex with tags deletes tag links before the regex', async () => {
 	await write.regex.remove(ctx, 1);
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
-	assertEquals(parseDesiredState(op).tags, ['A', 'B']);
+	expect(parseDesiredState(op).tags).toStrictEqual(['A', 'B']);
 	const sql = normalizeSql(op.sql);
 	const lowerSql = sql.toLowerCase();
 	const tagDeleteIndex = lowerSql.indexOf('delete from regular_expression_tags');
 	const regexDeleteIndex = lowerSql.indexOf('delete from "regular_expressions"');
-	assert(tagDeleteIndex >= 0);
-	assert(regexDeleteIndex >= 0);
-	assert(tagDeleteIndex < regexDeleteIndex);
+	expect(tagDeleteIndex >= 0).toBeTruthy();
+	expect(regexDeleteIndex >= 0).toBeTruthy();
+	expect(tagDeleteIndex < regexDeleteIndex).toBeTruthy();
 });
 
 /**
@@ -196,7 +195,7 @@ test('referenced regex is blocked when referenced deletes fail', async () => {
 	const response = await write.regex.submitRemove(ctx, 1);
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -236,14 +235,13 @@ test('referenced regex can remove dependent conditions when allowed', async () =
 	await write.regex.remove(ctx, 1);
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	const generatedOp = generatedCustomFormatOp(ops);
 	const deleteOp = ops.find((op) => parseMetadata(op).operation === 'delete');
-	assertExists(deleteOp);
+	expect(deleteOp).not.toBeOneOf([null, undefined]);
 	assertSameGroup([generatedOp, deleteOp]);
-	assertEquals(parseMetadata(generatedOp).changed_fields, ['conditions']);
-	assertEquals(
-		(parseDesiredState(generatedOp).conditions as JsonObject).removed instanceof Array,
-		true
-	);
+	expect(parseMetadata(generatedOp).changed_fields).toStrictEqual(['conditions']);
+	expect(
+		(parseDesiredState(generatedOp).conditions as JsonObject).removed instanceof Array
+	).toStrictEqual(true);
 });

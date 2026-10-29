@@ -2,7 +2,7 @@
  * Shared scenario factory and op assertions for delay profile write specs.
  */
 
-import { assert, assertEquals, assertExists } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	compilePcd,
 	normalizeSql,
@@ -60,7 +60,7 @@ export function opForChangedField(ops: OpRow[], field: string): OpRow {
 		const fields = changedFields(candidate);
 		return fields.length === 1 && fields[0] === field;
 	});
-	assertExists(op, `Expected a user op for ${field}`);
+	expect(op, `Expected a user op for ${field}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -72,33 +72,33 @@ export function opForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 export function assertOnlyField(ops: OpRow[], field: string): void {
 	const op = opForChangedField(ops, field);
-	assertEquals(changedFields(op), [field]);
+	expect(changedFields(op)).toStrictEqual([field]);
 	const sql = normalizeSql(op.sql).toLowerCase();
-	assert(
+	expect(
 		sql.includes(`"${field}"`) || sql.includes(field),
 		`Expected ${field} SQL to mention its field, got ${sql}`
-	);
+	).toBeTruthy();
 }
 
 export function assertSameGroup(ops: OpRow[]): void {
 	const groupIds = ops.map((op) => parseMetadata(op).group_id);
-	assert(groupIds.length > 0);
-	assertExists(groupIds[0]);
+	expect(groupIds.length > 0).toBeTruthy();
+	expect(groupIds[0]).not.toBeOneOf([null, undefined]);
 	for (const groupId of groupIds) {
-		assertEquals(groupId, groupIds[0]);
+		expect(groupId).toStrictEqual(groupIds[0]);
 	}
 }
 
 export async function assertActionFailed(response: Response): Promise<void> {
 	const body = await response.text();
-	assert(
+	expect(
 		response.status >= 400 || body.includes('"type":"failure"'),
 		`Expected form action failure, got status=${response.status} body=${body}`
-	);
+	).toBeTruthy();
 }

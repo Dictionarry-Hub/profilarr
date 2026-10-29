@@ -6,7 +6,7 @@
 import { writeFile } from 'node:fs/promises';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { cleanupLogs } from '#server/jobs/logic/cleanupLogs.ts';
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 
 class CleanupLogsTest extends BaseTest {
 	/**
@@ -29,9 +29,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert 1 file was deleted, no errors
-			assertEquals(result.deletedCount, 1);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(1);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Assert old file was deleted
 			await this.assertFileNotExists(oldLogFile);
@@ -58,9 +58,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert no files were deleted, no errors
-			assertEquals(result.deletedCount, 0);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(0);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Assert recent file still exists
 			await this.assertFileExists(recentLogFile);
@@ -95,9 +95,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert only 1 file was deleted (the old one)
-			assertEquals(result.deletedCount, 1);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(1);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Assert recent file still exists, old file was deleted
 			await this.assertFileExists(recentFile);
@@ -140,9 +140,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert only 1 file was deleted (the valid old file)
-			assertEquals(result.deletedCount, 1);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(1);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Assert all invalid files still exist
 			for (const file of invalidFiles) {
@@ -166,9 +166,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert no files were processed, no errors
-			assertEquals(result.deletedCount, 0);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(0);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 		});
 	}
 
@@ -217,9 +217,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert no files were deleted (boundary file should be kept)
-			assertEquals(result.deletedCount, 0);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(0);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Assert boundary file still exists (30 days old is within retention)
 			await this.assertFileExists(boundaryFile);
@@ -253,9 +253,9 @@ class CleanupLogsTest extends BaseTest {
 			const result = await cleanupLogs(context.tempDir, 30);
 
 			// Assert all 4 files were deleted, no errors
-			assertEquals(result.deletedCount, 4);
-			assertEquals(result.errorCount, 0);
-			assertEquals(result.errors.length, 0);
+			expect(result.deletedCount).toStrictEqual(4);
+			expect(result.errorCount).toStrictEqual(0);
+			expect(result.errors.length).toStrictEqual(0);
 
 			// Assert all old files were deleted
 			for (const file of oldFiles) {

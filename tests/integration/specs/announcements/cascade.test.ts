@@ -12,8 +12,7 @@
  * SQLite connection without `PRAGMA foreign_keys = ON`.
  */
 
-import { assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
 import {
@@ -52,20 +51,20 @@ test('deleting a parent database cascades only its announcements', () => {
 	insertAnnouncement(dbPath, { id: 'alpha-2', databaseId: alpha });
 	insertAnnouncement(dbPath, { id: 'beta-1', databaseId: beta });
 
-	assertEquals(countAnnouncementsFor(dbPath, alpha), 2);
-	assertEquals(countAnnouncementsFor(dbPath, beta), 1);
+	expect(countAnnouncementsFor(dbPath, alpha)).toStrictEqual(2);
+	expect(countAnnouncementsFor(dbPath, beta)).toStrictEqual(1);
 
 	deleteDatabaseInstance(dbPath, alpha);
 
-	assertEquals(countAnnouncementsFor(dbPath, alpha), 0);
-	assertEquals(countAnnouncementsFor(dbPath, beta), 1);
+	expect(countAnnouncementsFor(dbPath, alpha)).toStrictEqual(0);
+	expect(countAnnouncementsFor(dbPath, beta)).toStrictEqual(1);
 });
 
 test('inserting with an unknown database_id is rejected by the FK', () => {
 	// 999_999 has not been issued; the FK must reject the insert. If this
 	// fails, `PRAGMA foreign_keys` is not on for the integration DB.
 	const rejected = tryInsertOrphanAnnouncement(dbPath, 999_999);
-	assertEquals(rejected, true);
+	expect(rejected).toStrictEqual(true);
 });
 
 test('the same id can live under two different databases (composite PK)', () => {
@@ -81,12 +80,12 @@ test('the same id can live under two different databases (composite PK)', () => 
 	insertAnnouncement(dbPath, { id: 'shared', databaseId: a });
 	insertAnnouncement(dbPath, { id: 'shared', databaseId: b });
 
-	assertEquals(countAnnouncementsFor(dbPath, a), 1);
-	assertEquals(countAnnouncementsFor(dbPath, b), 1);
+	expect(countAnnouncementsFor(dbPath, a)).toStrictEqual(1);
+	expect(countAnnouncementsFor(dbPath, b)).toStrictEqual(1);
 });
 
 test('total table count reflects all surviving rows after cascades', () => {
 	// One row left from the first scenario, two rows from the composite
 	// scenario (one per database). That sums to three.
-	assertEquals(countAnnouncements(dbPath), 3);
+	expect(countAnnouncements(dbPath)).toStrictEqual(3);
 });

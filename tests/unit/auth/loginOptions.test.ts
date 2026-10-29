@@ -3,35 +3,34 @@
  * and when the first-run setup page is shown.
  */
 
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { getLoginOptions, getStartupAuthError, needsSetup } from '#utils/auth/loginOptions.ts';
 
 // --- getLoginOptions ---
 
 test('getLoginOptions: password account, no SSO shows only the password form', () => {
-	assertEquals(getLoginOptions({ oidcEnabled: false, hasLocalAccount: true }), {
+	expect(getLoginOptions({ oidcEnabled: false, hasLocalAccount: true })).toStrictEqual({
 		password: true,
 		sso: false
 	});
 });
 
 test('getLoginOptions: SSO, no password account shows only the SSO button', () => {
-	assertEquals(getLoginOptions({ oidcEnabled: true, hasLocalAccount: false }), {
+	expect(getLoginOptions({ oidcEnabled: true, hasLocalAccount: false })).toStrictEqual({
 		password: false,
 		sso: true
 	});
 });
 
 test('getLoginOptions: SSO and a password account shows both', () => {
-	assertEquals(getLoginOptions({ oidcEnabled: true, hasLocalAccount: true }), {
+	expect(getLoginOptions({ oidcEnabled: true, hasLocalAccount: true })).toStrictEqual({
 		password: true,
 		sso: true
 	});
 });
 
 test('getLoginOptions: neither shows nothing', () => {
-	assertEquals(getLoginOptions({ oidcEnabled: false, hasLocalAccount: false }), {
+	expect(getLoginOptions({ oidcEnabled: false, hasLocalAccount: false })).toStrictEqual({
 		password: false,
 		sso: false
 	});
@@ -58,7 +57,7 @@ const cases: {
 
 for (const { authMode, oidcEnabled, hasLocalAccount, expected } of cases) {
 	test(`needsSetup: AUTH=${authMode}, SSO ${oidcEnabled ? 'on' : 'off'}, ${hasLocalAccount ? 'has' : 'no'} password account -> ${expected}`, () => {
-		assertEquals(needsSetup({ authMode, oidcEnabled, hasLocalAccount }), expected);
+		expect(needsSetup({ authMode, oidcEnabled, hasLocalAccount })).toStrictEqual(expected);
 	});
 }
 
@@ -74,7 +73,7 @@ test('getStartupAuthError: SSO accounts, SSO removed, no password account refuse
 		hasLocalAccount: false,
 		hasSsoAccounts: true
 	});
-	assertEquals(error?.startsWith(LOCKED_OUT), true, String(error));
+	expect(error?.startsWith(LOCKED_OUT), String(error)).toStrictEqual(true);
 });
 
 const startupOkCases: {
@@ -116,6 +115,6 @@ const startupOkCases: {
 
 for (const { name, ...opts } of startupOkCases) {
 	test(`getStartupAuthError: ${name} starts normally`, () => {
-		assertEquals(getStartupAuthError(opts), null);
+		expect(getStartupAuthError(opts)).toStrictEqual(null);
 	});
 }

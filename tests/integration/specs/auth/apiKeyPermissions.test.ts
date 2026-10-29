@@ -20,11 +20,10 @@
  * changing anything.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUser, setApiKey, deleteApiKey } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { openDb } from '#integration/harness/db.ts';
 
@@ -81,9 +80,9 @@ afterAll(async () => {
 
 test('read key can GET its areas', async () => {
 	const status = await client.get('/api/v1/status', { headers: { 'X-Api-Key': READ_KEY } });
-	assertEquals(status.status, 200);
+	expect(status.status).toStrictEqual(200);
 	const databases = await client.get('/api/v1/databases', { headers: { 'X-Api-Key': READ_KEY } });
-	assertEquals(databases.status, 200);
+	expect(databases.status).toStrictEqual(200);
 });
 
 test('read key can HEAD its areas', async () => {
@@ -91,65 +90,65 @@ test('read key can HEAD its areas', async () => {
 		method: 'HEAD',
 		headers: { 'X-Api-Key': READ_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('read key gets 403 on areas it was not granted', async () => {
 	const arr = await client.get('/api/v1/arr', { headers: { 'X-Api-Key': READ_KEY } });
-	assertEquals(arr.status, 403);
-	assertEquals(await errorOf(arr), 'API key does not have read access to Arr');
+	expect(arr.status).toStrictEqual(403);
+	expect(await errorOf(arr)).toStrictEqual('API key does not have read access to Arr');
 
 	const job = await client.get('/api/v1/jobs/1', { headers: { 'X-Api-Key': READ_KEY } });
-	assertEquals(job.status, 403);
-	assertEquals(await errorOf(job), 'API key does not have read access to Jobs');
+	expect(job.status).toStrictEqual(403);
+	expect(await errorOf(job)).toStrictEqual('API key does not have read access to Jobs');
 });
 
 test('read key gets 403 on writes to its own area', async () => {
 	const res = await client.patch(MISSING_DATABASE, {}, { headers: { 'X-Api-Key': READ_KEY } });
-	assertEquals(res.status, 403);
-	assertEquals(await errorOf(res), 'API key does not have write access to Databases');
+	expect(res.status).toStrictEqual(403);
+	expect(await errorOf(res)).toStrictEqual('API key does not have write access to Databases');
 });
 
 // --- Write key: Databases read & write ---
 
 test('write key can read its area', async () => {
 	const res = await client.get('/api/v1/databases', { headers: { 'X-Api-Key': WRITE_KEY } });
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('write key can write its area', async () => {
 	// Passing the permission check reaches the handler, which 404s
 	const res = await client.patch(MISSING_DATABASE, {}, { headers: { 'X-Api-Key': WRITE_KEY } });
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });
 
 test('write key gets 403 on other areas', async () => {
 	const status = await client.get('/api/v1/status', { headers: { 'X-Api-Key': WRITE_KEY } });
-	assertEquals(status.status, 403);
-	assertEquals(await errorOf(status), 'API key does not have read access to System');
+	expect(status.status).toStrictEqual(403);
+	expect(await errorOf(status)).toStrictEqual('API key does not have read access to System');
 });
 
 // --- Edge cases ---
 
 test('unknown access values grant nothing', async () => {
 	const res = await client.get('/api/v1/databases', { headers: { 'X-Api-Key': BOGUS_KEY } });
-	assertEquals(res.status, 403);
+	expect(res.status).toStrictEqual(403);
 });
 
 test('expired key returns 401 with an expiry message', async () => {
 	const res = await client.get('/api/v1/status', { headers: { 'X-Api-Key': EXPIRED_KEY } });
-	assertEquals(res.status, 401);
-	assertEquals(await errorOf(res), 'API key has expired');
+	expect(res.status).toStrictEqual(401);
+	expect(await errorOf(res)).toStrictEqual('API key has expired');
 });
 
 test('deleted key stops working on the next request', async () => {
 	const before = await client.get('/api/v1/status', { headers: { 'X-Api-Key': DELETED_KEY } });
-	assertEquals(before.status, 200);
+	expect(before.status).toStrictEqual(200);
 
 	deleteApiKey(getDbPath(PORT), 'deleted');
 
 	const after = await client.get('/api/v1/status', { headers: { 'X-Api-Key': DELETED_KEY } });
-	assertEquals(after.status, 401);
+	expect(after.status).toStrictEqual(401);
 });
 
 test('last_used_at is recorded when a key is used', () => {
@@ -158,7 +157,7 @@ test('last_used_at is recorded when a key is used', () => {
 		const row = db.prepare("SELECT last_used_at FROM api_keys WHERE name = 'read'").get() as {
 			last_used_at: string | null;
 		};
-		assert(row.last_used_at !== null, 'read key should have a last_used_at after use');
+		expect(row.last_used_at !== null, 'read key should have a last_used_at after use').toBeTruthy();
 	} finally {
 		db.close();
 	}

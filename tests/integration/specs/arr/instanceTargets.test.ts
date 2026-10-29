@@ -2,8 +2,7 @@
  * Integration tests for Arr instance target duplicate detection.
  */
 
-import { assert, assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { TestClient } from '#integration/harness/client.ts';
 import { openDb } from '#integration/harness/db.ts';
 import { PORTS } from '#integration/harness/ports.ts';
@@ -83,7 +82,7 @@ test('same normalized target is blocked', async () => {
 		url: 'http://localhost:7878',
 		apiKey: 'shared-api-key'
 	});
-	assert(first.status < 400, `Expected first create to succeed, got ${first.status}`);
+	expect(first.status < 400, `Expected first create to succeed, got ${first.status}`).toBeTruthy();
 	await first.body?.cancel();
 
 	const second = await createArrInstance({
@@ -92,12 +91,12 @@ test('same normalized target is blocked', async () => {
 		url: 'http://localhost:7878/',
 		apiKey: 'different-api-key'
 	});
-	assertEquals(second.status, 400);
+	expect(second.status).toStrictEqual(400);
 	const body = await second.text();
-	assert(body.includes('"status":400'));
-	assert(body.includes('This instance target is already configured'));
+	expect(body.includes('"status":400')).toBeTruthy();
+	expect(body.includes('This instance target is already configured')).toBeTruthy();
 
-	assertEquals(countArrInstances(), 1);
+	expect(countArrInstances()).toStrictEqual(1);
 });
 
 test('same API key on different target is allowed', async () => {
@@ -109,7 +108,7 @@ test('same API key on different target is allowed', async () => {
 		url: 'http://localhost:7878',
 		apiKey: 'shared-api-key'
 	});
-	assert(first.status < 400, `Expected first create to succeed, got ${first.status}`);
+	expect(first.status < 400, `Expected first create to succeed, got ${first.status}`).toBeTruthy();
 	await first.body?.cancel();
 
 	const second = await createArrInstance({
@@ -118,10 +117,13 @@ test('same API key on different target is allowed', async () => {
 		url: 'http://localhost:7879',
 		apiKey: 'shared-api-key'
 	});
-	assert(second.status < 400, `Expected second create to succeed, got ${second.status}`);
+	expect(
+		second.status < 400,
+		`Expected second create to succeed, got ${second.status}`
+	).toBeTruthy();
 	await second.body?.cancel();
 
-	assertEquals(countArrInstances(), 2);
+	expect(countArrInstances()).toStrictEqual(2);
 });
 
 test('same URL with different Arr type is allowed', async () => {
@@ -133,7 +135,10 @@ test('same URL with different Arr type is allowed', async () => {
 		url: 'http://localhost:7878',
 		apiKey: 'radarr-key'
 	});
-	assert(radarr.status < 400, `Expected Radarr create to succeed, got ${radarr.status}`);
+	expect(
+		radarr.status < 400,
+		`Expected Radarr create to succeed, got ${radarr.status}`
+	).toBeTruthy();
 	await radarr.body?.cancel();
 
 	const sonarr = await createArrInstance({
@@ -142,8 +147,11 @@ test('same URL with different Arr type is allowed', async () => {
 		url: 'http://localhost:7878',
 		apiKey: 'sonarr-key'
 	});
-	assert(sonarr.status < 400, `Expected Sonarr create to succeed, got ${sonarr.status}`);
+	expect(
+		sonarr.status < 400,
+		`Expected Sonarr create to succeed, got ${sonarr.status}`
+	).toBeTruthy();
 	await sonarr.body?.cancel();
 
-	assertEquals(countArrInstances(), 2);
+	expect(countArrInstances()).toStrictEqual(2);
 });

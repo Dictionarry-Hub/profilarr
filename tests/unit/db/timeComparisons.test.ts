@@ -8,12 +8,11 @@
  * time just before the cutoff in the same second, which must count as older.
  */
 
-import { afterAll, describe, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { assertEquals, assertExists } from '@std/assert';
 
 /**
  * Waits until 5-50ms into a wall-clock second and returns that second in ms.
@@ -67,10 +66,10 @@ describe('SQL time comparisons keep milliseconds', async () => {
 	test('job queue does not claim a job before it is due', async () => {
 		const { later, earlier } = await times();
 		db.execute(`INSERT INTO job_queue (job_type, run_at) VALUES ('test.later', ?)`, later);
-		assertEquals(jobQueueQueries.getNextDueQueued(), undefined);
+		expect(jobQueueQueries.getNextDueQueued()).toStrictEqual(undefined);
 
 		db.execute(`INSERT INTO job_queue (job_type, run_at) VALUES ('test.earlier', ?)`, earlier);
-		assertEquals(jobQueueQueries.getNextDueQueued()?.jobType, 'test.earlier');
+		expect(jobQueueQueries.getNextDueQueued()?.jobType).toStrictEqual('test.earlier');
 	});
 
 	test('sessions stay valid until they expire', async () => {
@@ -88,11 +87,11 @@ describe('SQL time comparisons keep milliseconds', async () => {
 			earlier
 		);
 
-		assertExists(sessionsQueries.getValidById('later'));
-		assertEquals(sessionsQueries.getValidById('earlier'), undefined);
-		assertEquals(sessionsQueries.countByUserId(userId), 1);
-		assertEquals(sessionsQueries.deleteExpired(), 1);
-		assertExists(sessionsQueries.getById('later'));
+		expect(sessionsQueries.getValidById('later')).not.toBeOneOf([null, undefined]);
+		expect(sessionsQueries.getValidById('earlier')).toStrictEqual(undefined);
+		expect(sessionsQueries.countByUserId(userId)).toStrictEqual(1);
+		expect(sessionsQueries.deleteExpired()).toStrictEqual(1);
+		expect(sessionsQueries.getById('later')).not.toBeOneOf([null, undefined]);
 	});
 
 	test('GitHub cache entries stay fresh until they expire', async () => {
@@ -101,11 +100,11 @@ describe('SQL time comparisons keep milliseconds', async () => {
 		db.execute(insert, 'later', later);
 		db.execute(insert, 'earlier', earlier);
 
-		assertExists(githubCacheQueries.get('later'));
-		assertEquals(githubCacheQueries.get('earlier'), null);
-		assertEquals(githubCacheQueries.isExpired('later'), false);
-		assertEquals(githubCacheQueries.isExpired('earlier'), true);
-		assertEquals(githubCacheQueries.deleteExpired(), 1);
+		expect(githubCacheQueries.get('later')).not.toBeOneOf([null, undefined]);
+		expect(githubCacheQueries.get('earlier')).toStrictEqual(null);
+		expect(githubCacheQueries.isExpired('later')).toStrictEqual(false);
+		expect(githubCacheQueries.isExpired('earlier')).toStrictEqual(true);
+		expect(githubCacheQueries.deleteExpired()).toStrictEqual(1);
 	});
 
 	test('databases are not due for sync early', async () => {
@@ -117,7 +116,7 @@ describe('SQL time comparisons keep milliseconds', async () => {
 		db.execute(insert, 'uuid-earlier', 'earlier', at(-1000 - 60_000));
 
 		const due = databaseInstancesQueries.getDueForSync().map((instance) => instance.name);
-		assertEquals(due, ['earlier']);
+		expect(due).toStrictEqual(['earlier']);
 	});
 
 	test('scheduled configs are not due early', async () => {
@@ -146,7 +145,7 @@ describe('SQL time comparisons keep milliseconds', async () => {
 			arrCleanupSettingsQueries.getDueConfigs(),
 			arrDriftSettingsQueries.getDueConfigs()
 		].map((configs) => configs.map((config) => config.arrInstanceId));
-		assertEquals(dueIds, [[earlierArr], [earlierArr], [earlierArr], [earlierArr]]);
+		expect(dueIds).toStrictEqual([[earlierArr], [earlierArr], [earlierArr], [earlierArr]]);
 	});
 
 	test('login attempts stay in the rate-limit window until they leave it', async () => {
@@ -157,12 +156,11 @@ describe('SQL time comparisons keep milliseconds', async () => {
 		db.execute(insert, at(900 - 60_000));
 		db.execute(insert, at(-1000 - 60_000));
 
-		assertEquals(loginAttemptsQueries.countRecent('10.0.0.1', '/auth/login', 1), 1);
-		assertEquals(
-			loginAttemptsQueries.countRecentByCategory('10.0.0.1', '/auth/login', 'typo', 1),
-			1
-		);
-		assertEquals(loginAttemptsQueries.deleteExpired(1), 1);
+		expect(loginAttemptsQueries.countRecent('10.0.0.1', '/auth/login', 1)).toStrictEqual(1);
+		expect(
+			loginAttemptsQueries.countRecentByCategory('10.0.0.1', '/auth/login', 'typo', 1)
+		).toStrictEqual(1);
+		expect(loginAttemptsQueries.deleteExpired(1)).toStrictEqual(1);
 	});
 
 	test('history is deleted once it passes the retention period', async () => {
@@ -204,8 +202,8 @@ describe('SQL time comparisons keep milliseconds', async () => {
 			);
 		}
 
-		assertEquals(notificationHistoryQueries.deleteOlderThan(1), 1);
-		assertEquals(renameRunsQueries.deleteOlderThan(1), 1);
-		assertEquals(upgradeRunsQueries.deleteOlderThan(1), 1);
+		expect(notificationHistoryQueries.deleteOlderThan(1)).toStrictEqual(1);
+		expect(renameRunsQueries.deleteOlderThan(1)).toStrictEqual(1);
+		expect(upgradeRunsQueries.deleteOlderThan(1)).toStrictEqual(1);
 	});
 });

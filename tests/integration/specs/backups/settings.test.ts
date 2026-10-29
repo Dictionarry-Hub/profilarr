@@ -4,8 +4,7 @@
  * Verifies settings retrieval, updates, validation, and auth.
  */
 
-import { assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -143,19 +142,19 @@ afterAll(async () => {
 
 test('GET /api/v1/backups/settings with session returns 200', async () => {
 	const res = await client.get('/api/v1/backups/settings');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('GET /api/v1/backups/settings with API key returns 200', async () => {
 	const res = await apiKeyClient.get('/api/v1/backups/settings', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('GET /api/v1/backups/settings without auth returns 401', async () => {
 	const res = await unauthClient.get('/api/v1/backups/settings');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── GET: Response shape ─────────────────────────────────────────────────────
@@ -164,40 +163,40 @@ test('GET returns default settings with expected fields', async () => {
 	const res = await client.get('/api/v1/backups/settings');
 	const body = await res.json();
 
-	assertEquals(body.schedule, 'daily');
-	assertEquals(body.retentionDays, 30);
-	assertEquals(body.enabled, true);
-	assertEquals(body.includeDatabase, true);
-	assertEquals(body.compressionEnabled, true);
+	expect(body.schedule).toStrictEqual('daily');
+	expect(body.retentionDays).toStrictEqual(30);
+	expect(body.enabled).toStrictEqual(true);
+	expect(body.includeDatabase).toStrictEqual(true);
+	expect(body.compressionEnabled).toStrictEqual(true);
 });
 
 // ─── PATCH: Updates ──────────────────────────────────────────────────────────
 
 test('PATCH updates schedule and returns updated settings', async () => {
 	const res = await client.patch('/api/v1/backups/settings', { schedule: 'weekly' });
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.schedule, 'weekly');
+	expect(body.schedule).toStrictEqual('weekly');
 	// Other fields unchanged
-	assertEquals(body.retentionDays, 30);
-	assertEquals(body.enabled, true);
+	expect(body.retentionDays).toStrictEqual(30);
+	expect(body.enabled).toStrictEqual(true);
 });
 
 test('PATCH updates retentionDays', async () => {
 	const res = await client.patch('/api/v1/backups/settings', { retentionDays: 14 });
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.retentionDays, 14);
+	expect(body.retentionDays).toStrictEqual(14);
 });
 
 test('PATCH updates enabled toggle', async () => {
 	const res = await client.patch('/api/v1/backups/settings', { enabled: false });
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.enabled, false);
+	expect(body.enabled).toStrictEqual(false);
 
 	// Restore
 	await client.patch('/api/v1/backups/settings', { enabled: true });
@@ -210,10 +209,10 @@ test('PATCH retentionDays preserves queued backup job run times', async () => {
 	const { backupRunAt, cleanupRunAt } = setScheduleFixture(dbPath);
 
 	const res = await client.patch('/api/v1/backups/settings', { retentionDays: 14 });
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
-	assertEquals(getScheduledRunAt(dbPath, 'backup.create'), backupRunAt);
-	assertEquals(getScheduledRunAt(dbPath, 'backup.cleanup'), cleanupRunAt);
+	expect(getScheduledRunAt(dbPath, 'backup.create')).toStrictEqual(backupRunAt);
+	expect(getScheduledRunAt(dbPath, 'backup.cleanup')).toStrictEqual(cleanupRunAt);
 });
 
 test('PATCH schedule recalculates backup job but preserves cleanup job run time', async () => {
@@ -221,11 +220,11 @@ test('PATCH schedule recalculates backup job but preserves cleanup job run time'
 	const { backupRunAt, cleanupRunAt } = setScheduleFixture(dbPath);
 
 	const res = await client.patch('/api/v1/backups/settings', { schedule: 'daily' });
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const nextBackupRunAt = getScheduledRunAt(dbPath, 'backup.create');
-	assertEquals(nextBackupRunAt === backupRunAt, false);
-	assertEquals(getScheduledRunAt(dbPath, 'backup.cleanup'), cleanupRunAt);
+	expect(nextBackupRunAt === backupRunAt).toStrictEqual(false);
+	expect(getScheduledRunAt(dbPath, 'backup.cleanup')).toStrictEqual(cleanupRunAt);
 });
 
 test('general settings save preserves queued named schedule run times', async () => {
@@ -237,40 +236,40 @@ test('general settings save preserves queued named schedule run times', async ()
 		backupRetentionDays: 21,
 		logRetentionDays: 21
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
-	assertEquals(getScheduledRunAt(dbPath, 'backup.create'), backupRunAt);
-	assertEquals(getScheduledRunAt(dbPath, 'backup.cleanup'), cleanupRunAt);
-	assertEquals(getScheduledRunAt(dbPath, 'logs.cleanup'), cleanupRunAt);
+	expect(getScheduledRunAt(dbPath, 'backup.create')).toStrictEqual(backupRunAt);
+	expect(getScheduledRunAt(dbPath, 'backup.cleanup')).toStrictEqual(cleanupRunAt);
+	expect(getScheduledRunAt(dbPath, 'logs.cleanup')).toStrictEqual(cleanupRunAt);
 });
 
 // ─── PATCH: Validation ───────────────────────────────────────────────────────
 
 test('PATCH with empty body returns 400', async () => {
 	const res = await client.patch('/api/v1/backups/settings', {});
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('PATCH with retentionDays: 0 returns 400', async () => {
 	const res = await client.patch('/api/v1/backups/settings', { retentionDays: 0 });
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('PATCH with retentionDays: 999 returns 400', async () => {
 	const res = await client.patch('/api/v1/backups/settings', { retentionDays: 999 });
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('PATCH with invalid schedule returns 400', async () => {
 	const res = await client.patch('/api/v1/backups/settings', { schedule: 'every-5-seconds' });
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 // ─── PATCH: Auth ─────────────────────────────────────────────────────────────
 
 test('PATCH without auth returns 401', async () => {
 	const res = await unauthClient.patch('/api/v1/backups/settings', { schedule: 'weekly' });
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── Round-trip ──────────────────────────────────────────────────────────────
@@ -289,8 +288,8 @@ test('after PATCH, GET reflects changes', async () => {
 	// Verify via GET
 	const res = await client.get('/api/v1/backups/settings');
 	const body = await res.json();
-	assertEquals(body.schedule, 'monthly');
-	assertEquals(body.retentionDays, 7);
+	expect(body.schedule).toStrictEqual('monthly');
+	expect(body.retentionDays).toStrictEqual(7);
 
 	// Restore defaults
 	await client.patch('/api/v1/backups/settings', { schedule: 'daily', retentionDays: 30 });

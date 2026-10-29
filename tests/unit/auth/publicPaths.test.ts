@@ -2,57 +2,56 @@
  * Tests for auth middleware utilities
  */
 
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { isPublicPath } from '#utils/auth/publicPaths.ts';
 
 // Public paths (no session required)
 test('isPublicPath: /auth/login', () => {
-	assertEquals(isPublicPath('/auth/login'), true);
+	expect(isPublicPath('/auth/login')).toStrictEqual(true);
 });
 
 test('isPublicPath: /auth/setup', () => {
-	assertEquals(isPublicPath('/auth/setup'), true);
+	expect(isPublicPath('/auth/setup')).toStrictEqual(true);
 });
 
 test('isPublicPath: /auth/oidc', () => {
-	assertEquals(isPublicPath('/auth/oidc'), true);
+	expect(isPublicPath('/auth/oidc')).toStrictEqual(true);
 });
 
 test('isPublicPath: /api/v1/health', () => {
-	assertEquals(isPublicPath('/api/v1/health'), true);
+	expect(isPublicPath('/api/v1/health')).toStrictEqual(true);
 });
 
 // Subpaths of public paths
 test('isPublicPath: /auth/oidc/login', () => {
-	assertEquals(isPublicPath('/auth/oidc/login'), true);
+	expect(isPublicPath('/auth/oidc/login')).toStrictEqual(true);
 });
 
 test('isPublicPath: /auth/oidc/callback', () => {
-	assertEquals(isPublicPath('/auth/oidc/callback'), true);
+	expect(isPublicPath('/auth/oidc/callback')).toStrictEqual(true);
 });
 
 // Protected paths
 test('isPublicPath: / is protected', () => {
-	assertEquals(isPublicPath('/'), false);
+	expect(isPublicPath('/')).toStrictEqual(false);
 });
 
 test('isPublicPath: /settings is protected', () => {
-	assertEquals(isPublicPath('/settings'), false);
+	expect(isPublicPath('/settings')).toStrictEqual(false);
 });
 
 test('isPublicPath: /api/v1/sync is protected', () => {
-	assertEquals(isPublicPath('/api/v1/sync'), false);
+	expect(isPublicPath('/api/v1/sync')).toStrictEqual(false);
 });
 
 test('isPublicPath: /auth/logout is protected', () => {
-	assertEquals(isPublicPath('/auth/logout'), false);
+	expect(isPublicPath('/auth/logout')).toStrictEqual(false);
 });
 
 test('isPublicPath: /auth is protected', () => {
-	assertEquals(isPublicPath('/auth'), false);
+	expect(isPublicPath('/auth')).toStrictEqual(false);
 });
 
 test('isPublicPath: /databases is protected', () => {
-	assertEquals(isPublicPath('/databases'), false);
+	expect(isPublicPath('/databases')).toStrictEqual(false);
 });

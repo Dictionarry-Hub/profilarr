@@ -4,13 +4,12 @@
  * Verifies file upload, auth, validation, zip slip rejection, and duplicates.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { execFile } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -92,12 +91,12 @@ test('POST /api/v1/backups/upload with valid tar.gz returns 201', async () => {
 	const res = await client.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res.status, 201);
+	expect(res.status).toStrictEqual(201);
 
 	const body = await res.json();
-	assertExists(body.filename);
-	assertExists(body.size);
-	assertExists(body.sizeFormatted);
+	expect(body.filename).not.toBeOneOf([null, undefined]);
+	expect(body.size).not.toBeOneOf([null, undefined]);
+	expect(body.sizeFormatted).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/backups/upload with API key returns 201', async () => {
@@ -107,7 +106,7 @@ test('POST /api/v1/backups/upload with API key returns 201', async () => {
 	const res = await apiKeyClient.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { 'X-Api-Key': API_KEY, Origin: ORIGIN }
 	});
-	assertEquals(res.status, 201);
+	expect(res.status).toStrictEqual(201);
 });
 
 test('POST /api/v1/backups/upload without auth returns 401', async () => {
@@ -117,7 +116,7 @@ test('POST /api/v1/backups/upload without auth returns 401', async () => {
 	const res = await unauthClient.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── Validation ──────────────────────────────────────────────────────────────
@@ -134,10 +133,10 @@ test('upload with non-tar.gz file returns 400', async () => {
 	const res = await client.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 
 	const body = await res.json();
-	assertEquals(body.error.includes('.tar.gz'), true);
+	expect(body.error.includes('.tar.gz')).toStrictEqual(true);
 });
 
 test('upload with no file returns 400', async () => {
@@ -146,7 +145,7 @@ test('upload with no file returns 400', async () => {
 	const res = await client.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 // ─── Behavior ────────────────────────────────────────────────────────────────
@@ -158,7 +157,7 @@ test('uploaded file appears in GET /api/v1/backups', async () => {
 	const uploadRes = await client.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(uploadRes.status, 201);
+	expect(uploadRes.status).toStrictEqual(201);
 
 	const uploadBody = await uploadRes.json();
 	const uploadedFilename = uploadBody.filename;
@@ -166,7 +165,7 @@ test('uploaded file appears in GET /api/v1/backups', async () => {
 	const listRes = await client.get('/api/v1/backups');
 	const backups = await listRes.json();
 	const found = backups.some((b: { filename: string }) => b.filename === uploadedFilename);
-	assertEquals(found, true, `uploaded file ${uploadedFilename} should appear in list`);
+	expect(found, `uploaded file ${uploadedFilename} should appear in list`).toStrictEqual(true);
 });
 
 // ─── Security ────────────────────────────────────────────────────────────────
@@ -178,10 +177,10 @@ test('upload with zip slip archive returns 400', async () => {
 	const res = await client.postMultipart('/api/v1/backups/upload', formData, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 
 	const body = await res.json();
-	assertEquals(body.error.includes('path traversal'), true);
+	expect(body.error.includes('path traversal')).toStrictEqual(true);
 });
 
 // ─── Duplicates ──────────────────────────────────────────────────────────────
@@ -193,7 +192,7 @@ test('upload with duplicate filename returns 400', async () => {
 	const res1 = await client.postMultipart('/api/v1/backups/upload', formData1, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res1.status, 201);
+	expect(res1.status).toStrictEqual(201);
 
 	const archivePath2 = await createTarGz('backup-duplicate-test.tar.gz', 'second');
 	const formData2 = await buildUploadForm(archivePath2);
@@ -201,8 +200,8 @@ test('upload with duplicate filename returns 400', async () => {
 	const res2 = await client.postMultipart('/api/v1/backups/upload', formData2, {
 		headers: { Origin: ORIGIN }
 	});
-	assertEquals(res2.status, 400);
+	expect(res2.status).toStrictEqual(400);
 
 	const body = await res2.json();
-	assertEquals(body.error.includes('already exists'), true);
+	expect(body.error.includes('already exists')).toStrictEqual(true);
 });

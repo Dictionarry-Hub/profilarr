@@ -3,9 +3,8 @@
  * Extend this class to create test suites with automatic setup/teardown
  */
 
-import { test } from 'vitest';
+import { expect, test } from 'vitest';
 import { mkdir, readFile, rm, stat } from 'node:fs/promises';
-import { assertExists } from '@std/assert';
 import { isNotFound } from '#utils/fs.ts';
 
 export interface TestContext {
@@ -86,7 +85,7 @@ export abstract class BaseTest {
 	protected async assertFileExists(filePath: string, message?: string): Promise<void> {
 		try {
 			const info = await stat(filePath);
-			assertExists(info, message ?? `File should exist: ${filePath}`);
+			expect(info, message ?? `File should exist: ${filePath}`).not.toBeOneOf([null, undefined]);
 		} catch (error) {
 			throw new Error(message ?? `Expected file to exist: ${filePath}, but got error: ${error}`);
 		}

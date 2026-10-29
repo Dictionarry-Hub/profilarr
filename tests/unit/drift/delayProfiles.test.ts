@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareDelayProfileDrift,
@@ -39,8 +39,8 @@ class DelayProfileDriftTest extends BaseTest {
 		this.test('clean when expected and actual default delay profile match', () => {
 			const result = compareDelayProfileDrift(expectedDelayProfile(), [arrDelayProfile()]);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('clean when no delay profile is configured', () => {
@@ -49,16 +49,16 @@ class DelayProfileDriftTest extends BaseTest {
 				arrDelayProfile({ id: 2, usenetDelay: 999 })
 			]);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('reports missing Arr default delay profile', () => {
 			const result = compareDelayProfileDrift(expectedDelayProfile(), [arrDelayProfile({ id: 2 })]);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.missing, [{ name: 'Standard Delay' }]);
-			assertEquals(result.diff.modified, []);
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.missing).toStrictEqual([{ name: 'Standard Delay' }]);
+			expect(result.diff.modified).toStrictEqual([]);
 		});
 
 		this.test('reports protocol mismatch from managed Arr protocol fields', () => {
@@ -70,8 +70,8 @@ class DelayProfileDriftTest extends BaseTest {
 				})
 			]);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'Standard Delay',
 					fields: [{ path: 'protocol', expected: 'prefer_usenet', actual: 'only_torrent' }]
@@ -95,8 +95,8 @@ class DelayProfileDriftTest extends BaseTest {
 				})
 			]);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'Standard Delay',
 					fields: [
@@ -119,8 +119,8 @@ class DelayProfileDriftTest extends BaseTest {
 				arrDelayProfile({ id: 2, usenetDelay: 999, tags: [1, 2] })
 			]);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('displays delay drift in days, hours, and minutes', () => {
@@ -130,18 +130,17 @@ class DelayProfileDriftTest extends BaseTest {
 			);
 			const entities = buildDriftDisplayEntities({ delay_profiles: result.diff }, 'radarr');
 
-			assertEquals(entities.length, 1);
-			assertEquals(
+			expect(entities.length).toStrictEqual(1);
+			expect(
 				entities[0].changes.map((change) => ({
 					label: change.label,
 					expected: change.expected?.text,
 					actual: change.actual?.text
-				})),
-				[
-					{ label: 'Usenet Delay', expected: '14 days', actual: '30 minutes' },
-					{ label: 'Torrent Delay', expected: '1 day 6 hours', actual: '0 minutes' }
-				]
-			);
+				}))
+			).toStrictEqual([
+				{ label: 'Usenet Delay', expected: '14 days', actual: '30 minutes' },
+				{ label: 'Torrent Delay', expected: '1 day 6 hours', actual: '0 minutes' }
+			]);
 		});
 
 		this.test('hash is stable for equivalent object key order', async () => {
@@ -164,8 +163,7 @@ class DelayProfileDriftTest extends BaseTest {
 				missing: []
 			};
 
-			assertEquals(
-				await hashDriftDiff({ delay_profiles: first }),
+			expect(await hashDriftDiff({ delay_profiles: first })).toStrictEqual(
 				await hashDriftDiff({ delay_profiles: second })
 			);
 		});

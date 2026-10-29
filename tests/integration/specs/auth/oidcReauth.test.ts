@@ -22,7 +22,6 @@
  * 8. An SSO session cannot confirm with a password
  */
 
-import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import {
@@ -30,7 +29,7 @@ import {
 	getSessionConfirmedAt,
 	setSessionConfirmedAt
 } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import {
 	completeOidcLogin,
@@ -53,9 +52,9 @@ async function ssoSignIn(
 ): Promise<{ client: TestClient; sessionId: string }> {
 	const client = new TestClient(base);
 	const { callbackRes } = await completeOidcLogin(client, username);
-	assertEquals(callbackRes.status, 303, 'SSO sign-in should redirect');
+	expect(callbackRes.status, 'SSO sign-in should redirect').toStrictEqual(303);
 	const sessionId = client.getCookie('session');
-	assertEquals(typeof sessionId, 'string', 'SSO sign-in should set a session cookie');
+	expect(typeof sessionId, 'SSO sign-in should set a session cookie').toStrictEqual('string');
 	return { client, sessionId: sessionId! };
 }
 
@@ -85,23 +84,23 @@ afterAll(async () => {
 
 test('a key can be created right after SSO sign-in', async () => {
 	const { client, sessionId } = await ssoSignIn(ORIGIN);
-	assertNotEquals(getSessionConfirmedAt(getDbPath(PORT), sessionId), null);
-	assertEquals(await createKey(client, ORIGIN), 200);
+	expect(getSessionConfirmedAt(getDbPath(PORT), sessionId)).not.toStrictEqual(null);
+	expect(await createKey(client, ORIGIN)).toStrictEqual(200);
 });
 
 test('an aged session cannot create a key', async () => {
 	const { client, sessionId } = await ssoSignIn(ORIGIN);
 	setSessionConfirmedAt(getDbPath(PORT), sessionId, 31);
-	assertEquals(await createKey(client, ORIGIN), 403);
+	expect(await createKey(client, ORIGIN)).toStrictEqual(403);
 });
 
 test('reauth=1 sends prompt=login and a non-zero max_age to the provider', async () => {
 	const { client } = await ssoSignIn(ORIGIN);
 	const res = await client.get('/auth/oidc/login?reauth=1');
-	assertEquals(res.status, 302);
+	expect(res.status).toStrictEqual(302);
 	const location = res.headers.get('location') ?? '';
-	assertStringIncludes(location, `max_age=${REAUTH_SKEW_SECONDS}`);
-	assertStringIncludes(location, 'prompt=login');
+	expect(location).toContain(`max_age=${REAUTH_SKEW_SECONDS}`);
+	expect(location).toContain('prompt=login');
 });
 
 test('re-authenticating as the same user keeps the session, confirms it, and the key follows', async () => {
@@ -110,11 +109,13 @@ test('re-authenticating as the same user keeps the session, confirms it, and the
 	const before = getSessionConfirmedAt(getDbPath(PORT), sessionId);
 
 	const { callbackRes } = await completeOidcLogin(client, 'test', { reauth: true });
-	assertEquals(callbackRes.status, 303);
-	assertEquals(callbackRes.headers.get('location'), KEY_PAGE);
-	assertEquals(client.getCookie('session'), sessionId, 'the session cookie must not change');
-	assertNotEquals(getSessionConfirmedAt(getDbPath(PORT), sessionId), before);
-	assertEquals(await createKey(client, ORIGIN), 200);
+	expect(callbackRes.status).toStrictEqual(303);
+	expect(callbackRes.headers.get('location')).toStrictEqual(KEY_PAGE);
+	expect(client.getCookie('session'), 'the session cookie must not change').toStrictEqual(
+		sessionId
+	);
+	expect(getSessionConfirmedAt(getDbPath(PORT), sessionId)).not.toStrictEqual(before);
+	expect(await createKey(client, ORIGIN)).toStrictEqual(200);
 });
 
 test('re-authenticating as a different user is rejected and confirms nothing', async () => {
@@ -123,31 +124,28 @@ test('re-authenticating as a different user is rejected and confirms nothing', a
 	const before = getSessionConfirmedAt(getDbPath(PORT), sessionId);
 
 	const { callbackRes } = await completeOidcLogin(client, 'mallory', { reauth: true });
-	assertEquals(callbackRes.status, 400);
-	assertEquals(getSessionConfirmedAt(getDbPath(PORT), sessionId), before);
-	assertEquals(client.getCookie('session'), sessionId);
-	assertEquals(await createKey(client, ORIGIN), 403);
+	expect(callbackRes.status).toStrictEqual(400);
+	expect(getSessionConfirmedAt(getDbPath(PORT), sessionId)).toStrictEqual(before);
+	expect(client.getCookie('session')).toStrictEqual(sessionId);
+	expect(await createKey(client, ORIGIN)).toStrictEqual(403);
 });
 
 test('a provider without auth_time fails closed and the page is told', async () => {
 	const { client, sessionId } = await ssoSignIn(STALE_ORIGIN);
-	assertEquals(await createKey(client, STALE_ORIGIN), 200, 'sign-in itself still confirms');
+	expect(await createKey(client, STALE_ORIGIN), 'sign-in itself still confirms').toStrictEqual(200);
 	setSessionConfirmedAt(getDbPath(STALE_PORT), sessionId, 31);
 	const before = getSessionConfirmedAt(getDbPath(STALE_PORT), sessionId);
 
 	const { callbackRes } = await completeOidcLogin(client, 'test', { reauth: true });
-	assertEquals(callbackRes.status, 303);
-	assertStringIncludes(
-		callbackRes.headers.get('location') ?? '',
-		'/settings/security?reauth=failed'
-	);
-	assertEquals(getSessionConfirmedAt(getDbPath(STALE_PORT), sessionId), before);
-	assertEquals(await createKey(client, STALE_ORIGIN), 403);
+	expect(callbackRes.status).toStrictEqual(303);
+	expect(callbackRes.headers.get('location') ?? '').toContain('/settings/security?reauth=failed');
+	expect(getSessionConfirmedAt(getDbPath(STALE_PORT), sessionId)).toStrictEqual(before);
+	expect(await createKey(client, STALE_ORIGIN)).toStrictEqual(403);
 });
 
 test('reauth=1 without a session is rejected', async () => {
 	const res = await new TestClient(ORIGIN).get('/auth/oidc/login?reauth=1');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('an SSO session cannot confirm with a password', async () => {
@@ -158,6 +156,6 @@ test('an SSO session cannot confirm with a password', async () => {
 		{ password: 'anything' },
 		{ headers: { Origin: ORIGIN } }
 	);
-	assertEquals((await formResult(res)).status, 403);
-	assertEquals(await createKey(client, ORIGIN), 403);
+	expect((await formResult(res)).status).toStrictEqual(403);
+	expect(await createKey(client, ORIGIN)).toStrictEqual(403);
 });

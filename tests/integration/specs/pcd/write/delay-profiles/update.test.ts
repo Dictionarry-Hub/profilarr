@@ -2,9 +2,8 @@
  * PCD write tests: delay profile update.
  */
 
-import { assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -88,7 +87,7 @@ test('independent scalar fields split into grouped ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 5);
+	expect(ops.length).toStrictEqual(5);
 	assertOnlyField(ops, 'preferred_protocol');
 	assertOnlyField(ops, 'usenet_delay');
 	assertOnlyField(ops, 'torrent_delay');
@@ -146,15 +145,15 @@ test('rename plus scalar change emits grouped split ops', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 2);
+	expect(ops.length).toStrictEqual(2);
 	assertOnlyField(ops, 'torrent_delay');
 	assertOnlyField(ops, 'name');
 	assertSameGroup(ops);
 	const renameOp = opForChangedField(ops, 'name');
 	const metadata = parseMetadata(renameOp);
-	assertEquals(metadata.name, 'New Delay');
-	assertEquals(metadata.previousName, 'Old Delay');
-	assertEquals(parseDesiredState(renameOp).name, { from: 'Old Delay', to: 'New Delay' });
+	expect(metadata.name).toStrictEqual('New Delay');
+	expect(metadata.previousName).toStrictEqual('Old Delay');
+	expect(parseDesiredState(renameOp).name).toStrictEqual({ from: 'Old Delay', to: 'New Delay' });
 });
 
 /**
@@ -205,13 +204,13 @@ test('pure rename emits one ungrouped rename op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const renameOp = opForChangedField(ops, 'name');
 	const metadata = parseMetadata(renameOp);
-	assertEquals(metadata.group_id, undefined);
-	assertEquals(metadata.name, 'Renamed Delay');
-	assertEquals(metadata.previousName, 'Pure Rename Delay');
-	assertEquals(parseDesiredState(renameOp).name, {
+	expect(metadata.group_id).toStrictEqual(undefined);
+	expect(metadata.name).toStrictEqual('Renamed Delay');
+	expect(metadata.previousName).toStrictEqual('Pure Rename Delay');
+	expect(parseDesiredState(renameOp).name).toStrictEqual({
 		from: 'Pure Rename Delay',
 		to: 'Renamed Delay'
 	});
@@ -266,14 +265,14 @@ test('protocol nulling writes a constrained paired op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = opForChangedFields(ops, ['preferred_protocol', 'usenet_delay']);
 	const desired = parseDesiredState(op);
-	assertEquals(desired.preferred_protocol, {
+	expect(desired.preferred_protocol).toStrictEqual({
 		from: 'prefer_usenet',
 		to: 'only_torrent'
 	});
-	assertEquals(desired.usenet_delay, { from: 10, to: null });
+	expect(desired.usenet_delay).toStrictEqual({ from: 10, to: null });
 });
 
 /**
@@ -333,14 +332,14 @@ test('disabling bypass score writes a constrained paired op', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = opForChangedFields(ops, [
 		'bypass_if_above_custom_format_score',
 		'minimum_custom_format_score'
 	]);
 	const desired = parseDesiredState(op);
-	assertEquals(desired.bypass_if_above_custom_format_score, { from: true, to: false });
-	assertEquals(desired.minimum_custom_format_score, { from: 80, to: null });
+	expect(desired.bypass_if_above_custom_format_score).toStrictEqual({ from: true, to: false });
+	expect(desired.minimum_custom_format_score).toStrictEqual({ from: 80, to: null });
 });
 
 /**
@@ -385,5 +384,5 @@ test('unchanged submit writes no ops', async () => {
 		minimumCfScore: 0
 	});
 
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

@@ -2,7 +2,7 @@
  * Unit tests for archive validation (zip slip protection).
  */
 
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { validateArchiveEntries } from '#utils/backup/archive.ts';
 import { runCommand } from '#utils/command.ts';
@@ -26,8 +26,8 @@ class ArchiveValidationTest extends BaseTest {
 			await runCommand('tar', ['-czf', archivePath, '-C', ctx.tempDir, 'data']);
 
 			const result = await validateArchiveEntries(archivePath);
-			assertEquals(result.valid, true);
-			assertEquals(result.error, undefined);
+			expect(result.valid).toStrictEqual(true);
+			expect(result.error).toStrictEqual(undefined);
 		});
 
 		this.test('tar with ../ path entry fails', async (ctx) => {
@@ -48,8 +48,8 @@ class ArchiveValidationTest extends BaseTest {
 			]);
 
 			const result = await validateArchiveEntries(archivePath);
-			assertEquals(result.valid, false);
-			assertEquals(typeof result.error, 'string');
+			expect(result.valid).toStrictEqual(false);
+			expect(typeof result.error).toStrictEqual('string');
 		});
 
 		this.test('tar with absolute path entry fails', async (ctx) => {
@@ -70,8 +70,8 @@ class ArchiveValidationTest extends BaseTest {
 			]);
 
 			const result = await validateArchiveEntries(archivePath);
-			assertEquals(result.valid, false);
-			assertEquals(typeof result.error, 'string');
+			expect(result.valid).toStrictEqual(false);
+			expect(typeof result.error).toStrictEqual('string');
 		});
 	}
 }

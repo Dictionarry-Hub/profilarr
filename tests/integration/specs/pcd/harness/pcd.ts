@@ -3,7 +3,7 @@
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { assert } from '@std/assert';
+import { expect } from 'vitest';
 import { TestClient } from '#integration/harness/client.ts';
 import { openDb } from '#integration/harness/db.ts';
 import { getDbPath } from '#integration/harness/server.ts';
@@ -191,10 +191,10 @@ export async function compilePcd(ctx: PcdTestContext): Promise<void> {
 		{ headers: { Origin: ctx.origin } }
 	);
 
-	assert(
+	expect(
 		response.status >= 200 && response.status < 400,
 		`Expected compile trigger to return 2xx/3xx, got ${response.status}`
-	);
+	).toBeTruthy();
 }
 
 export function opCheckpoint(ctx: PcdTestContext): number {

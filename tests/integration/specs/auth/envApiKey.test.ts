@@ -7,11 +7,10 @@
  * 3. The env key's display name is reserved for new keys
  */
 
-import { assertEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUser, login, setApiKey } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.envApiKey;
@@ -37,7 +36,7 @@ test('PROFILARR_API_KEY returns 200', async () => {
 	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('database API key still returns 200 when PROFILARR_API_KEY is set', async () => {
@@ -46,14 +45,16 @@ test('database API key still returns 200 when PROFILARR_API_KEY is set', async (
 	const res = await c.get('/api/v1/status', {
 		headers: { 'X-Api-Key': DB_API_KEY }
 	});
-	assertEquals(res.status, 200, `Expected DB-backed key to keep working, got ${res.status}`);
+	expect(res.status, `Expected DB-backed key to keep working, got ${res.status}`).toStrictEqual(
+		200
+	);
 });
 
 test('session user cannot create a key named "Environment"', async () => {
 	// The env key is listed as "Environment"; a stored key with that name
 	// would be indistinguishable from it in the UI and logs.
 	const res = await login(client, 'admin', 'password123', ORIGIN);
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const create = await client.postForm(
 		'/settings/security/api-keys/new?/create',
@@ -61,10 +62,9 @@ test('session user cannot create a key named "Environment"', async () => {
 		{ headers: { Origin: ORIGIN } }
 	);
 	const body = await create.text();
-	assertEquals(create.status, 400);
-	assertEquals(
+	expect(create.status).toStrictEqual(400);
+	expect(
 		body.includes('"status":400'),
-		true,
 		`Expected form failure status 400 for reserved key name, got ${body}`
-	);
+	).toStrictEqual(true);
 });

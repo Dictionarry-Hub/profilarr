@@ -17,9 +17,8 @@
  * 2. /quality-profiles/[dbId] does not render an unquoted onerror handler
  */
 
-import { assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import {
 	setupPcd,
@@ -45,11 +44,10 @@ async function fetchPage(path: string): Promise<{ status: number; body: string }
 }
 
 function assertNotRendered(body: string, label: string) {
-	assertEquals(
+	expect(
 		body.includes(RENDERED_HANDLER),
-		false,
 		`${label}: unquoted onerror handler was rendered into the page HTML`
-	);
+	).toStrictEqual(false);
 }
 
 beforeAll(async () => {
@@ -68,14 +66,18 @@ afterAll(async () => {
 
 test('/custom-formats/[dbId] does not render an unquoted onerror handler', async () => {
 	const { status, body } = await fetchPage(`/custom-formats/${ctx.dbId}`);
-	assertEquals(status, 200);
-	assertEquals(body.includes(CF_NAME), true, 'seeded custom format is missing from the page');
+	expect(status).toStrictEqual(200);
+	expect(body.includes(CF_NAME), 'seeded custom format is missing from the page').toStrictEqual(
+		true
+	);
 	assertNotRendered(body, '/custom-formats');
 });
 
 test('/quality-profiles/[dbId] does not render an unquoted onerror handler', async () => {
 	const { status, body } = await fetchPage(`/quality-profiles/${ctx.dbId}`);
-	assertEquals(status, 200);
-	assertEquals(body.includes(QP_NAME), true, 'seeded quality profile is missing from the page');
+	expect(status).toStrictEqual(200);
+	expect(body.includes(QP_NAME), 'seeded quality profile is missing from the page').toStrictEqual(
+		true
+	);
 	assertNotRendered(body, '/quality-profiles');
 });

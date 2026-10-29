@@ -15,11 +15,10 @@
  * 3. Failed login attempts recorded under real IP, not spoofed header
  */
 
-import { assertEquals, assertNotEquals } from '@std/assert';
 import { TestClient } from '#integration/harness/client.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { createUserDirect, clearLoginAttempts, queryDb } from '#integration/harness/setup.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.xForwardedFor;
@@ -48,14 +47,14 @@ test('spoofed X-Forwarded-For is recorded in session metadata', async () => {
 	);
 
 	const sessionId = client.getCookie('session');
-	assertNotEquals(sessionId, undefined);
+	expect(sessionId).not.toStrictEqual(undefined);
 
 	const rows = queryDb(getDbPath(PORT), 'SELECT ip_address FROM sessions WHERE id = ?', [
 		sessionId!
 	]) as { ip_address: string | null }[];
 
-	assertEquals(rows.length, 1);
-	assertEquals(rows[0].ip_address, spoofedIp);
+	expect(rows.length).toStrictEqual(1);
+	expect(rows[0].ip_address).toStrictEqual(spoofedIp);
 });
 
 test('rate limit not bypassed by rotating X-Forwarded-For', async () => {
@@ -85,13 +84,12 @@ test('rate limit not bypassed by rotating X-Forwarded-For', async () => {
 	const body = await res.text();
 	try {
 		const parsed = JSON.parse(body);
-		assertEquals(
+		expect(
 			parsed.status,
-			429,
 			`Expected rate limit 429 despite rotating X-Forwarded-For, got ${parsed.status}`
-		);
+		).toStrictEqual(429);
 	} catch {
-		assertEquals(res.status, 429, `Expected 429, got ${res.status}`);
+		expect(res.status, `Expected 429, got ${res.status}`).toStrictEqual(429);
 	}
 });
 
@@ -111,11 +109,10 @@ test('failed login attempts recorded under real IP, not spoofed header', async (
 	) as {
 		ip: string;
 	}[];
-	assertEquals(rows.length, 1);
+	expect(rows.length).toStrictEqual(1);
 	// Should be the real TCP address (127.0.0.1), not the spoofed header
-	assertNotEquals(
+	expect(
 		rows[0].ip,
-		'198.51.100.1',
 		'login_attempts should record real TCP IP, not spoofed X-Forwarded-For'
-	);
+	).not.toStrictEqual('198.51.100.1');
 });

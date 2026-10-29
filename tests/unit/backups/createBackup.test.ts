@@ -5,7 +5,7 @@
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { createBackup } from '#server/jobs/logic/createBackup.ts';
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { runCommand } from '#utils/command.ts';
 import { mkdir, readFile, readdir, stat as statPath, writeFile } from 'node:fs/promises';
 
@@ -31,17 +31,17 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourceDir, backupDir);
 
 			// Assert success
-			assertEquals(result.success, true);
-			assertEquals(typeof result.filename, 'string');
-			assertEquals(typeof result.sizeBytes, 'number');
+			expect(result.success).toStrictEqual(true);
+			expect(typeof result.filename).toStrictEqual('string');
+			expect(typeof result.sizeBytes).toStrictEqual('number');
 
 			// Assert size is greater than 0
 			if (result.sizeBytes) {
-				assertEquals(result.sizeBytes > 0, true);
+				expect(result.sizeBytes > 0).toStrictEqual(true);
 			}
 
 			// Assert no error
-			assertEquals(result.error, undefined);
+			expect(result.error).toStrictEqual(undefined);
 		});
 	}
 
@@ -64,10 +64,10 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourceDir, backupDir, customTimestamp);
 
 			// Assert success
-			assertEquals(result.success, true);
+			expect(result.success).toStrictEqual(true);
 
 			// Assert filename matches expected format: backup-2025-01-15-143045.tar.gz
-			assertEquals(result.filename, 'backup-2025-01-15-143045.tar.gz');
+			expect(result.filename).toStrictEqual('backup-2025-01-15-143045.tar.gz');
 		});
 	}
 
@@ -88,7 +88,7 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourceDir, backupDir);
 
 			// Assert success
-			assertEquals(result.success, true);
+			expect(result.success).toStrictEqual(true);
 
 			// Construct backup file path
 			const backupFilePath = `${backupDir}/${result.filename}`;
@@ -98,10 +98,10 @@ class CreateBackupTest extends BaseTest {
 
 			// Get file stats and verify size
 			const stat = await statPath(backupFilePath);
-			assertEquals(stat.size > 0, true);
+			expect(stat.size > 0).toStrictEqual(true);
 
 			// Verify returned sizeBytes matches actual file size
-			assertEquals(result.sizeBytes, stat.size);
+			expect(result.sizeBytes).toStrictEqual(stat.size);
 		});
 	}
 
@@ -128,7 +128,7 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourceDir, backupDir);
 
 			// Assert success
-			assertEquals(result.success, true);
+			expect(result.success).toStrictEqual(true);
 
 			// Extract backup to verify contents
 			const extractDir = `${context.tempDir}/extract`;
@@ -138,7 +138,7 @@ class CreateBackupTest extends BaseTest {
 
 			// Extract tar.gz
 			const { code } = await runCommand('tar', ['-xzf', backupFilePath, '-C', extractDir]);
-			assertEquals(code, 0);
+			expect(code).toStrictEqual(0);
 
 			// Verify extracted files exist and have correct content
 			const extractedSourceDir = `${extractDir}/data`;
@@ -151,9 +151,9 @@ class CreateBackupTest extends BaseTest {
 			const extractedContent2 = await readFile(`${extractedSourceDir}/file2.txt`, 'utf8');
 			const extractedContent3 = await readFile(`${extractedSourceDir}/data.json`, 'utf8');
 
-			assertEquals(extractedContent1, testContent1);
-			assertEquals(extractedContent2, testContent2);
-			assertEquals(extractedContent3, testContent3);
+			expect(extractedContent1).toStrictEqual(testContent1);
+			expect(extractedContent2).toStrictEqual(testContent2);
+			expect(extractedContent3).toStrictEqual(testContent3);
 		});
 	}
 
@@ -170,17 +170,17 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourceDir, backupDir);
 
 			// Assert failure
-			assertEquals(result.success, false);
+			expect(result.success).toStrictEqual(false);
 
 			// Assert error message mentions source directory
-			assertEquals(typeof result.error, 'string');
+			expect(typeof result.error).toStrictEqual('string');
 			if (result.error) {
-				assertEquals(result.error.includes('Source directory does not exist'), true);
+				expect(result.error.includes('Source directory does not exist')).toStrictEqual(true);
 			}
 
 			// Assert no filename or size returned
-			assertEquals(result.filename, undefined);
-			assertEquals(result.sizeBytes, undefined);
+			expect(result.filename).toStrictEqual(undefined);
+			expect(result.sizeBytes).toStrictEqual(undefined);
 		});
 	}
 
@@ -199,17 +199,17 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourcePath, backupDir);
 
 			// Assert failure
-			assertEquals(result.success, false);
+			expect(result.success).toStrictEqual(false);
 
 			// Assert error message mentions not a directory
-			assertEquals(typeof result.error, 'string');
+			expect(typeof result.error).toStrictEqual('string');
 			if (result.error) {
-				assertEquals(result.error.includes('Source path is not a directory'), true);
+				expect(result.error.includes('Source path is not a directory')).toStrictEqual(true);
 			}
 
 			// Assert no filename or size returned
-			assertEquals(result.filename, undefined);
-			assertEquals(result.sizeBytes, undefined);
+			expect(result.filename).toStrictEqual(undefined);
+			expect(result.sizeBytes).toStrictEqual(undefined);
 		});
 	}
 
@@ -228,9 +228,9 @@ class CreateBackupTest extends BaseTest {
 			const result = await createBackup(sourceDir, backupDir);
 
 			// Assert success
-			assertEquals(result.success, true);
-			assertEquals(typeof result.filename, 'string');
-			assertEquals(typeof result.sizeBytes, 'number');
+			expect(result.success).toStrictEqual(true);
+			expect(typeof result.filename).toStrictEqual('string');
+			expect(typeof result.sizeBytes).toStrictEqual('number');
 
 			// Assert backup file exists
 			const backupFilePath = `${backupDir}/${result.filename}`;
@@ -238,7 +238,7 @@ class CreateBackupTest extends BaseTest {
 
 			// Assert file has size > 0 (even empty tar.gz has some size for headers)
 			if (result.sizeBytes) {
-				assertEquals(result.sizeBytes > 0, true);
+				expect(result.sizeBytes > 0).toStrictEqual(true);
 			}
 
 			// Extract and verify empty directory structure is preserved
@@ -246,7 +246,7 @@ class CreateBackupTest extends BaseTest {
 			await mkdir(extractDir, { recursive: true });
 
 			const { code } = await runCommand('tar', ['-xzf', backupFilePath, '-C', extractDir]);
-			assertEquals(code, 0);
+			expect(code).toStrictEqual(0);
 
 			// Verify extracted directory exists and is empty
 			const extractedSourceDir = `${extractDir}/data`;
@@ -257,7 +257,7 @@ class CreateBackupTest extends BaseTest {
 			for (const entry of await readdir(extractedSourceDir, { withFileTypes: true })) {
 				entries.push(entry);
 			}
-			assertEquals(entries.length, 0);
+			expect(entries.length).toStrictEqual(0);
 		});
 	}
 

@@ -1,4 +1,4 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareQualityProfileDrift,
@@ -129,7 +129,9 @@ class QualityProfileDriftTest extends BaseTest {
 					cutoff: 1001
 				});
 
-				assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+				expect(
+					compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count
+				).toStrictEqual(0);
 			}
 		);
 
@@ -155,8 +157,8 @@ class QualityProfileDriftTest extends BaseTest {
 
 			const result = compareQualityProfileDrift([expected], [actual], formats, 'sonarr');
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified[0].fields, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified[0].fields).toStrictEqual([
 				{ path: 'items[HDTV-1080p].maxSize', expected: null, actual: 232 },
 				{ path: 'items[HDTV-1080p].minSize', expected: 15, actual: 7 },
 				{ path: 'items[HDTV-1080p].preferredSize', expected: 995, actual: 531.2 }
@@ -173,7 +175,7 @@ class QualityProfileDriftTest extends BaseTest {
 
 			const result = compareQualityProfileDrift([expected], [actual], formats, 'sonarr');
 
-			assertEquals(result.diff.modified[0].fields, [
+			expect(result.diff.modified[0].fields).toStrictEqual([
 				{ path: 'items[WEBDL-1080p].minSize', expected: 15, actual: null }
 			]);
 		});
@@ -189,7 +191,9 @@ class QualityProfileDriftTest extends BaseTest {
 				]
 			});
 
-			assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+			expect(
+				compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count
+			).toStrictEqual(0);
 		});
 
 		this.test('item sizes: the Arr maximum at its unlimited cap equals an expected null', () => {
@@ -200,7 +204,9 @@ class QualityProfileDriftTest extends BaseTest {
 				items: [sizedItem('WEBDL-1080p', 3, { minSize: 15, maxSize: 1000, preferredSize: 995 })]
 			});
 
-			assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+			expect(
+				compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count
+			).toStrictEqual(0);
 		});
 
 		this.test(
@@ -223,7 +229,9 @@ class QualityProfileDriftTest extends BaseTest {
 					]
 				});
 
-				assertEquals(compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count, 0);
+				expect(
+					compareQualityProfileDrift([expected], [actual], formats, 'sonarr').count
+				).toStrictEqual(0);
 			}
 		);
 
@@ -254,14 +262,14 @@ class QualityProfileDriftTest extends BaseTest {
 					'sonarr'
 				);
 
-				assertEquals(entities.length, 1);
-				assertEquals(entities[0].changes[0].label, 'HDTV-1080p');
-				assertEquals(entities[0].changes[0].detail, 'Minimum Size changed');
-				assertEquals(entities[0].changes[0].expected?.text, '15');
-				assertEquals(entities[0].changes[0].actual?.text, 'None');
-				assertEquals(entities[0].changes[1].detail, 'Maximum Size changed');
-				assertEquals(entities[0].changes[1].expected?.text, 'Unlimited');
-				assertEquals(entities[0].changes[1].actual?.text, '232');
+				expect(entities.length).toStrictEqual(1);
+				expect(entities[0].changes[0].label).toStrictEqual('HDTV-1080p');
+				expect(entities[0].changes[0].detail).toStrictEqual('Minimum Size changed');
+				expect(entities[0].changes[0].expected?.text).toStrictEqual('15');
+				expect(entities[0].changes[0].actual?.text).toStrictEqual('None');
+				expect(entities[0].changes[1].detail).toStrictEqual('Maximum Size changed');
+				expect(entities[0].changes[1].expected?.text).toStrictEqual('Unlimited');
+				expect(entities[0].changes[1].actual?.text).toStrictEqual('232');
 			}
 		);
 
@@ -273,8 +281,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 0);
-			assertEquals(result.diff, { missing: [], modified: [] });
+			expect(result.count).toStrictEqual(0);
+			expect(result.diff).toStrictEqual({ missing: [], modified: [] });
 		});
 
 		this.test('reports selected quality profile missing from Arr', () => {
@@ -285,9 +293,9 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.missing, [{ name: 'HD Movies' }]);
-			assertEquals(result.diff.modified, []);
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.missing).toStrictEqual([{ name: 'HD Movies' }]);
+			expect(result.diff.modified).toStrictEqual([]);
 		});
 
 		this.test('ignores profile ids and resolves custom format rows through actual Arr ids', () => {
@@ -308,7 +316,7 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('reports managed profile setting mismatches', () => {
@@ -327,8 +335,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'HD Movies',
 					fields: [
@@ -360,8 +368,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'HD Movies',
 					fields: [
@@ -383,7 +391,7 @@ class QualityProfileDriftTest extends BaseTest {
 				'sonarr'
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('reports quality structure mismatch', () => {
@@ -413,8 +421,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified[0].fields, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified[0].fields).toStrictEqual([
 				{
 					path: 'items',
 					expected: [
@@ -462,8 +470,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'HD Movies',
 					fields: [
@@ -492,8 +500,8 @@ class QualityProfileDriftTest extends BaseTest {
 					'radarr'
 				);
 
-				assertEquals(result.count, 1);
-				assertEquals(result.diff.modified, [
+				expect(result.count).toStrictEqual(1);
+				expect(result.diff.modified).toStrictEqual([
 					{
 						name: 'HD Movies',
 						fields: [
@@ -521,8 +529,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'HD Movies',
 					fields: [
@@ -556,7 +564,7 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 0);
+			expect(result.count).toStrictEqual(0);
 		});
 
 		this.test('reports unmanaged Arr custom format scoring rows with nonzero score', () => {
@@ -579,8 +587,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'HD Movies',
 					fields: [
@@ -607,8 +615,8 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(result.count, 1);
-			assertEquals(result.diff.modified, [
+			expect(result.count).toStrictEqual(1);
+			expect(result.diff.modified).toStrictEqual([
 				{
 					name: 'HD Movies',
 					fields: [
@@ -640,16 +648,15 @@ class QualityProfileDriftTest extends BaseTest {
 				'radarr'
 			);
 
-			assertEquals(
-				result.diff.modified.map((item) => item.name),
-				['A Profile', 'Z Profile']
-			);
-			assertEquals(
+			expect(result.diff.modified.map((item) => item.name)).toStrictEqual([
+				'A Profile',
+				'Z Profile'
+			]);
+			expect(
 				result.diff.modified
 					.find((item) => item.name === 'Z Profile')
-					?.fields.map((field) => field.path),
-				['items', 'minFormatScore']
-			);
+					?.fields.map((field) => field.path)
+			).toStrictEqual(['items', 'minFormatScore']);
 		});
 
 		this.test('hash is stable for equivalent object key order', async () => {
@@ -684,8 +691,7 @@ class QualityProfileDriftTest extends BaseTest {
 				missing: []
 			};
 
-			assertEquals(
-				await hashDriftDiff({ quality_profiles: first }),
+			expect(await hashDriftDiff({ quality_profiles: first })).toStrictEqual(
 				await hashDriftDiff({ quality_profiles: second })
 			);
 		});

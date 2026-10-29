@@ -5,7 +5,7 @@
 
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals, assertExists } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	deleteAnnouncement,
 	generateAnnouncementId,
@@ -31,15 +31,15 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 
 		this.test('generateAnnouncementId returns a 26-char ULID', () => {
 			const id = generateAnnouncementId();
-			assertEquals(id.length, 26);
+			expect(id.length).toStrictEqual(26);
 			// Crockford Base32: digits + uppercase letters minus I, L, O, U
-			assertEquals(/^[0-9A-HJKMNP-TV-Z]{26}$/.test(id), true);
+			expect(/^[0-9A-HJKMNP-TV-Z]{26}$/.test(id)).toStrictEqual(true);
 		});
 
 		this.test('generateAnnouncementId returns unique values', () => {
 			const a = generateAnnouncementId();
 			const b = generateAnnouncementId();
-			assertEquals(a === b, false);
+			expect(a === b).toStrictEqual(false);
 		});
 
 		// ─── writeAnnouncement ───────────────────────────────────────────────
@@ -49,10 +49,10 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
 			const dirStat = await stat(`${ctx.tempDir}/announcements`);
-			assertEquals(dirStat.isDirectory(), true);
+			expect(dirStat.isDirectory()).toStrictEqual(true);
 
 			const fileStat = await stat(`${ctx.tempDir}/announcements/${id}.md`);
-			assertEquals(fileStat.isFile(), true);
+			expect(fileStat.isFile()).toStrictEqual(true);
 		});
 
 		this.test('writeAnnouncement leaves no temp file behind after success', async (ctx) => {
@@ -63,7 +63,7 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			for (const name of await readdir(`${ctx.tempDir}/announcements`)) {
 				entries.push(name);
 			}
-			assertEquals(entries, [`${id}.md`]);
+			expect(entries).toStrictEqual([`${id}.md`]);
 		});
 
 		this.test('writeAnnouncement overwrites an existing file in place', async (ctx) => {
@@ -72,8 +72,8 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			await writeAnnouncement(ctx.tempDir, id, { ...baseInput(), title: 'Updated title' });
 
 			const result = await parseAnnouncementsDir(ctx.tempDir);
-			assertEquals(result.parsed.length, 1);
-			assertEquals(result.parsed[0].title, 'Updated title');
+			expect(result.parsed.length).toStrictEqual(1);
+			expect(result.parsed[0].title).toStrictEqual('Updated title');
 		});
 
 		this.test('writeAnnouncement writes the expected file', async (ctx) => {
@@ -81,9 +81,7 @@ class DatabaseAnnouncementsAuthoringTest extends BaseTest {
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
 			const content = await readFile(`${ctx.tempDir}/announcements/${id}.md`, 'utf8');
-			assertEquals(
-				content,
-				`---
+			expect(content).toStrictEqual(`---
 title: Migration to v2
 severity: warning
 published_at: '2026-04-20T10:00:00Z'
@@ -94,8 +92,7 @@ link: https://example.com/migration
 # Heading
 
 Body content.
-`
-			);
+`);
 		});
 
 		this.test('writeAnnouncement quotes titles that would read as another type', async (ctx) => {
@@ -109,15 +106,12 @@ Body content.
 			});
 
 			const content = await readFile(`${ctx.tempDir}/announcements/${id}.md`, 'utf8');
-			assertEquals(
-				content,
-				`---
+			expect(content).toStrictEqual(`---
 title: '2026-04-20'
 severity: warning
 published_at: '2026-04-20T10:00:00Z'
 ---
-`
-			);
+`);
 		});
 
 		// ─── round-trip with parser ──────────────────────────────────────────
@@ -128,16 +122,16 @@ published_at: '2026-04-20T10:00:00Z'
 			await writeAnnouncement(ctx.tempDir, id, input);
 
 			const result = await parseAnnouncementsDir(ctx.tempDir);
-			assertEquals(result.errors, []);
-			assertEquals(result.parsed.length, 1);
+			expect(result.errors).toStrictEqual([]);
+			expect(result.parsed.length).toStrictEqual(1);
 			const parsed = result.parsed[0];
-			assertEquals(parsed.id, id);
-			assertEquals(parsed.title, input.title);
-			assertEquals(parsed.severity, input.severity);
-			assertEquals(parsed.published_at, input.publishedAt);
-			assertEquals(parsed.expires_at, input.expiresAt);
-			assertEquals(parsed.link, input.link);
-			assertEquals(parsed.body, input.body);
+			expect(parsed.id).toStrictEqual(id);
+			expect(parsed.title).toStrictEqual(input.title);
+			expect(parsed.severity).toStrictEqual(input.severity);
+			expect(parsed.published_at).toStrictEqual(input.publishedAt);
+			expect(parsed.expires_at).toStrictEqual(input.expiresAt);
+			expect(parsed.link).toStrictEqual(input.link);
+			expect(parsed.body).toStrictEqual(input.body);
 		});
 
 		this.test('round-trip preserves null optional fields', async (ctx) => {
@@ -149,9 +143,9 @@ published_at: '2026-04-20T10:00:00Z'
 			});
 
 			const result = await parseAnnouncementsDir(ctx.tempDir);
-			assertEquals(result.errors, []);
-			assertEquals(result.parsed[0].expires_at, null);
-			assertEquals(result.parsed[0].link, null);
+			expect(result.errors).toStrictEqual([]);
+			expect(result.parsed[0].expires_at).toStrictEqual(null);
+			expect(result.parsed[0].link).toStrictEqual(null);
 		});
 
 		this.test('round-trip preserves an empty body', async (ctx) => {
@@ -159,8 +153,8 @@ published_at: '2026-04-20T10:00:00Z'
 			await writeAnnouncement(ctx.tempDir, id, { ...baseInput(), body: '' });
 
 			const result = await parseAnnouncementsDir(ctx.tempDir);
-			assertEquals(result.errors, []);
-			assertEquals(result.parsed[0].body, '');
+			expect(result.errors).toStrictEqual([]);
+			expect(result.parsed[0].body).toStrictEqual('');
 		});
 
 		this.test(
@@ -171,8 +165,8 @@ published_at: '2026-04-20T10:00:00Z'
 				await writeAnnouncement(ctx.tempDir, id, { ...baseInput(), body: tricky });
 
 				const result = await parseAnnouncementsDir(ctx.tempDir);
-				assertEquals(result.errors, []);
-				assertEquals(result.parsed[0].body, tricky);
+				expect(result.errors).toStrictEqual([]);
+				expect(result.parsed[0].body).toStrictEqual(tricky);
 			}
 		);
 
@@ -183,7 +177,7 @@ published_at: '2026-04-20T10:00:00Z'
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
 			const removed = await deleteAnnouncement(ctx.tempDir, id);
-			assertEquals(removed, true);
+			expect(removed).toStrictEqual(true);
 
 			await this.assertFileNotExists(`${ctx.tempDir}/announcements/${id}.md`);
 		});
@@ -191,7 +185,7 @@ published_at: '2026-04-20T10:00:00Z'
 		this.test('deleteAnnouncement returns false when the file is missing', async (ctx) => {
 			const id = generateAnnouncementId();
 			const removed = await deleteAnnouncement(ctx.tempDir, id);
-			assertEquals(removed, false);
+			expect(removed).toStrictEqual(false);
 		});
 
 		this.test('deleteAnnouncement does not affect siblings', async (ctx) => {
@@ -203,8 +197,8 @@ published_at: '2026-04-20T10:00:00Z'
 			await deleteAnnouncement(ctx.tempDir, a);
 
 			const result = await parseAnnouncementsDir(ctx.tempDir);
-			assertEquals(result.parsed.length, 1);
-			assertEquals(result.parsed[0].id, b);
+			expect(result.parsed.length).toStrictEqual(1);
+			expect(result.parsed[0].id).toStrictEqual(b);
 		});
 
 		// ─── id derivation ───────────────────────────────────────────────────
@@ -214,7 +208,7 @@ published_at: '2026-04-20T10:00:00Z'
 			await writeAnnouncement(ctx.tempDir, id, baseInput());
 
 			const fileStat = await stat(`${ctx.tempDir}/announcements/${id}.md`);
-			assertExists(fileStat);
+			expect(fileStat).not.toBeOneOf([null, undefined]);
 		});
 	}
 }

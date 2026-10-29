@@ -6,8 +6,7 @@
  * linked-database default is covered by the resolveLandingPage unit tests.
  */
 
-import { assertEquals } from '@std/assert';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -61,7 +60,7 @@ function storedLandingPage(): string | null {
 
 async function landingRedirect(): Promise<string | null> {
 	const res = await client.get('/');
-	assertEquals(res.status, 302);
+	expect(res.status).toStrictEqual(302);
 	return res.headers.get('location');
 }
 
@@ -78,24 +77,24 @@ afterAll(async () => {
 });
 
 test('defaults to Databases when no page is chosen and no database is linked', async () => {
-	assertEquals(storedLandingPage(), null);
-	assertEquals(await landingRedirect(), '/databases');
+	expect(storedLandingPage()).toStrictEqual(null);
+	expect(await landingRedirect()).toStrictEqual('/databases');
 });
 
 test('saving a page makes / open it', async () => {
-	assertEquals(await saveLandingPage('arrs'), 200);
-	assertEquals(storedLandingPage(), 'arrs');
-	assertEquals(await landingRedirect(), '/arr');
+	expect(await saveLandingPage('arrs')).toStrictEqual(200);
+	expect(storedLandingPage()).toStrictEqual('arrs');
+	expect(await landingRedirect()).toStrictEqual('/arr');
 });
 
 test('saving an unknown page is rejected and keeps the current choice', async () => {
-	assertEquals(await saveLandingPage('dashboard'), 400);
-	assertEquals(storedLandingPage(), 'arrs');
-	assertEquals(await landingRedirect(), '/arr');
+	expect(await saveLandingPage('dashboard')).toStrictEqual(400);
+	expect(storedLandingPage()).toStrictEqual('arrs');
+	expect(await landingRedirect()).toStrictEqual('/arr');
 });
 
 test('switching back to Automatic clears the stored page', async () => {
-	assertEquals(await saveLandingPage(''), 200);
-	assertEquals(storedLandingPage(), null);
-	assertEquals(await landingRedirect(), '/databases');
+	expect(await saveLandingPage('')).toStrictEqual(200);
+	expect(storedLandingPage()).toStrictEqual(null);
+	expect(await landingRedirect()).toStrictEqual('/databases');
 });

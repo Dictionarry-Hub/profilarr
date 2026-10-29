@@ -2,9 +2,8 @@
  * PCD write tests: radarr naming create.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -66,21 +65,21 @@ test('minimal radarr naming emits one create op', async () => {
 	await write.namingRadarr.create(ctx, { name: 'Created Naming' });
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
 	const metadata = parseMetadata(op);
-	assertEquals(metadata.operation, 'create');
-	assertEquals(metadata.entity, 'radarr_naming');
-	assertEquals(metadata.name, 'Created Naming');
+	expect(metadata.operation).toStrictEqual('create');
+	expect(metadata.entity).toStrictEqual('radarr_naming');
+	expect(metadata.name).toStrictEqual('Created Naming');
 	const desired = parseDesiredState(op);
-	assertEquals(desired.name, 'Created Naming');
-	assertEquals(desired.rename, true);
-	assertEquals(desired.movie_format, VALID_RADARR_NAMING_DEFAULTS.movieFormat);
-	assertEquals(desired.movie_folder_format, VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat);
-	assertEquals(desired.replace_illegal_characters, false);
-	assertEquals(desired.colon_replacement_format, 'delete');
+	expect(desired.name).toStrictEqual('Created Naming');
+	expect(desired.rename).toStrictEqual(true);
+	expect(desired.movie_format).toStrictEqual(VALID_RADARR_NAMING_DEFAULTS.movieFormat);
+	expect(desired.movie_folder_format).toStrictEqual(VALID_RADARR_NAMING_DEFAULTS.movieFolderFormat);
+	expect(desired.replace_illegal_characters).toStrictEqual(false);
+	expect(desired.colon_replacement_format).toStrictEqual('delete');
 	const sql = normalizeSql(op.sql);
-	assert(/insert into "?radarr_naming"?/i.test(sql));
+	expect(/insert into "?radarr_naming"?/i.test(sql)).toBeTruthy();
 });
 
 /**
@@ -120,13 +119,13 @@ test('radarr naming non-default values are recorded', async () => {
 	});
 
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const desired = parseDesiredState(ops[0]);
-	assertEquals(desired.rename, false);
-	assertEquals(desired.movie_format, '{Movie Title} ({Release Year})');
-	assertEquals(desired.movie_folder_format, '{Movie Title} ({Release Year})');
-	assertEquals(desired.replace_illegal_characters, true);
-	assertEquals(desired.colon_replacement_format, 'dash');
+	expect(desired.rename).toStrictEqual(false);
+	expect(desired.movie_format).toStrictEqual('{Movie Title} ({Release Year})');
+	expect(desired.movie_folder_format).toStrictEqual('{Movie Title} ({Release Year})');
+	expect(desired.replace_illegal_characters).toStrictEqual(true);
+	expect(desired.colon_replacement_format).toStrictEqual('dash');
 });
 
 /**
@@ -150,7 +149,7 @@ test('duplicate radarr naming name fails without writing ops', async () => {
 	const response = await write.namingRadarr.submitCreate(ctx, { name: 'existing naming' });
 
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -182,13 +181,13 @@ test('radarr movie format missing required tokens fails without writing ops', as
 	});
 
 	const body = await response.clone().text();
-	assert(
+	expect(
 		body.includes(
 			'Movie format: Must contain either movie title and release year OR Original Title/Filename'
 		)
-	);
+	).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -220,9 +219,9 @@ test('radarr folder format missing movie title fails without writing ops', async
 	});
 
 	const body = await response.clone().text();
-	assert(body.includes('Folder format: Must contain movie title'));
+	expect(body.includes('Folder format: Must contain movie title')).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });
 
 /**
@@ -254,7 +253,7 @@ test('radarr folder format disallows file-derived tokens without writing ops', a
 	});
 
 	const body = await response.clone().text();
-	assert(body.includes('Folder format: Must not contain deprecated tokens'));
+	expect(body.includes('Folder format: Must not contain deprecated tokens')).toBeTruthy();
 	await assertActionFailed(response);
-	assertEquals(userOpsSince(ctx, checkpoint).length, 0);
+	expect(userOpsSince(ctx, checkpoint).length).toStrictEqual(0);
 });

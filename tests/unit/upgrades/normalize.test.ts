@@ -4,7 +4,7 @@
  */
 
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
-import { assertEquals, assertAlmostEquals } from '@std/assert';
+import { expect } from 'vitest';
 import {
 	normalizeRadarrItem,
 	normalizeRadarrItems,
@@ -154,12 +154,12 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.id, 1);
-			assertEquals(result.title, 'Beetlejuice Beetlejuice');
-			assertEquals(result.year, 2024);
-			assertEquals(result.monitored, false);
-			assertEquals(result.minimum_availability, 'announced');
-			assertEquals(result.runtime, 105);
+			expect(result.id).toStrictEqual(1);
+			expect(result.title).toStrictEqual('Beetlejuice Beetlejuice');
+			expect(result.year).toStrictEqual(2024);
+			expect(result.monitored).toStrictEqual(false);
+			expect(result.minimum_availability).toStrictEqual('announced');
+			expect(result.runtime).toStrictEqual(105);
 		});
 
 		this.test('normalizes quality profile name', () => {
@@ -169,7 +169,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.quality_profile, 'Custom 4K Profile');
+			expect(result.quality_profile).toStrictEqual('Custom 4K Profile');
 		});
 
 		this.test('normalizes collection title', () => {
@@ -181,7 +181,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.collection, 'Marvel Cinematic Universe');
+			expect(result.collection).toStrictEqual('Marvel Cinematic Universe');
 		});
 
 		this.test('normalizes studio', () => {
@@ -191,7 +191,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.studio, 'Warner Bros. Pictures');
+			expect(result.studio).toStrictEqual('Warner Bros. Pictures');
 		});
 
 		this.test('normalizes original language', () => {
@@ -203,7 +203,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.original_language, 'Japanese');
+			expect(result.original_language).toStrictEqual('Japanese');
 		});
 
 		this.test('normalizes genres as string array', () => {
@@ -215,7 +215,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.genres, ['Comedy', 'Fantasy', 'Horror']);
+			expect(result.genres).toStrictEqual(['Comedy', 'Fantasy', 'Horror']);
 		});
 
 		this.test('normalizes release group from movie file', () => {
@@ -225,7 +225,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.release_group, 'ZoroSenpai');
+			expect(result.release_group).toStrictEqual('ZoroSenpai');
 		});
 
 		this.test('normalizes custom formats from movie file', () => {
@@ -240,7 +240,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.custom_formats, ['Tier 6', 'HDR10']);
+			expect(result.custom_formats).toStrictEqual(['Tier 6', 'HDR10']);
 		});
 
 		this.test('normalizes popularity', () => {
@@ -250,7 +250,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertAlmostEquals(result.popularity, 6.5513, 0.0001);
+			expect(Math.abs(result.popularity - 6.5513)).toBeLessThanOrEqual(0.0001);
 		});
 
 		// =====================
@@ -265,7 +265,7 @@ class NormalizeTest extends BaseTest {
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
 			// 13880140407 / (1024^3) = 12.927...
-			assertAlmostEquals(result.size_on_disk, 12.927, 0.01);
+			expect(Math.abs(result.size_on_disk - 12.927)).toBeLessThanOrEqual(0.01);
 		});
 
 		this.test('handles zero size', () => {
@@ -275,7 +275,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.size_on_disk, 0);
+			expect(result.size_on_disk).toStrictEqual(0);
 		});
 
 		// =====================
@@ -296,10 +296,10 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertAlmostEquals(result.imdb_rating, 6.6, 0.001);
-			assertAlmostEquals(result.tmdb_rating, 6.961, 0.001);
-			assertEquals(result.tomato_rating, 75);
-			assertAlmostEquals(result.trakt_rating, 6.80532, 0.00001);
+			expect(Math.abs(result.imdb_rating - 6.6)).toBeLessThanOrEqual(0.001);
+			expect(Math.abs(result.tmdb_rating - 6.961)).toBeLessThanOrEqual(0.001);
+			expect(result.tomato_rating).toStrictEqual(75);
+			expect(Math.abs(result.trakt_rating - 6.80532)).toBeLessThanOrEqual(0.00001);
 		});
 
 		this.test('handles missing ratings', () => {
@@ -309,10 +309,10 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.imdb_rating, 0);
-			assertEquals(result.tmdb_rating, 0);
-			assertEquals(result.tomato_rating, 0);
-			assertEquals(result.trakt_rating, 0);
+			expect(result.imdb_rating).toStrictEqual(0);
+			expect(result.tmdb_rating).toStrictEqual(0);
+			expect(result.tomato_rating).toStrictEqual(0);
+			expect(result.trakt_rating).toStrictEqual(0);
 		});
 
 		this.test('handles partial ratings', () => {
@@ -327,10 +327,10 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertAlmostEquals(result.imdb_rating, 7.5, 0.001);
-			assertEquals(result.tmdb_rating, 0);
-			assertEquals(result.tomato_rating, 0);
-			assertEquals(result.trakt_rating, 0);
+			expect(Math.abs(result.imdb_rating - 7.5)).toBeLessThanOrEqual(0.001);
+			expect(result.tmdb_rating).toStrictEqual(0);
+			expect(result.tomato_rating).toStrictEqual(0);
+			expect(result.trakt_rating).toStrictEqual(0);
 		});
 
 		// =====================
@@ -345,8 +345,8 @@ class NormalizeTest extends BaseTest {
 			// 80% of 400000 = 320000, score is 320000 so cutoff is met
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.cutoff_met, true);
-			assertEquals(result.score, 320000);
+			expect(result.cutoff_met).toStrictEqual(true);
+			expect(result.score).toStrictEqual(320000);
 		});
 
 		this.test('calculates cutoff_met correctly when score below threshold', () => {
@@ -357,7 +357,7 @@ class NormalizeTest extends BaseTest {
 			// 80% of 400000 = 320000, score is 200000 so cutoff is NOT met
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.cutoff_met, false);
+			expect(result.cutoff_met).toStrictEqual(false);
 		});
 
 		this.test('calculates cutoff with different percentages', () => {
@@ -368,7 +368,7 @@ class NormalizeTest extends BaseTest {
 			// 50% of 400000 = 200000, score is 200000 so cutoff is met
 			const result = normalizeRadarrItem(movie, movieFile, profile, 50);
 
-			assertEquals(result.cutoff_met, true);
+			expect(result.cutoff_met).toStrictEqual(true);
 		});
 
 		this.test('handles zero cutoff score in profile', () => {
@@ -379,7 +379,7 @@ class NormalizeTest extends BaseTest {
 			// 80% of 0 = 0, any score >= 0 meets cutoff
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.cutoff_met, true);
+			expect(result.cutoff_met).toStrictEqual(true);
 		});
 
 		// =====================
@@ -393,8 +393,8 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.date_added, '2024-12-28T00:48:06Z');
-			assertEquals(result.dateAdded, '2024-12-28T00:48:06Z');
+			expect(result.date_added).toStrictEqual('2024-12-28T00:48:06Z');
+			expect(result.dateAdded).toStrictEqual('2024-12-28T00:48:06Z');
 		});
 
 		this.test('uses current date when added is missing', () => {
@@ -407,8 +407,8 @@ class NormalizeTest extends BaseTest {
 			const after = new Date().toISOString();
 
 			// date_added should be between before and after
-			assertEquals(result.date_added >= before, true);
-			assertEquals(result.date_added <= after, true);
+			expect(result.date_added >= before).toStrictEqual(true);
+			expect(result.date_added <= after).toStrictEqual(true);
 		});
 
 		// =====================
@@ -427,8 +427,8 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80, tagMap);
 
-			assertEquals(result.tags, ['no-redownload', 'profilarr-upgrades', 'manual-review']);
-			assertEquals(result._tags, [1, 2, 3]);
+			expect(result.tags).toStrictEqual(['no-redownload', 'profilarr-upgrades', 'manual-review']);
+			expect(result._tags).toStrictEqual([1, 2, 3]);
 		});
 
 		this.test('handles empty tags', () => {
@@ -438,7 +438,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result._tags, []);
+			expect(result._tags).toStrictEqual([]);
 		});
 
 		this.test('handles undefined tags', () => {
@@ -448,7 +448,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result._tags, []);
+			expect(result._tags).toStrictEqual([]);
 		});
 
 		this.test('preserves raw movie data', () => {
@@ -458,9 +458,9 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result._raw, movie);
-			assertEquals(result._raw.id, 1);
-			assertEquals(result._raw.title, 'Beetlejuice Beetlejuice');
+			expect(result._raw).toStrictEqual(movie);
+			expect(result._raw.id).toStrictEqual(1);
+			expect(result._raw.title).toStrictEqual('Beetlejuice Beetlejuice');
 		});
 
 		// =====================
@@ -473,10 +473,10 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, undefined, profile, 80);
 
-			assertEquals(result.score, 0);
-			assertEquals(result.release_group, '');
-			assertEquals(result.cutoff_met, false); // 0 < 320000 (80% of 400000)
-			assertEquals(result.custom_formats, []);
+			expect(result.score).toStrictEqual(0);
+			expect(result.release_group).toStrictEqual('');
+			expect(result.cutoff_met).toStrictEqual(false); // 0 < 320000 (80% of 400000)
+			expect(result.custom_formats).toStrictEqual([]);
 		});
 
 		this.test('handles undefined profile', () => {
@@ -485,8 +485,8 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, movieFile, undefined, 80);
 
-			assertEquals(result.quality_profile, 'Unknown');
-			assertEquals(result.cutoff_met, true); // 0 threshold, any score meets it
+			expect(result.quality_profile).toStrictEqual('Unknown');
+			expect(result.cutoff_met).toStrictEqual(true); // 0 threshold, any score meets it
 		});
 
 		this.test('handles all undefined optional fields', () => {
@@ -499,27 +499,27 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeRadarrItem(movie, undefined, undefined, 80);
 
-			assertEquals(result.id, 1);
-			assertEquals(result.title, 'Minimal Movie');
-			assertEquals(result.year, 0);
-			assertEquals(result.monitored, false);
-			assertEquals(result.minimum_availability, 'released');
-			assertEquals(result.quality_profile, 'Unknown');
-			assertEquals(result.collection, '');
-			assertEquals(result.studio, '');
-			assertEquals(result.original_language, '');
-			assertEquals(result.genres, []);
-			assertEquals(result.release_group, '');
-			assertEquals(result.popularity, 0);
-			assertEquals(result.runtime, 0);
-			assertEquals(result.size_on_disk, 0);
-			assertEquals(result.imdb_rating, 0);
-			assertEquals(result.tmdb_rating, 0);
-			assertEquals(result.tomato_rating, 0);
-			assertEquals(result.trakt_rating, 0);
-			assertEquals(result.score, 0);
-			assertEquals(result._tags, []);
-			assertEquals(result.custom_formats, []);
+			expect(result.id).toStrictEqual(1);
+			expect(result.title).toStrictEqual('Minimal Movie');
+			expect(result.year).toStrictEqual(0);
+			expect(result.monitored).toStrictEqual(false);
+			expect(result.minimum_availability).toStrictEqual('released');
+			expect(result.quality_profile).toStrictEqual('Unknown');
+			expect(result.collection).toStrictEqual('');
+			expect(result.studio).toStrictEqual('');
+			expect(result.original_language).toStrictEqual('');
+			expect(result.genres).toStrictEqual([]);
+			expect(result.release_group).toStrictEqual('');
+			expect(result.popularity).toStrictEqual(0);
+			expect(result.runtime).toStrictEqual(0);
+			expect(result.size_on_disk).toStrictEqual(0);
+			expect(result.imdb_rating).toStrictEqual(0);
+			expect(result.tmdb_rating).toStrictEqual(0);
+			expect(result.tomato_rating).toStrictEqual(0);
+			expect(result.trakt_rating).toStrictEqual(0);
+			expect(result.score).toStrictEqual(0);
+			expect(result._tags).toStrictEqual([]);
+			expect(result.custom_formats).toStrictEqual([]);
 		});
 
 		this.test('normalizes sonarr custom formats as empty', () => {
@@ -534,7 +534,7 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeSonarrItem(series, profile, 80);
 
-			assertEquals(result.custom_formats, []);
+			expect(result.custom_formats).toStrictEqual([]);
 		});
 
 		this.test('normalizes sonarr score as the episode-file average', () => {
@@ -553,8 +553,8 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeSonarrItem(series, profile, 50, files);
 
-			assertEquals(result.score, 100.5);
-			assertEquals(result.cutoff_met, true);
+			expect(result.score).toStrictEqual(100.5);
+			expect(result.cutoff_met).toStrictEqual(true);
 		});
 
 		this.test('normalizes sonarr cutoff as not met when the average is below threshold', () => {
@@ -573,8 +573,8 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeSonarrItem(series, profile, 80, files);
 
-			assertEquals(result.score, 50);
-			assertEquals(result.cutoff_met, false);
+			expect(result.score).toStrictEqual(50);
+			expect(result.cutoff_met).toStrictEqual(false);
 		});
 
 		this.test('normalizes sonarr series without files as zero and cutoff not met', () => {
@@ -589,8 +589,8 @@ class NormalizeTest extends BaseTest {
 
 			const result = normalizeSonarrItem(series, profile, 100, []);
 
-			assertEquals(result.score, 0);
-			assertEquals(result.cutoff_met, false);
+			expect(result.score).toStrictEqual(0);
+			expect(result.cutoff_met).toStrictEqual(false);
 		});
 
 		// =====================
@@ -617,21 +617,21 @@ class NormalizeTest extends BaseTest {
 
 			const results = normalizeRadarrItems(movies, movieFileMap, profileMap, 80);
 
-			assertEquals(results.length, 3);
+			expect(results.length).toStrictEqual(3);
 
-			assertEquals(results[0].id, 1);
-			assertEquals(results[0].title, 'Movie 1');
-			assertEquals(results[0].quality_profile, '1080p Quality');
-			assertEquals(results[0].score, 100000);
+			expect(results[0].id).toStrictEqual(1);
+			expect(results[0].title).toStrictEqual('Movie 1');
+			expect(results[0].quality_profile).toStrictEqual('1080p Quality');
+			expect(results[0].score).toStrictEqual(100000);
 
-			assertEquals(results[1].id, 2);
-			assertEquals(results[1].title, 'Movie 2');
-			assertEquals(results[1].score, 200000);
+			expect(results[1].id).toStrictEqual(2);
+			expect(results[1].title).toStrictEqual('Movie 2');
+			expect(results[1].score).toStrictEqual(200000);
 
-			assertEquals(results[2].id, 3);
-			assertEquals(results[2].title, 'Movie 3');
-			assertEquals(results[2].quality_profile, '4K Quality');
-			assertEquals(results[2].score, 0); // No movie file
+			expect(results[2].id).toStrictEqual(3);
+			expect(results[2].title).toStrictEqual('Movie 3');
+			expect(results[2].quality_profile).toStrictEqual('4K Quality');
+			expect(results[2].score).toStrictEqual(0); // No movie file
 		});
 
 		this.test('batch normalization handles empty input', () => {
@@ -640,7 +640,7 @@ class NormalizeTest extends BaseTest {
 
 			const results = normalizeRadarrItems([], movieFileMap, profileMap, 80);
 
-			assertEquals(results.length, 0);
+			expect(results.length).toStrictEqual(0);
 		});
 
 		// =====================
@@ -666,13 +666,13 @@ class NormalizeTest extends BaseTest {
 			// Score 225600 < 320000, so cutoff NOT met
 			const result = normalizeRadarrItem(movie, movieFile, profile, 80);
 
-			assertEquals(result.cutoff_met, false);
-			assertEquals(result.score, 225600);
+			expect(result.cutoff_met).toStrictEqual(false);
+			expect(result.score).toStrictEqual(225600);
 
 			// But at 50% cutoff: 400000 * 0.5 = 200000
 			// Score 225600 >= 200000, so cutoff IS met
 			const result50 = normalizeRadarrItem(movie, movieFile, profile, 50);
-			assertEquals(result50.cutoff_met, true);
+			expect(result50.cutoff_met).toStrictEqual(true);
 		});
 
 		this.test('scenario: filter upgrade candidates', () => {
@@ -695,9 +695,9 @@ class NormalizeTest extends BaseTest {
 			// Filter for monitored, cutoff not met
 			const upgradeCandidates = results.filter((r) => r.monitored && !r.cutoff_met);
 
-			assertEquals(upgradeCandidates.length, 2);
-			assertEquals(upgradeCandidates[0].title, 'Needs Upgrade');
-			assertEquals(upgradeCandidates[1].title, 'No File');
+			expect(upgradeCandidates.length).toStrictEqual(2);
+			expect(upgradeCandidates[0].title).toStrictEqual('Needs Upgrade');
+			expect(upgradeCandidates[1].title).toStrictEqual('No File');
 		});
 	}
 }

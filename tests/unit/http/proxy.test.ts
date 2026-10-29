@@ -3,14 +3,13 @@
  * credentials must never make it into the output.
  */
 
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { getProxyEnv } from '#utils/http/proxy.ts';
 
 const envOf = (vars: Record<string, string>) => (name: string) => vars[name];
 
 test('getProxyEnv: returns nothing when no proxy is set', () => {
-	assertEquals(getProxyEnv(envOf({})), { proxies: {}, noProxy: [] });
+	expect(getProxyEnv(envOf({}))).toStrictEqual({ proxies: {}, noProxy: [] });
 });
 
 test('getProxyEnv: masks logins in proxy URLs', () => {
@@ -21,25 +20,25 @@ test('getProxyEnv: masks logins in proxy URLs', () => {
 		})
 	);
 
-	assertEquals(result.proxies, {
+	expect(result.proxies).toStrictEqual({
 		HTTPS_PROXY: 'http://***@gluetun:8888',
 		ALL_PROXY: 'socks5h://***@proxy:1080'
 	});
 
 	const output = JSON.stringify(result);
 	for (const secret of ['user', 'p%40ss', 'secret']) {
-		assertEquals(output.includes(secret), false, `Output leaked "${secret}": ${output}`);
+		expect(output.includes(secret), `Output leaked "${secret}": ${output}`).toStrictEqual(false);
 	}
 });
 
 test('getProxyEnv: leaves proxies without a login unmasked', () => {
 	const result = getProxyEnv(envOf({ HTTP_PROXY: 'http://proxy:3128' }));
-	assertEquals(result.proxies, { HTTP_PROXY: 'http://proxy:3128' });
+	expect(result.proxies).toStrictEqual({ HTTP_PROXY: 'http://proxy:3128' });
 });
 
 test('getProxyEnv: assumes http:// when the scheme is missing', () => {
 	const result = getProxyEnv(envOf({ HTTPS_PROXY: 'user:pass@proxy:8080' }));
-	assertEquals(result.proxies, { HTTPS_PROXY: 'http://***@proxy:8080' });
+	expect(result.proxies).toStrictEqual({ HTTPS_PROXY: 'http://***@proxy:8080' });
 });
 
 test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
@@ -51,7 +50,7 @@ test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
 		})
 	);
 
-	assertEquals(result.proxies, {
+	expect(result.proxies).toStrictEqual({
 		HTTPS_PROXY: 'http://upper:8080',
 		http_proxy: 'http://lower:3128'
 	});
@@ -60,8 +59,8 @@ test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
 test('getProxyEnv: never returns the raw value of an invalid URL', () => {
 	const result = getProxyEnv(envOf({ HTTPS_PROXY: 'http://user:secret@[bad' }));
 
-	assertEquals(result.proxies, { HTTPS_PROXY: null });
-	assertEquals(JSON.stringify(result).includes('secret'), false);
+	expect(result.proxies).toStrictEqual({ HTTPS_PROXY: null });
+	expect(JSON.stringify(result).includes('secret')).toStrictEqual(false);
 });
 
 test('getProxyEnv: splits and trims NO_PROXY', () => {
@@ -72,5 +71,5 @@ test('getProxyEnv: splits and trims NO_PROXY', () => {
 		})
 	);
 
-	assertEquals(result.noProxy, ['localhost', '127.0.0.1', 'parser', '192.168.0.0/16']);
+	expect(result.noProxy).toStrictEqual(['localhost', '127.0.0.1', 'parser', '192.168.0.0/16']);
 });

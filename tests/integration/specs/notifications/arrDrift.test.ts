@@ -2,10 +2,9 @@
  * Arr drift notification - definition + Discord + Ntfy + Webhook + Telegram.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
 import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
@@ -118,19 +117,19 @@ function makeFailedParams(
 test('detected type, severity, title, and empty message', () => {
 	const notification = arrDriftDetected(makeDetectedParams());
 
-	assertEquals(notification.type, 'arr.drift.detected');
-	assertEquals(notification.severity, 'warning');
-	assertEquals(notification.title, 'Drift Detected - Radarr (Movies)');
-	assertEquals(notification.message, '');
+	expect(notification.type).toStrictEqual('arr.drift.detected');
+	expect(notification.severity).toStrictEqual('warning');
+	expect(notification.title).toStrictEqual('Drift Detected - Radarr (Movies)');
+	expect(notification.message).toStrictEqual('');
 });
 
 test('failed type, severity, title, and first-line message', () => {
 	const notification = arrDriftFailed(makeFailedParams());
 
-	assertEquals(notification.type, 'arr.drift.failed');
-	assertEquals(notification.severity, 'error');
-	assertEquals(notification.title, 'Drift Check Failed - Radarr (Movies)');
-	assertEquals(notification.message, 'Connection refused');
+	expect(notification.type).toStrictEqual('arr.drift.failed');
+	expect(notification.severity).toStrictEqual('error');
+	expect(notification.title).toStrictEqual('Drift Check Failed - Radarr (Movies)');
+	expect(notification.message).toStrictEqual('Connection refused');
 });
 
 test('detected emits one section block per drift category', () => {
@@ -138,21 +137,21 @@ test('detected emits one section block per drift category', () => {
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 
 	const cf = sections.find((b) => b.kind === 'section' && b.title === 'Custom Format');
-	assertExists(cf);
+	expect(cf).not.toBeOneOf([null, undefined]);
 	if (cf?.kind === 'section') {
-		assertEquals(cf.content, '- Streaming Tier: 2 changes detected');
+		expect(cf.content).toStrictEqual('- Streaming Tier: 2 changes detected');
 	}
 
 	const qp = sections.find((b) => b.kind === 'section' && b.title === 'Quality Profile');
-	assertExists(qp);
+	expect(qp).not.toBeOneOf([null, undefined]);
 	if (qp?.kind === 'section') {
-		assertEquals(qp.content, '- HD Movies: 4 changes detected');
+		expect(qp.content).toStrictEqual('- HD Movies: 4 changes detected');
 	}
 
 	const dp = sections.find((b) => b.kind === 'section' && b.title === 'Delay Profile');
-	assertExists(dp);
+	expect(dp).not.toBeOneOf([null, undefined]);
 	if (dp?.kind === 'section') {
-		assertEquals(dp.content, '- Standard Delay: 1 change detected');
+		expect(dp.content).toStrictEqual('- Standard Delay: 1 change detected');
 	}
 });
 
@@ -169,39 +168,39 @@ test('detected caps at 15 entities and emits a trailing More block', () => {
 	const sections = notification.blocks?.filter((b) => b.kind === 'section') ?? [];
 
 	const cf = sections.find((b) => b.kind === 'section' && b.title === 'Custom Format');
-	assertExists(cf);
+	expect(cf).not.toBeOneOf([null, undefined]);
 	if (cf?.kind === 'section') {
-		assertEquals(cf.content.includes('Format 15'), true);
-		assertEquals(cf.content.includes('Format 16'), false);
-		assertEquals(cf.content.includes('Format 17'), false);
+		expect(cf.content.includes('Format 15')).toStrictEqual(true);
+		expect(cf.content.includes('Format 16')).toStrictEqual(false);
+		expect(cf.content.includes('Format 17')).toStrictEqual(false);
 	}
 
 	const more = sections.find((b) => b.kind === 'section' && b.title === 'More');
-	assertExists(more);
+	expect(more).not.toBeOneOf([null, undefined]);
 	if (more?.kind === 'section') {
-		assertEquals(more.content, '+2 more');
+		expect(more.content).toStrictEqual('+2 more');
 	}
 });
 
 test('detected definition emits no field blocks', () => {
 	const notification = arrDriftDetected(makeDetectedParams());
 	const fields = notification.blocks?.filter((b) => b.kind === 'field') ?? [];
-	assertEquals(fields.length, 0);
+	expect(fields.length).toStrictEqual(0);
 });
 
 test('failed definition emits full Error section', () => {
 	const notification = arrDriftFailed(makeFailedParams());
 	const block = notification.blocks?.find((b) => b.kind === 'section' && b.title === 'Error');
-	assertExists(block);
+	expect(block).not.toBeOneOf([null, undefined]);
 	if (block?.kind === 'section') {
-		assertEquals(block.content, 'Connection refused\nfetch failed: ECONNREFUSED');
+		expect(block.content).toStrictEqual('Connection refused\nfetch failed: ECONNREFUSED');
 	}
 });
 
 test('shared notification metadata includes drift events', () => {
 	const ids = notificationTypes.map((type) => type.id);
-	assertEquals(ids.includes('arr.drift.detected'), true);
-	assertEquals(ids.includes('arr.drift.failed'), true);
+	expect(ids.includes('arr.drift.detected')).toStrictEqual(true);
+	expect(ids.includes('arr.drift.failed')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -218,20 +217,20 @@ test('discord: detected uses warning color and renders one field per category', 
 	await notifier.notify(arrDriftDetected(makeDetectedParams()));
 
 	const embed = getAllEmbeds()[0];
-	assertEquals(embed?.color, Colors.WARNING);
+	expect(embed?.color).toStrictEqual(Colors.WARNING);
 	const fields = (embed?.fields as { name: string; value: string }[]) ?? [];
 
 	const cfField = fields.find((field) => field.name === 'Custom Format');
-	assertExists(cfField);
-	assertEquals(cfField!.value.includes('Streaming Tier'), true);
+	expect(cfField).not.toBeOneOf([null, undefined]);
+	expect(cfField!.value.includes('Streaming Tier')).toStrictEqual(true);
 
 	const qpField = fields.find((field) => field.name === 'Quality Profile');
-	assertExists(qpField);
-	assertEquals(qpField!.value.includes('HD Movies'), true);
+	expect(qpField).not.toBeOneOf([null, undefined]);
+	expect(qpField!.value.includes('HD Movies')).toStrictEqual(true);
 
 	const dpField = fields.find((field) => field.name === 'Delay Profile');
-	assertExists(dpField);
-	assertEquals(dpField!.value.includes('Standard Delay'), true);
+	expect(dpField).not.toBeOneOf([null, undefined]);
+	expect(dpField!.value.includes('Standard Delay')).toStrictEqual(true);
 });
 
 test('discord: failed uses error color and renders error section', async () => {
@@ -244,11 +243,11 @@ test('discord: failed uses error color and renders error section', async () => {
 	await notifier.notify(arrDriftFailed(makeFailedParams()));
 
 	const embed = getAllEmbeds()[0];
-	assertEquals(embed?.color, Colors.ERROR);
+	expect(embed?.color).toStrictEqual(Colors.ERROR);
 	const fields = (embed?.fields as { name: string; value: string }[]) ?? [];
 	const errorField = fields.find((field) => field.name === 'Error');
-	assertExists(errorField);
-	assertEquals(errorField!.value.includes('ECONNREFUSED'), true);
+	expect(errorField).not.toBeOneOf([null, undefined]);
+	expect(errorField!.value.includes('ECONNREFUSED')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -264,9 +263,9 @@ test('ntfy: detected maps to priority 4 and omits entity names', async () => {
 	await notifier.notify(arrDriftDetected(makeDetectedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.priority, 4);
-	assertEquals(payload?.tags, ['warning']);
-	assertEquals((payload?.message as string).includes('Streaming Tier'), false);
+	expect(payload?.priority).toStrictEqual(4);
+	expect(payload?.tags).toStrictEqual(['warning']);
+	expect((payload?.message as string).includes('Streaming Tier')).toStrictEqual(false);
 });
 
 // =========================================================================
@@ -281,21 +280,21 @@ test('webhook: detected sends full notification with one section per category', 
 	await notifier.notify(arrDriftDetected(makeDetectedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'arr.drift.detected');
-	assertEquals(payload?.severity, 'warning');
+	expect(payload?.type).toStrictEqual('arr.drift.detected');
+	expect(payload?.severity).toStrictEqual('warning');
 	const blocks = payload?.blocks as { kind: string; title?: string; content?: string }[];
 
 	const cfBlock = blocks.find(
 		(block) => block.kind === 'section' && block.title === 'Custom Format'
 	);
-	assertExists(cfBlock);
-	assertEquals(cfBlock!.content?.includes('Streaming Tier'), true);
+	expect(cfBlock).not.toBeOneOf([null, undefined]);
+	expect(cfBlock!.content?.includes('Streaming Tier')).toStrictEqual(true);
 
 	const qpBlock = blocks.find(
 		(block) => block.kind === 'section' && block.title === 'Quality Profile'
 	);
-	assertExists(qpBlock);
-	assertEquals(qpBlock!.content?.includes('HD Movies'), true);
+	expect(qpBlock).not.toBeOneOf([null, undefined]);
+	expect(qpBlock!.content?.includes('HD Movies')).toStrictEqual(true);
 });
 
 test('webhook: failed sends full notification with error detail', async () => {
@@ -306,12 +305,12 @@ test('webhook: failed sends full notification with error detail', async () => {
 	await notifier.notify(arrDriftFailed(makeFailedParams()));
 
 	const payload = captured[0]?.body as Record<string, unknown>;
-	assertEquals(payload?.type, 'arr.drift.failed');
-	assertEquals(payload?.severity, 'error');
+	expect(payload?.type).toStrictEqual('arr.drift.failed');
+	expect(payload?.severity).toStrictEqual('error');
 	const blocks = payload?.blocks as { kind: string; title?: string; content?: string }[];
 	const errorBlock = blocks.find((block) => block.kind === 'section' && block.title === 'Error');
-	assertExists(errorBlock);
-	assertEquals(errorBlock!.content?.includes('ECONNREFUSED'), true);
+	expect(errorBlock).not.toBeOneOf([null, undefined]);
+	expect(errorBlock!.content?.includes('ECONNREFUSED')).toStrictEqual(true);
 });
 
 // =========================================================================
@@ -330,8 +329,8 @@ test('telegram: detected has warning prefix and omits entity names', async () =>
 	await notifier.notify(arrDriftDetected(makeDetectedParams()));
 
 	const text = (captured[0]?.body as Record<string, unknown>)?.text as string;
-	assertEquals(text.startsWith('\u26A0\uFE0F'), true);
-	assertEquals(text.includes('Streaming Tier'), false);
+	expect(text.startsWith('\u26A0\uFE0F')).toStrictEqual(true);
+	expect(text.includes('Streaming Tier')).toStrictEqual(false);
 });
 
 // =========================================================================

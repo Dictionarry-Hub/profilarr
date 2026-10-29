@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assert, assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -106,7 +105,7 @@ test('reorder existing qualities emits one batched op', async () => {
 		'quality_item:quality:Quality C'
 	]);
 	assertFullListDesiredState(op, 3, 3);
-	assertEquals(compiledQualityOrder(ctx), [QUALITY_C, QUALITY_A, QUALITY_B]);
+	expect(compiledQualityOrder(ctx)).toStrictEqual([QUALITY_C, QUALITY_A, QUALITY_B]);
 });
 
 /**
@@ -159,18 +158,21 @@ test('create group emits one batched op with group members and row', async () =>
 		'quality_item:group:2160p'
 	]);
 	const sql = normalizeSql(op.sql).toLowerCase();
-	assert(sql.includes('insert into quality_groups'), `Expected quality_groups insert, got ${sql}`);
-	assert(
+	expect(
+		sql.includes('insert into quality_groups'),
+		`Expected quality_groups insert, got ${sql}`
+	).toBeTruthy();
+	expect(
 		sql.includes('insert into quality_group_members'),
 		`Expected quality_group_members insert, got ${sql}`
-	);
-	assert(
+	).toBeTruthy();
+	expect(
 		sql.includes('insert into quality_profile_qualities'),
 		`Expected quality_profile_qualities insert, got ${sql}`
-	);
-	assertEquals(compiledQualityOrder(ctx), [QUALITY_A, GROUP_NAME]);
-	assertEquals(compiledGroupMembers(ctx, GROUP_NAME), [QUALITY_B, QUALITY_C]);
-	assertEquals(compiledUpgradeUntilName(ctx), QUALITY_A);
+	).toBeTruthy();
+	expect(compiledQualityOrder(ctx)).toStrictEqual([QUALITY_A, GROUP_NAME]);
+	expect(compiledGroupMembers(ctx, GROUP_NAME)).toStrictEqual([QUALITY_B, QUALITY_C]);
+	expect(compiledUpgradeUntilName(ctx)).toStrictEqual(QUALITY_A);
 });
 
 /**
@@ -212,7 +214,7 @@ test('move upgrade until between existing rows clears before setting', async () 
 		"set upgrade_until = 0 where quality_profile_name = 'qualities profile' and quality_name = 'quality a'",
 		"set upgrade_until = 1 where quality_profile_name = 'qualities profile' and quality_name = 'quality b'"
 	);
-	assertEquals(compiledUpgradeUntilName(ctx), QUALITY_B);
+	expect(compiledUpgradeUntilName(ctx)).toStrictEqual(QUALITY_B);
 });
 
 /**
@@ -263,8 +265,8 @@ test('create group and mark it upgrade until clears old marker before adding gro
 		"set upgrade_until = 0 where quality_profile_name = 'qualities profile' and quality_name = 'quality a'",
 		"select 'qualities profile', null, '2160p', 1, 1, 1"
 	);
-	assertEquals(compiledUpgradeUntilName(ctx), GROUP_NAME);
-	assertEquals(compiledGroupMembers(ctx, GROUP_NAME), [QUALITY_B, QUALITY_C]);
+	expect(compiledUpgradeUntilName(ctx)).toStrictEqual(GROUP_NAME);
+	expect(compiledGroupMembers(ctx, GROUP_NAME)).toStrictEqual([QUALITY_B, QUALITY_C]);
 });
 
 function qualityItem(
@@ -299,38 +301,41 @@ function groupItem(
 
 function singleQualitiesOp(ctx: PcdTestContext, checkpoint: number): OpRow {
 	const ops = userOpsSince(ctx, checkpoint);
-	assertEquals(ops.length, 1);
+	expect(ops.length).toStrictEqual(1);
 	const op = ops[0];
-	assertEquals(parseMetadata(op).operation, 'update');
-	assertEquals(parseMetadata(op).entity, 'quality_profile');
-	assertEquals(parseMetadata(op).name, PROFILE_NAME);
+	expect(parseMetadata(op).operation).toStrictEqual('update');
+	expect(parseMetadata(op).entity).toStrictEqual('quality_profile');
+	expect(parseMetadata(op).name).toStrictEqual(PROFILE_NAME);
 	return op;
 }
 
 function assertChangedFields(op: OpRow, expected: string[]): void {
 	const metadata = parseMetadata(op);
 	const fields = metadata.changed_fields;
-	assert(Array.isArray(fields), 'Expected changed_fields array');
-	assertEquals([...fields].sort(), [...expected].sort());
+	expect(Array.isArray(fields), 'Expected changed_fields array').toBeTruthy();
+	expect([...fields].sort()).toStrictEqual([...expected].sort());
 }
 
 function assertFullListDesiredState(op: OpRow, fromLength: number, toLength: number): void {
 	const desired = parseDesiredState(op);
 	const orderedItems = desired.ordered_items as { from?: unknown; to?: unknown } | undefined;
-	assertExists(orderedItems, 'Expected ordered_items desired state');
-	assert(Array.isArray(orderedItems.from), 'Expected ordered_items.from array');
-	assert(Array.isArray(orderedItems.to), 'Expected ordered_items.to array');
-	assertEquals(orderedItems.from.length, fromLength);
-	assertEquals(orderedItems.to.length, toLength);
+	expect(orderedItems, 'Expected ordered_items desired state').not.toBeOneOf([null, undefined]);
+	expect(Array.isArray(orderedItems.from), 'Expected ordered_items.from array').toBeTruthy();
+	expect(Array.isArray(orderedItems.to), 'Expected ordered_items.to array').toBeTruthy();
+	expect(orderedItems.from.length).toStrictEqual(fromLength);
+	expect(orderedItems.to.length).toStrictEqual(toLength);
 }
 
 function assertSqlOrder(sql: string, before: string, after: string): void {
 	const normalized = normalizeSql(sql).toLowerCase();
 	const beforeIndex = normalized.indexOf(before);
 	const afterIndex = normalized.indexOf(after);
-	assert(beforeIndex >= 0, `Expected SQL to contain ${before}, got ${normalized}`);
-	assert(afterIndex >= 0, `Expected SQL to contain ${after}, got ${normalized}`);
-	assert(beforeIndex < afterIndex, `Expected ${before} before ${after}, got ${normalized}`);
+	expect(beforeIndex >= 0, `Expected SQL to contain ${before}, got ${normalized}`).toBeTruthy();
+	expect(afterIndex >= 0, `Expected SQL to contain ${after}, got ${normalized}`).toBeTruthy();
+	expect(
+		beforeIndex < afterIndex,
+		`Expected ${before} before ${after}, got ${normalized}`
+	).toBeTruthy();
 }
 
 function compiledQualityOrder(ctx: PcdTestContext): string[] {

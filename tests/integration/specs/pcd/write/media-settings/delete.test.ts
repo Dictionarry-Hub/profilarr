@@ -6,9 +6,8 @@
  * before the implementation, mirroring the regex / delay-profile pattern.
  */
 
-import { assert, assertEquals } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -86,35 +85,35 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		await write.mediaSettings.remove(ctx, arrType, 'Delete Media');
 
 		const ops = userOpsSince(ctx, checkpoint);
-		assertEquals(ops.length, 1);
+		expect(ops.length).toStrictEqual(1);
 		const op = ops[0];
 		const metadata = parseMetadata(op);
-		assertEquals(metadata.operation, 'delete');
-		assertEquals(metadata.entity, entityForArrType(arrType));
-		assertEquals(metadata.name, 'Delete Media');
-		assertEquals(metadata.changed_fields, ['deleted']);
+		expect(metadata.operation).toStrictEqual('delete');
+		expect(metadata.entity).toStrictEqual(entityForArrType(arrType));
+		expect(metadata.name).toStrictEqual('Delete Media');
+		expect(metadata.changed_fields).toStrictEqual(['deleted']);
 		const desired = parseDesiredState(op);
-		assertEquals(desired.deleted, true);
-		assertEquals(desired.name, 'Delete Media');
-		assertEquals(desired.propers_repacks, 'preferAndUpgrade');
-		assertEquals(desired.enable_media_info, true);
+		expect(desired.deleted).toStrictEqual(true);
+		expect(desired.name).toStrictEqual('Delete Media');
+		expect(desired.propers_repacks).toStrictEqual('preferAndUpgrade');
+		expect(desired.enable_media_info).toStrictEqual(true);
 
 		const sql = normalizeSql(op.sql);
 		const lowerSql = sql.toLowerCase();
 		const deletePattern = new RegExp(`delete from "?${tableForArrType(arrType)}"?`, 'i');
-		assert(deletePattern.test(sql));
+		expect(deletePattern.test(sql)).toBeTruthy();
 
 		const deleteIndex = lowerSql.indexOf(`delete from "${tableForArrType(arrType)}"`);
-		assert(deleteIndex >= 0, 'expected media settings delete in SQL');
+		expect(deleteIndex >= 0, 'expected media settings delete in SQL').toBeTruthy();
 		const deleteClause = sql.slice(deleteIndex);
-		assert(/where "?name"? = /i.test(deleteClause));
-		assert(
+		expect(/where "?name"? = /i.test(deleteClause)).toBeTruthy();
+		expect(
 			!/where[^;]*"?propers_repacks"?\s*=/i.test(deleteClause),
 			`propers_repacks should not appear in delete WHERE clause, got: ${deleteClause}`
-		);
-		assert(
+		).toBeTruthy();
+		expect(
 			!/where[^;]*"?enable_media_info"?\s*=/i.test(deleteClause),
 			`enable_media_info should not appear in delete WHERE clause, got: ${deleteClause}`
-		);
+		).toBeTruthy();
 	});
 }

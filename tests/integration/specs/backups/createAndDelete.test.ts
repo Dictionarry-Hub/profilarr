@@ -4,13 +4,12 @@
  * Verifies backup creation (async via job), deletion, auth, and validation.
  */
 
-import { assertEquals, assertExists } from '@std/assert';
 import { execFile } from 'node:child_process';
 import { mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import { TestClient } from '#integration/harness/client.ts';
@@ -66,11 +65,11 @@ afterAll(async () => {
 
 test('POST /api/v1/backups with session returns 202 with jobId', async () => {
 	const res = await client.post('/api/v1/backups', {});
-	assertEquals(res.status, 202);
+	expect(res.status).toStrictEqual(202);
 
 	const body = await res.json();
-	assertExists(body.jobId);
-	assertEquals(typeof body.jobId, 'number');
+	expect(body.jobId).not.toBeOneOf([null, undefined]);
+	expect(typeof body.jobId).toStrictEqual('number');
 });
 
 test('POST /api/v1/backups with API key returns 202', async () => {
@@ -81,15 +80,15 @@ test('POST /api/v1/backups with API key returns 202', async () => {
 			headers: { 'X-Api-Key': API_KEY }
 		}
 	);
-	assertEquals(res.status, 202);
+	expect(res.status).toStrictEqual(202);
 
 	const body = await res.json();
-	assertExists(body.jobId);
+	expect(body.jobId).not.toBeOneOf([null, undefined]);
 });
 
 test('POST /api/v1/backups without auth returns 401', async () => {
 	const res = await unauthClient.post('/api/v1/backups', {});
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── Create: Job integration ─────────────────────────────────────────────────
@@ -99,11 +98,11 @@ test('returned jobId is fetchable via GET /api/v1/jobs/{jobId}', async () => {
 	const { jobId } = await createRes.json();
 
 	const jobRes = await client.get(`/api/v1/jobs/${jobId}`);
-	assertEquals(jobRes.status, 200);
+	expect(jobRes.status).toStrictEqual(200);
 
 	const job = await jobRes.json();
-	assertEquals(job.id, jobId);
-	assertEquals(job.jobType, 'backup.create');
+	expect(job.id).toStrictEqual(jobId);
+	expect(job.jobType).toStrictEqual('backup.create');
 });
 
 // ─── Delete: Auth ────────────────────────────────────────────────────────────
@@ -112,10 +111,10 @@ test('DELETE /api/v1/backups/{filename} with session returns 200 for existing fi
 	await createDummyBackup('backup-delete-session-test.tar.gz');
 
 	const res = await client.delete('/api/v1/backups/backup-delete-session-test.tar.gz');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
 	const body = await res.json();
-	assertEquals(body.success, true);
+	expect(body.success).toStrictEqual(true);
 });
 
 test('DELETE /api/v1/backups/{filename} with API key returns 200', async () => {
@@ -124,39 +123,39 @@ test('DELETE /api/v1/backups/{filename} with API key returns 200', async () => {
 	const res = await apiKeyClient.delete('/api/v1/backups/backup-delete-apikey-test.tar.gz', {
 		headers: { 'X-Api-Key': API_KEY }
 	});
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 });
 
 test('DELETE /api/v1/backups/{filename} without auth returns 401', async () => {
 	const res = await unauthClient.delete('/api/v1/backups/backup-delete-unauth-test.tar.gz');
-	assertEquals(res.status, 401);
+	expect(res.status).toStrictEqual(401);
 });
 
 // ─── Delete: Errors ──────────────────────────────────────────────────────────
 
 test('DELETE /api/v1/backups/{filename} returns 404 for non-existent file', async () => {
 	const res = await client.delete('/api/v1/backups/backup-does-not-exist.tar.gz');
-	assertEquals(res.status, 404);
+	expect(res.status).toStrictEqual(404);
 });
 
 test('DELETE /api/v1/backups/{filename} returns 400 for invalid filename', async () => {
 	const res = await client.delete('/api/v1/backups/notabackup.tar.gz');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 test('DELETE /api/v1/backups/{filename} returns 400 for path traversal', async () => {
 	const res = await client.delete('/api/v1/backups/backup-..%2F..%2Fetc%2Fpasswd.tar.gz');
-	assertEquals(res.status, 400);
+	expect(res.status).toStrictEqual(400);
 });
 
 // ─── Delete: Behavior ────────────────────────────────────────────────────────
 
 test('file is actually deleted after successful DELETE', async () => {
 	await createDummyBackup('backup-verify-deleted.tar.gz');
-	assertEquals(await fileExists(`${BACKUPS_DIR}/backup-verify-deleted.tar.gz`), true);
+	expect(await fileExists(`${BACKUPS_DIR}/backup-verify-deleted.tar.gz`)).toStrictEqual(true);
 
 	const res = await client.delete('/api/v1/backups/backup-verify-deleted.tar.gz');
-	assertEquals(res.status, 200);
+	expect(res.status).toStrictEqual(200);
 
-	assertEquals(await fileExists(`${BACKUPS_DIR}/backup-verify-deleted.tar.gz`), false);
+	expect(await fileExists(`${BACKUPS_DIR}/backup-verify-deleted.tar.gz`)).toStrictEqual(false);
 });

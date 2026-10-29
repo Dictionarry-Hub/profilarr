@@ -1,5 +1,4 @@
-import { test } from 'vitest';
-import { assertEquals } from '@std/assert';
+import { expect, test } from 'vitest';
 import { evaluateCustomFormat } from '#entities/customFormats/evaluator.ts';
 import { Language, QualitySource, QualityModifier, Resolution } from '#arr/parser/types.ts';
 import type { ParseResult } from '#arr/parser/types.ts';
@@ -48,7 +47,7 @@ test('evaluateCustomFormat: Spanish (Latino) matches when release language is Sp
 		null
 	);
 
-	assertEquals(result.matches, true);
+	expect(result.matches).toStrictEqual(true);
 });
 
 test('evaluateCustomFormat: Spanish matches when release language is Spanish', () => {
@@ -59,7 +58,7 @@ test('evaluateCustomFormat: Spanish matches when release language is Spanish', (
 		null
 	);
 
-	assertEquals(result.matches, true);
+	expect(result.matches).toStrictEqual(true);
 });
 
 test('evaluateCustomFormat: Spanish (Latino) does not match when release language is only Spanish', () => {
@@ -70,5 +69,5 @@ test('evaluateCustomFormat: Spanish (Latino) does not match when release languag
 		null
 	);
 
-	assertEquals(result.matches, false);
+	expect(result.matches).toStrictEqual(false);
 });

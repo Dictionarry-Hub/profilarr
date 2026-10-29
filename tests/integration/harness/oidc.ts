@@ -3,7 +3,7 @@
  * (see tests/integration/specs/auth/docker-compose.yml).
  */
 
-import { assertEquals, assertStringIncludes } from '@std/assert';
+import { expect } from 'vitest';
 import type { TestClient } from './client.ts';
 
 export const MOCK_OIDC_URL = 'http://localhost:9090/default/.well-known/openid-configuration';
@@ -47,20 +47,20 @@ export async function completeOidcLogin(
 	const loginRes = await client.get(
 		options.reauth ? '/auth/oidc/login?reauth=1' : '/auth/oidc/login'
 	);
-	assertEquals(loginRes.status, 302, 'OIDC login should redirect to provider');
+	expect(loginRes.status, 'OIDC login should redirect to provider').toStrictEqual(302);
 	const authUrl = loginRes.headers.get('location')!;
 
 	// Step 2: Follow redirect to mock-oauth2-server (get login form)
 	const formRes = await client.get(authUrl);
-	assertEquals(formRes.status, 200, 'Mock server should return login form');
+	expect(formRes.status, 'Mock server should return login form').toStrictEqual(200);
 	// Consume the body so the response is not left hanging
 	await formRes.text();
 
 	// Step 3: POST the login form (mock server accepts any username)
 	const formPostRes = await client.postForm(authUrl, { username });
-	assertEquals(formPostRes.status, 302, 'Mock server should redirect back to callback');
+	expect(formPostRes.status, 'Mock server should redirect back to callback').toStrictEqual(302);
 	const callbackUrl = formPostRes.headers.get('location')!;
-	assertStringIncludes(callbackUrl, '/auth/oidc/callback', 'Redirect should target our callback');
+	expect(callbackUrl, 'Redirect should target our callback').toContain('/auth/oidc/callback');
 
 	// Step 4: Follow the callback redirect
 	const callbackRes = await client.get(callbackUrl);

@@ -3,10 +3,9 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { assertEquals, assertExists } from '@std/assert';
 import { startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { afterAll, beforeAll, test } from 'vitest';
+import { afterAll, beforeAll, expect, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
@@ -104,12 +103,12 @@ test('matching upstream minimum score auto-aligns user op', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['minimum_custom_format_score']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.minimum_custom_format_score, 9);
+		expect(row.minimum_custom_format_score).toStrictEqual(9);
 	}
 });
 
@@ -156,13 +155,13 @@ test('minimum score applies after upstream description change', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['minimum_custom_format_score']);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.description, 'Upstream description');
-		assertEquals(row.minimum_custom_format_score, 7);
+		expect(row.description).toStrictEqual('Upstream description');
+		expect(row.minimum_custom_format_score).toStrictEqual(7);
 	}
 });
 
@@ -208,12 +207,12 @@ test('matching upstream upgrade-until score auto-aligns user op', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['upgrade_until_score']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.upgrade_until_score, 13);
+		expect(row.upgrade_until_score).toStrictEqual(13);
 	}
 });
 
@@ -259,12 +258,12 @@ test('matching upstream upgrade score increment auto-aligns user op', async () =
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['upgrade_score_increment']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.upgrade_score_increment, 2);
+		expect(row.upgrade_score_increment).toStrictEqual(2);
 	}
 });
 
@@ -290,12 +289,12 @@ test('matching upstream upgrades allowed auto-aligns user op', async () => {
 		await compilePcd(ctx);
 
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), ['upgrades_allowed']);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.upgrades_allowed, 0);
+		expect(row.upgrades_allowed).toStrictEqual(0);
 	}
 });
 
@@ -343,10 +342,12 @@ test('matching upstream custom format score auto-aligns user op', async () => {
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`custom_format_score:${CUSTOM_FORMAT_NAME}:radarr`
 		]);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), 21);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(21);
 	}
 });
 
@@ -390,10 +391,12 @@ test('matching upstream add custom format score auto-aligns user op', async () =
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`custom_format_score:${CUSTOM_FORMAT_NAME}:radarr`
 		]);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), 17);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(17);
 	}
 });
 
@@ -441,10 +444,12 @@ test('matching upstream remove custom format score auto-aligns user op', async (
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`custom_format_score:${CUSTOM_FORMAT_NAME}:radarr`
 		]);
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), null);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(null);
 	}
 });
 
@@ -488,7 +493,7 @@ test('minimum score update after upstream rename resolves by strategy', async ()
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, 'Scoring Profile Upstream');
-		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? 7 : 0);
+		expect(row.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? 7 : 0);
 		assertNoQualityProfileScoring(ctx, PROFILE_NAME);
 	}
 });
@@ -513,7 +518,7 @@ test('upgrades allowed update after upstream rename resolves by strategy', async
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, 'Scoring Profile Upstream');
-		assertEquals(row.upgrades_allowed, strategy === 'override' ? 0 : 1);
+		expect(row.upgrades_allowed).toStrictEqual(strategy === 'override' ? 0 : 1);
 		assertNoQualityProfileScoring(ctx, PROFILE_NAME);
 	}
 });
@@ -567,14 +572,14 @@ test('rename survives when minimum score conflicts', async () => {
 
 		const ops = opsSince(ctx, checkpoint);
 		const renameOp = firstOpForChangedFields(ops, ['name']);
-		assertEquals(renameOp.state, 'published');
+		expect(renameOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, renameOp, 'applied');
 
 		const minimumScoreOp = firstOpForChangedFields(ops, ['minimum_custom_format_score']);
 		assertStrategyOutcome(ctx, minimumScoreOp, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, 'Scoring Profile Local');
-		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? 7 : 13);
+		expect(row.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? 7 : 13);
 		assertNoQualityProfileScoring(ctx, PROFILE_NAME);
 	}
 });
@@ -623,7 +628,7 @@ test('minimum score conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? 10 : 20);
+		expect(row.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? 10 : 20);
 	}
 });
 
@@ -671,7 +676,7 @@ test('upgrade-until score conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.upgrade_until_score, strategy === 'override' ? 10 : 20);
+		expect(row.upgrade_until_score).toStrictEqual(strategy === 'override' ? 10 : 20);
 	}
 });
 
@@ -719,7 +724,7 @@ test('upgrade score increment conflict resolves by strategy', async () => {
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.upgrade_score_increment, strategy === 'override' ? 6 : 16);
+		expect(row.upgrade_score_increment).toStrictEqual(strategy === 'override' ? 6 : 16);
 	}
 });
 
@@ -768,10 +773,9 @@ test('custom format score conflict resolves by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'),
-			strategy === 'override' ? 20 : 30
-		);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(strategy === 'override' ? 20 : 30);
 	}
 });
 
@@ -824,11 +828,15 @@ test('different custom format score rows apply without conflict', async () => {
 		const op = firstOpForChangedFields(opsSince(ctx, checkpoint), [
 			`custom_format_score:${CUSTOM_FORMAT_NAME}:radarr`
 		]);
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'applied');
 		assertNoPendingConflicts(ctx);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), 11);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME_2, 'sonarr'), 22);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(11);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME_2, 'sonarr')
+		).toStrictEqual(22);
 	}
 });
 
@@ -876,10 +884,9 @@ test('add custom format score conflict resolves by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'),
-			strategy === 'override' ? 50 : 100
-		);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(strategy === 'override' ? 50 : 100);
 	}
 });
 
@@ -928,10 +935,9 @@ test('remove custom format score conflicts with upstream update', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'),
-			strategy === 'override' ? null : 30
-		);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(strategy === 'override' ? null : 30);
 	}
 });
 
@@ -989,12 +995,14 @@ test('custom format score survives when same-save minimum score conflicts', asyn
 		const scoreOp = firstOpForChangedFields(ops, [
 			`custom_format_score:${CUSTOM_FORMAT_NAME}:radarr`
 		]);
-		assertEquals(scoreOp.state, 'published');
+		expect(scoreOp.state).toStrictEqual('published');
 		assertLatestHistory(ctx, scoreOp, 'applied');
 
 		const row = assertQualityProfileScoring(ctx, PROFILE_NAME);
-		assertEquals(row.minimum_custom_format_score, strategy === 'override' ? 10 : 30);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), 20);
+		expect(row.minimum_custom_format_score).toStrictEqual(strategy === 'override' ? 10 : 30);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(20);
 	}
 });
 
@@ -1041,11 +1049,12 @@ test('custom format score dependency rename resolves by strategy', async () => {
 		]);
 		assertStrategyOutcome(ctx, op, strategy, 'guard_mismatch');
 
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), null);
-		assertEquals(
-			compiledCustomFormatScore(ctx, PROFILE_NAME, 'Scoring CF Renamed', 'radarr'),
-			strategy === 'override' ? 20 : 10
-		);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(null);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, 'Scoring CF Renamed', 'radarr')
+		).toStrictEqual(strategy === 'override' ? 20 : 10);
 	}
 });
 
@@ -1091,7 +1100,9 @@ test('custom format score dependency delete resolves by strategy', async () => {
 			`custom_format_score:${CUSTOM_FORMAT_NAME}:radarr`
 		]);
 		assertDependencyDeletedOutcome(ctx, op, strategy);
-		assertEquals(compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr'), null);
+		expect(
+			compiledCustomFormatScore(ctx, PROFILE_NAME, CUSTOM_FORMAT_NAME, 'radarr')
+		).toStrictEqual(null);
 	}
 });
 
@@ -1136,13 +1147,13 @@ function firstOpForChangedFields(ops: OpRow[], fields: string[]): OpRow {
 			actual.length === expected.length && actual.every((field, index) => field === expected[index])
 		);
 	});
-	assertExists(op, `Expected a user op for ${fields.join(', ')}`);
+	expect(op, `Expected a user op for ${fields.join(', ')}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
 function firstOpForOperation(ops: OpRow[], operation: string): OpRow {
 	const op = ops.find((candidate) => parseMetadata(candidate).operation === operation);
-	assertExists(op, `Expected a user op for operation ${operation}`);
+	expect(op, `Expected a user op for operation ${operation}`).not.toBeOneOf([null, undefined]);
 	return op;
 }
 
@@ -1159,19 +1170,22 @@ function assertStrategyOutcome(
 	reason: string
 ): void {
 	if (strategy === 'ask') {
-		assertEquals(op.state, 'published');
+		expect(op.state).toStrictEqual('published');
 		assertLatestHistory(ctx, op, 'conflicted_pending', reason);
 		return;
 	}
 
 	if (strategy === 'align') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped', 'aligned');
 		return;
 	}
 
-	assertEquals(op.state, 'superseded');
-	assertExists(op.superseded_by_op_id, 'Expected override to link a replacement op');
+	expect(op.state).toStrictEqual('superseded');
+	expect(op.superseded_by_op_id, 'Expected override to link a replacement op').not.toBeOneOf([
+		null,
+		undefined
+	]);
 	assertLatestHistory(ctx, op, 'superseded');
 }
 
@@ -1181,7 +1195,7 @@ function assertDependencyDeletedOutcome(
 	strategy: ConflictStrategy
 ): void {
 	if (strategy === 'override') {
-		assertEquals(op.state, 'dropped');
+		expect(op.state).toStrictEqual('dropped');
 		assertLatestHistory(ctx, op, 'dropped');
 		assertNoPendingConflicts(ctx);
 		return;
@@ -1197,9 +1211,9 @@ function assertLatestHistory(
 	reason?: string
 ): void {
 	const history = latestHistory(ctx, op.id);
-	assertEquals(history.status, status);
+	expect(history.status).toStrictEqual(status);
 	if (reason !== undefined) {
-		assertEquals(history.conflict_reason, reason);
+		expect(history.conflict_reason).toStrictEqual(reason);
 	}
 }
 
@@ -1216,7 +1230,7 @@ function latestHistory(ctx: PcdTestContext, opId: number): LatestHistory {
 				 LIMIT 1`
 			)
 			.get(ctx.dbId, opId) as LatestHistory | undefined;
-		assertExists(row, `Expected latest history for op ${opId}`);
+		expect(row, `Expected latest history for op ${opId}`).not.toBeOneOf([null, undefined]);
 		return row;
 	} finally {
 		db.close();
@@ -1239,7 +1253,7 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 				 WHERE h.status IN ('conflicted', 'conflicted_pending')`
 			)
 			.get(ctx.dbId) as { count: number };
-		assertEquals(row.count, 0);
+		expect(row.count).toStrictEqual(0);
 	} finally {
 		db.close();
 	}
@@ -1247,13 +1261,13 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 
 function assertQualityProfileScoring(ctx: PcdTestContext, name: string): QualityProfileScoringRow {
 	const row = compiledQualityProfileScoring(ctx).find((profile) => profile.name === name);
-	assertExists(row, `Expected quality profile ${name}`);
+	expect(row, `Expected quality profile ${name}`).not.toBeOneOf([null, undefined]);
 	return row;
 }
 
 function assertNoQualityProfileScoring(ctx: PcdTestContext, name: string): void {
 	const row = compiledQualityProfileScoring(ctx).find((profile) => profile.name === name);
-	assertEquals(row, undefined, `Expected no quality profile ${name}`);
+	expect(row, `Expected no quality profile ${name}`).toStrictEqual(undefined);
 }
 
 function compiledQualityProfileScoring(ctx: PcdTestContext): QualityProfileScoringRow[] {

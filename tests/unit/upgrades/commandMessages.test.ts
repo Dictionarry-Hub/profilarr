@@ -1,37 +1,34 @@
-import { assertEquals } from '@std/assert';
+import { expect } from 'vitest';
 import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { parseDownloadedReportCount } from '#server/upgrades/commandMessages.ts';
 
 class CommandMessagesTest extends BaseTest {
 	runTests(): void {
 		this.test('parses plural downloaded report count', () => {
-			assertEquals(
-				parseDownloadedReportCount('Completed search for 10 movies. 4 reports downloaded.'),
-				4
-			);
+			expect(
+				parseDownloadedReportCount('Completed search for 10 movies. 4 reports downloaded.')
+			).toStrictEqual(4);
 		});
 
 		this.test('parses singular downloaded report count', () => {
-			assertEquals(
-				parseDownloadedReportCount('Completed search for 10 movies. 1 report downloaded.'),
-				1
-			);
+			expect(
+				parseDownloadedReportCount('Completed search for 10 movies. 1 report downloaded.')
+			).toStrictEqual(1);
 		});
 
 		this.test('parses zero downloaded report count', () => {
-			assertEquals(
-				parseDownloadedReportCount('Completed search for 10 movies. 0 reports downloaded.'),
-				0
-			);
+			expect(
+				parseDownloadedReportCount('Completed search for 10 movies. 0 reports downloaded.')
+			).toStrictEqual(0);
 		});
 
 		this.test('returns null for missing message', () => {
-			assertEquals(parseDownloadedReportCount(undefined), null);
-			assertEquals(parseDownloadedReportCount(null), null);
+			expect(parseDownloadedReportCount(undefined)).toStrictEqual(null);
+			expect(parseDownloadedReportCount(null)).toStrictEqual(null);
 		});
 
 		this.test('returns null for unrecognized message', () => {
-			assertEquals(parseDownloadedReportCount('Completed search for 10 movies.'), null);
+			expect(parseDownloadedReportCount('Completed search for 10 movies.')).toStrictEqual(null);
 		});
 	}
 }
