@@ -103,7 +103,7 @@ export interface ServerInfo {
 export function getServerInfo(): ServerInfo {
 	return {
 		version: build.version,
-		env: process.env.DENO_ENV || 'production',
+		env: process.env.NODE_ENV || 'production',
 		timezone: config.timezone,
 		basePath: config.paths.base,
 		hostname: hostname()

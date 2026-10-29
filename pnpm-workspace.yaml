@@ -1,0 +1,7 @@
+# pnpm settings. .npmrc only holds npm-compatible settings.
+minimumReleaseAge: 10080
+saveExact: true
+# esbuild's binary comes from its optional platform package, so its install
+# script is not needed.
+allowBuilds:
+  esbuild: false

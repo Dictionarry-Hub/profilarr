@@ -4,7 +4,7 @@
 		"sourceMap": true,
 		"strict": true,
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"types": ["$app/types", "deno"],
+		"types": ["$app/types"],
 		"noFallthroughCasesInSwitch": true,
 		"noImplicitReturns": true,
 		"noImplicitOverride": true
