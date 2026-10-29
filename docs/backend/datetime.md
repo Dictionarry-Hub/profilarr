@@ -71,7 +71,7 @@ strings with a `Z` suffix. No downstream code needs to worry about which
 format the database used.
 
 ```ts
-import { toUTC } from '$shared/utils/dates';
+import { toUTC } from '#shared/utils/dates.ts';
 
 function rowToRecord(row: SomeRow): SomeRecord {
 	return {
@@ -130,8 +130,8 @@ initialized from root layout data and do not change for the lifetime of the
 session unless the layout reloads after settings are saved.
 
 ```ts
-import { serverTimezone } from '$stores/timezone';
-import { dateFormat } from '$stores/dateFormat';
+import { serverTimezone } from '#stores/timezone.ts';
+import { dateFormat } from '#stores/dateFormat.ts';
 
 // In a component
 const tz = $serverTimezone; // "Asia/Kuala_Lumpur"
@@ -160,9 +160,9 @@ date format preference. These are the only functions that produce text shown
 to users. Called in Svelte components only.
 
 ```ts
-import { formatDateTime } from '$shared/utils/dates';
-import { serverTimezone } from '$stores/timezone';
-import { dateFormat } from '$stores/dateFormat';
+import { formatDateTime } from '#shared/utils/dates.ts';
+import { serverTimezone } from '#stores/timezone.ts';
+import { dateFormat } from '#stores/dateFormat.ts';
 
 const display = formatDateTime(job.createdAt, $serverTimezone, $dateFormat);
 // "4/19/2026, 10:30:45 PM"  (in Asia/Kuala_Lumpur)
@@ -188,7 +188,7 @@ fractional seconds; compare with `julianday()` instead.
 
 1. **No raw locale methods.** `.toLocaleString()`, `.toLocaleDateString()`,
    and `.toLocaleTimeString()` are banned. Use the display functions from
-   `$shared/utils/dates` instead.
+   `#shared/utils/dates.ts` instead.
 2. **No raw `new Date(x)` for display.** Constructing a Date from a server
    string and immediately rendering it (e.g. `{new Date(row.timestamp)}`)
    bypasses timezone conversion. Use `formatDateTime()` or `formatDate()`.

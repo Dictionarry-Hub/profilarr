@@ -1,7 +1,7 @@
 # UI Components
 
 **Source:** `src/lib/client/ui/`
-**Import alias:** `$ui/*` (maps to `src/lib/client/ui/`)
+**Import alias:** `#ui/*` (maps to `src/lib/client/ui/`)
 **Lint rule:** `profilarr/no-raw-ui` (`scripts/lint/rules/no-raw-ui.ts`)
 
 Profilarr ships a small in-house component library that wraps the raw HTML
@@ -87,7 +87,7 @@ one-line description.
 
 #### FormInput
 
-**`$ui/form/FormInput.svelte`** wraps `<input>` (and, with `textarea={true}`,
+**`#ui/form/FormInput.svelte`** wraps `<input>` (and, with `textarea={true}`,
 `<textarea>`). It owns the label, description text, password visibility
 toggle, monospace mode, and the size scale (`xs` / `sm` / `md` / `lg`).
 
@@ -117,7 +117,7 @@ switches to the monospace font stack (useful for API keys and URLs).
 
 #### CodeInput
 
-**`$ui/form/CodeInput.svelte`** is the editable code textarea. It uses the
+**`#ui/form/CodeInput.svelte`** is the editable code textarea. It uses the
 same tokenizer and theme colors as `CodeBlock`, with a transparent textarea
 over a highlighted layer. Use it for JSON or SQL input, not plain text forms.
 
@@ -144,7 +144,7 @@ flush with surrounding content when `label` is omitted.
 
 #### NumberInput
 
-**`$ui/form/NumberInput.svelte`** wraps a numeric text input and adds
+**`#ui/form/NumberInput.svelte`** wraps a numeric text input and adds
 increment/decrement buttons with press-and-hold repeat, min/max validation,
 optional decimal precision, and a `compact` mode for dense form grids.
 Typical use: retention days, timeouts, thresholds. The visible value is draft
@@ -179,13 +179,13 @@ as seeding an empty range bound from its paired value.
 
 Two related components:
 
-- **`$ui/dropdown/DropdownCombobox.svelte`** is the searchable dropdown. The
+- **`#ui/dropdown/DropdownCombobox.svelte`** is the searchable dropdown. The
   user types to filter, keyboard arrows navigate, Enter selects. It supports
   fixed positioning, compact modes, item slots, and matching menu width to the
   trigger. While open, the search field is a `combobox` and the options are a
   `listbox` of `option`s. `label` or `ariaLabel` names it like `DropdownSelect`
   does.
-- **`$ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
+- **`#ui/dropdown/DropdownSelect.svelte`** is the plain `<select>` replacement:
   no search box, just click and pick. `header` and `headerDescription` add a
   `DropdownHeader` above the options, for explaining the choice in the menu.
   `label` shows a label next to the button. When the field's label sits
@@ -229,25 +229,25 @@ sort order).
 
 #### MarkdownInput
 
-**`$ui/form/MarkdownInput.svelte`** is the `<textarea>` replacement. It adds
+**`#ui/form/MarkdownInput.svelte`** is the `<textarea>` replacement. It adds
 a markdown toolbar, a live preview toggle, and auto-grow behavior. Pass
 `markdown={false}` for plain multi-line text without the toolbar.
 
 #### DateInput and TimeInput
 
-**`$ui/form/DateInput.svelte`** composes three `DropdownCombobox`s for
+**`#ui/form/DateInput.svelte`** composes three `DropdownCombobox`s for
 month, day, and year. The visible order follows the app date-format setting;
 the value format stays `YYYY-MM-DD`. It includes days-in-month validation so
 February never accepts day 30.
 
-**`$ui/form/TimeInput.svelte`** is two dropdowns (`HH` / `MM`).
+**`#ui/form/TimeInput.svelte`** is two dropdowns (`HH` / `MM`).
 
 Both exist because cross-browser native date/time pickers are a usability
 nightmare on mobile.
 
 #### TagInput
 
-**`$ui/form/TagInput.svelte`** is a chips-style input. Enter adds a tag;
+**`#ui/form/TagInput.svelte`** is a chips-style input. Enter adds a tag;
 Backspace on an empty field removes the last one. Supports a `NOT:` prefix
 convention for exclusions (used by custom-format language filters and the
 release-title parser). `ariaLabel` names the typing box. It defaults to
@@ -255,7 +255,7 @@ release-title parser). `ariaLabel` names the typing box. It defaults to
 
 #### IconCheckbox
 
-**`$ui/form/IconCheckbox.svelte`** is a checkbox with an icon baked in and
+**`#ui/form/IconCheckbox.svelte`** is a checkbox with an icon baked in and
 configurable colors (hex or CSS variable), plus filled / outline variants.
 Used for qualifiers like "exclude", "required", "boost". It shows only an
 icon, so a standalone checkbox needs `ariaLabel` to have a name. Inside a
@@ -265,19 +265,19 @@ button that already has a label, it can go without `ariaLabel`.
 
 Minor but worth knowing:
 
-- **`$ui/form/KeyValueList.svelte`**: dynamic list of string key / string
+- **`#ui/form/KeyValueList.svelte`**: dynamic list of string key / string
   value pairs. Add / remove rows; used for header maps and env-var style
   config.
-- **`$ui/form/RangeScale.svelte`**: slider for bounded numeric values
+- **`#ui/form/RangeScale.svelte`**: slider for bounded numeric values
   (score weights, percentages).
-- **`$ui/cron/CronInput.svelte`**: structured cron-expression builder with
+- **`#ui/cron/CronInput.svelte`**: structured cron-expression builder with
   common presets (hourly, daily, weekly) plus a raw-expression escape hatch.
 
 ### Buttons and Toggles
 
 #### Button
 
-**`$ui/button/Button.svelte`** is the single replacement for every
+**`#ui/button/Button.svelte`** is the single replacement for every
 `<button>` and action link in the app. Props cover everything raw buttons
 need: `text`, `icon` (a Lucide component), `variant`
 (`primary` / `secondary` / `danger` / `ghost` / others), `size`
@@ -328,7 +328,7 @@ A row action inside a table body:
 
 #### Toggle
 
-**`$ui/toggle/Toggle.svelte`** is the boolean toggle button. The whole
+**`#ui/toggle/Toggle.svelte`** is the boolean toggle button. The whole
 bordered button is the click target (`role="switch"`, Enter/Space toggle).
 The button stays neutral in both states; checked, the label goes full
 strength and a check icon in `color` slides in on the right (pinned to the
@@ -387,7 +387,7 @@ And a standalone toggle that just drives local state:
 
 #### SelectableContainer and SelectableRow
 
-**`$ui/toggle/SelectableContainer.svelte`** + **`SelectableRow.svelte`** are
+**`#ui/toggle/SelectableContainer.svelte`** + **`SelectableRow.svelte`** are
 the bulk-selection pair: a container that manages selection state across a
 list of rows, each row showing a checkbox indicator. Used in the import
 modal and release-selection flows.
@@ -398,19 +398,19 @@ modal and release-selection flows.
 
 The card family is the primary content container:
 
-- **`$ui/card/Card.svelte`** is a surface with padding, optional hover,
+- **`#ui/card/Card.svelte`** is a surface with padding, optional hover,
   optional `href` (renders as a link), and a `flush` mode that removes
   internal padding when the card is used as a grid child.
-- **`$ui/card/CardGrid.svelte`** is a responsive grid (1 / 2 / 3 / 4 / 5
+- **`#ui/card/CardGrid.svelte`** is a responsive grid (1 / 2 / 3 / 4 / 5
   column breakpoints) that lays cards out.
-- **`$ui/card/ExpandableCard.svelte`** is a card with a collapsible body.
+- **`#ui/card/ExpandableCard.svelte`** is a card with a collapsible body.
   Its header has a `header-right` slot beside the title and a
   `header-actions` slot at the far right next to the chevron; clicks in
   `header-actions` don't collapse the card. A `description` slot overrides
   the `description` prop when it needs markup such as inline code. The
   chevron is a button named "Collapse {title}" or "Expand {title}" with
   `aria-expanded`. Keyboard users and tests toggle the card through it.
-- **`$ui/card/StickyCard.svelte`** is a card that pins to the bottom of
+- **`#ui/card/StickyCard.svelte`** is a card that pins to the bottom of
   the viewport, typically used as a save/discard action bar.
 
 A settings page uses `ExpandableCard` extensively to group related fields
@@ -474,7 +474,7 @@ building bespoke menus.
 
 #### DraggableCard
 
-**`$ui/list/DraggableCard.svelte`** wraps a card with the drag-and-drop
+**`#ui/list/DraggableCard.svelte`** wraps a card with the drag-and-drop
 affordance used for reordering ordered collections (profile qualities,
 custom format conditions).
 
@@ -482,7 +482,7 @@ custom format conditions).
 
 #### Modal
 
-**`$ui/modal/Modal.svelte`** is the `<dialog>` replacement. It owns
+**`#ui/modal/Modal.svelte`** is the `<dialog>` replacement. It owns
 overlay / backdrop handling, Escape-to-close, focus management, and
 scroll-lock on `<body>`. The `header` text is the dialog's accessible name,
 so a test can find it with `getByRole('dialog', { name: header })`. Body
@@ -536,7 +536,7 @@ Pre-composed modals for recurring flows:
 
 #### Table and ExpandableTable
 
-**`$ui/table/Table.svelte`** is the `<table>` replacement. It owns sortable
+**`#ui/table/Table.svelte`** is the `<table>` replacement. It owns sortable
 headers, hover rows, responsive card fallback on narrow viewports, an empty
 state, progressive loading, page size, and a per-row `actions` slot. Columns
 are described declaratively.
@@ -571,38 +571,38 @@ Additional call sites worth skimming:
 - `src/routes/arr/[id]/logs/+page.svelte`: arr-specific log table mirroring
   the Profilarr logs layout.
 
-**`$ui/table/ExpandableTable.svelte`** extends `Table` with a per-row
+**`#ui/table/ExpandableTable.svelte`** extends `Table` with a per-row
 expand region (click a chevron, get a nested detail view). Used in
 entity-testing tables where each row has nested per-release detail.
 
-**`$ui/table/TableActionButton.svelte`** is a button styled to match the
+**`#ui/table/TableActionButton.svelte`** is a button styled to match the
 dense vertical rhythm of table action cells; prefer it over `Button` when
 the button lives in a table column.
 
 #### Badge
 
-**`$ui/badge/Badge.svelte`** is an inline pill label. Variants cover the
+**`#ui/badge/Badge.svelte`** is an inline pill label. Variants cover the
 usual palette (`accent` / `neutral` / `success` / `warning` / `danger` /
 `info`) plus product-specific (`radarr` / `sonarr`). Supports an inline
 icon and `mono` text.
 
 #### Label
 
-**`$ui/label/Label.svelte`** is the lighter-weight text label; use it for
+**`#ui/label/Label.svelte`** is the lighter-weight text label; use it for
 inline tags that don't need a badge's visual weight.
 
 #### CodeBlock and InlineCode
 
-- **`$ui/code/CodeBlock.svelte`**: syntax-highlighted multi-line code with
+- **`#ui/code/CodeBlock.svelte`**: syntax-highlighted multi-line code with
   theme selection and a copy button.
-- **`$ui/code/InlineCode.svelte`**: inline monospace span for references in
+- **`#ui/code/InlineCode.svelte`**: inline monospace span for references in
   prose.
 
-A second `CodeBlock` exists at `$ui/display/CodeBlock.svelte`; treat the
+A second `CodeBlock` exists at `#ui/display/CodeBlock.svelte`; treat the
 `code/` pair as the canonical entry point for now.
 
-**`$ui/display/Markdown.svelte`** renders a markdown string through the shared
-`renderMarkdown()` helper (`$shared/utils/markdown`). Props: `content`,
+**`#ui/display/Markdown.svelte`** renders a markdown string through the shared
+`renderMarkdown()` helper (`#shared/utils/markdown.ts`). Props: `content`,
 `inline` (default true), `maxLines` for a line clamp, and `links` (set false
 inside a card that is itself a link). The regex card view uses it.
 
@@ -636,7 +636,7 @@ icon }` objects.
 
 #### InlineLink
 
-**`$ui/link/InlineLink.svelte`** is a lightweight inline `<a>` for text-level
+**`#ui/link/InlineLink.svelte`** is a lightweight inline `<a>` for text-level
 links within content. It renders as accent-colored text with an underline on
 hover. Use it to link entity names to their detail pages.
 
@@ -652,7 +652,7 @@ false; adds `target="_blank" rel="noopener noreferrer"`).
 
 #### Tooltip
 
-**`$ui/tooltip/Tooltip.svelte`** wraps any child in a hover-activated
+**`#ui/tooltip/Tooltip.svelte`** wraps any child in a hover-activated
 tooltip. It handles viewport edge detection (flipping position when the
 tooltip would overflow), supports `top` / `bottom` / `right` positions, and
 supports a `fullWidth` mode for stretching to fit a parent container.
@@ -678,7 +678,7 @@ manually wrapping a `<Button>`.
 
 #### EmptyState
 
-**`$ui/state/EmptyState.svelte`** is the "no data yet" empty-view surface:
+**`#ui/state/EmptyState.svelte`** is the "no data yet" empty-view surface:
 icon, title, description, plus an optional CTA button (with `buttonText`,
 `buttonHref`, `buttonIcon`, `onboarding` hook).
 
@@ -701,13 +701,13 @@ Used on every list page when the underlying collection is empty. The
 
 #### HelpButton
 
-**`$ui/help/HelpButton.svelte`** is the floating / navbar help button that
+**`#ui/help/HelpButton.svelte`** is the floating / navbar help button that
 opens the help modal. Variants: `fab` (floating) or `navbar` (inline).
 
 ### Filters
 
-- **`$ui/filter/FilterTag.svelte`**: active-filter chip with a clear button.
-- **`$ui/filter/SmartFilterBar.svelte`**: multi-facet filter toolbar that
+- **`#ui/filter/FilterTag.svelte`**: active-filter chip with a clear button.
+- **`#ui/filter/SmartFilterBar.svelte`**: multi-facet filter toolbar that
   combines search, filter chips, and saved-filter presets. Used on
   list-heavy pages (arr library, custom formats).
 
@@ -735,7 +735,7 @@ top of a list page:
   "fuzzy" vs. "exact").
 - **`ViewToggle.svelte`**: list / grid view switcher used on pages that
   support both layouts. Persist view state with `createViewModeStore` from
-  `#lib/client/stores/dataPage.js`; saved preferences win, mobile falls back to
+  `#stores/dataPage.ts`; saved preferences win, mobile falls back to
   cards, and the default no-preference view is cards unless the page opts into
   `defaultView: 'table'`.
 
@@ -743,11 +743,11 @@ top of a list page:
 
 Components scoped to Radarr / Sonarr semantics rather than generic UI:
 
-- **`$ui/arr/Score.svelte`**: custom-format score display with positive /
+- **`#ui/arr/Score.svelte`**: custom-format score display with positive /
   negative coloring.
-- **`$ui/arr/CustomFormatBadge.svelte`**: badge styled specifically for
+- **`#ui/arr/CustomFormatBadge.svelte`**: badge styled specifically for
   custom formats (tight sizing, color-coded by score).
-- **`$ui/arr/ProgressIndicator.svelte`**: progress bar for long-running
+- **`#ui/arr/ProgressIndicator.svelte`**: progress bar for long-running
   arr operations (sync, bulk upgrade).
 
 ## Semantic Tokens and Theming (Planned)

@@ -255,7 +255,7 @@ minimum_custom_format_score
 
 Delays are stored and synced as whole minutes, matching the Arr API. The
 form's unit picker (minutes, hours, days) only changes the display; values
-are converted with `$shared/utils/duration.ts` and always posted as minutes.
+are converted with `#shared/utils/duration.ts` and always posted as minutes.
 
 The schema enforces protocol constraints via CHECK clauses:
 

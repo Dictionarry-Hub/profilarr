@@ -1,6 +1,6 @@
 # Logger
 
-**Source:** `src/lib/server/utils/logger/` (`$logger/*`)
+**Source:** `src/lib/server/utils/logger/` (`#logger/*`)
 
 ## Table of Contents
 
@@ -79,7 +79,7 @@ the application continues normally.
 Import the singleton and call a level method:
 
 ```ts
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 
 await logger.info('Sync processing complete', {
 	source: 'SyncProcessor',
@@ -112,7 +112,7 @@ await logger.errorWithTrace('Failed to compile cache', error, {
   instead of importing the singleton:
 
 ```ts
-import { Logger } from '$logger/logger.ts';
+import { Logger } from '#logger/logger.ts';
 const testLogger = new Logger({ logsDir: '/tmp/test-logs', minLevel: 'DEBUG' });
 ```
 

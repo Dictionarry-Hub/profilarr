@@ -672,7 +672,7 @@ so it survives clone. A path like `evil/passwd` passes a naive lexical check (it
 resolves inside the repo directory) but follows the symlink to `/etc/passwd`
 when the filesystem actually reads it.
 
-**Mitigation**: `validateFilePaths()` in `$utils/paths.ts` checks every
+**Mitigation**: `validateFilePaths()` in `#utils/paths.ts` checks every
 client-supplied path before any filesystem operation:
 
 1. Rejects absolute paths (`/etc/passwd`)

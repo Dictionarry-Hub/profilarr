@@ -69,7 +69,8 @@ tests/flows/
     entities/   typed page data readers per entity
     sync/       Arr instances, the fake Arr and its targets, Sync page setup
     git/        database pull and publish, the local upstream
-    auth/       local accounts, Settings › Security, SSO providers in sso/
+    auth/       local accounts, Settings › Security
+    sso/        SSO providers
     proxy/      reverse proxies in front of an app
     settings/   Settings pages, such as Backups
   scenarios/    real user flows, by area
@@ -116,7 +117,7 @@ test.use({
 - **Accounts.** `createAccount` makes the first account through the setup
   form. `signIn`, `signInWithSso` and `signOut` cover the rest
   (`helpers/auth/accounts.ts`).
-- **SSO providers.** `helpers/auth/sso/providers.ts` lists them. `fake` runs
+- **SSO providers.** `helpers/sso/providers.ts` lists them. `fake` runs
   in the test process and can misbehave on purpose. `authelia` runs Authelia
   in a container. Each entry lists the features it `supports`.
 - **Reverse proxies.** `helpers/proxy/proxies.ts` lists them. `fake` can
@@ -142,8 +143,9 @@ test.use({
 
 - Put it in its area under `scenarios/`, or in `workflows/` when it crosses
   areas.
-- Import with the `$flows/` alias only. Take `test` and `expect` from
-  `$flows/helpers/core/test.ts`, and use helpers rather than the harness.
+- Import with `#flows/`, or `./` for files beside or below the spec. Take
+  `test` and `expect` from `#flows/helpers/core/test.ts`, and use helpers
+  rather than the harness.
 - Use `openPage` from `helpers/core/nav.ts` for full loads of Profilarr pages
   before interacting. It waits for the root layout's `data-hydrated` marker,
   set in `onMount`, so hydration cannot clear typed values. After a reload,
