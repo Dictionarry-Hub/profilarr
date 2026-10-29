@@ -32,32 +32,7 @@ export default defineConfig({
 				usage: 'deno-compile',
 				out: 'dist/build',
 				buildOptions: { logOverride: { 'ignored-bare-import': 'silent' } }
-			}),
-
-			alias: {
-				$api: './src/lib/api',
-				$config: './src/lib/server/utils/config/config.ts',
-				$logger: './src/lib/server/utils/logger',
-				$shared: './src/lib/shared',
-				$stores: './src/lib/client/stores',
-				$ui: './src/lib/client/ui',
-				$assets: './src/lib/client/assets',
-				$alerts: './src/lib/client/alerts',
-				$server: './src/server',
-				$db: './src/lib/server/db',
-				$jobs: './src/lib/server/jobs',
-				$drift: './src/lib/server/drift',
-				$pcd: './src/lib/server/pcd',
-				$arr: './src/lib/server/utils/arr',
-				$http: './src/lib/server/utils/http',
-				$utils: './src/lib/server/utils',
-				$notifications: './src/lib/server/notifications',
-				$announcements: './src/lib/server/announcements',
-				$cache: './src/lib/server/utils/cache',
-				$sync: './src/lib/server/sync',
-				$auth: './src/lib/server/utils/auth',
-				$cutscene: './src/lib/client/cutscene'
-			}
+			})
 		})
 	],
 	ssr: {

@@ -1,6 +1,6 @@
 import { defineConfig } from '@playwright/test';
-import { TEST_IGNORE } from '$flows/harness/specFiles.ts';
-import { SCREENS } from '$flows/helpers/core/screen.ts';
+import { TEST_IGNORE } from './harness/specFiles.ts';
+import { SCREENS } from './helpers/core/screen.ts';
 
 const workersOverride = process.env.FLOWS_WORKERS;
 // Playwright empties the results folder at the start of every run, so UI mode
@@ -8,9 +8,6 @@ const workersOverride = process.env.FLOWS_WORKERS;
 const outputDir = process.env.FLOWS_UI ? 'test-results-ui' : 'test-results';
 
 export default defineConfig({
-	// Resolves the $flows/ import alias.
-	tsconfig: './tsconfig.json',
-
 	// Every *.spec.ts is a test file: scenarios under scenarios/, and each
 	// helper's own spec next to it under helpers/. Folders group the output.
 	testDir: '.',

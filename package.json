@@ -3,7 +3,23 @@
 	"private": true,
 	"type": "module",
 	"imports": {
-		"#lib": "./src/lib/index.js",
-		"#lib/*": "./src/lib/*"
+		"#server/*": "./src/lib/server/*",
+		"#db/*": "./src/lib/server/db/*",
+		"#utils/*": "./src/lib/server/utils/*",
+		"#logger/*": "./src/lib/server/utils/logger/*",
+		"#arr/*": "./src/lib/server/utils/arr/*",
+		"#pcd/*": "./src/lib/server/pcd/*",
+		"#entities/*": "./src/lib/server/pcd/entities/*",
+		"#notifications/*": "./src/lib/server/notifications/*",
+		"#client/*": "./src/lib/client/*",
+		"#ui/*": "./src/lib/client/ui/*",
+		"#stores/*": "./src/lib/client/stores/*",
+		"#shared/*": "./src/lib/shared/*",
+		"#api/*": "./src/lib/api/*",
+		"#routes/*": "./src/routes/*",
+		"#tests/*": "./tests/*",
+		"#flows/*": "./tests/flows/*",
+		"#integration/*": "./tests/integration/*",
+		"#scripts/*": "./scripts/*"
 	}
 }

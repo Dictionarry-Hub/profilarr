@@ -6,11 +6,7 @@
 		"strict": true,
 		"noEmit": true,
 		"allowImportingTsExtensions": true,
-		"types": ["node"],
-		"baseUrl": ".",
-		"paths": {
-			"$flows/*": ["./*"]
-		}
+		"types": ["node"]
 	},
 	"include": ["**/*.ts"],
 	"exclude": ["data", "test-results", "playwright-report"]
