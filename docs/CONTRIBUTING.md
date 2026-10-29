@@ -381,4 +381,3 @@ when `develop` is free.
 
 - `docs/ARCHITECTURE.md` - full codebase encyclopedia (modules, data flow, PCD)
 - `docs/DEVELOPMENT.md` - branching model, release process, versioning
-- `deno task stats` - per-module code stats (TS/JS/Svelte/CSS/SQL/C#)

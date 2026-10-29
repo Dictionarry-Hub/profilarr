@@ -178,9 +178,7 @@ The `announcements.fetch` job runs every 30 minutes (plus once at startup):
 
 `PROFILARR_BULLETIN_URL` overrides the base URL (default
 `https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/main`) for
-testing against a fork, branch, or local file server. `deno task
-dev:bulletin` serves `scripts/dev-bulletin/` fixtures on port 6970 for
-local development.
+testing against a fork, branch, or local file server.
 
 A bulletin payload with `schema !== 1` is rejected with a warning and the
 existing snapshot is preserved. Announcement payloads are also capped at
@@ -256,9 +254,8 @@ the bulletin repo directly.
 
 `deno task dev` uses channel `dev` and skips the version comparison
 entirely. Announcement fetching still runs so the feature is testable;
-point `PROFILARR_BULLETIN_URL` at `deno task dev:bulletin` (port 6970)
-or any fork / local server to exercise new payloads without touching the
-production bulletin.
+point `PROFILARR_BULLETIN_URL` at a fork or local server to exercise new
+payloads without touching the production bulletin.
 
 Version bounds on announcements are ignored when `channel === 'dev'` or
 the running version contains a `-` prerelease suffix (dev always sees
@@ -311,14 +308,11 @@ Instances pick it up on the next fetch (every 30 minutes) or on restart.
 
 ## Testing Locally
 
-Point dev at fixture files instead of the live bulletin:
+Point dev at a branch of the bulletin repo, or at any static server holding
+`versions.json`, `announcements.json` and the announcement bodies:
 
 ```bash
-# Terminal 1
-deno task dev:bulletin
-
-# Terminal 2
-PROFILARR_BULLETIN_URL=http://localhost:6970 deno task dev
+deno task dev --profilarr-bulletin-url https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/<branch>
 ```
 
 To preview the sidebar and About-page under a different channel, hand-edit

@@ -436,7 +436,7 @@ conflict UI and provides an audit trail.
 
 ## Type Generation
 
-**Source:** `scripts/generate-pcd-types.ts`
+**Source:** `scripts/generate/pcd-types.ts`
 **Output:** `src/lib/shared/pcd/types.ts`
 
 The PCD schema is the source of truth for TypeScript types. Rather than

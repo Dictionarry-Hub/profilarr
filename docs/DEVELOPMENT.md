@@ -452,4 +452,3 @@ When notifications is tagged, dark mode is next in the queue.
 
 - `docs/ARCHITECTURE.md` - full codebase encyclopedia (modules, data flow, PCD)
 - `docs/CONTRIBUTING.md` - how to submit changes, guidelines, conventions
-- `deno task stats` - per-module code stats (TS/JS/Svelte/CSS/SQL/C#)
