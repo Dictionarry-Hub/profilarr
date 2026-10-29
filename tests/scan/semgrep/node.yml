@@ -1,10 +1,10 @@
 rules:
-  # Deno.Command with template literal command path
-  - id: profilarr.deno.command-template-args
+  # Child process spawned with a template literal command path
+  - id: profilarr.node.command-template-args
     patterns:
-      - pattern-regex: 'new Deno\.Command\(\s*`'
+      - pattern-regex: '(?<![.\w])(spawn|spawnSync|exec|execSync|execFile|execFileSync)\(\s*`'
     message: >
-      Deno.Command called with a template literal as the command path.
+      Child process started with a template literal as the command path.
       Command paths should be static strings. If dynamic, ensure the
       path is validated and does not come from user input.
     languages: [generic]
@@ -18,7 +18,7 @@ rules:
         - 'CWE-78: Improper Neutralization of Special Elements used in an OS Command'
 
   # eval() or Function() constructor
-  - id: profilarr.deno.no-eval
+  - id: profilarr.node.no-eval
     patterns:
       - pattern-either:
           - pattern: 'eval(...)'
@@ -37,15 +37,14 @@ rules:
         - 'CWE-94: Improper Control of Generation of Code'
 
   # File I/O with path from request/params in route handlers
-  - id: profilarr.deno.path-traversal
+  - id: profilarr.node.path-traversal
     patterns:
       - pattern-either:
-          - pattern: 'Deno.readFile($PATH)'
-          - pattern: 'Deno.readTextFile($PATH)'
-          - pattern: 'Deno.writeFile($PATH, ...)'
-          - pattern: 'Deno.writeTextFile($PATH, ...)'
-          - pattern: 'Deno.remove($PATH, ...)'
-          - pattern: 'Deno.mkdir($PATH, ...)'
+          - pattern: '$FS.$FN($PATH, ...)'
+          - pattern: '$FN($PATH, ...)'
+      - metavariable-regex:
+          metavariable: $FN
+          regex: '^(readFile|readFileSync|writeFile|writeFileSync|appendFile|rm|rmSync|unlink|mkdir|mkdirSync|readdir|stat|copyFile|rename|open|access|createReadStream|createWriteStream)$'
       - metavariable-pattern:
           metavariable: $PATH
           patterns:
@@ -72,9 +71,9 @@ rules:
         - 'CWE-22: Improper Limitation of a Pathname to a Restricted Directory'
 
   # Logging environment variable values
-  - id: profilarr.deno.no-env-log
+  - id: profilarr.node.no-env-log
     patterns:
-      - pattern-regex: 'console\.(log|info|debug|warn|error)\(.*Deno\.env\.get\('
+      - pattern-regex: 'console\.(log|info|debug|warn|error)\(.*process\.env'
     paths:
       include:
         - '/src/**'

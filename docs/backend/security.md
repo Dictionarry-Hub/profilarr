@@ -786,13 +786,13 @@ positive to suppress with a justification comment.
 
 **Custom rulesets** (`tests/scan/semgrep/`):
 
-| File          | What it catches                                                                       |
-| ------------- | ------------------------------------------------------------------------------------- |
-| `xss.yml`     | `{@html}` usage, `marked` imported outside the shared renderer, unescaped table cells |
-| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)                   |
-| `secrets.yml` | Sensitive field names in logger metadata                                              |
-| `deno.yml`    | Deno-specific patterns (file I/O review)                                              |
-| `csharp.yml`  | C# parser service patterns (file I/O review)                                          |
+| File          | What it catches                                                                        |
+| ------------- | -------------------------------------------------------------------------------------- |
+| `xss.yml`     | `{@html}` usage, `marked` imported outside the shared renderer, unescaped table cells  |
+| `sql.yml`     | Template literal interpolation in SQL (exempts known-safe patterns)                    |
+| `secrets.yml` | Sensitive field names in logger metadata                                               |
+| `node.yml`    | Template literal command paths, `eval`, request-derived file paths, env values in logs |
+| `csharp.yml`  | C# parser service patterns (file I/O review)                                           |
 
 **Suppressing false positives**: Use `nosemgrep` with the full rule ID and a
 justification. The comment must be on the matched line or the line immediately
