@@ -10,18 +10,30 @@
 # Stage 1: Build
 # -----------------------------------------------------------------------------
 ARG DENO_VERSION=2.9.8
-FROM denoland/deno:${DENO_VERSION} AS builder
+ARG NODE_VERSION=24.22.1
+ARG PNPM_VERSION=11.28.9
+
+# COPY --from does not expand variables, so the Deno binary comes from a stage
+FROM denoland/deno:bin-${DENO_VERSION} AS deno
+
+FROM node:${NODE_VERSION}-bookworm-slim AS builder
+ARG PNPM_VERSION
+
+# pnpm installs dependencies and runs Vite; Deno only compiles the binary
+RUN npm install -g pnpm@${PNPM_VERSION}
+COPY --from=deno /deno /usr/local/bin/deno
 
 WORKDIR /build
 
 # Copy dependency files first (cache key)
-COPY deno.jsonc deno.lock* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+
+# Install dependencies, keeping the pnpm store in a build cache mount
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile --store-dir /pnpm/store
 
 # Copy everything else
 COPY . .
-
-# Install dependencies (needs full source to resolve npm: imports)
-RUN deno ci
 
 # Build the application
 # 1. Vite builds SvelteKit to dist/build/
@@ -60,7 +72,7 @@ export const build: BuildInfo = {
 EOF
 
 ENV APP_BASE_PATH=/build/dist/build
-RUN deno run -A vite build
+RUN pnpm exec vite build
 # --node-modules-dir=none + --exclude-unused-npm embed only what the server
 # reaches instead of the whole node_modules tree (build tooling included).
 # See docs/ARCHITECTURE.md#runtime-and-memory.
@@ -69,6 +81,7 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
         *)     echo "x86_64-unknown-linux-gnu" ;; \
     esac) && \
     deno compile \
+    --no-lock \
     --node-modules-dir=none \
     --exclude-unused-npm \
     --no-check \
