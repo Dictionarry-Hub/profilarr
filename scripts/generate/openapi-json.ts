@@ -1,14 +1,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-import process from 'node:process';
-import { pathToFileURL } from 'node:url';
 import { load as parse } from 'js-yaml';
 
-const OPENAPI_ROOT_URL = new URL('../docs/api/v1/openapi.yaml', import.meta.url);
-// Optional output path argument; defaults to the committed artifact.
-const OUTPUT_URL = process.argv[2]
-	? pathToFileURL(resolve(process.argv[2]))
-	: new URL('../src/lib/api/v1.openapi.json', import.meta.url);
+const OPENAPI_ROOT_URL = new URL('../../docs/api/v1/openapi.yaml', import.meta.url);
+const OUTPUT_URL = new URL('../../src/lib/api/v1.openapi.json', import.meta.url);
 
 const parsedDocumentCache = new Map<string, unknown>();
 

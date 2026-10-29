@@ -62,7 +62,6 @@ export default defineConfig(
 			'tests/flows/playwright-report/',
 			'tests/flows/test-results/',
 			'tests/flows/test-results-ui/',
-			'scripts/proxy/.caddy-data/',
 			'src/adapter/',
 			'src/services/'
 		]

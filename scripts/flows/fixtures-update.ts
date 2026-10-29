@@ -17,7 +17,7 @@ import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { buildSnapshot } from './fixtures-snapshot.ts';
+import { buildSnapshot } from '#flows/harness/fixtureSnapshot.ts';
 
 const FIXTURES_REPO = 'https://github.com/Dictionarry-Hub/fixtures';
 const DATA_DIR = 'tests/flows/data';

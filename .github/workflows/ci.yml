@@ -343,7 +343,7 @@ jobs:
         run: chmod +x dist/build/profilarr
 
       # The images real-service tests run, pinned in tests/flows/services.Dockerfile.
-      # scripts/flows.ts only pulls images missing from the host.
+      # scripts/flows/run.ts only pulls images missing from the host.
       - name: Cache flow service images
         id: flow-images
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

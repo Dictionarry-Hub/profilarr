@@ -7,6 +7,9 @@
  * To add a review, add it to REVIEWS and to the workflow matrix.
  */
 
+import { readFileSync } from 'node:fs';
+import process from 'node:process';
+
 export interface Finding {
 	category?: string;
 	file: string;
@@ -126,17 +129,17 @@ export function renderComment(
 
 function readJson<T>(path: string): T | undefined {
 	try {
-		return JSON.parse(Deno.readTextFileSync(path)) as T;
+		return JSON.parse(readFileSync(path, 'utf8')) as T;
 	} catch {
 		return undefined;
 	}
 }
 
 if (import.meta.main) {
-	const [dir] = Deno.args;
+	const [dir] = process.argv.slice(2);
 	if (!dir) {
 		console.error('Usage: render.ts <results-dir>');
-		Deno.exit(1);
+		process.exit(1);
 	}
 	const results: Record<string, Result | undefined> = {};
 	const metas: Record<string, Meta | undefined> = {};
@@ -146,9 +149,9 @@ if (import.meta.main) {
 	}
 	console.log(
 		renderComment(results, metas, {
-			repo: Deno.env.get('REPO') ?? '',
-			headSha: Deno.env.get('HEAD_SHA') ?? '',
-			runUrl: Deno.env.get('RUN_URL') ?? ''
+			repo: process.env.REPO ?? '',
+			headSha: process.env.HEAD_SHA ?? '',
+			runUrl: process.env.RUN_URL ?? ''
 		})
 	);
 }
