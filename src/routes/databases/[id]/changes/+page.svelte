@@ -1,15 +1,15 @@
 <script lang="ts">
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
 	import QualityProfileDiff from './components/QualityProfileDiff.svelte';
 	import SectionRenderer from './components/SectionRenderer.svelte';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import ActionInput from '$ui/actions/ActionInput.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import CodeBlock from '$ui/code/CodeBlock.svelte';
-	import InlineCode from '$ui/code/InlineCode.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import ActionInput from '#ui/actions/ActionInput.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import CodeBlock from '#ui/code/CodeBlock.svelte';
+	import InlineCode from '#ui/code/InlineCode.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import Check from '@lucide/svelte/icons/check';
 	import Send from '@lucide/svelte/icons/send';
 	import Download from '@lucide/svelte/icons/download';
@@ -32,19 +32,19 @@
 	import GitCommit from '@lucide/svelte/icons/git-commit-horizontal';
 	import GitPullRequestCreateArrow from '@lucide/svelte/icons/git-pull-request-create-arrow';
 	import X from '@lucide/svelte/icons/x';
-	import goOnGit from '$assets/goOnGit.gif';
-	import Button from '$ui/button/Button.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
+	import goOnGit from '#client/assets/goOnGit.gif';
+	import Button from '#ui/button/Button.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { deserialize } from '$app/forms';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import type { PageData } from './$types';
-	import type { GitStatus, IncomingChanges, Commit } from '$utils/git/types';
-	import type { Column } from '$ui/table/types';
-	import type { DraftEntityChange } from './components/types';
-	import { parseUTC, formatDate, formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import type { GitStatus, IncomingChanges, Commit } from '#utils/git/types.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { DraftEntityChange } from './components/types.ts';
+	import { parseUTC, formatDate, formatDateTime } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 
 	export let data: PageData;
 

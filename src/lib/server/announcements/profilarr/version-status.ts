@@ -1,4 +1,4 @@
-import { build } from '#lib/shared/build.ts';
+import { build } from '#shared/build.ts';
 import { compareVersions } from './filter.ts';
 import { getVersionsSnapshot } from './service.ts';
 

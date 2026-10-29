@@ -3,17 +3,17 @@
  * Pushes a single entity to an arr instance (inline, no job queue)
  */
 
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
-import { probeAndRecordVersion, withDetectedVersion } from '$utils/arr/version.ts';
-import type { BaseArrClient } from '$utils/arr/base.ts';
-import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '#arr/version.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import { hasProfileItemSizes } from '#shared/arr/capabilities.ts';
 import { createProfileSizeSource } from './qualityProfiles/sizeSource.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
-import { getCache } from '$pcd/index.ts';
-import { logger } from '$logger/logger.ts';
-import type { ArrType } from '$utils/arr/types.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
+import { getCache } from '#pcd/index.ts';
+import { logger } from '#logger/logger.ts';
+import type { ArrType } from '#arr/types.ts';
 import type { SyncArrType } from './mappings.ts';
 
 // Quality profile imports
@@ -22,27 +22,27 @@ import {
 	getQualityApiMappings,
 	transformQualityProfile
 } from './qualityProfiles/transformer.ts';
-import { getCustomFormatsForProfile, getCustomFormatsForRegex } from '$pcd/references.ts';
+import { getCustomFormatsForProfile, getCustomFormatsForRegex } from '#pcd/references.ts';
 import {
 	fetchCustomFormatFromPcd,
 	transformCustomFormat,
 	syncCustomFormats,
 	type PcdCustomFormat
 } from './customFormats/index.ts';
-import { getByName as getDelayProfileByName } from '$pcd/entities/delayProfiles/index.ts';
+import { getByName as getDelayProfileByName } from '#entities/delayProfiles/index.ts';
 import {
 	getRadarrByName as getRadarrNaming,
 	getSonarrByName as getSonarrNaming
-} from '$pcd/entities/mediaManagement/naming/read.ts';
+} from '#entities/mediaManagement/naming/read.ts';
 import {
 	getRadarrByName as getRadarrQualityDefs,
 	getSonarrByName as getSonarrQualityDefs
-} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+} from '#entities/mediaManagement/quality-definitions/read.ts';
 import {
 	getRadarrByName as getRadarrMediaSettings,
 	getSonarrByName as getSonarrMediaSettings
-} from '$pcd/entities/mediaManagement/media-settings/read.ts';
-import type { RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
+} from '#entities/mediaManagement/media-settings/read.ts';
+import type { RadarrNamingConfig, SonarrNamingConfig } from '#arr/types.ts';
 import { transformDelayProfile } from './delayProfiles/transformer.ts';
 import {
 	applyQualityDefinitionsToArr,
@@ -52,7 +52,7 @@ import {
 	transformQualityDefinitionsForArr
 } from './mediaManagement/transformer.ts';
 
-import type { EntitySyncResult as SyncResult } from '$shared/sync/types.ts';
+import type { EntitySyncResult as SyncResult } from '#shared/sync/types.ts';
 
 /**
  * Sync a single quality profile to an arr instance

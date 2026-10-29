@@ -1,6 +1,6 @@
 <script lang="ts">
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
 	export let config: Record<string, unknown> = {};
 	export let mode: 'create' | 'edit' = 'create';
 

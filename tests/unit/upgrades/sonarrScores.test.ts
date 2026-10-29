@@ -1,13 +1,13 @@
 import { assertEquals, assertRejects } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import type { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import type { SonarrEpisodeFile, SonarrSeries } from '$utils/arr/types.ts';
-import type { FilterConfig } from '$shared/upgrades/filters.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import type { SonarrClient } from '#arr/clients/sonarr.ts';
+import type { SonarrEpisodeFile, SonarrSeries } from '#arr/types.ts';
+import type { FilterConfig } from '#shared/upgrades/filters.ts';
 import {
 	averageEpisodeFileScore,
 	filterNeedsSonarrScores,
 	loadSonarrEpisodeFiles
-} from '#lib/server/upgrades/sonarrScores.ts';
+} from '#server/upgrades/sonarrScores.ts';
 
 class SonarrScoresTest extends BaseTest {
 	private createSeries(id: number, episodeFileCount: number): SonarrSeries {

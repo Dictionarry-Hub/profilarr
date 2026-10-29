@@ -8,11 +8,17 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { startServer, stopServer } from '$test-harness/server.ts';
-import { openDb } from '$test-harness/db.ts';
-import { run, setup, teardown, test } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { compilePcd, insertOp, seedBase, setupPcd, type PcdTestContext } from '../harness/pcd.ts';
+import { startServer, stopServer } from '#tests/harness/server.ts';
+import { openDb } from '#tests/harness/db.ts';
+import { run, setup, teardown, test } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import {
+	compilePcd,
+	insertOp,
+	seedBase,
+	setupPcd,
+	type PcdTestContext
+} from '#integration/pcd/harness/pcd.ts';
 
 const PORT = PORTS.pcd.securityAttach;
 const ORIGIN = `http://localhost:${PORT}`;

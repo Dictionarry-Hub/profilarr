@@ -2,18 +2,18 @@
  * Tests for announcement reconciliation logic.
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals, assertThrows } from '@std/assert';
 import {
 	ANNOUNCEMENTS_CAP,
 	reconcileAnnouncements,
 	UnsupportedSchemaError
-} from '$announcements/profilarr/reconcile.ts';
+} from '#server/announcements/profilarr/reconcile.ts';
 import type {
 	AnnouncementRow,
 	BulletinAnnouncement,
 	BulletinAnnouncementsFile
-} from '$announcements/profilarr/types.ts';
+} from '#server/announcements/profilarr/types.ts';
 
 function makeBulletin(overrides: Partial<BulletinAnnouncement> = {}): BulletinAnnouncement {
 	return {

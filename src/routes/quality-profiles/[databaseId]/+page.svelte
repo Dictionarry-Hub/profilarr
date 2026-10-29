@@ -2,29 +2,29 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Plus from '@lucide/svelte/icons/plus';
-	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ViewToggle from '$ui/actions/ViewToggle.svelte';
-	import FilterModeToggle from '$ui/actions/FilterModeToggle.svelte';
-	import SmartFilterBar from '$ui/filter/SmartFilterBar.svelte';
-	import CloneModal from '$ui/modal/CloneModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import Tabs from '#ui/navigation/tabs/Tabs.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ViewToggle from '#ui/actions/ViewToggle.svelte';
+	import FilterModeToggle from '#ui/actions/FilterModeToggle.svelte';
+	import SmartFilterBar from '#ui/filter/SmartFilterBar.svelte';
+	import CloneModal from '#ui/modal/CloneModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { getPersistentSearchStore } from '$stores/search';
-	import { filterMode } from '$stores/filterMode';
-	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
-	import { applySmartFilters } from '$ui/filter/match';
-	import { createViewModeStore } from '#lib/client/stores/dataPage.js';
-	import { alertStore } from '$alerts/store';
-	import type { QualityProfileTableRow } from '$shared/pcd/display';
-	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { getPersistentSearchStore } from '#stores/search.ts';
+	import { filterMode } from '#stores/filterMode.ts';
+	import type { FilterFieldDef, FilterTag } from '#ui/filter/types.ts';
+	import { applySmartFilters } from '#ui/filter/match.ts';
+	import { createViewModeStore } from '#stores/dataPage.ts';
+	import { alertStore } from '#client/alerts/store.ts';
+	import type { QualityProfileTableRow } from '#shared/pcd/display.ts';
+	import { copyToClipboard } from '#client/utils/clipboard.ts';
 	import {
 		qualityProfileLanguageLabel,
 		qualityProfileSearchValues
-	} from '#lib/client/utils/entitySearch.js';
+	} from '#client/utils/entitySearch.ts';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

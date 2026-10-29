@@ -1,6 +1,6 @@
-import type { DiscordConfig, Notification, NotificationSeverity } from '../../types.ts';
+import type { DiscordConfig, Notification, NotificationSeverity } from '#notifications/types.ts';
 import { Colors, type DiscordEmbed } from './embed.ts';
-import { getWebhookClient } from '../../base/webhookClient.ts';
+import { getWebhookClient } from '#notifications/base/webhookClient.ts';
 
 const RATE_LIMIT_DELAY = 1000;
 

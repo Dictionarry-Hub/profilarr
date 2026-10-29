@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import type { PCDCache } from '$pcd/database/cache.ts';
-import { ENTITY_TYPES } from '$shared/pcd/portable.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import type { PCDCache } from '#pcd/database/cache.ts';
+import { ENTITY_TYPES } from '#shared/pcd/portable.ts';
 import type {
 	EntityType,
 	PortableDelayProfile,
@@ -14,9 +14,9 @@ import type {
 	PortableSonarrNaming,
 	PortableMediaSettings,
 	PortableQualityDefinitions
-} from '$shared/pcd/portable.ts';
-import * as deserialize from '$pcd/entities/deserialize.ts';
-import { validatePortableData } from '$pcd/entities/validate.ts';
+} from '#shared/pcd/portable.ts';
+import * as deserialize from '#entities/deserialize.ts';
+import { validatePortableData } from '#entities/validate.ts';
 
 interface ErrorResponse {
 	error: string;

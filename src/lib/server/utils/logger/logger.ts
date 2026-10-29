@@ -5,7 +5,7 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { config } from '$config';
+import { config } from '#utils/config/config.ts';
 import { colors } from './colors.ts';
 import { logSettings } from './settings.ts';
 import type { LogEntry, LoggerConfig, LogLevel, LogOptions } from './types.ts';

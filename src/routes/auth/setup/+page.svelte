@@ -5,13 +5,13 @@
 	import Shield from '@lucide/svelte/icons/shield';
 	import KeyRound from '@lucide/svelte/icons/key-round';
 	import ShieldOff from '@lucide/svelte/icons/shield-off';
-	import Button from '$ui/button/Button.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import InlineLink from '$ui/link/InlineLink.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '$alerts/store';
-	import logo from '$assets/logo-512.png';
+	import Button from '#ui/button/Button.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import InlineLink from '#ui/link/InlineLink.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import logo from '#client/assets/logo-512.png';
 
 	export let form: ActionData;
 

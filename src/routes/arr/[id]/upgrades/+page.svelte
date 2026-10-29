@@ -1,18 +1,18 @@
 <script lang="ts">
 	import type { PageData, ActionData } from './$types';
-	import type { DynamicFilterOptions, FilterConfig, FilterMode } from '$shared/upgrades/filters';
+	import type { DynamicFilterOptions, FilterConfig, FilterMode } from '#shared/upgrades/filters.ts';
 	import {
 		createEmptyDynamicFilterOptions,
 		searchRateLimits,
 		getRunsPerHour
-	} from '$shared/upgrades/filters';
+	} from '#shared/upgrades/filters.ts';
 	import { enhance } from '$app/forms';
 	import { browser } from '$app/env';
 	import { refreshAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { alertStore } from '#lib/client/alerts/store.js';
-	import { isDirty, initEdit, update, current, clear } from '#lib/client/stores/dirty.js';
-	import { jobStatus } from '$stores/jobStatus';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { isDirty, initEdit, update, current, clear } from '#stores/dirty.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
 	import Info from '@lucide/svelte/icons/info';
 	import Save from '@lucide/svelte/icons/save';
 	import Play from '@lucide/svelte/icons/play';
@@ -21,11 +21,11 @@
 	import CoreSettings from './components/CoreSettings.svelte';
 	import FilterSettings from './components/FilterSettings.svelte';
 	import RunHistory from './components/RunHistory.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Admonition from '$ui/admonition/Admonition.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Admonition from '#ui/admonition/Admonition.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;

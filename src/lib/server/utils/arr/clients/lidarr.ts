@@ -1,4 +1,4 @@
-import { BaseArrClient } from '../base.ts';
+import { BaseArrClient } from '#arr/base.ts';
 
 /**
  * Lidarr API client

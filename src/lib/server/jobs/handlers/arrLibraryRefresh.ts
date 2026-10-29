@@ -1,14 +1,14 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { cache } from '$cache/cache.ts';
-import { RadarrClient } from '$utils/arr/clients/radarr.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
-import { LIBRARY_REQUEST_TIMEOUT_MS } from '$utils/arr/base.ts';
-import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
-import { calculateNextRunFromMinutes } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { cache } from '#utils/cache/cache.ts';
+import { RadarrClient } from '#arr/clients/radarr.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import { LIBRARY_REQUEST_TIMEOUT_MS } from '#arr/base.ts';
+import { getProfilarrProfileNames } from '#server/sync/libraryHelpers.ts';
+import { calculateNextRunFromMinutes } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
 
 const libraryRefreshHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);

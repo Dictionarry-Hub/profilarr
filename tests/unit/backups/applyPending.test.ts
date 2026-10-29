@@ -18,13 +18,13 @@
  *     before extract
  */
 
-import { BaseTest, type TestContext } from '../base/BaseTest.ts';
+import { BaseTest, type TestContext } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals, assertRejects } from '@std/assert';
-import { applyPendingRestore } from '../../../src/lib/server/utils/backup/applyPending.ts';
-import { config } from '../../../src/lib/server/utils/config/config.ts';
-import { Database } from '$db/sqlite.ts';
-import { runCommand } from '$utils/command.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { applyPendingRestore } from '#utils/backup/applyPending.ts';
+import { config } from '#utils/config/config.ts';
+import { Database } from '#db/sqlite.ts';
+import { runCommand } from '#utils/command.ts';
+import { isNotFound } from '#utils/fs.ts';
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 
 const SENTINEL_NAME = '.restore-pending';

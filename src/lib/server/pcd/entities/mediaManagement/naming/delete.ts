@@ -2,9 +2,9 @@
  * Remove naming config operations
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { RadarrNamingRow, SonarrNamingRow } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { RadarrNamingRow, SonarrNamingRow } from '#shared/pcd/display.ts';
 
 export interface RemoveRadarrNamingOptions {
 	databaseId: number;

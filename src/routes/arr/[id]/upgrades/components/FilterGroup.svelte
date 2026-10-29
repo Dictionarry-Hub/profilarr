@@ -23,14 +23,14 @@
 		type FilterGroup,
 		type FilterRule,
 		type UpgradeAppType
-	} from '$shared/upgrades/filters';
-	import Card from '$ui/card/Card.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import DateInput from '$ui/form/DateInput.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	} from '#shared/upgrades/filters.ts';
+	import Card from '#ui/card/Card.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import DateInput from '#ui/form/DateInput.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import DropdownCombobox from '#ui/dropdown/DropdownCombobox.svelte';
 
 	export let group: FilterGroup;
 	export let appType: UpgradeAppType = 'radarr';

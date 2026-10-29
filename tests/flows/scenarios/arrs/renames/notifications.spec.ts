@@ -10,12 +10,12 @@
  *   season.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { createNotificationService } from '$flows/helpers/settings/notifications.ts';
-import type { FakeWebhook } from '$flows/helpers/settings/fakeWebhook.ts';
-import { addArr } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
-import { seedLibrary } from '$flows/helpers/sync/library.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { createNotificationService } from '#flows/helpers/settings/notifications.ts';
+import type { FakeWebhook } from '#flows/helpers/settings/fakeWebhook.ts';
+import { addArr } from '#flows/helpers/sync/arrs.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
+import { seedLibrary } from '#flows/helpers/sync/library.ts';
 import {
 	dryRun,
 	folderOf,
@@ -28,7 +28,7 @@ import {
 	titleB,
 	type RenameChanges,
 	type RenameTitle
-} from '$flows/helpers/sync/renames.ts';
+} from '#flows/helpers/sync/renames.ts';
 
 const HOOK = '/hooks/renames';
 const RENAME_TYPES = ['Rename Completed (Success)', 'Rename Completed (Partial)', 'Rename Failed'];

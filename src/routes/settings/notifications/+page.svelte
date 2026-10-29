@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Bell from '@lucide/svelte/icons/bell';
@@ -8,14 +8,14 @@
 	import Rss from '@lucide/svelte/icons/rss';
 	import Send from '@lucide/svelte/icons/send';
 	import Pencil from '@lucide/svelte/icons/pencil';
-	import Modal from '$ui/modal/Modal.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
 	import NotificationHistory from './components/NotificationHistory.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import type { Column } from '$ui/table/types';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import { siDiscord, siNtfy, siTelegram } from 'simple-icons';
-	import Button from '$ui/button/Button.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

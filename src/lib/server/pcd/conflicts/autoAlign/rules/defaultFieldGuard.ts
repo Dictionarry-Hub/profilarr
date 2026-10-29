@@ -1,6 +1,6 @@
-import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
-import { isFromTo, resolveCurrentRow, valuesEqual } from '../shared.ts';
-import type { UpdateRule } from '../types.ts';
+import { AUTO_ALIGN_ENTITIES } from '#entities/registry.ts';
+import { isFromTo, resolveCurrentRow, valuesEqual } from '#pcd/conflicts/autoAlign/shared.ts';
+import type { UpdateRule } from '#pcd/conflicts/autoAlign/types.ts';
 
 export const defaultFieldGuardRule: UpdateRule = {
 	name: 'default_field_guard',

@@ -3,11 +3,11 @@
  */
 
 import type { CompiledQuery } from 'kysely';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { RadarrNamingRow, SonarrNamingRow } from '$shared/pcd/display.ts';
-import { colonReplacementToDb, multiEpisodeStyleToDb } from '$shared/pcd/mediaManagement.ts';
-import { uuid } from '$shared/utils/uuid.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { RadarrNamingRow, SonarrNamingRow } from '#shared/pcd/display.ts';
+import { colonReplacementToDb, multiEpisodeStyleToDb } from '#shared/pcd/mediaManagement.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 
 // ── Radarr ──
 

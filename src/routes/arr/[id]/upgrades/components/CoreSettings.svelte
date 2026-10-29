@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { filterModes, type FilterMode } from '$shared/upgrades/filters';
-	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.js';
-	import { serverTimezone } from '#lib/client/stores/timezone.js';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import CronInput from '$ui/cron/CronInput.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
+	import { filterModes, type FilterMode } from '#shared/upgrades/filters.ts';
+	import { formatSmartDateTime } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import CronInput from '#ui/cron/CronInput.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
 
 	export let enabled: boolean = true;
 	export let cron: string = '0 */6 * * *';

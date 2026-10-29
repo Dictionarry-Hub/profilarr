@@ -3,9 +3,9 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { validateArchiveEntries } from '../../../src/lib/server/utils/backup/archive.ts';
-import { runCommand } from '$utils/command.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { validateArchiveEntries } from '#utils/backup/archive.ts';
+import { runCommand } from '#utils/command.ts';
 import { mkdir, writeFile } from 'node:fs/promises';
 
 class ArchiveValidationTest extends BaseTest {

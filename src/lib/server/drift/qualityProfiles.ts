@@ -1,6 +1,6 @@
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import type { BaseArrClient } from '$arr/base.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import type { BaseArrClient } from '#arr/base.ts';
 import type {
 	ArrCustomFormat,
 	ArrLanguage,
@@ -8,18 +8,18 @@ import type {
 	ArrQualityProfileItem,
 	ArrQualityProfilePayload,
 	QualityProfileFormatItem
-} from '$arr/types.ts';
-import { collectItemSizes, type QualitySizes } from '$sync/qualityProfiles/sizes.ts';
-import type { ProfileSizeSource } from '$sync/qualityProfiles/sizeSource.ts';
+} from '#arr/types.ts';
+import { collectItemSizes, type QualitySizes } from '#server/sync/qualityProfiles/sizes.ts';
+import type { ProfileSizeSource } from '#server/sync/qualityProfiles/sizeSource.ts';
 import { QUALITY_DEFINITION_UNLIMITED_MAX } from './mediaManagement.ts';
-import { getCache } from '$pcd/index.ts';
-import { getCustomFormatsForProfile } from '$pcd/references.ts';
+import { getCache } from '#pcd/index.ts';
+import { getCustomFormatsForProfile } from '#pcd/references.ts';
 import {
 	fetchQualityProfileFromPcd,
 	getQualityApiMappings,
 	transformQualityProfile
-} from '$sync/qualityProfiles/transformer.ts';
-import type { SyncArrType } from '$sync/mappings.ts';
+} from '#server/sync/qualityProfiles/transformer.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 import type { DriftFieldDiff } from './customFormats.ts';
 import { stringifyCanonical } from './hash.ts';
 

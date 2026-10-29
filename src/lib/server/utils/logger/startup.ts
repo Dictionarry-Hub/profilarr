@@ -5,9 +5,9 @@
 import { readFileSync, statSync } from 'node:fs';
 import { hostname } from 'node:os';
 import process from 'node:process';
-import { config } from '$config';
-import { build } from '#lib/shared/build.ts';
-import { getProxyEnv } from '$http/proxy.ts';
+import { config } from '#utils/config/config.ts';
+import { build } from '#shared/build.ts';
+import { getProxyEnv } from '#utils/http/proxy.ts';
 import { logger } from './logger.ts';
 
 const BANNER = String.raw`

@@ -39,12 +39,12 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, setApiKey } from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { openDb } from '$test-harness/db.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { createUserDirect, setApiKey } from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { openDb } from '#tests/harness/db.ts';
 
 const PORT = PORTS.api.databases;
 const ORIGIN = `http://localhost:${PORT}`;

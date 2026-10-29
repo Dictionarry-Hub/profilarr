@@ -1,5 +1,5 @@
-import type { Database } from '$db/sqlite.ts';
-import type { ParsedOpMetadata, UpdateRule } from '../types.ts';
+import type { Database } from '#db/sqlite.ts';
+import type { ParsedOpMetadata, UpdateRule } from '#pcd/conflicts/autoAlign/types.ts';
 
 type ScoringDesiredEntry = {
 	custom_format_name: string;

@@ -1,7 +1,7 @@
-import type { EntitySyncResult } from '$shared/sync/types.ts';
+import type { EntitySyncResult } from '#shared/sync/types.ts';
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
 import {
 	syncQualityProfile,
 	syncCustomFormat,
@@ -10,8 +10,8 @@ import {
 	syncNaming,
 	syncQualityDefinitions,
 	syncMediaSettings
-} from '#lib/server/sync/entitySync.ts';
-import { logger } from '$logger/logger.ts';
+} from '#server/sync/entitySync.ts';
+import { logger } from '#logger/logger.ts';
 
 /**
  * POST /arr/{id}/resync

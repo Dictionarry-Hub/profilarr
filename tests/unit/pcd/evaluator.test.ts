@@ -1,14 +1,9 @@
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { evaluateCustomFormat } from '$pcd/entities/customFormats/evaluator.ts';
-import {
-	Language,
-	QualitySource,
-	QualityModifier,
-	Resolution
-} from '#lib/server/utils/arr/parser/types.ts';
-import type { ParseResult } from '#lib/server/utils/arr/parser/types.ts';
-import type { ConditionData } from '$shared/pcd/display.ts';
+import { evaluateCustomFormat } from '#entities/customFormats/evaluator.ts';
+import { Language, QualitySource, QualityModifier, Resolution } from '#arr/parser/types.ts';
+import type { ParseResult } from '#arr/parser/types.ts';
+import type { ConditionData } from '#shared/pcd/display.ts';
 
 function parsed(languages: Language[]): ParseResult {
 	return {

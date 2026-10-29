@@ -18,11 +18,16 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { startServer, stopServer } from '$test-harness/server.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { setupPcd, seedBase, compilePcd, type PcdTestContext } from '../../pcd/harness/pcd.ts';
-import { base } from '../../pcd/harness/fixtures.ts';
+import { startServer, stopServer } from '#tests/harness/server.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import {
+	setupPcd,
+	seedBase,
+	compilePcd,
+	type PcdTestContext
+} from '#integration/pcd/harness/pcd.ts';
+import { base } from '#integration/pcd/harness/fixtures.ts';
 
 const PORT = PORTS.auth.xss;
 const ORIGIN = `http://localhost:${PORT}`;

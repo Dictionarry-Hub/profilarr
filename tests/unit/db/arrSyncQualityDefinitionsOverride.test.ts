@@ -17,10 +17,10 @@ describe('quality definitions override on profile selections', async () => {
 	const baseDir = await mkdtemp(join(tmpdir(), 'profilarr-qd-override-'));
 	process.env.APP_BASE_PATH = baseDir;
 
-	const { db } = await import('$db/db.ts');
-	const { runMigrations } = await import('$db/migrations.ts');
-	const { arrInstancesQueries } = await import('$db/queries/arrInstances.ts');
-	const { arrSyncQueries } = await import('$db/queries/arrSync.ts');
+	const { db } = await import('#db/db.ts');
+	const { runMigrations } = await import('#db/migrations.ts');
+	const { arrInstancesQueries } = await import('#db/queries/arrInstances.ts');
+	const { arrSyncQueries } = await import('#db/queries/arrSync.ts');
 
 	afterAll(async () => {
 		db.close();

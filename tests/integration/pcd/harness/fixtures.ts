@@ -5,7 +5,7 @@ import {
 	type MultiEpisodeStyle,
 	type RadarrColonReplacementFormat,
 	type SonarrColonReplacementFormat
-} from '$shared/pcd/mediaManagement.ts';
+} from '#shared/pcd/mediaManagement.ts';
 
 type QualityProfileQualityItem = {
 	type: 'quality' | 'group';

@@ -6,7 +6,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { Component } from 'svelte';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 
 	export let text: string = '';
 	export let variant: 'primary' | 'secondary' | 'danger' | 'ghost' | 'outline' = 'secondary';

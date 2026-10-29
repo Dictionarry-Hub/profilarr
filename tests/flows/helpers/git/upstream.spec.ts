@@ -1,6 +1,6 @@
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { openDatabase, openTab } from '$flows/helpers/core/nav.ts';
-import { upstream } from '$flows/helpers/git/upstream.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { openDatabase, openTab } from '#flows/helpers/core/nav.ts';
+import { upstream } from './upstream.ts';
 
 test('the upstream starts with the fixtures commit', async ({ app }) => {
 	const origin = upstream(app);

@@ -3,8 +3,8 @@
  * Provides common structure for syncing PCD data to arr instances
  */
 
-import type { BaseArrClient } from '$arr/base.ts';
-import { logger } from '$logger/logger.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import { logger } from '#logger/logger.ts';
 import type { SyncResult } from './types.ts';
 
 export type { SyncResult };

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import X from '@lucide/svelte/icons/x';
-	import Label from '$ui/label/Label.svelte';
-	import type { FilterTag } from './types';
+	import Label from '#ui/label/Label.svelte';
+	import type { FilterTag } from './types.ts';
 
 	export let tag: FilterTag;
 	export let fieldLabel: string;

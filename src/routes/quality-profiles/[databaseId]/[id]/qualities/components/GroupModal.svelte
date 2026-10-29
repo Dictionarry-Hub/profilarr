@@ -3,11 +3,11 @@
 	import Check from '@lucide/svelte/icons/check';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import DraggableCard from '$ui/list/DraggableCard.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import IconCheckbox from '#lib/client/ui/form/IconCheckbox.svelte';
-	import FormInput from '#lib/client/ui/form/FormInput.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import DraggableCard from '#ui/list/DraggableCard.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Button from '#ui/button/Button.svelte';
 
 	type GroupModalItem = {
 		name: string;

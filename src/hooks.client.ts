@@ -1,4 +1,4 @@
-import { alertStore } from '$alerts/store';
+import { alertStore } from '#client/alerts/store.ts';
 
 // SvelteKit's CSRF middleware rejects cross-site POST/PUT/PATCH/DELETE with a
 // raw 403 that bypasses form actions, so `use:enhance` callbacks never see a

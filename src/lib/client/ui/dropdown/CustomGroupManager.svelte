@@ -1,9 +1,9 @@
 <script lang="ts">
 	import X from '@lucide/svelte/icons/x';
 	import Plus from '@lucide/svelte/icons/plus';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import Check from '@lucide/svelte/icons/check';
 
 	export let customGroups: Array<{ name: string; key: string; tags: string[]; custom: boolean }> =

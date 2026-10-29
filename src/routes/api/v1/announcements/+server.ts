@@ -7,9 +7,9 @@
  */
 
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1';
-import { listVisible } from '$announcements/index.ts';
-import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
+import type { components } from '#api/v1.d.ts';
+import { listVisible } from '#server/announcements/index.ts';
+import type { AnnouncementRecord } from '#server/announcements/profilarr/types.ts';
 
 type AnnouncementSummary = components['schemas']['AnnouncementSummary'];
 

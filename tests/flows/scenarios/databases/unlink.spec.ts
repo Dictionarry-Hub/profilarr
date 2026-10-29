@@ -4,19 +4,19 @@
  *   at the missing database.
  * - What the Arr already received stays: the unlink sends the Arr nothing.
  */
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { scheduledJobs } from '$flows/helpers/core/jobs.ts';
-import { openTab, sidebar } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { databasesApi, unlinkDatabase } from '$flows/helpers/git/databases.ts';
-import { arrInstance, openArr } from '$flows/helpers/sync/arrs.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import { scheduledJobs } from '#flows/helpers/core/jobs.ts';
+import { openTab, sidebar } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { databasesApi, unlinkDatabase } from '#flows/helpers/git/databases.ts';
+import { arrInstance, openArr } from '#flows/helpers/sync/arrs.ts';
 import {
 	arrSyncStatus,
 	setUpProfileSync,
 	syncRegion,
 	syncSection
-} from '$flows/helpers/sync/sync.ts';
+} from '#flows/helpers/sync/sync.ts';
 
 const PROFILE = fixture.qualityProfile('Radarr Profile');
 

@@ -1,30 +1,30 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { tick } from 'svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import { alertStore } from '$alerts/store';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import SyncPromptModal from '#ui/modal/SyncPromptModal.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Info from '@lucide/svelte/icons/info';
-	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
-	import type { SonarrNamingRow } from '$shared/pcd/display.ts';
-	import type { AffectedArr } from '$shared/sync/types.ts';
+	import { current, isDirty, initEdit, initCreate, update } from '#stores/dirty.ts';
+	import type { SonarrNamingRow } from '#shared/pcd/display.ts';
+	import type { AffectedArr } from '#shared/sync/types.ts';
 	import {
 		SONARR_COLON_REPLACEMENT_OPTIONS,
 		MULTI_EPISODE_STYLE_OPTIONS,
 		type SonarrColonReplacementFormat,
 		type MultiEpisodeStyle
-	} from '$shared/pcd/mediaManagement.ts';
-	import { resolveSonarrFormat, getSonarrTokenCategories } from '$shared/pcd/namingTokens.ts';
+	} from '#shared/pcd/mediaManagement.ts';
+	import { resolveSonarrFormat, getSonarrTokenCategories } from '#shared/pcd/namingTokens.ts';
 	import NamingPreview from './NamingPreview.svelte';
 
 	import TokenAutocomplete from './TokenAutocomplete.svelte';

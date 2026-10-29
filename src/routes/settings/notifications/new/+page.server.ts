@@ -1,9 +1,9 @@
 /* eslint-disable profilarr/secret-destination -- create only: there is no stored secret to re-point */
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
-import { logger } from '$logger/logger.ts';
-import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
-import { getAllNotificationTypeIds } from '$shared/notifications/types.ts';
+import { logger } from '#logger/logger.ts';
+import { notificationServicesQueries } from '#db/queries/notificationServices.ts';
+import { getAllNotificationTypeIds } from '#shared/notifications/types.ts';
 
 export const actions: Actions = {
 	create: async ({ request }: RequestEvent) => {

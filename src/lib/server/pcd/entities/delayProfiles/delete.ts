@@ -2,9 +2,9 @@
  * Delete a delay profile operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { DelayProfilesRow } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { DelayProfilesRow } from '#shared/pcd/display.ts';
 
 interface DeleteDelayProfileOptions {
 	databaseId: number;

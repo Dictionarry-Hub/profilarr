@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Label from '$ui/label/Label.svelte';
+	import Label from '#ui/label/Label.svelte';
 
 	export let row: { source?: string | null; logger?: string | null };
 

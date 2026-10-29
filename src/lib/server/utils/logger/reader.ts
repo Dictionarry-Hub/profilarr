@@ -5,7 +5,7 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { config } from '$config';
+import { config } from '#utils/config/config.ts';
 import type { LogEntry } from './types.ts';
 
 /**

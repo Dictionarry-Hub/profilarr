@@ -10,13 +10,13 @@
  *   Live runs post the `run` action, as the dev-only Live Run button does.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { waitForAction } from '$flows/helpers/core/forms.ts';
-import { latestJobRunId, scheduledJobs } from '$flows/helpers/core/jobs.ts';
-import { logEntries } from '$flows/helpers/core/logs.ts';
-import { createNotificationService } from '$flows/helpers/settings/notifications.ts';
-import { addArr, arrInstance } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { waitForAction } from '#flows/helpers/core/forms.ts';
+import { latestJobRunId, scheduledJobs } from '#flows/helpers/core/jobs.ts';
+import { logEntries } from '#flows/helpers/core/logs.ts';
+import { createNotificationService } from '#flows/helpers/settings/notifications.ts';
+import { addArr, arrInstance } from '#flows/helpers/sync/arrs.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	episodeFile,
 	movieFile,
@@ -27,7 +27,7 @@ import {
 	sonarrSeries,
 	taggedIds,
 	type Library
-} from '$flows/helpers/sync/library.ts';
+} from '#flows/helpers/sync/library.ts';
 import {
 	addDefaultFilter,
 	dryRun,
@@ -41,7 +41,7 @@ import {
 	type FilterChanges,
 	type UpgradeCore,
 	type UpgradeRun
-} from '$flows/helpers/sync/upgrades.ts';
+} from '#flows/helpers/sync/upgrades.ts';
 
 /** Once a year, so no scheduled run lands during a test */
 const YEARLY: UpgradeCore['schedule'] = { custom: '0 3 1 1 *' };

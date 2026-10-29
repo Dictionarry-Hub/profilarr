@@ -11,12 +11,12 @@ import {
 	type Page,
 	type PlaywrightWorkerArgs
 } from '@playwright/test';
-import type { App } from '$flows/harness/app.ts';
-import { ageConfirmations } from '$flows/harness/sessions.ts';
-import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
-import { chooseOption, confirmDialog, waitForAction } from '$flows/helpers/core/forms.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
+import type { App } from '#flows/harness/app.ts';
+import { ageConfirmations } from '#flows/harness/sessions.ts';
+import type { RunningSso, SsoUser } from '#flows/helpers/sso/providers.ts';
+import { chooseOption, confirmDialog, waitForAction } from '#flows/helpers/core/forms.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { openSidebarPage, waitForHydration } from '#flows/helpers/core/nav.ts';
 
 /** How long the app trusts a confirmation (src/lib/server/utils/auth/confirmation.ts) */
 const CONFIRMATION_WINDOW_MINUTES = 30;

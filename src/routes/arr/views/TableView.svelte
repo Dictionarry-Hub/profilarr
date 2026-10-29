@@ -1,16 +1,16 @@
 <script lang="ts">
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Unlink from '@lucide/svelte/icons/unlink';
-	import Table from '$ui/table/Table.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
-	import { getDisplayUrl } from '#lib/client/utils/arrDisplayUrl.ts';
-	import type { Column } from '$ui/table/types';
-	import type { ArrInstanceSummary } from '../+page.server.ts';
-	import radarrLogo from '#lib/client/assets/Radarr.svg';
-	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
+	import Table from '#ui/table/Table.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import { isExperimentalVersion } from '#shared/arr/capabilities.ts';
+	import { getDisplayUrl } from '#client/utils/arrDisplayUrl.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { ArrInstanceSummary } from '#routes/arr/+page.server.ts';
+	import radarrLogo from '#client/assets/Radarr.svg';
+	import sonarrLogo from '#client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
 
 	export let instances: ArrInstanceSummary[];

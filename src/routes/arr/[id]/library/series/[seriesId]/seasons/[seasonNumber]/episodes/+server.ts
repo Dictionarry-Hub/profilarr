@@ -1,11 +1,11 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { cache } from '$cache/cache.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
-import type { SonarrEpisodeItem } from '$utils/arr/types.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { cache } from '#utils/cache/cache.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
+import type { SonarrEpisodeItem } from '#arr/types.ts';
+import { logger } from '#logger/logger.ts';
 
 const EPISODE_CACHE_TTL = 300;
 

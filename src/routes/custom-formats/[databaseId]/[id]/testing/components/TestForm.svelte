@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick, onMount } from 'svelte';
-	import { alertStore } from '$alerts/store';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import MarkdownInput from '#ui/form/MarkdownInput.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import Save from '@lucide/svelte/icons/save';
 	import X from '@lucide/svelte/icons/x';
-	import { isDirty, initEdit, initCreate, update, clear } from '#lib/client/stores/dirty.js';
+	import { isDirty, initEdit, initCreate, update, clear } from '#stores/dirty.ts';
 
 	// Props
 	export let mode: 'create' | 'edit';

@@ -34,14 +34,9 @@ import {
 } from 'node:http';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ARR_DATA_DIR } from '$flows/harness/paths.ts';
-import { freePort } from '$flows/harness/ports.ts';
-import {
-	recordingName,
-	target as findTarget,
-	type FolderMove,
-	type Target
-} from '$flows/helpers/sync/targets.ts';
+import { ARR_DATA_DIR } from '#flows/harness/paths.ts';
+import { freePort } from '#flows/harness/ports.ts';
+import { recordingName, target as findTarget, type FolderMove, type Target } from './targets.ts';
 
 export type ArrType = Target['app'];
 

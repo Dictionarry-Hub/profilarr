@@ -1,6 +1,6 @@
 <script lang="ts">
-	import GeneralForm from '../../components/GeneralForm.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import GeneralForm from '#routes/quality-profiles/[databaseId]/components/GeneralForm.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

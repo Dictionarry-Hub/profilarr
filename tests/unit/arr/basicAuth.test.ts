@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
 
 class BasicAuthPairTest extends BaseTest {
 	runTests(): void {

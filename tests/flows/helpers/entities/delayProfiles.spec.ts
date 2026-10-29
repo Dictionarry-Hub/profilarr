@@ -1,10 +1,10 @@
 /**
  * Checks for the readers in helpers/entities/delayProfiles.ts.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
-import { delayProfilePages } from '$flows/helpers/entities/delayProfiles.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
+import { openEntity, openSidebarPage } from '#flows/helpers/core/nav.ts';
+import { delayProfilePages } from './delayProfiles.ts';
 
 test('list reads every delay profile', async ({ page }) => {
 	await openSidebarPage(page, 'Delay Profiles');

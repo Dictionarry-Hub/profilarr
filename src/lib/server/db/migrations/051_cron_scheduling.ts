@@ -1,4 +1,4 @@
-import type { Migration } from '../migrations.ts';
+import type { Migration } from '#db/migrations.ts';
 
 /**
  * Migration 051: Replace schedule INTEGER with cron TEXT + next_run_at TEXT

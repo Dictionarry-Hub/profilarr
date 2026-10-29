@@ -1,16 +1,16 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
 import {
 	getSonarrByName,
 	updateSonarrMediaSettings,
 	removeSonarrMediaSettings
-} from '$pcd/entities/mediaManagement/media-settings/index.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
-import type { PropersRepacks } from '$shared/pcd/mediaManagement.ts';
+} from '#entities/mediaManagement/media-settings/index.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { getAffectedArrs } from '#server/sync/affectedArrs.ts';
+import type { PropersRepacks } from '#shared/pcd/mediaManagement.ts';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const { databaseId, name } = params;

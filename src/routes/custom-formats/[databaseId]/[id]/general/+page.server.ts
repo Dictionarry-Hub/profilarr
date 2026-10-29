@@ -1,12 +1,12 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
-import { getProfileRefsForCustomFormat } from '$pcd/references.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import * as customFormatQueries from '#entities/customFormats/index.ts';
+import { getProfileRefsForCustomFormat } from '#pcd/references.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import { getAffectedArrs } from '#server/sync/affectedArrs.ts';
+import { generalSettingsQueries } from '#db/queries/generalSettings.ts';
 
 export const load: ServerLoad = async ({ params }) => {
 	const { databaseId, id } = params;

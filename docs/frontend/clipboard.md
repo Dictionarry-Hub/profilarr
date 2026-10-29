@@ -13,13 +13,13 @@ when the same action works during local development.
 ## Rules
 
 Do not call `navigator.clipboard.writeText()` directly. Use
-`copyToClipboard()` from `#lib/client/utils/clipboard.js`. The helper first tries
+`copyToClipboard()` from `#client/utils/clipboard.ts`. The helper first tries
 the Clipboard API, then falls back to a temporary textarea copy path for
 non-secure HTTP origins.
 
 Do not call `navigator.clipboard.readText()` directly. Browser paste fallback
 cannot silently read arbitrary clipboard data, so use
-`$ui/modal/PasteModal.svelte` and let the user paste into a textarea.
+`#ui/modal/PasteModal.svelte` and let the user paste into a textarea.
 
 Two ESLint rules enforce both, in client code and non-server routes
 (`deno task lint:eslint`):

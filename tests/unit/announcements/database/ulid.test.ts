@@ -5,9 +5,9 @@
  * sequentially-generated ULIDs sort lexicographically by creation time.
  */
 
-import { BaseTest } from '../../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals } from '@std/assert';
-import { generateUlid } from '$shared/utils/ulid.ts';
+import { generateUlid } from '#shared/utils/ulid.ts';
 
 const CROCKFORD_RE = /^[0-9A-HJKMNP-TV-Z]{26}$/;
 

@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
-import { validatePrDescription } from '../../../scripts/check-pr-description.ts';
+import { validatePrDescription } from '#scripts/check-pr-description.ts';
 
 // Fictional PR bodies exercise contributor-facing behavior, not GitHub API calls.
 const fixture = (name: string) =>

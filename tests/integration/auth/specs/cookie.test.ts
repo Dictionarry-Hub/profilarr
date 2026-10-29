@@ -13,11 +13,11 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUser, createUserDirect, login } from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { createUser, createUserDirect, login } from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
 
 // HTTPS: Caddy on :7443 → server on :7003
 const HTTPS_PORT = PORTS.auth.cookieHttps;

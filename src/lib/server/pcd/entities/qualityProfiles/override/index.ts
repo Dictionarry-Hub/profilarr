@@ -1,5 +1,5 @@
-import type { WriteResult } from '$pcd/index.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
 import { overrideGeneral } from './general.ts';
 import { overrideQualities } from './qualities.ts';
 import { overrideScoring } from './scoring.ts';

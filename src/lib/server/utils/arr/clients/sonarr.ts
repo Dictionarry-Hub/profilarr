@@ -1,4 +1,4 @@
-import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '../base.ts';
+import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '#arr/base.ts';
 import type {
 	SonarrSeries,
 	SonarrRelease,
@@ -12,7 +12,7 @@ import type {
 	ArrTag,
 	ArrCommand,
 	RenamePreviewItem
-} from '../types.ts';
+} from '#arr/types.ts';
 
 /**
  * Sonarr API client

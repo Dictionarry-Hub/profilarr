@@ -3,14 +3,9 @@
  *   security.ts.
  * - Creating an API key asks the user to confirm who they are first.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { FLOWS_USER, createAccount, signInWithSso } from '$flows/helpers/auth/accounts.ts';
-import {
-	confirmIdentity,
-	createApiKey,
-	lapseConfirmation,
-	securityPages
-} from '$flows/helpers/auth/security.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { FLOWS_USER, createAccount, signInWithSso } from './accounts.ts';
+import { confirmIdentity, createApiKey, lapseConfirmation, securityPages } from './security.ts';
 
 test.describe('password accounts', () => {
 	test.use({ appEnv: { AUTH: 'on' } });

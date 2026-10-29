@@ -6,10 +6,10 @@
  * plus the running build's channel + version and the current time.
  */
 
-import { isVisibleBase } from '../shared/filter.ts';
-import type { AnnouncementSeverity } from '../shared/types.ts';
+import { isVisibleBase } from '#server/announcements/shared/filter.ts';
+import type { AnnouncementSeverity } from '#server/announcements/shared/types.ts';
 import type { AnnouncementRecord } from './types.ts';
-import type { Channel } from '#lib/shared/build.ts';
+import type { Channel } from '#shared/build.ts';
 
 export type { AnnouncementSeverity };
 

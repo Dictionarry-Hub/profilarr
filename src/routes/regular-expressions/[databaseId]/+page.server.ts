@@ -1,9 +1,9 @@
 import { error } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import * as regularExpressionQueries from '$pcd/entities/regularExpressions/index.ts';
-import { setLastDatabase } from '$utils/redirect/lastDatabase.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import * as regularExpressionQueries from '#entities/regularExpressions/index.ts';
+import { setLastDatabase } from '#utils/redirect/lastDatabase.ts';
 
 export const load: ServerLoad = async ({ params, cookies }) => {
 	const { databaseId } = params;

@@ -1,5 +1,5 @@
-import type { QualityProfileCustomFormatsRow } from '$shared/pcd/types';
-import type { OrderedItem, QualityDefinitionEntry } from '$shared/pcd/display';
+import type { QualityProfileCustomFormatsRow } from '#shared/pcd/types.ts';
+import type { OrderedItem, QualityDefinitionEntry } from '#shared/pcd/display.ts';
 
 export type OperationType = 'create' | 'update' | 'delete';
 

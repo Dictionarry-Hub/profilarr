@@ -1,4 +1,4 @@
-import { BaseHttpClient } from '../http/client.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
 import type {
 	ArrSystemStatus,
 	ArrApiInfo,
@@ -20,7 +20,7 @@ import type {
 	QualityProfileFormatItem,
 	ScoreBreakdownItem
 } from './types.ts';
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 import { Buffer } from 'node:buffer';
 
 /**

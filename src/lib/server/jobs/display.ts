@@ -1,5 +1,5 @@
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
 import type { JobType } from './queueTypes.ts';
 
 export type JobNameLookups = {

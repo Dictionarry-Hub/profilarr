@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { OrderedItem } from '$shared/pcd/display';
-	import type { OperationType } from './types';
+	import Table from '#ui/table/Table.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { OrderedItem } from '#shared/pcd/display.ts';
+	import type { OperationType } from './types.ts';
 
 	export let beforeItems: OrderedItem[] = [];
 	export let afterItems: OrderedItem[] = [];

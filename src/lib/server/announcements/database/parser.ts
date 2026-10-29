@@ -14,7 +14,7 @@ import type { Dirent } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import { CORE_SCHEMA, load as parseYaml, mergeTag, timestampTag } from 'js-yaml';
 import type { AnnouncementSeverity, DatabaseAnnouncementParsed } from './types.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 const ANNOUNCEMENTS_SUBDIR = 'announcements';
 

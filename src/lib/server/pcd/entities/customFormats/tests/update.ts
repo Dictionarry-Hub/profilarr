@@ -2,8 +2,8 @@
  * Update a custom format test operation
  */
 
-import { getCache, writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { CustomFormatTest } from '$shared/pcd/display.ts';
+import { getCache, writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { CustomFormatTest } from '#shared/pcd/display.ts';
 
 interface UpdateTestInput {
 	title: string;

@@ -5,12 +5,12 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { TestClient } from '$test-harness/client.ts';
-import { createUser, login, setApiKey } from '$test-harness/setup.ts';
-import { openDb } from '$test-harness/db.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { createUser, login, setApiKey } from '#tests/harness/setup.ts';
+import { openDb } from '#tests/harness/db.ts';
 
 const PORT = PORTS.backups.settings;
 const ORIGIN = `http://localhost:${PORT}`;

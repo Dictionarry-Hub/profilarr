@@ -6,8 +6,8 @@
  * existing callers don't need to know about the shared module.
  */
 
-import { reconcile } from '../shared/reconcile.ts';
-import type { ReconcilePlan } from '../shared/types.ts';
+import { reconcile } from '#server/announcements/shared/reconcile.ts';
+import type { ReconcilePlan } from '#server/announcements/shared/types.ts';
 import type { AnnouncementRow, BulletinAnnouncement, BulletinAnnouncementsFile } from './types.ts';
 
 /** Hard cap to prevent a misbehaving bulletin from writing unbounded rows. */

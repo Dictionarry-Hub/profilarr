@@ -224,11 +224,12 @@ falls into.
 ### Code Conventions
 
 - **Svelte 5, no runes.** Use `onclick`, no `$state` / `$derived`.
-- **Page state from `$stores/page`.** `$app/state` doesn't update in components without runes.
+- **Page state from `#stores/page.ts`.** `$app/state` doesn't update in components without runes.
 - **Alerts for feedback.** Use `alertStore.add(type, message)`.
 - **Dirty tracking.** Use the dirty store to block saves + warn on navigation.
 - **Routes > modals.** Only use modals for confirmations or rare one-off forms.
 - **API:** extend `/api/v1/*` only; legacy routes are migration targets.
+- **Imports:** aliases live in `package.json` `imports`. Use the closest alias, or `./` inside it; never `../`; always the real extension. `lint:eslint --fix` corrects them.
 
 ### AI-Assisted Contributions
 

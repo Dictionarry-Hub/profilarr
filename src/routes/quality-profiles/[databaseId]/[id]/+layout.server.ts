@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import * as qualityProfileQueries from '#entities/qualityProfiles/index.ts';
 
 export const load: LayoutServerLoad = async ({ params }) => {
 	const databaseId = parseInt(params.databaseId, 10);

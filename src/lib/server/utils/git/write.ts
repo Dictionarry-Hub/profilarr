@@ -4,8 +4,8 @@
 
 import { execGit, execGitSafe } from './exec.ts';
 import type { RepoInfo } from './types.ts';
-import { getCachedRepoInfo } from '../github/cache.ts';
-import { logger } from '$logger/logger.ts';
+import { getCachedRepoInfo } from '#utils/github/cache.ts';
+import { logger } from '#logger/logger.ts';
 
 type GitHubApiError = {
 	message: string;

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Table from '$ui/table/Table.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { DriftDisplayChange, DriftDisplayTone, DriftDisplayValue } from '$shared/drift.ts';
+	import Table from '#ui/table/Table.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { DriftDisplayChange, DriftDisplayTone, DriftDisplayValue } from '#shared/drift.ts';
 	import QualityListDiff from './QualityListDiff.svelte';
 
 	export let changes: DriftDisplayChange[];

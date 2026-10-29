@@ -7,7 +7,7 @@
 		confirmNavigation,
 		confirmDiscard,
 		cancelDiscard
-	} from '#lib/client/stores/dirty.js';
+	} from '#stores/dirty.ts';
 
 	let pendingNavigationUrl: string | null = null;
 

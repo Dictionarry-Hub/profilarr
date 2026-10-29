@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { QualityDefinitionEntry, OperationType } from './types';
+	import Table from '#ui/table/Table.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { QualityDefinitionEntry, OperationType } from './types.ts';
 
 	export let beforeEntries: QualityDefinitionEntry[] = [];
 	export let afterEntries: QualityDefinitionEntry[] = [];

@@ -2,8 +2,8 @@
  * Arr sync notification definition
  */
 
-import type { Notification, NotificationBlock, SectionItem } from '../types.ts';
-import type { SyncedItem } from '#lib/server/sync/types.ts';
+import type { Notification, NotificationBlock, SectionItem } from '#notifications/types.ts';
+import type { SyncedItem } from '#server/sync/types.ts';
 
 export interface ArrSyncSectionResult {
 	section: string;

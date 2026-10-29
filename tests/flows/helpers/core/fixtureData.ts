@@ -6,7 +6,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { FIXTURES_SNAPSHOT, SOURCE_FILE } from '$flows/harness/paths.ts';
+import { FIXTURES_SNAPSHOT, SOURCE_FILE } from '#flows/harness/paths.ts';
 
 export type ArrType = 'radarr' | 'sonarr';
 

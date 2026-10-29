@@ -1,6 +1,6 @@
 import process from 'node:process';
-import type { Migration } from '../migrations.ts';
-import { db } from '../db.ts';
+import type { Migration } from '#db/migrations.ts';
+import { db } from '#db/db.ts';
 
 /**
  * Migration 056: Add local bypass toggle to auth settings

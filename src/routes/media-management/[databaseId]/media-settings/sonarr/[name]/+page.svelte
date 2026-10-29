@@ -1,7 +1,7 @@
 <script lang="ts">
-	import MediaSettingsForm from '../../components/MediaSettingsForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import MediaSettingsForm from '#routes/media-management/[databaseId]/media-settings/components/MediaSettingsForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

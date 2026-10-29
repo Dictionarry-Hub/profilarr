@@ -169,7 +169,7 @@ process:
 
 Op SQL comes from the linked repo and runs as written. The cache connection
 must not reach anything outside the cache. `openIsolatedDatabase()` in
-`$db/sqlite.ts` uses `node:sqlite`'s `limits` option to set SQLite's
+`#db/sqlite.ts` uses `node:sqlite`'s `limits` option to set SQLite's
 attached-database limit to 0. Op SQL then can't ATTACH another database file,
 such as Profilarr's own database, or write a new file with VACUUM INTO.
 `openIsolatedDatabase()` runs a probe ATTACH that must fail before it returns

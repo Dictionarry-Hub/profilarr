@@ -1,12 +1,12 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
-import { config } from '$config';
-import { createBackup } from '../logic/createBackup.ts';
-import { calculateNextRunFromSchedule } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { backupSettingsQueries } from '#db/queries/backupSettings.ts';
+import { config } from '#utils/config/config.ts';
+import { createBackup } from '#server/jobs/logic/createBackup.ts';
+import { calculateNextRunFromSchedule } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
 
 async function notifyFailure(jobId: number, error: string): Promise<void> {
 	try {

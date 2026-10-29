@@ -1,5 +1,5 @@
 <script lang="ts">
-	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
 
 	export let open = false;
 </script>

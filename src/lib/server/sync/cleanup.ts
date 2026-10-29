@@ -8,14 +8,14 @@
  * QPs assigned to media will be skipped (arr returns HTTP 500).
  */
 
-import type { BaseArrClient } from '$utils/arr/base.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getCache } from '$pcd/index.ts';
-import { getCustomFormatsForProfile } from '$pcd/references.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { getCache } from '#pcd/index.ts';
+import { getCustomFormatsForProfile } from '#pcd/references.ts';
 import type { SyncArrType } from './mappings.ts';
-import { HttpError } from '$http/types.ts';
-import { logger } from '$logger/logger.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
+import { HttpError } from '#utils/http/types.ts';
+import { logger } from '#logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
 
 const SOURCE = 'Cleanup';
 

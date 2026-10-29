@@ -1,7 +1,7 @@
 <script lang="ts">
-	import RadarrNamingForm from '../../components/RadarrNamingForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import RadarrNamingForm from '#routes/media-management/[databaseId]/naming/components/RadarrNamingForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

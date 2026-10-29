@@ -10,11 +10,11 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { logEntries, type LogEntry } from '$flows/helpers/core/logs.ts';
-import { openPage } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import type { LogFile } from '$flows/helpers/settings/logs.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { logEntries, type LogEntry } from '#flows/helpers/core/logs.ts';
+import { openPage } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import type { LogFile } from '#flows/helpers/settings/logs.ts';
 
 const REQUESTED = '../data/profilarr.db';
 const LOGS_URL = `/settings/logs?file=${encodeURIComponent(REQUESTED)}`;

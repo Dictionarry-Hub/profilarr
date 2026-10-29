@@ -2,13 +2,17 @@
  * Quality profiles section handler
  */
 
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
-import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { hasProfileItemSizes } from '#shared/arr/capabilities.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
 import { QualityProfileSyncer } from './syncer.ts';
-import type { SyncArrType } from '../mappings.ts';
-import { registerSection, type SectionHandler, type ScheduledConfig } from '../registry.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
+import {
+	registerSection,
+	type SectionHandler,
+	type ScheduledConfig
+} from '#server/sync/registry.ts';
 
 export const qualityProfilesHandler: SectionHandler = {
 	type: 'qualityProfiles',

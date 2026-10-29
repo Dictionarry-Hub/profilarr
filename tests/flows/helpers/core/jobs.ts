@@ -6,7 +6,7 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+import { pageData } from './pageData.ts';
 
 /** One finished run on Settings › Jobs */
 export interface JobRun {

@@ -1,4 +1,4 @@
-import type { Migration } from '../migrations.ts';
+import type { Migration } from '#db/migrations.ts';
 
 /**
  * Migration 069: Create arr_sync_database_priority

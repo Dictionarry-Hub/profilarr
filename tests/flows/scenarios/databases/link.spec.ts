@@ -14,20 +14,20 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, join } from 'node:path';
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures, fixturesSource } from '$flows/helpers/core/fixtureData.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
-import { scheduledJobs } from '$flows/helpers/core/jobs.ts';
-import { openEntity, openPage, sidebar } from '$flows/helpers/core/nav.ts';
-import { ONLINE_TAG, skipWithoutNetwork } from '$flows/helpers/core/realServices.ts';
-import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures, fixturesSource } from '#flows/helpers/core/fixtureData.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
+import { scheduledJobs } from '#flows/helpers/core/jobs.ts';
+import { openEntity, openPage, sidebar } from '#flows/helpers/core/nav.ts';
+import { ONLINE_TAG, skipWithoutNetwork } from '#flows/helpers/core/realServices.ts';
+import { regularExpressionPages } from '#flows/helpers/entities/regularExpressions.ts';
 import {
 	databaseFolders,
 	databasesApi,
 	fixturesRepo,
 	linkDatabase,
 	unlinkDatabase
-} from '$flows/helpers/git/databases.ts';
+} from '#flows/helpers/git/databases.ts';
 
 const REPOSITORY = fixturesSource.fixtures.repository;
 const UNUSED = fixture.regularExpression('Unused Regex');

@@ -2,8 +2,8 @@
  * - Covers: the fake reverse proxy's options in fakeProxy.ts.
  * - The app runs behind the proxy, with the proxy as its `ORIGIN`.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { createAccount } from '$flows/helpers/auth/accounts.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { createAccount } from '#flows/helpers/auth/accounts.ts';
 
 test.describe('tls', () => {
 	test.use({ appEnv: { AUTH: 'on' }, appProxy: { tls: true } });

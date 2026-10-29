@@ -1,6 +1,6 @@
 # Alerts
 
-**Source:** `src/lib/client/alerts/` (`$alerts/*`)
+**Source:** `src/lib/client/alerts/` (`#client/alerts/*`)
 **Mount:** `src/routes/+layout.svelte:62`
 
 ## Table of Contents
@@ -14,7 +14,7 @@ Alerts are the app's toast notification system: transient messages that appear
 at a configured screen edge, auto-dismiss after a timeout, and can be clicked
 to dismiss early. They are the channel for ephemeral feedback ("Settings
 saved", "Failed to unlink database"). For confirmations, use
-`$ui/modal/Modal.svelte`; for field-level errors, render next to the field.
+`#ui/modal/Modal.svelte`; for field-level errors, render next to the field.
 
 ## Store
 

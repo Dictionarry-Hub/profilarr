@@ -1,22 +1,22 @@
 <script lang="ts">
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ViewToggle from '$ui/actions/ViewToggle.svelte';
-	import CloneModal from '$ui/modal/CloneModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ViewToggle from '#ui/actions/ViewToggle.svelte';
+	import CloneModal from '#ui/modal/CloneModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
+	import { createDataPageStore } from '#stores/dataPage.ts';
 	import { goto } from '$app/navigation';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Plus from '@lucide/svelte/icons/plus';
-	import type { EntityType } from '$shared/pcd/portable.ts';
+	import type { EntityType } from '#shared/pcd/portable.ts';
 	import type { PageData } from './$types';
-	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { copyToClipboard } from '#client/utils/clipboard.ts';
 
 	export let data: PageData;
 

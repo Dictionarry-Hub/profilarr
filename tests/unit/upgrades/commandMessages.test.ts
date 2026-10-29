@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { parseDownloadedReportCount } from '#lib/server/upgrades/commandMessages.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { parseDownloadedReportCount } from '#server/upgrades/commandMessages.ts';
 
 class CommandMessagesTest extends BaseTest {
 	runTests(): void {

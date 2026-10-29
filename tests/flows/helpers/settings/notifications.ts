@@ -13,9 +13,9 @@ import {
 	setSwitch,
 	waitForAction,
 	type ActionResult
-} from '$flows/helpers/core/forms.ts';
-import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+} from '#flows/helpers/core/forms.ts';
+import { openSidebarPage, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 const LIST_PATH = '/settings/notifications';
 

@@ -1,25 +1,25 @@
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
-import { apiKeysQueries } from '$db/queries/apiKeys.ts';
-import { sessionsQueries } from '$db/queries/sessions.ts';
-import { API_AREAS } from '$auth/apiPermissions.ts';
+import { apiKeysQueries } from '#db/queries/apiKeys.ts';
+import { sessionsQueries } from '#db/queries/sessions.ts';
+import { API_AREAS } from '#utils/auth/apiPermissions.ts';
 import {
 	isRecentlyConfirmed,
 	requiredConfirmation,
 	REAUTH_RETURN_PATH
-} from '$auth/confirmation.ts';
-import { isOidcUsername } from '$auth/loginOptions.ts';
-import { verifyPassword } from '$auth/password.ts';
-import { getClientIp } from '$auth/network.ts';
-import { checkRateLimit, recordFailedAttempt, clearAttempts } from '$auth/rateLimit.ts';
+} from '#utils/auth/confirmation.ts';
+import { isOidcUsername } from '#utils/auth/loginOptions.ts';
+import { verifyPassword } from '#utils/auth/password.ts';
+import { getClientIp } from '#utils/auth/network.ts';
+import { checkRateLimit, recordFailedAttempt, clearAttempts } from '#utils/auth/rateLimit.ts';
 import {
 	ENV_API_KEY_NAME,
 	apiKeyExpiresAt,
 	isApiKeyExpiry,
 	type ApiKeyAreaPermissions,
 	type ApiKeyPermissions
-} from '$shared/apiKeys.ts';
-import { logger } from '$logger/logger.ts';
+} from '#shared/apiKeys.ts';
+import { logger } from '#logger/logger.ts';
 
 const MAX_NAME_LENGTH = 64;
 

@@ -8,7 +8,7 @@ import {
 	resolveSonarrFormat,
 	validateNamingFormat,
 	type NamingFormatField
-} from '$shared/pcd/namingTokens.ts';
+} from '#shared/pcd/namingTokens.ts';
 
 type ArrType = 'radarr' | 'sonarr';
 

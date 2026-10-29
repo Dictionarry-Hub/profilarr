@@ -9,33 +9,33 @@
  *   editing in Radarr would.
  */
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
 import {
 	latestJobRunId,
 	scheduledJobs,
 	waitForIdleJobs,
 	waitForNextJobRun
-} from '$flows/helpers/core/jobs.ts';
-import { openDatabase, openPage, openTab } from '$flows/helpers/core/nav.ts';
-import { createAccount, signIn, signOut } from '$flows/helpers/auth/accounts.ts';
-import { qualityProfilePages, setProfileScores } from '$flows/helpers/entities/qualityProfiles.ts';
+} from '#flows/helpers/core/jobs.ts';
+import { openDatabase, openPage, openTab } from '#flows/helpers/core/nav.ts';
+import { createAccount, signIn, signOut } from '#flows/helpers/auth/accounts.ts';
+import { qualityProfilePages, setProfileScores } from '#flows/helpers/entities/qualityProfiles.ts';
 import {
 	createBackup,
 	listBackups,
 	restoreBackup,
 	restoreBanner
-} from '$flows/helpers/settings/backups.ts';
-import { arrInstance, openArr } from '$flows/helpers/sync/arrs.ts';
-import { driftState, enableDrift, runDriftCheck } from '$flows/helpers/sync/drift.ts';
+} from '#flows/helpers/settings/backups.ts';
+import { arrInstance, openArr } from '#flows/helpers/sync/arrs.ts';
+import { driftState, enableDrift, runDriftCheck } from '#flows/helpers/sync/drift.ts';
 import {
 	expectedDelayProfile,
 	expectedMediaSettings,
 	expectedNaming,
 	expectedProfileSettings,
 	expectedScores
-} from '$flows/helpers/sync/expected.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+} from '#flows/helpers/sync/expected.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	addArrAndOpenSync,
 	arrSyncStatus,
@@ -45,7 +45,7 @@ import {
 	syncConfig,
 	syncSection,
 	type SyncSection
-} from '$flows/helpers/sync/sync.ts';
+} from '#flows/helpers/sync/sync.ts';
 
 test.use({ appEnv: { AUTH: 'on' } });
 

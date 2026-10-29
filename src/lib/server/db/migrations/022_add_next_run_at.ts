@@ -1,4 +1,4 @@
-import type { Migration } from '../migrations.ts';
+import type { Migration } from '#db/migrations.ts';
 
 /**
  * Migration 022: Add next_run_at to sync config tables

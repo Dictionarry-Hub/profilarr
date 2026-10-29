@@ -10,13 +10,13 @@
  *   live run sends.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { waitForAction } from '$flows/helpers/core/forms.ts';
-import { latestJobRunId, scheduledJobs } from '$flows/helpers/core/jobs.ts';
-import { waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pick } from '$flows/helpers/core/pageData.ts';
-import { addArr, arrInstance } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { waitForAction } from '#flows/helpers/core/forms.ts';
+import { latestJobRunId, scheduledJobs } from '#flows/helpers/core/jobs.ts';
+import { waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pick } from '#flows/helpers/core/pageData.ts';
+import { addArr, arrInstance } from '#flows/helpers/sync/arrs.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	episodeFile,
 	movieFile,
@@ -26,8 +26,8 @@ import {
 	taggedIds,
 	type Library,
 	type LibraryEntry
-} from '$flows/helpers/sync/library.ts';
-import { TARGETS } from '$flows/helpers/sync/targets.ts';
+} from '#flows/helpers/sync/library.ts';
+import { TARGETS } from '#flows/helpers/sync/targets.ts';
 import {
 	addDefaultFilter,
 	buildRules,
@@ -52,7 +52,7 @@ import {
 	type FilterPreview,
 	type FilterRule,
 	type GroupInput
-} from '$flows/helpers/sync/upgrades.ts';
+} from '#flows/helpers/sync/upgrades.ts';
 
 const TAG = 'flow-tag';
 /** Only spaces: the save drops it, so the filter is stored with no tag */

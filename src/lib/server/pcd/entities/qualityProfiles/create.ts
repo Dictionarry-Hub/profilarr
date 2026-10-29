@@ -2,10 +2,10 @@
  * Create a quality profile operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import { logger } from '$logger/logger.ts';
-import type { OrderedItem } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import { logger } from '#logger/logger.ts';
+import type { OrderedItem } from '#shared/pcd/display.ts';
 
 // ============================================================================
 // Input types

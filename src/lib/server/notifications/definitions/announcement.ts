@@ -7,8 +7,12 @@
  * field block so users immediately see which database posted it.
  */
 
-import type { AnnouncementSeverity } from '$announcements/shared/types.ts';
-import type { Notification, NotificationBlock, NotificationSeverity } from '../types.ts';
+import type { AnnouncementSeverity } from '#server/announcements/shared/types.ts';
+import type {
+	Notification,
+	NotificationBlock,
+	NotificationSeverity
+} from '#notifications/types.ts';
 
 /**
  * Minimum shape the definition needs from any announcement record.

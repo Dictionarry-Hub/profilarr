@@ -1,24 +1,24 @@
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import type { BaseArrClient } from '$arr/base.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import type { BaseArrClient } from '#arr/base.ts';
 import type {
 	ArrMediaManagementConfig,
 	ArrNamingConfig,
 	ArrQualityDefinition
-} from '$arr/types.ts';
-import type { SyncArrType } from '$sync/mappings.ts';
-import { getCache } from '$pcd/index.ts';
+} from '#arr/types.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
+import { getCache } from '#pcd/index.ts';
 import {
 	getRadarrByName as getRadarrMediaSettings,
 	getSonarrByName as getSonarrMediaSettings
-} from '$pcd/entities/mediaManagement/media-settings/read.ts';
+} from '#entities/mediaManagement/media-settings/read.ts';
 import {
 	getRadarrByName as getRadarrNaming,
 	getSonarrByName as getSonarrNaming
-} from '$pcd/entities/mediaManagement/naming/read.ts';
+} from '#entities/mediaManagement/naming/read.ts';
 import {
 	getRadarrByName as getRadarrQualityDefs,
 	getSonarrByName as getSonarrQualityDefs
-} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+} from '#entities/mediaManagement/quality-definitions/read.ts';
 import {
 	normalizeArrQualityDefinition,
 	normalizeNamingConfig,
@@ -28,8 +28,8 @@ import {
 	type ArrMediaSettingsManagedFields,
 	type MappedQualityDefinition,
 	type NormalizedNamingManagedFields
-} from '$sync/mediaManagement/transformer.ts';
-import { getQualityApiMappings } from '$sync/qualityProfiles/transformer.ts';
+} from '#server/sync/mediaManagement/transformer.ts';
+import { getQualityApiMappings } from '#server/sync/qualityProfiles/transformer.ts';
 import type { DriftFieldDiff } from './customFormats.ts';
 import { stringifyCanonical } from './hash.ts';
 

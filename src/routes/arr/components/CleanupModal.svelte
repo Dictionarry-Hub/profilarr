@@ -3,9 +3,9 @@
 	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import Check from '@lucide/svelte/icons/check';
 	import { enhance } from '$app/forms';
-	import { alertStore } from '#lib/client/alerts/store.js';
-	import { jobStatus } from '#lib/client/stores/jobStatus.js';
-	import Modal from '$ui/modal/Modal.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
+	import Modal from '#ui/modal/Modal.svelte';
 
 	export let open = false;
 	export let instanceId: number;

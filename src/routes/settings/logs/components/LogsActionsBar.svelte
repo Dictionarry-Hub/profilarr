@@ -5,13 +5,13 @@
 	import Filter from '@lucide/svelte/icons/funnel';
 	import Layers from '@lucide/svelte/icons/layers';
 	import BrushCleaning from '@lucide/svelte/icons/brush-cleaning';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import { type SearchStore } from '$stores/search';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import { type SearchStore } from '#stores/search.ts';
 
 	interface LogFile {
 		filename: string;

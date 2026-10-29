@@ -1,14 +1,14 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import type { ArrType } from '$shared/pcd/types.ts';
-import { getAvailableQualities } from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import type { ArrType } from '#shared/pcd/types.ts';
+import { getAvailableQualities } from '#entities/mediaManagement/quality-definitions/read.ts';
 import {
 	createRadarrQualityDefinitions,
 	createSonarrQualityDefinitions
-} from '$pcd/entities/mediaManagement/quality-definitions/index.ts';
+} from '#entities/mediaManagement/quality-definitions/index.ts';
 
 export const load: PageServerLoad = async ({ params, parent }) => {
 	const { databaseId } = params;

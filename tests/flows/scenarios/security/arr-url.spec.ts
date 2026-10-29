@@ -9,12 +9,12 @@
  * - Each test checks what the app stored and which fake Arr got the
  *   requests, and with which credentials.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
-import { openTab } from '$flows/helpers/core/nav.ts';
-import { unflatten } from '$flows/helpers/core/pageData.ts';
-import { addArr, arrInstance, arrSettings, editArr, openArr } from '$flows/helpers/sync/arrs.ts';
-import { chooseDelayProfile, syncSection } from '$flows/helpers/sync/sync.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
+import { openTab } from '#flows/helpers/core/nav.ts';
+import { unflatten } from '#flows/helpers/core/pageData.ts';
+import { addArr, arrInstance, arrSettings, editArr, openArr } from '#flows/helpers/sync/arrs.ts';
+import { chooseDelayProfile, syncSection } from '#flows/helpers/sync/sync.ts';
 
 const NAME = 'Moved Radarr';
 const BASIC_AUTH = { username: 'proxy-user', password: 'proxy-pass' };

@@ -1,4 +1,4 @@
-import type { NotificationServiceConfig } from '$db/queries/notificationServices.ts';
+import type { NotificationServiceConfig } from '#db/queries/notificationServices.ts';
 
 /**
  * Config keys that hold credentials. They never leave the server: the

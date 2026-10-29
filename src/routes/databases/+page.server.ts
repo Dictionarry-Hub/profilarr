@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
-import { db } from '$db/db.ts';
-import { logger } from '$logger/logger.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import type { DatabaseInstancePublic } from '#db/queries/databaseInstances.ts';
+import { db } from '#db/db.ts';
+import { logger } from '#logger/logger.ts';
 
 export interface DatabaseInstanceSummary extends DatabaseInstancePublic {
 	qualityProfileCount: number;

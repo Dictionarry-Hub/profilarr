@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import { page } from '$stores/page';
-	import AnnouncementForm from '../components/AnnouncementForm.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import { page } from '#stores/page.ts';
+	import AnnouncementForm from '#routes/databases/[id]/announcements/components/AnnouncementForm.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 	export let form: ActionData;

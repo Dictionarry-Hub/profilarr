@@ -2,8 +2,8 @@
  * Types for the upgrade processing system
  */
 
-import type { RadarrMovie, ScoreBreakdownItem, SonarrSeries } from '#lib/server/utils/arr/types.ts';
-import type { FilterGroup } from '$shared/upgrades/filters.ts';
+import type { RadarrMovie, ScoreBreakdownItem, SonarrSeries } from '#arr/types.ts';
+import type { FilterGroup } from '#shared/upgrades/filters.ts';
 
 /**
  * Normalized item interface that matches filter field names

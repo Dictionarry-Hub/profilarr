@@ -1,14 +1,14 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
 import {
 	generateAnnouncementId,
 	reconcileFromWorkingCopy,
 	writeAnnouncement,
 	type AnnouncementFileInput
-} from '$announcements/database/index.ts';
-import { getPCDPath } from '$pcd/utils/operations.ts';
-import { logger } from '$logger/logger.ts';
+} from '#server/announcements/database/index.ts';
+import { getPCDPath } from '#pcd/utils/operations.ts';
+import { logger } from '#logger/logger.ts';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);

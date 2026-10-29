@@ -25,13 +25,13 @@
  */
 
 import { assert, assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect, login } from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { openDb } from '$test-harness/db.ts';
-import { hash } from '$auth/bcrypt.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { createUserDirect, login } from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { openDb } from '#tests/harness/db.ts';
+import { hash } from '#utils/auth/bcrypt.ts';
 
 const PORT = PORTS.backups.backupSecrets;
 const ORIGIN = `http://localhost:${PORT}`;

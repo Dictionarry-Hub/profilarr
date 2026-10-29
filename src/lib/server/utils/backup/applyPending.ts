@@ -23,11 +23,11 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { config } from '$config';
-import { logger } from '$logger/logger.ts';
-import { Database } from '$db/sqlite.ts';
-import { runCommand } from '../command.ts';
-import { isNotFound } from '../fs.ts';
+import { config } from '#utils/config/config.ts';
+import { logger } from '#logger/logger.ts';
+import { Database } from '#db/sqlite.ts';
+import { runCommand } from '#utils/command.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 const SENTINEL_NAME = '.restore-pending';
 const STAGING_NAME = '.restoring';

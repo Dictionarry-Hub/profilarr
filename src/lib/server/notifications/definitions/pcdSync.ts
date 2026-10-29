@@ -2,7 +2,7 @@
  * PCD sync notification definitions
  */
 
-import type { Notification, NotificationBlock } from '../types.ts';
+import type { Notification, NotificationBlock } from '#notifications/types.ts';
 
 export interface PcdUpdatesAvailableParams {
 	name: string;

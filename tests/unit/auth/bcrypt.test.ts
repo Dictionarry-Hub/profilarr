@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import { assert, assertEquals } from '@std/assert';
-import { BCRYPT_COST, hash, verify } from '$auth/bcrypt.ts';
+import { BCRYPT_COST, hash, verify } from '#utils/auth/bcrypt.ts';
 
 // Made by @felix/bcrypt (the native library Profilarr used before bcryptjs) at
 // its default cost of 12. Existing passwords and API keys are stored like this.

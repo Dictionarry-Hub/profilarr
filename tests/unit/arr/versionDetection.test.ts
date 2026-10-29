@@ -7,15 +7,15 @@
 
 import { describe, test } from 'vitest';
 import { assertEquals, assertRejects } from '@std/assert';
-import { BaseArrClient } from '$arr/base.ts';
-import { HttpError } from '$utils/http/types.ts';
-import type { RequestOptions } from '$utils/http/types.ts';
+import { BaseArrClient } from '#arr/base.ts';
+import { HttpError } from '#utils/http/types.ts';
+import type { RequestOptions } from '#utils/http/types.ts';
 import {
 	apiGeneration,
 	hasProfileItemSizes,
 	isExperimentalVersion,
 	versionMajor
-} from '$shared/arr/capabilities.ts';
+} from '#shared/arr/capabilities.ts';
 
 type Routes = Record<string, unknown>;
 

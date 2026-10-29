@@ -1,20 +1,20 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
+	import Table from '#ui/table/Table.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { CustomFormatTableRow } from '#shared/pcd/display.ts';
 	import Tag from '@lucide/svelte/icons/tag';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Layers from '@lucide/svelte/icons/layers';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import { renderMarkdown } from '$shared/utils/markdown';
-	import { escapeHtml } from '$shared/utils/sanitize';
-	import { page } from '$stores/page';
-	import { sortConditions } from '$shared/pcd/conditions';
-	import { FEATURES } from '$shared/features.ts';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
+	import { escapeHtml } from '#shared/utils/sanitize.ts';
+	import { page } from '#stores/page.ts';
+	import { sortConditions } from '#shared/pcd/conditions.ts';
+	import { FEATURES } from '#shared/features.ts';
 
 	export let formats: CustomFormatTableRow[];
 

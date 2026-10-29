@@ -5,10 +5,10 @@
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import Breadcrumb from '$ui/navigation/breadcrumb/Breadcrumb.svelte';
-	import { clickOutside } from '#lib/client/utils/clickOutside.js';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import Breadcrumb from '#ui/navigation/breadcrumb/Breadcrumb.svelte';
+	import { clickOutside } from '#client/utils/clickOutside.ts';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
 
 	interface Tab {
 		label: string;

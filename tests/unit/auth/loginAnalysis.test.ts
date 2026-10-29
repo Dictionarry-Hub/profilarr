@@ -10,7 +10,7 @@ import {
 	analyzeLoginFailure,
 	formatLoginFailure,
 	getAttemptCategory
-} from '$auth/loginAnalysis.ts';
+} from '#utils/auth/loginAnalysis.ts';
 
 // --- isCommonAttackUsername ---
 

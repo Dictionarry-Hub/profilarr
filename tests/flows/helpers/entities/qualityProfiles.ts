@@ -10,15 +10,15 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import { fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { openEntity, openTab } from '$flows/helpers/core/nav.ts';
+import { fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { openEntity, openTab } from '#flows/helpers/core/nav.ts';
 import type {
 	QualitiesPageData,
 	QualityProfileGeneral,
 	QualityProfileScoring,
 	QualityProfileTableRow
-} from '$shared/pcd/display.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+} from '#shared/pcd/display.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 export const qualityProfilePages = {
 	/** Every quality profile on a list page, `/quality-profiles/{databaseId}` */

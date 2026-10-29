@@ -1,4 +1,4 @@
-import type { CodeTheme } from './index';
+import type { CodeTheme } from './index.ts';
 
 export const defaultTheme: CodeTheme = {
 	name: 'Default',

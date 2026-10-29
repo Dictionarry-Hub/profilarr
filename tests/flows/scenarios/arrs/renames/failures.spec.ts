@@ -7,10 +7,10 @@
  * - Radarr only, except the batch tests, which use Sonarr's smaller batches.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { addArr, arrInstance } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr, Resource } from '$flows/helpers/sync/fakeArr.ts';
-import { seedLibrary } from '$flows/helpers/sync/library.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { addArr, arrInstance } from '#flows/helpers/sync/arrs.ts';
+import type { FakeArr, Resource } from '#flows/helpers/sync/fakeArr.ts';
+import { seedLibrary } from '#flows/helpers/sync/library.ts';
 import {
 	dryRun,
 	expandRun,
@@ -29,7 +29,7 @@ import {
 	type RenameChanges,
 	type RenameRun,
 	type RenameTitle
-} from '$flows/helpers/sync/renames.ts';
+} from '#flows/helpers/sync/renames.ts';
 
 const DISK_FULL = 'Disk full';
 /** The error the client gives a 404 */

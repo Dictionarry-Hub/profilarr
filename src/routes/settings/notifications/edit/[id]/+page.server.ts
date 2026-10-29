@@ -1,10 +1,10 @@
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { error, fail, redirect } from '@sveltejs/kit';
-import { logger } from '$logger/logger.ts';
-import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
-import { stripNotificationSecrets, storedNotificationSecrets } from '$notifications/secrets.ts';
-import { requireSecretForDestinationChange } from '$utils/secretDestination.ts';
-import { getAllNotificationTypeIds } from '$shared/notifications/types.ts';
+import { logger } from '#logger/logger.ts';
+import { notificationServicesQueries } from '#db/queries/notificationServices.ts';
+import { stripNotificationSecrets, storedNotificationSecrets } from '#notifications/secrets.ts';
+import { requireSecretForDestinationChange } from '#utils/secretDestination.ts';
+import { getAllNotificationTypeIds } from '#shared/notifications/types.ts';
 
 export const load = ({ params }: { params: { id: string } }) => {
 	const { id } = params;

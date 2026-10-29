@@ -1,11 +1,11 @@
 import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import { getAffectedArrs } from '#lib/server/sync/affectedArrs.ts';
-import { hasQualityGroupMembersPositionInCache } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import * as qualityProfileQueries from '#entities/qualityProfiles/index.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import { getAffectedArrs } from '#server/sync/affectedArrs.ts';
+import { hasQualityGroupMembersPositionInCache } from '#entities/qualityProfiles/qualities/groupMembersSchema.ts';
 
 type OrderedItem = {
 	type: 'quality' | 'group';

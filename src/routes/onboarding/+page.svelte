@@ -1,15 +1,15 @@
 <script lang="ts">
 	import Play from '@lucide/svelte/icons/play';
-	import { cutscene } from '#lib/client/cutscene/store.js';
-	import { STAGES, GROUPS } from '#lib/client/cutscene/definitions/index.ts';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
-	import { alertStore } from '$alerts/store';
+	import { cutscene } from '#client/cutscene/store.ts';
+	import { STAGES, GROUPS } from '#client/cutscene/definitions/index.ts';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ExpandableCard from '#ui/card/ExpandableCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { createDataPageStore } from '#stores/dataPage.ts';
+	import { alertStore } from '#client/alerts/store.ts';
 
 	interface StageItem {
 		id: string;

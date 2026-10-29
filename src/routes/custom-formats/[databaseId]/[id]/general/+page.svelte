@@ -1,10 +1,10 @@
 <script lang="ts">
-	import GeneralForm from '../../components/GeneralForm.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Score from '$ui/arr/Score.svelte';
-	import InlineLink from '$ui/link/InlineLink.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { page } from '$stores/page';
+	import GeneralForm from '#routes/custom-formats/[databaseId]/components/GeneralForm.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import Score from '#ui/arr/Score.svelte';
+	import InlineLink from '#ui/link/InlineLink.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { page } from '#stores/page.ts';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

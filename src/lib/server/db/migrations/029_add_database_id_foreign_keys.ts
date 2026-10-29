@@ -1,4 +1,4 @@
-import type { Migration } from '../migrations.ts';
+import type { Migration } from '#db/migrations.ts';
 
 /**
  * Migration 029: Add foreign key constraints for database_id columns

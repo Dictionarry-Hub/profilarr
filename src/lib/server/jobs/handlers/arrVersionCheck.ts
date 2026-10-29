@@ -1,9 +1,9 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
-import { probeAndRecordVersion } from '$arr/version.ts';
-import type { ArrType } from '$arr/types.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import { probeAndRecordVersion } from '#arr/version.ts';
+import type { ArrType } from '#arr/types.ts';
 
 /** Containers that boot alongside Profilarr can take a few minutes to answer. */
 const RETRY_DELAY_MS = 5 * 60 * 1000;

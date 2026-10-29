@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
-import { runCommand } from '$utils/command.ts';
+import { runCommand } from '#utils/command.ts';
 
 test('PROFILARR_API_KEY shorter than 32 characters fails config import', async () => {
 	const result = await runCommand(

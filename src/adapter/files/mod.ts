@@ -1,7 +1,7 @@
 import { serveDir, serveFile } from 'jsr:@std/http@1/file-server';
 import { dirname, extname, fromFileUrl, join } from 'jsr:@std/path@1';
 
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 import server from 'SERVER';
 
 const initialized = server.init({ env: Deno.env.toObject() });

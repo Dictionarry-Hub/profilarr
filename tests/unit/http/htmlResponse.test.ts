@@ -9,9 +9,9 @@ import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { describe, test } from 'vitest';
 import { assert, assertEquals, assertInstanceOf, assertRejects } from '@std/assert';
-import { BaseArrClient } from '$arr/base.ts';
-import { BaseHttpClient } from '$http/client.ts';
-import { HtmlResponseError, HttpError } from '$http/types.ts';
+import { BaseArrClient } from '#arr/base.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
+import { HtmlResponseError, HttpError } from '#utils/http/types.ts';
 
 const LOGIN_PAGE = '<!--\nSPDX-License-Identifier: Apache-2.0\n-->\n<!doctype html><html></html>';
 

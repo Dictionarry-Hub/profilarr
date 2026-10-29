@@ -1,11 +1,11 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import * as delayProfileQueries from '$pcd/entities/delayProfiles/index.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import type { PreferredProtocol } from '$shared/pcd/display.ts';
-import { logger } from '$logger/logger.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import * as delayProfileQueries from '#entities/delayProfiles/index.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import type { PreferredProtocol } from '#shared/pcd/display.ts';
+import { logger } from '#logger/logger.ts';
 
 export const load: ServerLoad = ({ params }) => {
 	const { databaseId } = params;

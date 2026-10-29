@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
 	import Check from '@lucide/svelte/icons/check';
-	import { createVirtualList } from '#lib/client/utils/virtualList.js';
-	import InlineLink from '$ui/link/InlineLink.svelte';
+	import { createVirtualList } from '#client/utils/virtualList.ts';
+	import InlineLink from '#ui/link/InlineLink.svelte';
 
 	export let databaseId: number;
 	export let formats: any[];

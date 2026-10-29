@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { basicAuthHeader } from '$utils/arr/base.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { basicAuthHeader } from '#arr/base.ts';
 
 class BasicAuthHeaderTest extends BaseTest {
 	runTests(): void {

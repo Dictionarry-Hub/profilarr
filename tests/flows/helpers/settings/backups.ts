@@ -12,11 +12,11 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import type { App } from '$flows/harness/app.ts';
-import { saveForm, waitForAction, type ActionResult } from '$flows/helpers/core/forms.ts';
-import { waitForJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
-import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { retentionField } from '$flows/helpers/settings/general.ts';
+import type { App } from '#flows/harness/app.ts';
+import { saveForm, waitForAction, type ActionResult } from '#flows/helpers/core/forms.ts';
+import { waitForJobRun, type JobRun } from '#flows/helpers/core/jobs.ts';
+import { openSidebarPage, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { retentionField } from './general.ts';
 
 /** A row of GET /api/v1/backups */
 export interface BackupFile {

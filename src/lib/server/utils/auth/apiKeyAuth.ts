@@ -9,11 +9,11 @@
  * immediately and expiry is always current.
  */
 
-import { verify } from '$auth/bcrypt.ts';
-import { config } from '$config';
-import { apiKeysQueries } from '$db/queries/apiKeys.ts';
-import { ENV_API_KEY_NAME, isApiKeyExpired, type ApiKeyPermissions } from '$shared/apiKeys.ts';
-import { logger } from '$logger/logger.ts';
+import { verify } from './bcrypt.ts';
+import { config } from '#utils/config/config.ts';
+import { apiKeysQueries } from '#db/queries/apiKeys.ts';
+import { ENV_API_KEY_NAME, isApiKeyExpired, type ApiKeyPermissions } from '#shared/apiKeys.ts';
+import { logger } from '#logger/logger.ts';
 import { sha256Hex } from './hash.ts';
 
 export interface ResolvedApiKey {

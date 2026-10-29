@@ -10,13 +10,13 @@
 	import X from '@lucide/svelte/icons/x';
 	import Film from '@lucide/svelte/icons/film';
 	import Tv from '@lucide/svelte/icons/tv';
-	import Modal from '$ui/modal/Modal.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import Score from '$ui/arr/Score.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import type { ReleaseEvaluation } from '$shared/pcd/display.ts';
+	import Modal from '#ui/modal/Modal.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import Score from '#ui/arr/Score.svelte';
+	import CustomFormatBadge from '#ui/arr/CustomFormatBadge.svelte';
+	import type { ReleaseEvaluation } from '#shared/pcd/display.ts';
 
 	interface CfScore {
 		radarr: number | null;

@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { compile, invalidate } from '$pcd/database/compiler.ts';
-import { syncDependencies } from '$pcd/git/dependencies.ts';
+import { compile, invalidate } from '#pcd/database/compiler.ts';
+import { syncDependencies } from '#pcd/git/dependencies.ts';
 import {
 	readManifest,
 	writeManifest,
@@ -9,9 +9,9 @@ import {
 	readReadme,
 	writeReadme,
 	type Manifest
-} from '$pcd/manifest/manifest.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { logger } from '$logger/logger.ts';
+} from '#pcd/manifest/manifest.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { logger } from '#logger/logger.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();

@@ -1,4 +1,4 @@
-import type { Migration } from '../migrations.ts';
+import type { Migration } from '#db/migrations.ts';
 
 /**
  * Migration 061: Create announcements + versions_snapshot tables

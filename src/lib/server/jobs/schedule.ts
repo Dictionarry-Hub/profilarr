@@ -1,15 +1,15 @@
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
-import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
-import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
-import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
-import { logSettingsQueries } from '$db/queries/logSettings.ts';
-import { FEATURES } from '$shared/features.ts';
-import { calculateNextRun } from '#lib/server/sync/utils.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { upgradeConfigsQueries } from '#db/queries/upgradeConfigs.ts';
+import { arrRenameSettingsQueries } from '#db/queries/arrRenameSettings.ts';
+import { arrCleanupSettingsQueries } from '#db/queries/arrCleanupSettings.ts';
+import { arrDriftSettingsQueries } from '#db/queries/arrDriftSettings.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { backupSettingsQueries } from '#db/queries/backupSettings.ts';
+import { logSettingsQueries } from '#db/queries/logSettings.ts';
+import { FEATURES } from '#shared/features.ts';
+import { calculateNextRun } from '#server/sync/utils.ts';
 import { calculateNextRunFromMinutes, calculateNextRunFromSchedule } from './scheduleUtils.ts';
 import { jobDispatcher } from './dispatcher.ts';
 

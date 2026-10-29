@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
-	import { getPlatformLabel } from '$shared/utils/version.ts';
-	import { build } from '#lib/shared/build.ts';
-	import logo from '$assets/logo-512.png';
-	import Button from '$ui/button/Button.svelte';
-	import Card from '$ui/card/Card.svelte';
+	import { getPlatformLabel } from '#shared/utils/version.ts';
+	import { build } from '#shared/build.ts';
+	import logo from '#client/assets/logo-512.png';
+	import Button from '#ui/button/Button.svelte';
+	import Card from '#ui/card/Card.svelte';
 
 	const CHANNEL_LABELS = {
 		stable: 'stable',

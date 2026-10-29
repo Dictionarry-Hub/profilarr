@@ -2,7 +2,7 @@ import type {
 	CustomFormatTableRow,
 	QualityProfileTableRow,
 	RegularExpressionWithTags
-} from '$shared/pcd/display.ts';
+} from '#shared/pcd/display.ts';
 
 function nonEmpty(values: Array<string | null | undefined>): string[] {
 	return values.filter((value): value is string => Boolean(value));

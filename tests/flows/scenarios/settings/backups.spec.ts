@@ -8,10 +8,10 @@
  */
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { test, expect, FIXTURES_NAME, type App } from '$flows/helpers/core/test.ts';
-import { fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { openPage } from '$flows/helpers/core/nav.ts';
-import { addArr } from '$flows/helpers/sync/arrs.ts';
+import { test, expect, FIXTURES_NAME, type App } from '#flows/helpers/core/test.ts';
+import { fixtures } from '#flows/helpers/core/fixtureData.ts';
+import { openPage } from '#flows/helpers/core/nav.ts';
+import { addArr } from '#flows/helpers/sync/arrs.ts';
 import {
 	ageBackup,
 	backupRow,
@@ -26,7 +26,7 @@ import {
 	runCleanup,
 	setBackupRetention,
 	uploadBackup
-} from '$flows/helpers/settings/backups.ts';
+} from '#flows/helpers/settings/backups.ts';
 import type { Page } from '@playwright/test';
 
 const backupPath = (app: App, filename: string) => join(app.dir, 'backups', filename);

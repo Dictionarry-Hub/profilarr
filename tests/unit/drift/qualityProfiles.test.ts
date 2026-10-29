@@ -1,20 +1,20 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareQualityProfileDrift,
 	type QualityProfileDriftDiff,
 	type QualityProfileDriftExpected
-} from '$drift/qualityProfiles.ts';
-import { hashDriftDiff } from '$drift/hash.ts';
-import { buildDriftDisplayEntities } from '$drift/display.ts';
-import { applySizesToItems, resolveDefinitionSizes } from '$sync/qualityProfiles/sizes.ts';
+} from '#server/drift/qualityProfiles.ts';
+import { hashDriftDiff } from '#server/drift/hash.ts';
+import { buildDriftDisplayEntities } from '#server/drift/display.ts';
+import { applySizesToItems, resolveDefinitionSizes } from '#server/sync/qualityProfiles/sizes.ts';
 import type {
 	ArrCustomFormat,
 	ArrLanguage,
 	ArrQualityProfile,
 	ArrQualityProfileItem,
 	ArrQualityProfilePayload
-} from '$arr/types.ts';
+} from '#arr/types.ts';
 
 type ActualQualityProfile = ArrQualityProfile & {
 	language?: ArrLanguage;

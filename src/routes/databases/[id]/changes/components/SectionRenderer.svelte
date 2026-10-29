@@ -1,5 +1,10 @@
 <script lang="ts">
-	import type { DraftEntitySection, DraftEntitySectionRow, FieldRow, OperationType } from './types';
+	import type {
+		DraftEntitySection,
+		DraftEntitySectionRow,
+		FieldRow,
+		OperationType
+	} from './types.ts';
 	import FieldDiffTable from './FieldDiffTable.svelte';
 	import TagsDiffTable from './TagsDiffTable.svelte';
 	import CustomFormatScoresTable from './CustomFormatScoresTable.svelte';

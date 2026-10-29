@@ -10,11 +10,11 @@
  * All HTTP access is delegated to `./client.ts`.
  */
 
-import { db } from '$db/db.ts';
-import { announcementQueries, versionsSnapshotQueries } from '$db/queries/announcements.ts';
-import { logger } from '$logger/logger.ts';
-import { build } from '#lib/shared/build.ts';
-import type { ReconcilePlan } from '../shared/types.ts';
+import { db } from '#db/db.ts';
+import { announcementQueries, versionsSnapshotQueries } from '#db/queries/announcements.ts';
+import { logger } from '#logger/logger.ts';
+import { build } from '#shared/build.ts';
+import type { ReconcilePlan } from '#server/announcements/shared/types.ts';
 import { fetchAnnouncements, fetchBody, fetchVersions } from './client.ts';
 import { isVisible, type VisibilityContext } from './filter.ts';
 import { reconcileAnnouncements, UnsupportedSchemaError } from './reconcile.ts';

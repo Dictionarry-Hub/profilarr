@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { validateLinkInput } from '$pcd/core/validate.ts';
+import { validateLinkInput } from '#pcd/core/validate.ts';
 
 function branchFor(repositoryUrl: string, branch?: string): string | undefined {
 	const result = validateLinkInput({

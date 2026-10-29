@@ -1,22 +1,22 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { tick } from 'svelte';
 	import Save from '@lucide/svelte/icons/save';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import Trash2 from '@lucide/svelte/icons/trash';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
-	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import { alertStore } from '$alerts/store';
-	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
-	import type { AffectedArr } from '$shared/sync/types.ts';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import MarkdownInput from '#ui/form/MarkdownInput.svelte';
+	import TagInput from '#ui/form/TagInput.svelte';
+	import DropdownCombobox from '#ui/dropdown/DropdownCombobox.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import SyncPromptModal from '#ui/modal/SyncPromptModal.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { current, isDirty, initEdit, initCreate, update } from '#stores/dirty.ts';
+	import type { AffectedArr } from '#shared/sync/types.ts';
 
 	// Form data shape
 	interface GeneralFormData {

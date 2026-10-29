@@ -1,12 +1,12 @@
 <script lang="ts">
 	import ExternalLink from '@lucide/svelte/icons/external-link';
-	import Button from '$ui/button/Button.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import type { Column, SortState } from '$ui/table/types';
-	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
-	import { dateSortValue, sortTitle } from '$shared/utils/sort.ts';
+	import Button from '#ui/button/Button.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import type { Column, SortState } from '#ui/table/types.ts';
+	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '#arr/types.ts';
+	import { dateSortValue, sortTitle } from '#shared/utils/sort.ts';
 
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
 	import SeriesRow from './SeriesRow.svelte';
 	import SeriesRowSkeleton from './SeriesRowSkeleton.svelte';
 	import SeasonTable from './SeasonTable.svelte';

@@ -4,10 +4,10 @@
 	import Check from '@lucide/svelte/icons/check';
 	import X from '@lucide/svelte/icons/x';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import { alertStore } from '$alerts/store';
-	import { sanitizeRegex101Id } from '#lib/client/utils/regex101.js';
-	import Label from '$ui/label/Label.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { sanitizeRegex101Id } from '#client/utils/regex101.ts';
+	import Label from '#ui/label/Label.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
 
 	// Props
 	export let pattern: string = '';

@@ -1,14 +1,11 @@
 import { error, redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import type { RadarrNamingRow, SonarrNamingRow } from '$shared/pcd/display.ts';
-import {
-	createRadarrNaming,
-	createSonarrNaming
-} from '$pcd/entities/mediaManagement/naming/index.ts';
-import { validateNamingFormat } from '$shared/pcd/namingTokens.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import type { RadarrNamingRow, SonarrNamingRow } from '#shared/pcd/display.ts';
+import { createRadarrNaming, createSonarrNaming } from '#entities/mediaManagement/naming/index.ts';
+import { validateNamingFormat } from '#shared/pcd/namingTokens.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const parentData = await parent();

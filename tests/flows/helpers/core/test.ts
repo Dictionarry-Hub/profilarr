@@ -10,7 +10,7 @@
  *
  * Options a spec sets with `test.use()`:
  * - `appEnv`: environment applied over the defaults, e.g. `{ AUTH: 'on' }`
- * - `ssoProvider`: an SSO provider id (helpers/auth/sso/providers.ts). The
+ * - `ssoProvider`: an SSO provider id (helpers/sso/providers.ts). The
  *   provider starts first, and its OIDC settings go into the app's env. The
  *   test reaches it as the `sso` fixture.
  * - `appProxy`: a reverse proxy in front of the app (helpers/proxy/proxies.ts).
@@ -24,20 +24,17 @@
  */
 
 import { test as base, expect, type TestInfo } from '@playwright/test';
-import { startApp, type App } from '$flows/harness/app.ts';
-import { upstreamRepo } from '$flows/harness/seed.ts';
-import {
-	ssoProvider as findSsoProvider,
-	type RunningSso
-} from '$flows/helpers/auth/sso/providers.ts';
+import { startApp, type App } from '#flows/harness/app.ts';
+import { upstreamRepo } from '#flows/harness/seed.ts';
+import { ssoProvider as findSsoProvider, type RunningSso } from '#flows/helpers/sso/providers.ts';
 import {
 	reverseProxy as findReverseProxy,
 	type ProxyOptions,
 	type RunningProxy
-} from '$flows/helpers/proxy/proxies.ts';
-import { startFakeArr, type FakeArr, type FakeArrOptions } from '$flows/helpers/sync/fakeArr.ts';
-import { defaultTarget } from '$flows/helpers/sync/targets.ts';
-import { startFakeWebhook, type FakeWebhook } from '$flows/helpers/settings/fakeWebhook.ts';
+} from '#flows/helpers/proxy/proxies.ts';
+import { startFakeArr, type FakeArr, type FakeArrOptions } from '#flows/helpers/sync/fakeArr.ts';
+import { defaultTarget } from '#flows/helpers/sync/targets.ts';
+import { startFakeWebhook, type FakeWebhook } from '#flows/helpers/settings/fakeWebhook.ts';
 
 /** Attach a service's logs to a test that didn't end as expected */
 async function attachServiceLogs(
@@ -199,5 +196,5 @@ export const test = base.extend<{
 export { expect };
 
 /** The linked fixtures database's name, and the running app a test gets */
-export { FIXTURES_NAME } from '$flows/harness/seed.ts';
+export { FIXTURES_NAME } from '#flows/harness/seed.ts';
 export type { App };

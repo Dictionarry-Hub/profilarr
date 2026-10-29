@@ -7,7 +7,7 @@
 	import Code from '@lucide/svelte/icons/code';
 	import Eye from '@lucide/svelte/icons/eye';
 	import Edit3 from '@lucide/svelte/icons/pen-line';
-	import { renderMarkdown } from '$shared/utils/markdown';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
 
 	// Props
 	export let value: string = '';

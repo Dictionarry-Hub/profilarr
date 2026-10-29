@@ -6,11 +6,11 @@
  * - Every save returns to the media settings list.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures, type ArrType } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, deleteEntity, fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity } from '$flows/helpers/core/nav.ts';
-import { mediaSettingsPages } from '$flows/helpers/entities/mediaManagement.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures, type ArrType } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, deleteEntity, fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity } from '#flows/helpers/core/nav.ts';
+import { mediaSettingsPages } from '#flows/helpers/entities/mediaManagement.ts';
 
 const FIXTURE = {
 	radarr: fixture.mediaSettings('radarr', 'Fixture Radarr'),

@@ -1,31 +1,34 @@
 import { error, fail } from '@sveltejs/kit';
-import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
+import { hasProfileItemSizes } from '#shared/arr/capabilities.ts';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '$db/queries/arrSync.ts';
-import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
-import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { logger } from '$logger/logger.ts';
-import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
-import * as delayProfileQueries from '$pcd/entities/delayProfiles/index.ts';
-import * as namingQueries from '$pcd/entities/mediaManagement/naming/index.ts';
-import * as qualityDefinitionsQueries from '$pcd/entities/mediaManagement/quality-definitions/index.ts';
-import * as mediaSettingsQueries from '$pcd/entities/mediaManagement/media-settings/index.ts';
-import { calculateNextRun } from '#lib/server/sync/utils.ts';
-import { scheduleArrSyncForInstance } from '#lib/server/jobs/init.ts';
-import { enqueueJob } from '#lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
-import { buildExpectedCustomFormatsPerDatabase } from '$drift/customFormats.ts';
-import type { CustomFormatDriftDiff, DatabaseCustomFormatDriftDiff } from '$drift/customFormats.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries, type SyncTrigger, type ProfileSelection } from '#db/queries/arrSync.ts';
+import { arrDriftStatusQueries } from '#db/queries/arrDriftStatus.ts';
+import { arrDriftSettingsQueries } from '#db/queries/arrDriftSettings.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { logger } from '#logger/logger.ts';
+import * as qualityProfileQueries from '#entities/qualityProfiles/index.ts';
+import * as delayProfileQueries from '#entities/delayProfiles/index.ts';
+import * as namingQueries from '#entities/mediaManagement/naming/index.ts';
+import * as qualityDefinitionsQueries from '#entities/mediaManagement/quality-definitions/index.ts';
+import * as mediaSettingsQueries from '#entities/mediaManagement/media-settings/index.ts';
+import { calculateNextRun } from '#server/sync/utils.ts';
+import { scheduleArrSyncForInstance } from '#server/jobs/init.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#server/jobs/display.ts';
+import { buildExpectedCustomFormatsPerDatabase } from '#server/drift/customFormats.ts';
+import type {
+	CustomFormatDriftDiff,
+	DatabaseCustomFormatDriftDiff
+} from '#server/drift/customFormats.ts';
 import type {
 	QualityProfileDriftDiff,
 	QualityProfileModifiedDiff,
 	DatabaseQualityProfileDriftDiff
-} from '$drift/qualityProfiles.ts';
-import type { MediaManagementDriftDiff } from '$drift/mediaManagement.ts';
-import { FEATURES } from '$shared/features.ts';
-import type { SyncArrType } from '$sync/mappings.ts';
+} from '#server/drift/qualityProfiles.ts';
+import type { MediaManagementDriftDiff } from '#server/drift/mediaManagement.ts';
+import { FEATURES } from '#shared/features.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 
 interface SectionProgress {
 	total: number;

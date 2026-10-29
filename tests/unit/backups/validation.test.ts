@@ -4,10 +4,7 @@
 
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import {
-	isValidBackupFilename,
-	resolveBackupPath
-} from '../../../src/lib/server/utils/backup/validation.ts';
+import { isValidBackupFilename, resolveBackupPath } from '#utils/backup/validation.ts';
 
 // ─── isValidBackupFilename ───────────────────────────────────────────────────
 

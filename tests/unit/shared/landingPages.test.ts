@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { LANDING_PAGES, isLandingPage, resolveLandingPage } from '$shared/landingPages.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { LANDING_PAGES, isLandingPage, resolveLandingPage } from '#shared/landingPages.ts';
 
 class LandingPagesTest extends BaseTest {
 	runTests(): void {

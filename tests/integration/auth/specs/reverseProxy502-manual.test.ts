@@ -20,10 +20,10 @@
  * - nginx does not log "upstream sent too big header"
  */
 
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { createUserDirect } from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { createUserDirect } from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
 
 const PORT = PORTS.auth.reverseProxy502Manual;
 const PROXY_ORIGIN = 'http://localhost:7446';

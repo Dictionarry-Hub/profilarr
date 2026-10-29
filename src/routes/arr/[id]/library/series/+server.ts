@@ -1,14 +1,14 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { cache } from '$cache/cache.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
-import { LIBRARY_REQUEST_TIMEOUT_MS } from '$utils/arr/base.ts';
-import type { SonarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
-import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { scheduleLibraryRefreshForInstance } from '#lib/server/jobs/schedule.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { cache } from '#utils/cache/cache.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import { LIBRARY_REQUEST_TIMEOUT_MS } from '#arr/base.ts';
+import type { SonarrLibraryItem, SonarrSeriesItem } from '#arr/types.ts';
+import { getProfilarrProfileNames } from '#server/sync/libraryHelpers.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
+import { scheduleLibraryRefreshForInstance } from '#server/jobs/schedule.ts';
+import { logger } from '#logger/logger.ts';
 
 const MANUAL_CACHE_TTL = 86400;
 

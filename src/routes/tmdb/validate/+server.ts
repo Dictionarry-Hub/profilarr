@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { TMDBClient } from '#lib/server/utils/tmdb/client.ts';
-import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
+import { TMDBClient } from '#utils/tmdb/client.ts';
+import { tmdbSettingsQueries } from '#db/queries/tmdbSettings.ts';
 
 export const POST: RequestHandler = async ({ request }) => {
 	const { apiKey: providedKey } = await request.json();

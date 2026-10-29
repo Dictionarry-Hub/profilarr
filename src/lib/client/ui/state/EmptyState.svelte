@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Plus from '@lucide/svelte/icons/plus';
-	import Button from '$ui/button/Button.svelte';
+	import Button from '#ui/button/Button.svelte';
 
 	export let icon: any; // Lucide icon component
 	export let title: string;

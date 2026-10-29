@@ -7,8 +7,8 @@
 	import AlertOctagon from '@lucide/svelte/icons/octagon-alert';
 	import CheckCircle2 from '@lucide/svelte/icons/circle-check';
 	import MessageSquare from '@lucide/svelte/icons/message-square';
-	import Button from '$ui/button/Button.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
 
 	type Variant = 'info' | 'warning' | 'danger' | 'success' | 'note';
 

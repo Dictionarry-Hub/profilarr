@@ -2,9 +2,9 @@
  * Remove media settings config operations
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '#shared/pcd/display.ts';
 
 export interface RemoveMediaSettingsOptions {
 	databaseId: number;

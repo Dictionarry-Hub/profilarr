@@ -20,11 +20,11 @@ import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
 import { generateKeyPairSync, pbkdf2Sync, randomBytes } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
-import { serviceDir, startService, waitForService, type Service } from '$flows/harness/docker.ts';
-import { serviceImage } from '$flows/harness/images.ts';
-import { freePort } from '$flows/harness/ports.ts';
-import { certificatePaths, httpsGet } from '$flows/harness/tls.ts';
-import type { RunningSso, SsoProvider, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
+import { serviceDir, startService, waitForService, type Service } from '#flows/harness/docker.ts';
+import { serviceImage } from '#flows/harness/images.ts';
+import { freePort } from '#flows/harness/ports.ts';
+import { certificatePaths, httpsGet } from '#flows/harness/tls.ts';
+import type { RunningSso, SsoProvider, SsoUser } from './providers.ts';
 
 const CLIENT_ID = 'profilarr-flows';
 

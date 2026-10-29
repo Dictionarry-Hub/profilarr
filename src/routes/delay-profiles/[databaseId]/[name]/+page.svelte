@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import DelayProfileForm from '../components/DelayProfileForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import DelayProfileForm from '#routes/delay-profiles/[databaseId]/components/DelayProfileForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

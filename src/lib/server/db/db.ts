@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises';
-import { Database } from '$db/sqlite.ts';
-import type { RestBindParameters } from '$db/sqlite.ts';
-import { config } from '$config';
-import { logger } from '$logger/logger.ts';
+import { Database } from './sqlite.ts';
+import type { RestBindParameters } from './sqlite.ts';
+import { config } from '#utils/config/config.ts';
+import { logger } from '#logger/logger.ts';
 
 /**
  * Database singleton for SQLite

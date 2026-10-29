@@ -16,9 +16,9 @@ describe('arr_instances detected version columns', async () => {
 	const baseDir = await mkdtemp(join(tmpdir(), 'profilarr-detected-version-'));
 	process.env.APP_BASE_PATH = baseDir;
 
-	const { db } = await import('$db/db.ts');
-	const { runMigrations } = await import('$db/migrations.ts');
-	const { arrInstancesQueries } = await import('$db/queries/arrInstances.ts');
+	const { db } = await import('#db/db.ts');
+	const { runMigrations } = await import('#db/migrations.ts');
+	const { arrInstancesQueries } = await import('#db/queries/arrInstances.ts');
 
 	afterAll(async () => {
 		db.close();

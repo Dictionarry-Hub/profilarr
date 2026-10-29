@@ -9,12 +9,12 @@
  *   because their token list stays open over the fields below.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures, SONARR_WORDS, type ArrType } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, deleteEntity, fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity } from '$flows/helpers/core/nav.ts';
-import { camelKeys, pick, type Json } from '$flows/helpers/core/pageData.ts';
-import { namingPages } from '$flows/helpers/entities/mediaManagement.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures, SONARR_WORDS, type ArrType } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, deleteEntity, fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity } from '#flows/helpers/core/nav.ts';
+import { camelKeys, pick, type Json } from '#flows/helpers/core/pageData.ts';
+import { namingPages } from '#flows/helpers/entities/mediaManagement.ts';
 
 const FIXTURE = {
 	radarr: fixture.naming('radarr', 'Fixture Radarr'),

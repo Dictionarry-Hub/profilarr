@@ -8,18 +8,18 @@
  *   default "Block Referenced Deletes" setting is on.
  */
 import type { Locator, Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
 import {
 	chooseOption,
 	deleteEntity,
 	expectDeleteBlocked,
 	fillField,
 	saveForm
-} from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
-import { conditionFromFixture, customFormatPages } from '$flows/helpers/entities/customFormats.ts';
-import type { ConditionData } from '$shared/pcd/display.ts';
+} from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity, openSidebarPage, openTab } from '#flows/helpers/core/nav.ts';
+import { conditionFromFixture, customFormatPages } from '#flows/helpers/entities/customFormats.ts';
+import type { ConditionData } from '#shared/pcd/display.ts';
 
 const EVERY_CONDITION = fixture.customFormat('Every Condition');
 const TITLE_MATCH = fixture.customFormat('Title Match');

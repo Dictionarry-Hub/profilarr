@@ -6,27 +6,27 @@
 	import Copy from '@lucide/svelte/icons/copy';
 	import Check from '@lucide/svelte/icons/check';
 	import type { PageData } from './$types';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import ConfirmIdentityModal from '../../components/ConfirmIdentityModal.svelte';
-	import type { Column } from '$ui/table/types';
-	import { alertStore } from '$alerts/store';
-	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
-	import { current, initCreate, update, clear } from '#lib/client/stores/dirty.js';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import ConfirmIdentityModal from '#routes/settings/security/components/ConfirmIdentityModal.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { copyToClipboard } from '#client/utils/clipboard.ts';
+	import { current, initCreate, update, clear } from '#stores/dirty.ts';
 	import {
 		API_KEY_EXPIRY_OPTIONS,
 		DEFAULT_API_KEY_EXPIRY,
 		type ApiArea,
 		type ApiKeyAccess,
 		type ApiKeyAreaPermissions
-	} from '$shared/apiKeys';
+	} from '#shared/apiKeys.ts';
 
 	export let data: PageData;
 

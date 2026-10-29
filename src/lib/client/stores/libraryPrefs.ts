@@ -1,7 +1,7 @@
 /**
  * Persisted library view preferences.
  * Each store loads from localStorage on creation (defaults on the server),
- * validates via the parsers in `$shared/utils/libraryPrefs.ts`, and writes
+ * validates via the parsers in `#shared/utils/libraryPrefs.ts`, and writes
  * back on every change.
  */
 
@@ -24,7 +24,7 @@ import {
 	parseStringSetPref,
 	type LibraryDownloadStatus,
 	type LibrarySort
-} from '$shared/utils/libraryPrefs.ts';
+} from '#shared/utils/libraryPrefs.ts';
 
 export interface PersistedPref<T> extends Writable<T> {
 	/** Storage key this preference is persisted under */

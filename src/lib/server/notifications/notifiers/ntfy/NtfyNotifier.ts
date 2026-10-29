@@ -1,5 +1,5 @@
-import type { NtfyConfig, Notification, NotificationSeverity } from '../../types.ts';
-import { getWebhookClient } from '../../base/webhookClient.ts';
+import type { NtfyConfig, Notification, NotificationSeverity } from '#notifications/types.ts';
+import { getWebhookClient } from '#notifications/base/webhookClient.ts';
 
 /**
  * Ntfy notification service implementation.

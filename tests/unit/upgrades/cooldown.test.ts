@@ -4,7 +4,7 @@
  * Also tests API-dependent functions with mocked RadarrClient
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals } from '@std/assert';
 import {
 	getFilterTagLabel,
@@ -15,9 +15,9 @@ import {
 	applyFilterTagToMovies,
 	resetFilterCooldown,
 	resolveTagLabel
-} from '../../../src/lib/server/upgrades/cooldown.ts';
-import type { ArrTag, RadarrMovie } from '../../../src/lib/server/utils/arr/types.ts';
-import type { RadarrClient } from '../../../src/lib/server/utils/arr/clients/radarr.ts';
+} from '#server/upgrades/cooldown.ts';
+import type { ArrTag, RadarrMovie } from '#arr/types.ts';
+import type { RadarrClient } from '#arr/clients/radarr.ts';
 
 /**
  * Mock RadarrClient for testing

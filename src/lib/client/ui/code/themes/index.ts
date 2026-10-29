@@ -18,7 +18,7 @@ export interface CodeTheme {
 	dark: ThemeVariant;
 }
 
-import { defaultTheme } from './default';
+import { defaultTheme } from './default.ts';
 
 export const themes: CodeTheme[] = [defaultTheme];
 

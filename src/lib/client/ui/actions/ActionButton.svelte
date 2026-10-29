@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import type { Component } from 'svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 
 	export let icon: Component | undefined = undefined;
 	export let iconClass: string = '';

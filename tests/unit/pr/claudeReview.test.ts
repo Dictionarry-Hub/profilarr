@@ -1,4 +1,5 @@
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+// eslint-disable-next-line profilarr/import-paths -- the review renderer lives in .github/, outside every alias
 import {
 	type Finding,
 	MARKER,

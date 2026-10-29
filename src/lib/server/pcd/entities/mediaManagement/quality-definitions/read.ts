@@ -3,13 +3,13 @@
  */
 
 import { sql } from 'kysely';
-import type { PCDCache } from '$pcd/index.ts';
-import type { ArrType } from '$shared/pcd/types.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { ArrType } from '#shared/pcd/types.ts';
 import type {
 	QualityDefinitionListItem,
 	QualityDefinitionsConfig,
 	QualityDefinitionEntry
-} from '$shared/pcd/display.ts';
+} from '#shared/pcd/display.ts';
 
 /**
  * Get available qualities for an arr type from quality_api_mappings

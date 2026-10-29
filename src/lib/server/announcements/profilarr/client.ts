@@ -8,8 +8,8 @@
  * Base URL is `config.bulletinUrl`, overridable via `PROFILARR_BULLETIN_URL`.
  */
 
-import { config } from '$config';
-import { BaseHttpClient } from '$http/client.ts';
+import { config } from '#utils/config/config.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
 import type { BulletinAnnouncementsFile, BulletinVersionsFile } from './types.ts';
 
 export type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };

@@ -9,17 +9,17 @@
  * - Apply Default Delay Profile off leaves a new Arr's delay profile alone.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { chooseOption, fillField, saveForm, setSwitch } from '$flows/helpers/core/forms.ts';
-import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { addArr } from '$flows/helpers/sync/arrs.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { chooseOption, fillField, saveForm, setSwitch } from '#flows/helpers/core/forms.ts';
+import { openSidebarPage, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { addArr } from '#flows/helpers/sync/arrs.ts';
 import {
 	generalSettings,
 	retentionField,
 	storedTmdbToken,
 	uiPreferences
-} from '$flows/helpers/settings/general.ts';
+} from '#flows/helpers/settings/general.ts';
 
 const ALERT_POSITION = { label: 'Bottom left', value: 'bottom-left' };
 const ALERT_SECONDS = 3;

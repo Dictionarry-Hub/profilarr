@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { compareOptionalDates } from '../../../src/lib/shared/utils/sort.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { compareOptionalDates } from '#shared/utils/sort.ts';
 
 class SortTest extends BaseTest {
 	runTests(): void {

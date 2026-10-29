@@ -11,11 +11,11 @@
 import * as fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { test } from '@playwright/test';
-import type { App } from '$flows/harness/app.ts';
-import { git } from '$flows/harness/git.ts';
-import { fixturesRepo as repoIn, upstreamRepo } from '$flows/harness/seed.ts';
+import type { App } from '#flows/harness/app.ts';
+import { git } from '#flows/harness/git.ts';
+import { fixturesRepo as repoIn, upstreamRepo } from '#flows/harness/seed.ts';
 
-export { FLOWS_TOKEN } from '$flows/harness/seed.ts';
+export { FLOWS_TOKEN } from '#flows/harness/seed.ts';
 
 const BRANCH = 'main';
 

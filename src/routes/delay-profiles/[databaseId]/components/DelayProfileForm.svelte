@@ -1,23 +1,23 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { tick } from 'svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
-	import { alertStore } from '$alerts/store';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import SyncPromptModal from '#ui/modal/SyncPromptModal.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import type { PreferredProtocol } from '$shared/pcd/display.ts';
-	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
-	import type { AffectedArr } from '$shared/sync/types.ts';
+	import type { PreferredProtocol } from '#shared/pcd/display.ts';
+	import { current, isDirty, initEdit, initCreate, update } from '#stores/dirty.ts';
+	import type { AffectedArr } from '#shared/sync/types.ts';
 	import {
 		changeUnit,
 		clearOriginals,
@@ -27,7 +27,7 @@
 		largestEvenUnit,
 		type DurationField,
 		type DurationUnit
-	} from '$shared/utils/duration.ts';
+	} from '#shared/utils/duration.ts';
 
 	// Form data shape
 	interface DelayProfileFormData {

@@ -16,9 +16,9 @@ describe('arr_instances Basic Auth pair', async () => {
 	const baseDir = await mkdtemp(join(tmpdir(), 'profilarr-basic-auth-'));
 	process.env.APP_BASE_PATH = baseDir;
 
-	const { db } = await import('$db/db.ts');
-	const { runMigrations } = await import('$db/migrations.ts');
-	const { arrInstancesQueries } = await import('$db/queries/arrInstances.ts');
+	const { db } = await import('#db/db.ts');
+	const { runMigrations } = await import('#db/migrations.ts');
+	const { arrInstancesQueries } = await import('#db/queries/arrInstances.ts');
 
 	const base = { type: 'sonarr', apiKey: 'test-api-key' };
 

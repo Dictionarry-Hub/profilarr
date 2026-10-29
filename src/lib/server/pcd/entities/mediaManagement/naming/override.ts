@@ -1,10 +1,10 @@
-import { getCache } from '$pcd/index.ts';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import type { RadarrNamingRow, SonarrNamingRow } from '$shared/pcd/display.ts';
+import { getCache } from '#pcd/index.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import type { RadarrNamingRow, SonarrNamingRow } from '#shared/pcd/display.ts';
 import { getRadarrByName, getSonarrByName } from './read.ts';
 import { updateRadarrNaming, updateSonarrNaming } from './update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, followRenameChain, valuesEqual } from '$pcd/conflicts/overrideUtils.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, followRenameChain, valuesEqual } from '#pcd/conflicts/overrideUtils.ts';
 
 type NamingTable = 'radarr_naming' | 'sonarr_naming';
 

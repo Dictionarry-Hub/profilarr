@@ -1,9 +1,9 @@
-import { db } from '../db.ts';
+import { db } from '#db/db.ts';
 import type {
 	AnnouncementRow,
 	BulletinAnnouncement,
 	VersionsSnapshotRow
-} from '$announcements/profilarr/types.ts';
+} from '#server/announcements/profilarr/types.ts';
 
 /**
  * Queries for the announcements + versions_snapshot tables.

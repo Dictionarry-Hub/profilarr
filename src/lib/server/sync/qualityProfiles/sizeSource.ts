@@ -15,17 +15,17 @@
  * when a profile has to be created.
  */
 
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getCache } from '$pcd/index.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { getCache } from '#pcd/index.ts';
 import {
 	getRadarrByName as getRadarrQualityDefs,
 	getSonarrByName as getSonarrQualityDefs
-} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
-import { logger } from '$logger/logger.ts';
-import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrQualityProfile } from '$arr/types.ts';
-import type { SyncArrType } from '../mappings.ts';
-import { transformQualityDefinitionsForArr } from '../mediaManagement/transformer.ts';
+} from '#entities/mediaManagement/quality-definitions/read.ts';
+import { logger } from '#logger/logger.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { ArrQualityProfile } from '#arr/types.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
+import { transformQualityDefinitionsForArr } from '#server/sync/mediaManagement/transformer.ts';
 import { getQualityApiMappings } from './transformer.ts';
 import {
 	collectItemSizes,

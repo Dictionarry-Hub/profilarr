@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { page } from '$stores/page';
-	import gif404 from '$assets/404.gif';
+	import { page } from '#stores/page.ts';
+	import gif404 from '#client/assets/404.gif';
 
 	$: statusCode = $page.status;
 	$: errorMessage = $page.error?.message || 'An unexpected error occurred';

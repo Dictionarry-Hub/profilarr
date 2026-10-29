@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 
 	export let current: number = 0;
 	export let target: number = 0;

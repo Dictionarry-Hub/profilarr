@@ -2,9 +2,9 @@
  * Entity test read queries
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import type { TestEntity } from '$shared/pcd/display.ts';
-import type { TestEntitiesRow } from '$shared/pcd/types.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { TestEntity } from '#shared/pcd/display.ts';
+import type { TestEntitiesRow } from '#shared/pcd/types.ts';
 
 /**
  * Get all test entities with their releases

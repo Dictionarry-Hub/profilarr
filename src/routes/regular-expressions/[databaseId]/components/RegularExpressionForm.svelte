@@ -1,25 +1,25 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { browser } from '$app/env';
 	import { tick } from 'svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
-	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import TagInput from '#ui/form/TagInput.svelte';
+	import MarkdownInput from '#ui/form/MarkdownInput.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import SyncPromptModal from '#ui/modal/SyncPromptModal.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import RegexPatternField from './RegexPatternField.svelte';
 	import UnitTests from './UnitTests.svelte';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import { current, isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
-	import type { AffectedArr } from '$shared/sync/types.ts';
-	import type { Regex101UnitTest } from '../../regex101/types';
+	import { current, isDirty, initEdit, initCreate, update } from '#stores/dirty.ts';
+	import type { AffectedArr } from '#shared/sync/types.ts';
+	import type { Regex101UnitTest } from '#routes/regular-expressions/regex101/types.ts';
 
 	// Form data shape
 	interface RegularExpressionFormData {

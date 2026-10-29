@@ -1,7 +1,7 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import type { ArrQualityProfile, SonarrSeries } from '$utils/arr/types.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import type { ArrQualityProfile, SonarrSeries } from '#arr/types.ts';
 
 class MockSonarrClient extends SonarrClient {
 	constructor(

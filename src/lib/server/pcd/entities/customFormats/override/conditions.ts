@@ -1,9 +1,9 @@
-import { getCache } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import type { ConditionData } from '$shared/pcd/display.ts';
-import { getConditionsForEvaluation } from '../conditions/read.ts';
-import { updateConditions } from '../conditions/update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
+import { getCache } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import type { ConditionData } from '#shared/pcd/display.ts';
+import { getConditionsForEvaluation } from '#entities/customFormats/conditions/read.ts';
+import { updateConditions } from '#entities/customFormats/conditions/update.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
 import { resolveFormatName } from './resolve.ts';
 
 /**

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { tick } from 'svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
-	import { alertStore } from '$alerts/store';
+	import Modal from '#ui/modal/Modal.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import TagInput from '#ui/form/TagInput.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 
 	export let open = false;
 	export let mode: 'create' | 'edit' = 'create';

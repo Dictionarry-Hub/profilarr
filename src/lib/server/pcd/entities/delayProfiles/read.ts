@@ -7,8 +7,8 @@
  */
 
 import { sql } from 'kysely';
-import type { PCDCache } from '$pcd/index.ts';
-import type { DelayProfilesRow, PreferredProtocol } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { DelayProfilesRow, PreferredProtocol } from '#shared/pcd/display.ts';
 
 /**
  * Convert a database row to DelayProfilesRow with boolean conversion.

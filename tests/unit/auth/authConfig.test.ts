@@ -5,7 +5,7 @@
 
 import { test } from 'vitest';
 import { assertEquals, assertThrows } from '@std/assert';
-import { parseAuthConfig } from '$utils/config/auth.ts';
+import { parseAuthConfig } from '#utils/config/auth.ts';
 
 const FULL_OIDC = {
 	OIDC_DISCOVERY_URL: 'https://idp.example.com/.well-known/openid-configuration',

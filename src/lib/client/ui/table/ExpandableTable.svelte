@@ -5,9 +5,9 @@
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
-	import type { Column, SortState } from './types';
-	import Button from '$ui/button/Button.svelte';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
+	import type { Column, SortState } from './types.ts';
+	import Button from '#ui/button/Button.svelte';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
 
 	export let columns: Column<T>[];
 	export let data: T[];

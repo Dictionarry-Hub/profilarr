@@ -3,7 +3,7 @@
  * Helpers for importing releases from Arr interactive search into PCD test releases
  */
 
-import { INDEXER_FLAGS } from '#lib/server/sync/mappings.ts';
+import { INDEXER_FLAGS } from '#server/sync/mappings.ts';
 import type { SonarrSeries, SonarrSeason, RadarrRelease, SonarrRelease } from './types.ts';
 
 // =============================================================================

@@ -2,10 +2,10 @@
  * Test setup helpers — create users, login, set API keys, manipulate DB state.
  */
 
-import { TestClient } from '$test-harness/client.ts';
-import { openDb } from '$test-harness/db.ts';
-import { hash } from '$auth/bcrypt.ts';
-import { log } from '$test-harness/log.ts';
+import { TestClient } from './client.ts';
+import { openDb } from './db.ts';
+import { hash } from '#utils/auth/bcrypt.ts';
+import { log } from './log.ts';
 
 /**
  * Create the first user via the /auth/setup form action.

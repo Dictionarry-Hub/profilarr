@@ -1,13 +1,13 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
 import {
 	FETCH_INTERVAL_MS,
 	reconcileFromBulletin,
 	type AnnouncementRecord
-} from '$announcements/index.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import { logger } from '$logger/logger.ts';
+} from '#server/announcements/index.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import { logger } from '#logger/logger.ts';
 
 async function notifyNewAnnouncements(
 	jobId: number,

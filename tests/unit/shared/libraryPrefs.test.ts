@@ -1,11 +1,11 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	parseBooleanPref,
 	parseLibraryDownloadStatusesPref,
 	parseLibrarySortPref,
 	parseStringSetPref
-} from '$shared/utils/libraryPrefs.ts';
+} from '#shared/utils/libraryPrefs.ts';
 
 class LibraryPrefsTest extends BaseTest {
 	runTests(): void {

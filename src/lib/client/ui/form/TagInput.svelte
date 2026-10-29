@@ -4,8 +4,8 @@
 
 <script lang="ts">
 	import X from '@lucide/svelte/icons/x';
-	import Label from '$ui/label/Label.svelte';
-	import { alertStore } from '#lib/client/alerts/store.js';
+	import Label from '#ui/label/Label.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 
 	export let tags: string[] = [];
 	export let placeholder = 'Type and press Enter to add tags';

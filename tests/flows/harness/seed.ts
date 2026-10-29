@@ -20,8 +20,8 @@
 import * as fs from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { git, gitConfigPath } from '$flows/harness/git.ts';
-import { FIXTURES_DIR, SCHEMA_DIR, SOURCE_FILE } from '$flows/harness/paths.ts';
+import { git, gitConfigPath } from './git.ts';
+import { FIXTURES_DIR, SCHEMA_DIR, SOURCE_FILE } from './paths.ts';
 
 export const FIXTURES_NAME = 'Fixtures';
 const FIXTURES_UUID = 'fixtures';

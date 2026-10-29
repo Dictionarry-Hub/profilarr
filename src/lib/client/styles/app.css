@@ -1,20 +1,20 @@
 @import 'tailwindcss';
-@import './styles/fonts.css';
-@import './styles/prose.css';
-@import './styles/scrollbar.css';
-@import './styles/transitions.css';
+@import './fonts.css';
+@import './prose.css';
+@import './scrollbar.css';
+@import './transitions.css';
 
 /* Exclude non-source directories from Tailwind scanning */
-@source not '../dist';
-@source not '../research';
-@source not '../config';
-@source not '../bruno';
-@source not '../docker';
-@source not '../scripts';
-@source not '../docs';
-@source not '../packages';
-@source not '../test-results';
-@source not '../node_modules';
+@source not '../../../../dist';
+@source not '../../../../research';
+@source not '../../../../config';
+@source not '../../../../bruno';
+@source not '../../../../docker';
+@source not '../../../../scripts';
+@source not '../../../../docs';
+@source not '../../../../packages';
+@source not '../../../../test-results';
+@source not '../../../../node_modules';
 
 @custom-variant dark (&:where(.dark, .dark *));
 

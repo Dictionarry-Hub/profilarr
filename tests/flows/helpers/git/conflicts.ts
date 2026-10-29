@@ -10,10 +10,10 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import { FIXTURES_NAME } from '$flows/harness/seed.ts';
-import { waitForAction, type ActionResult } from '$flows/helpers/core/forms.ts';
-import { openDatabase, openTab } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+import { FIXTURES_NAME } from '#flows/harness/seed.ts';
+import { waitForAction, type ActionResult } from '#flows/helpers/core/forms.ts';
+import { openDatabase, openTab } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 /** One field of a simple update op: what it was, what the user set, what upstream has now */
 export interface ConflictField {

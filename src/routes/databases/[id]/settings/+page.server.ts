@@ -1,11 +1,11 @@
 /* eslint-disable profilarr/secret-destination -- the PAT only goes to github.com and the repository URL cannot be changed here */
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { validateUpdateInput, checkNameConflict } from '$pcd/core/validate.ts';
-import { logger } from '$logger/logger.ts';
-import { schedulePcdSyncForDatabase } from '#lib/server/jobs/init.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { validateUpdateInput, checkNameConflict } from '#pcd/core/validate.ts';
+import { logger } from '#logger/logger.ts';
+import { schedulePcdSyncForDatabase } from '#server/jobs/init.ts';
 
 export const actions: Actions = {
 	update: async ({ params, request }) => {

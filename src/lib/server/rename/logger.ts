@@ -4,8 +4,8 @@
  * Stores run history in the database
  */
 
-import { logger } from '$logger/logger.ts';
-import { renameRunsQueries } from '$db/queries/renameRuns.ts';
+import { logger } from '#logger/logger.ts';
+import { renameRunsQueries } from '#db/queries/renameRuns.ts';
 import type { RenameJobLog } from './types.ts';
 
 const SOURCE = 'RenameJob';

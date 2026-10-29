@@ -1,13 +1,13 @@
 import * as fs from 'node:fs/promises';
 import type { LayoutServerLoad } from './$types';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { isParserHealthy } from '#lib/server/utils/arr/parser/client.ts';
-import { config } from '#lib/server/utils/config/config.ts';
-import { build } from '#lib/shared/build.ts';
-import { getVersionStatus, inbox } from '$announcements/index.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { isParserHealthy } from '#arr/parser/client.ts';
+import { config } from '#utils/config/config.ts';
+import { build } from '#shared/build.ts';
+import { getVersionStatus, inbox } from '#server/announcements/index.ts';
+import { generalSettingsQueries } from '#db/queries/generalSettings.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 async function readPendingRestore(): Promise<{ filename: string } | null> {
 	try {

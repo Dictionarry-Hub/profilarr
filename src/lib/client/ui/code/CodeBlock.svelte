@@ -1,14 +1,14 @@
 <script lang="ts">
-	import { tokenize } from '#lib/client/utils/tokenize.js';
-	import { themes, getTheme, type ThemeVariant } from './themes';
-	import { themeStore } from '#lib/client/stores/theme.js';
+	import { tokenize } from '#client/utils/tokenize.ts';
+	import { themes, getTheme, type ThemeVariant } from './themes/index.ts';
+	import { themeStore } from '#stores/theme.ts';
 	import { browser } from '$app/env';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Check from '@lucide/svelte/icons/check';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import Label from '$ui/label/Label.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import Label from '#ui/label/Label.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import { copyToClipboard } from '#client/utils/clipboard.ts';
 
 	export let code: string = '';
 	export let language: string = 'sql';

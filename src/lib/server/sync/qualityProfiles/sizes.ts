@@ -8,11 +8,11 @@
  * nothing about versions; callers decide whether to use them.
  */
 
-import type { ArrQualityProfileItem, ArrQualityProfileReadItem } from '$arr/types.ts';
+import type { ArrQualityProfileItem, ArrQualityProfileReadItem } from '#arr/types.ts';
 import type {
 	MappedQualityDefinition,
 	QualityDefinitionManagedFields
-} from '../mediaManagement/transformer.ts';
+} from '#server/sync/mediaManagement/transformer.ts';
 
 export type QualitySizes = QualityDefinitionManagedFields;
 

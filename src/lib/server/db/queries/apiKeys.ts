@@ -1,8 +1,8 @@
-import { db } from '../db.ts';
-import { hash } from '$auth/bcrypt.ts';
-import { generateApiKey } from '$auth/apiKey.ts';
-import { toUTC } from '$shared/utils/dates.ts';
-import { parseApiKeyPermissions, type ApiKeyPermissions } from '$shared/apiKeys.ts';
+import { db } from '#db/db.ts';
+import { hash } from '#utils/auth/bcrypt.ts';
+import { generateApiKey } from '#utils/auth/apiKey.ts';
+import { toUTC } from '#shared/utils/dates.ts';
+import { parseApiKeyPermissions, type ApiKeyPermissions } from '#shared/apiKeys.ts';
 
 /**
  * Types for api_keys table

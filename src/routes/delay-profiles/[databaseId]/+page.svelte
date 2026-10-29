@@ -1,21 +1,21 @@
 <script lang="ts">
-	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ViewToggle from '$ui/actions/ViewToggle.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import CloneModal from '$ui/modal/CloneModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import Tabs from '#ui/navigation/tabs/Tabs.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ViewToggle from '#ui/actions/ViewToggle.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import CloneModal from '#ui/modal/CloneModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
+	import { createDataPageStore } from '#stores/dataPage.ts';
 	import { goto } from '$app/navigation';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Info from '@lucide/svelte/icons/info';
 	import Plus from '@lucide/svelte/icons/plus';
 	import type { PageData } from './$types';
-	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import { copyToClipboard } from '#client/utils/clipboard.ts';
 
 	export let data: PageData;
 

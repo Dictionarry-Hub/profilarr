@@ -1,5 +1,5 @@
-import type { TelegramConfig, Notification, NotificationSeverity } from '../../types.ts';
-import { getWebhookClient } from '../../base/webhookClient.ts';
+import type { TelegramConfig, Notification, NotificationSeverity } from '#notifications/types.ts';
+import { getWebhookClient } from '#notifications/base/webhookClient.ts';
 
 const TELEGRAM_API = 'https://api.telegram.org';
 const MAX_MESSAGE_LENGTH = 4096;

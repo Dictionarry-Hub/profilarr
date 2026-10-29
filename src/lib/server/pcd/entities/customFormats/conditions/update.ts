@@ -7,16 +7,16 @@
  * - Updating existing conditions
  */
 
-import type { PCDCache } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
 import {
 	writeOperation,
 	recompileCache,
 	type OperationLayer,
 	type WriteResult
-} from '$pcd/index.ts';
-import type { ConditionData } from '$shared/pcd/display.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import { logger } from '$logger/logger.ts';
+} from '#pcd/index.ts';
+import type { ConditionData } from '#shared/pcd/display.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import { logger } from '#logger/logger.ts';
 
 interface UpdateConditionsOptions {
 	databaseId: number;

@@ -5,10 +5,10 @@
 
 import { PCDCache } from './cache.ts';
 import { setCache, getCache, deleteCache, getCachedDatabaseIds } from './registry.ts';
-import type { CacheBuildStats } from '../core/types.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import { logger } from '$logger/logger.ts';
+import type { CacheBuildStats } from '#pcd/core/types.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import { logger } from '#logger/logger.ts';
 
 const AUTO_OVERRIDE_MAX_ROUNDS = 10;
 const autoOverrideLocks = new Set<number>();
@@ -39,7 +39,7 @@ async function autoResolveOverrideConflicts(databaseInstanceId: number): Promise
 	autoOverrideLocks.add(databaseInstanceId);
 
 	try {
-		const { overrideConflict } = await import('$pcd/conflicts/override.ts');
+		const { overrideConflict } = await import('#pcd/conflicts/override.ts');
 
 		await logger.info('Starting automatic override conflict resolution', {
 			source: 'PCDCompiler',

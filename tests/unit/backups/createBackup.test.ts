@@ -3,10 +3,10 @@
  * Tests the creation of compressed backups
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
-import { createBackup } from '../../../src/lib/server/jobs/logic/createBackup.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { createBackup } from '#server/jobs/logic/createBackup.ts';
 import { assertEquals } from '@std/assert';
-import { runCommand } from '$utils/command.ts';
+import { runCommand } from '#utils/command.ts';
 import { mkdir, readFile, readdir, stat as statPath, writeFile } from 'node:fs/promises';
 
 class CreateBackupTest extends BaseTest {

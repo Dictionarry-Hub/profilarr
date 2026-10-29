@@ -1,8 +1,8 @@
-import { db } from '../db.ts';
-import type { DateFormat } from '$shared/utils/dates.ts';
-import type { LandingPage } from '$shared/landingPages.ts';
+import { db } from '#db/db.ts';
+import type { DateFormat } from '#shared/utils/dates.ts';
+import type { LandingPage } from '#shared/landingPages.ts';
 
-export type { DateFormat } from '$shared/utils/dates.ts';
+export type { DateFormat } from '#shared/utils/dates.ts';
 
 /**
  * Types for general_settings table

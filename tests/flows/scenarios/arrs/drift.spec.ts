@@ -9,23 +9,23 @@
  *   the Drift tab's data and the Sync page's progress chips.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
-import type { JobRun } from '$flows/helpers/core/jobs.ts';
-import { openTab } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { arrInstance } from '$flows/helpers/sync/arrs.ts';
-import { driftState, enableDrift, runDriftCheck } from '$flows/helpers/sync/drift.ts';
-import { expectedQualitySizes, expectedScores } from '$flows/helpers/sync/expected.ts';
-import type { FakeArr, Resource } from '$flows/helpers/sync/fakeArr.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
+import type { JobRun } from '#flows/helpers/core/jobs.ts';
+import { openTab } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { arrInstance } from '#flows/helpers/sync/arrs.ts';
+import { driftState, enableDrift, runDriftCheck } from '#flows/helpers/sync/drift.ts';
+import { expectedQualitySizes, expectedScores } from '#flows/helpers/sync/expected.ts';
+import type { FakeArr, Resource } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	setUpProfileSync,
 	syncConfig,
 	syncSection,
 	type SectionProgress,
 	type SyncSection
-} from '$flows/helpers/sync/sync.ts';
-import { hasCapability, targetsWith, type Target } from '$flows/helpers/sync/targets.ts';
+} from '#flows/helpers/sync/sync.ts';
+import { hasCapability, targetsWith, type Target } from '#flows/helpers/sync/targets.ts';
 
 /** The fixtures profile written for a target's app, e.g. "Sonarr Profile" */
 const profileFor = (target: Target) => fixture.qualityProfile(`${target.label} Profile`);

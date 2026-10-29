@@ -5,9 +5,9 @@
  * Used by clone (serialize → rename → deserialize) and future import.
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { getCache, type OperationLayer } from '$pcd/index.ts';
-import { recompileCache } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { getCache, type OperationLayer } from '#pcd/index.ts';
+import { recompileCache } from '#pcd/index.ts';
 import type {
 	PortableDelayProfile,
 	PortableRegularExpression,
@@ -17,7 +17,7 @@ import type {
 	PortableSonarrNaming,
 	PortableMediaSettings,
 	PortableQualityDefinitions
-} from '$shared/pcd/portable.ts';
+} from '#shared/pcd/portable.ts';
 import * as delayProfileQueries from './delayProfiles/index.ts';
 import * as regexQueries from './regularExpressions/index.ts';
 import * as cfQueries from './customFormats/index.ts';

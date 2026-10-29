@@ -1,7 +1,7 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { resolveRadarrInitialReleaseDate } from '../../../src/lib/server/utils/arr/releaseDates.ts';
-import type { RadarrMovie } from '../../../src/lib/server/utils/arr/types.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { resolveRadarrInitialReleaseDate } from '#arr/releaseDates.ts';
+import type { RadarrMovie } from '#arr/types.ts';
 
 function movie(dates: Partial<RadarrMovie>): RadarrMovie {
 	return {

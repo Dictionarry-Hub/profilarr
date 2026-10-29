@@ -1,14 +1,14 @@
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
-import { RadarrClient } from '$utils/arr/clients/radarr.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
+import { RadarrClient } from '#arr/clients/radarr.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
 import type {
 	ArrQualityProfile,
 	ArrTag,
 	RadarrMovie,
 	RadarrMovieFile,
 	SonarrSeries
-} from '$utils/arr/types.ts';
+} from '#arr/types.ts';
 import {
 	evaluateGroup,
 	evaluateRule,
@@ -20,8 +20,8 @@ import {
 	type FilterGroup,
 	type FilterRule,
 	type UpgradeAppType
-} from '$shared/upgrades/filters.ts';
-import { getSelector } from '$shared/upgrades/selectors.ts';
+} from '#shared/upgrades/filters.ts';
+import { getSelector } from '#shared/upgrades/selectors.ts';
 import { hasFilterTag, resolveTagLabel } from './cooldown.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
 import {

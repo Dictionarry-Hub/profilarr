@@ -15,28 +15,28 @@
 	import Eye from '@lucide/svelte/icons/eye';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import ShieldCheck from '@lucide/svelte/icons/shield-check';
-	import { parseUTC, formatDateTime, formatDate } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '#lib/client/stores/timezone.ts';
-	import Button from '$ui/button/Button.svelte';
-	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
+	import { parseUTC, formatDateTime, formatDate } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
+	import Button from '#ui/button/Button.svelte';
+	import ExpandableCard from '#ui/card/ExpandableCard.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
 	import ConfirmIdentityModal from './components/ConfirmIdentityModal.svelte';
-	import InlineCode from '$ui/code/InlineCode.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '$alerts/store';
-	import type { Column } from '$ui/table/types';
-	import { FEATURES } from '$shared/features';
+	import InlineCode from '#ui/code/InlineCode.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import { FEATURES } from '#shared/features.ts';
 	import {
 		API_KEYS_DOCS_URL,
 		ENV_API_KEY_NAME,
 		apiKeyAccessEntries,
 		type ApiKeyAccessEntry
-	} from '$shared/apiKeys';
+	} from '#shared/apiKeys.ts';
 
 	export let data: PageData;
 	export let form: ActionData;

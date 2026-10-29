@@ -1,6 +1,6 @@
-import { db } from '../db.ts';
-import { toUTC } from '$shared/utils/dates.ts';
-import type { JobQueueRecord, JobSource, JobStatus, JobType } from '$jobs/queueTypes.ts';
+import { db } from '#db/db.ts';
+import { toUTC } from '#shared/utils/dates.ts';
+import type { JobQueueRecord, JobSource, JobStatus, JobType } from '#server/jobs/queueTypes.ts';
 
 interface JobQueueRow {
 	id: number;

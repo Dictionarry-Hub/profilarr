@@ -1,10 +1,10 @@
 /**
  * Checks for the readers in helpers/entities/qualityProfiles.ts.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { openEntity, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
-import { qualityProfilePages } from '$flows/helpers/entities/qualityProfiles.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
+import { openEntity, openSidebarPage, openTab } from '#flows/helpers/core/nav.ts';
+import { qualityProfilePages } from './qualityProfiles.ts';
 
 const expected = fixture.qualityProfile('Radarr Profile');
 

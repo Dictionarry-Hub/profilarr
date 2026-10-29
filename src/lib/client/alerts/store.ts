@@ -1,6 +1,6 @@
 import { get, writable } from 'svelte/store';
-import { uuid } from '$shared/utils/uuid';
-import { alertSettingsStore } from './settings';
+import { uuid } from '#shared/utils/uuid.ts';
+import { alertSettingsStore } from './settings.ts';
 
 export type AlertType = 'success' | 'error' | 'warning' | 'info';
 

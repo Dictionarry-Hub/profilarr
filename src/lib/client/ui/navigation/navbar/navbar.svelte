@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AccentPicker from './accentPicker.svelte';
 	import ThemeToggle from './themeToggle.svelte';
-	import HelpButton from '$ui/help/HelpButton.svelte';
+	import HelpButton from '#ui/help/HelpButton.svelte';
 	import Menu from '@lucide/svelte/icons/menu';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import ChevronRight from '@lucide/svelte/icons/chevron-right';
@@ -17,14 +17,14 @@
 	import Megaphone from '@lucide/svelte/icons/megaphone';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
 	import type { Component } from 'svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import { mobileNavOpen } from '$stores/mobileNav';
-	import { sidebarCollapsed } from '$stores/sidebar';
-	import { navIconStore } from '$stores/navIcons';
-	import { cutscene } from '#lib/client/cutscene/store.js';
-	import { page } from '$stores/page';
-	import logo from '$assets/logo-512.png';
+	import Button from '#ui/button/Button.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import { mobileNavOpen } from '#stores/mobileNav.ts';
+	import { sidebarCollapsed } from '#stores/sidebar.ts';
+	import { navIconStore } from '#stores/navIcons.ts';
+	import { cutscene } from '#client/cutscene/store.ts';
+	import { page } from '#stores/page.ts';
+	import logo from '#client/assets/logo-512.png';
 
 	export let unreadAnnouncements: number = 0;
 

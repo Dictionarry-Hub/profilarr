@@ -1,14 +1,18 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { config } from '$config';
-import { getDiscoveryDocument, exchangeCode, verifyAndDecodeIdToken } from '$auth/oidc.ts';
-import { usersQueries } from '$db/queries/users.ts';
-import { sessionsQueries } from '$db/queries/sessions.ts';
-import { authSettingsQueries } from '$db/queries/authSettings.ts';
-import { getClientIp } from '$auth/network.ts';
-import { parseUserAgent } from '$auth/userAgent.ts';
-import { evaluateReauth, REAUTH_FAILED_PATH, REAUTH_RETURN_PATH } from '$auth/confirmation.ts';
-import { logger } from '$logger/logger.ts';
+import { config } from '#utils/config/config.ts';
+import { getDiscoveryDocument, exchangeCode, verifyAndDecodeIdToken } from '#utils/auth/oidc.ts';
+import { usersQueries } from '#db/queries/users.ts';
+import { sessionsQueries } from '#db/queries/sessions.ts';
+import { authSettingsQueries } from '#db/queries/authSettings.ts';
+import { getClientIp } from '#utils/auth/network.ts';
+import { parseUserAgent } from '#utils/auth/userAgent.ts';
+import {
+	evaluateReauth,
+	REAUTH_FAILED_PATH,
+	REAUTH_RETURN_PATH
+} from '#utils/auth/confirmation.ts';
+import { logger } from '#logger/logger.ts';
 
 export const GET: RequestHandler = async (event) => {
 	const { url, cookies, request } = event;

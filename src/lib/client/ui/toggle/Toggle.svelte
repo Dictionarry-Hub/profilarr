@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import Check from '@lucide/svelte/icons/check';
-	import Tooltip from '#lib/client/ui/tooltip/Tooltip.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 
 	type NamedColor = 'accent' | 'amber' | 'green' | 'red' | 'neutral' | 'blue';
 

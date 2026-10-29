@@ -4,14 +4,14 @@
  */
 
 import type { RequestEvent } from '@sveltejs/kit';
-import { config } from '$config';
-import { usersQueries, type User } from '$db/queries/users.ts';
-import { sessionsQueries, type Session } from '$db/queries/sessions.ts';
-import { authSettingsQueries } from '$db/queries/authSettings.ts';
+import { config } from '#utils/config/config.ts';
+import { usersQueries, type User } from '#db/queries/users.ts';
+import { sessionsQueries, type Session } from '#db/queries/sessions.ts';
+import { authSettingsQueries } from '#db/queries/authSettings.ts';
 import { getClientIp } from './network.ts';
 import { resolveApiKey, type ResolvedApiKey } from './apiKeyAuth.ts';
 import { needsSetup } from './loginOptions.ts';
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 export { isPublicPath } from './publicPaths.ts';
 
 /**

@@ -2,9 +2,9 @@
  * AI client for OpenAI-compatible APIs
  */
 
-import { aiSettingsQueries } from '$db/queries/aiSettings.ts';
-import { logger } from '$logger/logger.ts';
-import { BaseHttpClient } from '../http/client.ts';
+import { aiSettingsQueries } from '#db/queries/aiSettings.ts';
+import { logger } from '#logger/logger.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
 
 interface ChatMessage {
 	role: 'system' | 'user' | 'assistant';

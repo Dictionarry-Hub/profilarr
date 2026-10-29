@@ -1,10 +1,10 @@
-import { getCache } from '$pcd/index.ts';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import type { RadarrMediaSettingsRow } from '$shared/pcd/display.ts';
+import { getCache } from '#pcd/index.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import type { RadarrMediaSettingsRow } from '#shared/pcd/display.ts';
 import { getRadarrByName, getSonarrByName } from './read.ts';
 import { updateRadarrMediaSettings, updateSonarrMediaSettings } from './update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, followRenameChain, valuesEqual } from '$pcd/conflicts/overrideUtils.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, followRenameChain, valuesEqual } from '#pcd/conflicts/overrideUtils.ts';
 
 type SettingsTable = 'radarr_media_settings' | 'sonarr_media_settings';
 

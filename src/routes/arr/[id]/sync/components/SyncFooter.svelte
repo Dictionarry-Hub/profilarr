@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Button from '$ui/button/Button.svelte';
-	import CronInput from '$ui/cron/CronInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import CronInput from '#ui/cron/CronInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import Save from '@lucide/svelte/icons/save';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';

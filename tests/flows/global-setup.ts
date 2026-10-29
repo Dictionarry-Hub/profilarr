@@ -9,11 +9,11 @@ import { randomUUID } from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { startApp } from '$flows/harness/app.ts';
-import { RUN_ID_ENV, removeRunServices } from '$flows/harness/docker.ts';
-import { GOLDEN_DIR_ENV } from '$flows/harness/paths.ts';
-import { FIXTURES_NAME, seedFixtures } from '$flows/harness/seed.ts';
-import { TLS_DIR_ENV, createCertificate } from '$flows/harness/tls.ts';
+import { startApp } from './harness/app.ts';
+import { RUN_ID_ENV, removeRunServices } from './harness/docker.ts';
+import { GOLDEN_DIR_ENV } from './harness/paths.ts';
+import { FIXTURES_NAME, seedFixtures } from './harness/seed.ts';
+import { TLS_DIR_ENV, createCertificate } from './harness/tls.ts';
 
 export default async function globalSetup(): Promise<() => Promise<void>> {
 	// A fresh folder per run; workers read its path from the environment

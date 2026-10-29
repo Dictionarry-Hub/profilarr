@@ -7,9 +7,9 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { Database } from '$db/sqlite.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { config } from '$config';
+import { Database } from '#db/sqlite.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { config } from '#utils/config/config.ts';
 
 const SENTINEL_NAME = '.restore-pending';
 
@@ -71,7 +71,7 @@ setup(async () => {
 	baseDir = await Deno.makeTempDir({ prefix: 'profilarr-restore-local-paths-' });
 	config.setBasePath(baseDir);
 	await Deno.mkdir(config.paths.data, { recursive: true });
-	({ applyPendingRestore } = await import('$utils/backup/applyPending.ts'));
+	({ applyPendingRestore } = await import('#utils/backup/applyPending.ts'));
 });
 
 teardown(async () => {

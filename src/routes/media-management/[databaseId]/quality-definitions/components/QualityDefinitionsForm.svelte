@@ -1,34 +1,34 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { tick } from 'svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import RangeScale from '$ui/form/RangeScale.svelte';
-	import type { Marker } from '$ui/form/RangeScale.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import type { Column } from '$ui/table/types';
-	import { alertStore } from '$alerts/store';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import SyncPromptModal from '#ui/modal/SyncPromptModal.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import RangeScale from '#ui/form/RangeScale.svelte';
+	import type { Marker } from '#ui/form/RangeScale.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import Info from '@lucide/svelte/icons/info';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
 
 	let showInfoModal = false;
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import { clickOutside } from '#lib/client/utils/clickOutside.js';
-	import { isDirty, initEdit, initCreate, update } from '#lib/client/stores/dirty.js';
-	import type { ArrType } from '$shared/pcd/types.ts';
-	import type { QualityDefinitionsConfig, QualityDefinitionEntry } from '$shared/pcd/display.ts';
-	import type { AffectedArr } from '$shared/sync/types.ts';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import { clickOutside } from '#client/utils/clickOutside.ts';
+	import { isDirty, initEdit, initCreate, update } from '#stores/dirty.ts';
+	import type { ArrType } from '#shared/pcd/types.ts';
+	import type { QualityDefinitionsConfig, QualityDefinitionEntry } from '#shared/pcd/display.ts';
+	import type { AffectedArr } from '#shared/sync/types.ts';
 
 	// Resolution grouping for quality definitions UI
 	type ResolutionGroup = 'SD' | '720p' | '1080p' | '2160p' | 'Prereleases' | 'Other';

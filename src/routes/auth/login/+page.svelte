@@ -3,11 +3,11 @@
 	import { enhance } from '$app/forms';
 	import LogIn from '@lucide/svelte/icons/log-in';
 	import KeyRound from '@lucide/svelte/icons/key-round';
-	import Button from '$ui/button/Button.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '$alerts/store';
-	import logo from '$assets/logo-512.png';
+	import Button from '#ui/button/Button.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import logo from '#client/assets/logo-512.png';
 
 	export let data: PageData;
 	export let form: ActionData;

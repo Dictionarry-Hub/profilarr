@@ -2,15 +2,9 @@
  * - Covers: createAccount, signIn, signInWithSso and signOut in accounts.ts.
  * - Every test runs an app with `AUTH=on`.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import {
-	FLOWS_USER,
-	createAccount,
-	signIn,
-	signInWithSso,
-	signOut
-} from '$flows/helpers/auth/accounts.ts';
-import { securityPages } from '$flows/helpers/auth/security.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { FLOWS_USER, createAccount, signIn, signInWithSso, signOut } from './accounts.ts';
+import { securityPages } from './security.ts';
 
 test.describe('local accounts', () => {
 	test.use({ appEnv: { AUTH: 'on' } });

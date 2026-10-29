@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
+	import type { QualityProfileTableRow } from '#shared/pcd/display.ts';
 	import BookOpenText from '@lucide/svelte/icons/book-open-text';
 	import Gauge from '@lucide/svelte/icons/gauge';
 	import Earth from '@lucide/svelte/icons/earth';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
-	import { renderMarkdown } from '$shared/utils/markdown';
-	import { FEATURES } from '$shared/features.ts';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
+	import { FEATURES } from '#shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
 	export let databaseId: number;

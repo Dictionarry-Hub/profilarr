@@ -5,8 +5,8 @@
 import { test } from 'vitest';
 import { assert, assertEquals, assertStrictEquals } from '@std/assert';
 import { Buffer } from 'node:buffer';
-import { GIT_ENV } from '$utils/git/exec.ts';
-import { githubAuthHeader, withGitAuth } from '$utils/git/auth.ts';
+import { GIT_ENV } from '#utils/git/exec.ts';
+import { githubAuthHeader, withGitAuth } from '#utils/git/auth.ts';
 
 const TOKEN = 'ghp_exampleToken123';
 

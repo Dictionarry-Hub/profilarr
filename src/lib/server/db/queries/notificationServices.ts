@@ -1,4 +1,4 @@
-import { db } from '../db.ts';
+import { db } from '#db/db.ts';
 
 /**
  * Types for notification_services table

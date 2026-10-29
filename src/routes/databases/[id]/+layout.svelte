@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
+	import Tabs from '#ui/navigation/tabs/Tabs.svelte';
 	import GitBranch from '@lucide/svelte/icons/git-branch';
 	import History from '@lucide/svelte/icons/rotate-ccw-clock';
 	import GitPullRequestClosed from '@lucide/svelte/icons/git-pull-request-closed';
@@ -7,8 +7,8 @@
 	import Settings from '@lucide/svelte/icons/settings';
 	import FileCog from '@lucide/svelte/icons/file-cog';
 	import Megaphone from '@lucide/svelte/icons/megaphone';
-	import { page } from '$stores/page';
-	import { FEATURES } from '#lib/shared/features.js';
+	import { page } from '#stores/page.ts';
+	import { FEATURES } from '#shared/features.ts';
 
 	$: database = $page.data.database;
 	$: currentPath = $page.url.pathname;

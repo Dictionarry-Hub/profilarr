@@ -1,5 +1,5 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	changeUnit,
 	clearOriginals,
@@ -13,7 +13,7 @@ import {
 	toMinutes,
 	type DurationField,
 	type DurationFieldInfo
-} from '$shared/utils/duration.ts';
+} from '#shared/utils/duration.ts';
 
 type Field = 'usenet' | 'torrent';
 

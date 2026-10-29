@@ -1,5 +1,5 @@
 import { db } from './db.ts';
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 
 // Static imports for all migrations
 import { migration as migration001 } from './migrations/001_create_arr_instances.ts';

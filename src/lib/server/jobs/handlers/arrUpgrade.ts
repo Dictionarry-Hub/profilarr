@@ -1,11 +1,11 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { upgradeConfigsQueries } from '$db/queries/upgradeConfigs.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import type { FilterConfig } from '$shared/upgrades/filters.ts';
-import { advanceShuffleRound, processUpgradeConfig } from '#lib/server/upgrades/processor.ts';
-import { calculateNextRun } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { upgradeConfigsQueries } from '#db/queries/upgradeConfigs.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import type { FilterConfig } from '#shared/upgrades/filters.ts';
+import { advanceShuffleRound, processUpgradeConfig } from '#server/upgrades/processor.ts';
+import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
 
 const upgradeRunHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);

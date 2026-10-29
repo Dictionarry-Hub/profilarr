@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
 
 class ArrUrlTest extends BaseTest {
 	runTests(): void {

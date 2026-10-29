@@ -4,9 +4,9 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { logger } from '$logger/logger.ts';
-import { ManifestValidationError } from '../core/errors.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { logger } from '#logger/logger.ts';
+import { ManifestValidationError } from '#pcd/core/errors.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 export interface Manifest {
 	name: string;

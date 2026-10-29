@@ -6,7 +6,7 @@ import {
 	RESOLUTIONS,
 	SOURCES,
 	type SyncArrType
-} from '$sync/mappings.ts';
+} from '#server/sync/mappings.ts';
 import type {
 	DriftDiff,
 	DriftDisplayChange,
@@ -15,10 +15,10 @@ import type {
 	DriftDisplayQualityItem,
 	DriftDisplayTone,
 	DriftDisplayValue
-} from '$shared/drift.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { formatMinutes } from '$shared/utils/duration.ts';
+} from '#shared/drift.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { formatMinutes } from '#shared/utils/duration.ts';
 import { buildExpectedCustomFormatsPerDatabase } from './customFormats.ts';
 
 interface CustomFormatDiff {

@@ -14,30 +14,26 @@
 		UpgradeSelectionItem,
 		UpgradeOriginalEpisode,
 		UpgradeNewRelease
-	} from '#lib/server/upgrades/types.ts';
-	import {
-		createSearchStore,
-		getPersistentSearchStore,
-		type SearchStore
-	} from '#lib/client/stores/search.js';
+	} from '#server/upgrades/types.ts';
+	import { createSearchStore, getPersistentSearchStore, type SearchStore } from '#stores/search.ts';
 	import type { Readable } from 'svelte/store';
-	import { page } from '$stores/page';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
-	import Score from '$ui/arr/Score.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import type { Column } from '$ui/table/types';
-	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.js';
-	import { serverTimezone } from '#lib/client/stores/timezone.js';
+	import { page } from '#stores/page.ts';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Pagination from '#ui/navigation/pagination/Pagination.svelte';
+	import Score from '#ui/arr/Score.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import { formatSmartDateTime } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;

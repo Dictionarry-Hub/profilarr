@@ -2,15 +2,15 @@
  * Tests for announcement visibility logic.
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals } from '@std/assert';
 import {
 	compareVersions,
 	isVisible,
 	satisfiesRange,
 	type VisibilityContext
-} from '$announcements/profilarr/filter.ts';
-import type { AnnouncementRecord } from '$announcements/profilarr/types.ts';
+} from '#server/announcements/profilarr/filter.ts';
+import type { AnnouncementRecord } from '#server/announcements/profilarr/types.ts';
 
 function makeAnnouncement(overrides: Partial<AnnouncementRecord> = {}): AnnouncementRecord {
 	return {

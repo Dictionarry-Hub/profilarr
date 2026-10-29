@@ -6,17 +6,17 @@
 	import Edit3 from '@lucide/svelte/icons/pen-line';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import { goto } from '$app/navigation';
-	import { renderMarkdown } from '$shared/utils/markdown.ts';
-	import Button from '$ui/button/Button.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import EmptyState from '$ui/state/EmptyState.svelte';
-	import DateTime from '$ui/datetime/DateTime.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
+	import Button from '#ui/button/Button.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import EmptyState from '#ui/state/EmptyState.svelte';
+	import DateTime from '#ui/datetime/DateTime.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import WithdrawAnnouncementModal from './components/WithdrawAnnouncementModal.svelte';
-	import type { Column } from '$ui/table/types';
+	import type { Column } from '#ui/table/types.ts';
 
 	export let data: PageData;
 

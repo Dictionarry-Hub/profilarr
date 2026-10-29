@@ -1,6 +1,6 @@
 <script lang="ts">
-	import NotificationServiceForm from '../components/NotificationServiceForm.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import NotificationServiceForm from '#routes/settings/notifications/components/NotificationServiceForm.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 </script>
 
 <PageMeta title="Notification Service · New" />

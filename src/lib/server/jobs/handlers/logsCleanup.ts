@@ -1,10 +1,10 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { logSettingsQueries } from '$db/queries/logSettings.ts';
-import { config } from '$config';
-import { cleanupLogs } from '../logic/cleanupLogs.ts';
-import { calculateNextRunFromSchedule } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { logSettingsQueries } from '#db/queries/logSettings.ts';
+import { config } from '#utils/config/config.ts';
+import { cleanupLogs } from '#server/jobs/logic/cleanupLogs.ts';
+import { calculateNextRunFromSchedule } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
 
 const logsCleanupHandler: JobHandler = async (job) => {
 	const settings = logSettingsQueries.get();

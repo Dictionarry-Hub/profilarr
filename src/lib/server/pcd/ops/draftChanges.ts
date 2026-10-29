@@ -1,6 +1,6 @@
-import type { OperationType } from '../core/types.ts';
-import type { QualityDefinitionEntry } from '$shared/pcd/display.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
+import type { OperationType } from '#pcd/core/types.ts';
+import type { QualityDefinitionEntry } from '#shared/pcd/display.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
 
 type ParsedMetadata = {
 	operation?: OperationType;

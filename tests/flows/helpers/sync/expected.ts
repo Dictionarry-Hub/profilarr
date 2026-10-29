@@ -16,7 +16,7 @@ import {
 	type FixtureDelayProfile,
 	type FixtureQualityDefinitions,
 	type FixtureQualityProfile
-} from '$flows/helpers/core/fixtureData.ts';
+} from '#flows/helpers/core/fixtureData.ts';
 
 /** Fixture naming fields to the Arr's naming field names, per Arr */
 export const NAMING_FIELDS: Record<ArrType, Record<string, string>> = {

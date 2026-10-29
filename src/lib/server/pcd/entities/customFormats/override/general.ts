@@ -1,15 +1,15 @@
-import { getCache } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import { general as readCustomFormatGeneral } from '../general/read.ts';
-import { updateGeneral } from '../general/update.ts';
-import { create as createCustomFormat } from '../create.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
+import { getCache } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import { general as readCustomFormatGeneral } from '#entities/customFormats/general/read.ts';
+import { updateGeneral } from '#entities/customFormats/general/update.ts';
+import { create as createCustomFormat } from '#entities/customFormats/create.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
 import {
 	getDesiredTo,
 	normalizeTags,
 	normalizeText,
 	tagsEqual
-} from '$pcd/conflicts/overrideUtils.ts';
+} from '#pcd/conflicts/overrideUtils.ts';
 import { resolveFormatName } from './resolve.ts';
 
 function resolveBoolean(value: unknown, fallback: boolean): boolean {

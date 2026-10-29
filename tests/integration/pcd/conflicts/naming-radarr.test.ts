@@ -3,11 +3,11 @@
  */
 
 import { assert, assertEquals, assertExists, assertStringIncludes } from '@std/assert';
-import { startServer, stopServer } from '$test-harness/server.ts';
-import { openDb } from '$test-harness/db.ts';
-import { run, setup, teardown, test } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { base } from '../harness/fixtures.ts';
+import { startServer, stopServer } from '#tests/harness/server.ts';
+import { openDb } from '#tests/harness/db.ts';
+import { run, setup, teardown, test } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { base } from '#integration/pcd/harness/fixtures.ts';
 import {
 	compilePcd,
 	insertOp,
@@ -20,8 +20,8 @@ import {
 	type OpRow,
 	type PcdTestContext,
 	type SeedOperation
-} from '../harness/pcd.ts';
-import { VALID_RADARR_NAMING_DEFAULTS, write } from '../harness/write.ts';
+} from '#integration/pcd/harness/pcd.ts';
+import { VALID_RADARR_NAMING_DEFAULTS, write } from '#integration/pcd/harness/write.ts';
 
 const PORT = PORTS.pcd.conflictsNamingRadarr;
 const ORIGIN = `http://localhost:${PORT}`;

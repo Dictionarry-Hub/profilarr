@@ -1,11 +1,11 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { cache } from '$cache/cache.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
-import type { SonarrLibraryItem } from '$utils/arr/types.ts';
-import { getProfilarrProfileNames } from '#lib/server/sync/libraryHelpers.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { cache } from '#utils/cache/cache.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import type { SonarrLibraryItem } from '#arr/types.ts';
+import { getProfilarrProfileNames } from '#server/sync/libraryHelpers.ts';
+import { logger } from '#logger/logger.ts';
 
 const MANUAL_CACHE_TTL = 86400;
 

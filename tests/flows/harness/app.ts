@@ -10,10 +10,10 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { gitConfigPath } from '$flows/harness/git.ts';
-import { APP_BINARY, goldenDir } from '$flows/harness/paths.ts';
-import { freePort } from '$flows/harness/ports.ts';
-import { relinkDatabases } from '$flows/harness/seed.ts';
+import { gitConfigPath } from './git.ts';
+import { APP_BINARY, goldenDir } from './paths.ts';
+import { freePort } from './ports.ts';
+import { relinkDatabases } from './seed.ts';
 
 export interface App {
 	url: string;

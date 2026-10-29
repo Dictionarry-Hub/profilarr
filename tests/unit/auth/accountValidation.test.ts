@@ -5,8 +5,8 @@
 
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { Database } from '$db/sqlite.ts';
-import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
+import { Database } from '#db/sqlite.ts';
+import { isOidcUsername, validateNewLocalAccount } from '#utils/auth/loginOptions.ts';
 
 // --- validateNewLocalAccount ---
 

@@ -6,10 +6,10 @@
  * extract TMDB/TVDB IDs → match against library → delete.
  */
 
-import type { BaseArrClient } from '$utils/arr/base.ts';
-import { RadarrClient } from '$utils/arr/clients/radarr.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { logger } from '$logger/logger.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import { RadarrClient } from '#arr/clients/radarr.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { logger } from '#logger/logger.ts';
 
 const SOURCE = 'EntityCleanup';
 

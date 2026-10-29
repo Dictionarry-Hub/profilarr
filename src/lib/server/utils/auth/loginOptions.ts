@@ -3,7 +3,7 @@
  * open, and which accounts are SSO accounts.
  */
 
-import type { AuthMode } from '$config';
+import type { AuthMode } from '#utils/config/config.ts';
 
 /** SSO accounts are stored as `oidc:<sub>`. Matches SQL `LIKE 'oidc:%'`. */
 const OIDC_USERNAME_PREFIX = /^oidc:/i;

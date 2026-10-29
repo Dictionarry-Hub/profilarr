@@ -2,10 +2,10 @@
  * Update media settings config operations
  */
 
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd/display.ts';
-import { uuid } from '$shared/utils/uuid.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '#shared/pcd/display.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 import type { CompiledQuery } from 'kysely';
 
 export interface UpdateMediaSettingsInput {

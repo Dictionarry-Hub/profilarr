@@ -1,5 +1,5 @@
-import type { Notification, NotificationBlock } from '../types.ts';
-import type { DriftDisplayEntity } from '$shared/drift.ts';
+import type { Notification, NotificationBlock } from '#notifications/types.ts';
+import type { DriftDisplayEntity } from '#shared/drift.ts';
 
 export interface ArrDriftDetectedNotificationParams {
 	instanceName: string;

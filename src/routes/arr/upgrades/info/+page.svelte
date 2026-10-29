@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { getFilterFields, filterModes, type FilterField } from '$shared/upgrades/filters';
-	import { selectors } from '$shared/upgrades/selectors';
+	import { getFilterFields, filterModes, type FilterField } from '#shared/upgrades/filters.ts';
+	import { selectors } from '#shared/upgrades/selectors.ts';
 	import ArrowLeft from '@lucide/svelte/icons/arrow-left';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import type { Column } from '$ui/table/types';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import type { Column } from '#ui/table/types.ts';
 
 	const radarrFields = getFilterFields('radarr');
 	const sonarrFields = getFilterFields('sonarr');

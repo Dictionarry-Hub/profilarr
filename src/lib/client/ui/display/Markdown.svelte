@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { renderMarkdown } from '$shared/utils/markdown';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
 
 	export let content: string | null = null;
 	export let inline: boolean = true;

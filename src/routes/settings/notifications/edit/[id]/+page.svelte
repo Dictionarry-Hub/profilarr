@@ -1,6 +1,6 @@
 <script lang="ts">
-	import NotificationServiceForm from '../../components/NotificationServiceForm.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import NotificationServiceForm from '#routes/settings/notifications/components/NotificationServiceForm.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

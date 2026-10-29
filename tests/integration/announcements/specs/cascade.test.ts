@@ -13,9 +13,9 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { run, setup, teardown, test } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
+import { run, setup, teardown, test } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
 import {
 	countAnnouncements,
 	countAnnouncementsFor,
@@ -23,7 +23,7 @@ import {
 	deleteDatabaseInstance,
 	insertAnnouncement,
 	tryInsertOrphanAnnouncement
-} from '../harness/setup.ts';
+} from '#integration/announcements/harness/setup.ts';
 
 const PORT = PORTS.announcements.cascade;
 

@@ -8,17 +8,17 @@
  * This file wires it together with client creation, logging, and notifications.
  */
 
-import { arrClientOptionsFromInstance, createArrClient } from '#lib/server/utils/arr/factory.ts';
-import type { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
-import type { ArrCommand } from '#lib/server/utils/arr/types.ts';
-import type { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
-import type { RenameSettings } from '$db/queries/arrRenameSettings.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import type { RadarrClient } from '#arr/clients/radarr.ts';
+import type { ArrCommand } from '#arr/types.ts';
+import type { SonarrClient } from '#arr/clients/sonarr.ts';
+import type { RenameSettings } from '#db/queries/arrRenameSettings.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
 import type { RenameJobLog, LibrarySnapshot } from './types.ts';
 import { logRenameRun, logRenameError } from './logger.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import { logger } from '$logger/logger.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import { logger } from '#logger/logger.ts';
 
 import {
 	createLog,

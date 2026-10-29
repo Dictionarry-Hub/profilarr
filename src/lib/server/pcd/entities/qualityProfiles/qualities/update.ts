@@ -2,10 +2,10 @@
  * Update quality profile qualities
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { type OperationLayer, writeOperation } from '$pcd/index.ts';
-import type { OrderedItem } from '$shared/pcd/display.ts';
-import { logger } from '$logger/logger.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { type OperationLayer, writeOperation } from '#pcd/index.ts';
+import type { OrderedItem } from '#shared/pcd/display.ts';
+import { logger } from '#logger/logger.ts';
 import { qualities as readQualities } from './read.ts';
 import type { CompiledQuery } from 'kysely';
 

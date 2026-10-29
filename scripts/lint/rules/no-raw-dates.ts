@@ -10,7 +10,7 @@
  *    seconds, so a time later in the current second compares as reached.
  *
  * 2. Route `.svelte` files: raw locale date methods and raw `new Date(x)` for
- *    display are banned. Use the display functions from `$shared/utils/dates`.
+ *    display are banned. Use the display functions from `#shared/utils/dates.ts`.
  *
  * Both checks read source lines, so they also look inside SQL strings.
  */
@@ -38,8 +38,8 @@ const RAW_DATE_DISPLAY_RE = /\bnew Date\([^)]+\)\s*\}/;
 const SCRIPT_OPEN_RE = /^<script\b/;
 const SCRIPT_CLOSE_RE = /^<\/script>/;
 
-const SUGGESTION_SCRIPT = 'use formatDateTime() or formatDate() from $shared/utils/dates';
-const SUGGESTION_TEMPLATE = 'use <DateTime value={...} /> from $ui/datetime/DateTime.svelte';
+const SUGGESTION_SCRIPT = 'use formatDateTime() or formatDate() from #shared/utils/dates.ts';
+const SUGGESTION_TEMPLATE = 'use <DateTime value={...} /> from #ui/datetime/DateTime.svelte';
 
 const rule: Rule.RuleModule = {
 	meta: {

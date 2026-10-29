@@ -2,7 +2,7 @@
  * Backup notification definitions
  */
 
-import type { Notification, NotificationBlock } from '../types.ts';
+import type { Notification, NotificationBlock } from '#notifications/types.ts';
 
 export interface BackupSuccessParams {
 	filename: string;

@@ -1,8 +1,8 @@
-import type { Database } from '$db/sqlite.ts';
-import type { ParsedOpMetadata, UpdateRule } from '../types.ts';
-import { readCurrentOrderedItems } from '../../fullListCheck.ts';
-import { orderedItemsEqual } from '../../overrideUtils.ts';
-import { hasQualityGroupMembersPositionInDb } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
+import type { Database } from '#db/sqlite.ts';
+import type { ParsedOpMetadata, UpdateRule } from '#pcd/conflicts/autoAlign/types.ts';
+import { readCurrentOrderedItems } from '#pcd/conflicts/fullListCheck.ts';
+import { orderedItemsEqual } from '#pcd/conflicts/overrideUtils.ts';
+import { hasQualityGroupMembersPositionInDb } from '#entities/qualityProfiles/qualities/groupMembersSchema.ts';
 
 type NormalizedQualityRow = {
 	type: 'quality' | 'group';

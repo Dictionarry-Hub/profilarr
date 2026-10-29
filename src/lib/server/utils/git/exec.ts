@@ -2,7 +2,7 @@
  * Git command execution helper
  */
 
-import { runCommand } from '../command.ts';
+import { runCommand } from '#utils/command.ts';
 import { withGitAuth } from './auth.ts';
 
 const DEFAULT_TIMEOUT_MS = 60_000;

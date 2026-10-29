@@ -3,15 +3,18 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { createMockServer, type CapturedRequest } from '../harness/mock-server.ts';
-import { DiscordNotifier } from '$notifications/notifiers/discord/DiscordNotifier.ts';
-import { NtfyNotifier } from '$notifications/notifiers/ntfy/NtfyNotifier.ts';
-import { WebhookNotifier } from '$notifications/notifiers/webhook/WebhookNotifier.ts';
-import { TelegramNotifier } from '$notifications/notifiers/telegram/TelegramNotifier.ts';
-import { Colors } from '$notifications/notifiers/discord/embed.ts';
-import { test as testDef } from '$notifications/definitions/test.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import {
+	createMockServer,
+	type CapturedRequest
+} from '#integration/notifications/harness/mock-server.ts';
+import { DiscordNotifier } from '#notifications/notifiers/discord/DiscordNotifier.ts';
+import { NtfyNotifier } from '#notifications/notifiers/ntfy/NtfyNotifier.ts';
+import { WebhookNotifier } from '#notifications/notifiers/webhook/WebhookNotifier.ts';
+import { TelegramNotifier } from '#notifications/notifiers/telegram/TelegramNotifier.ts';
+import { Colors } from '#notifications/notifiers/discord/embed.ts';
+import { test as testDef } from '#notifications/definitions/test.ts';
 
 const MOCK_PORT = PORTS.notifications.test;
 let captured: CapturedRequest[];

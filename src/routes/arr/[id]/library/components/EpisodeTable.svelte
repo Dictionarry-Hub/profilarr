@@ -1,10 +1,10 @@
 <script lang="ts">
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
+	import CustomFormatBadge from '#ui/arr/CustomFormatBadge.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { SonarrEpisodeItem } from '#arr/types.ts';
 
 	export let episodes: SonarrEpisodeItem[];
 

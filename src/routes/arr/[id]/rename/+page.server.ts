@@ -1,13 +1,13 @@
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
-import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
-import { renameRunsQueries } from '$db/queries/renameRuns.ts';
-import { logger } from '$logger/logger.ts';
-import { scheduleRenameForInstance } from '#lib/server/jobs/init.ts';
-import { enqueueJob } from '#lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
-import { validateCronExpression, calculateNextRun } from '#lib/server/jobs/scheduleUtils.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '#db/queries/arrInstances.ts';
+import { arrRenameSettingsQueries } from '#db/queries/arrRenameSettings.ts';
+import { renameRunsQueries } from '#db/queries/renameRuns.ts';
+import { logger } from '#logger/logger.ts';
+import { scheduleRenameForInstance } from '#server/jobs/init.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#server/jobs/display.ts';
+import { validateCronExpression, calculateNextRun } from '#server/jobs/scheduleUtils.ts';
 
 export const load: ServerLoad = ({ params }) => {
 	const id = parseInt(params.id || '', 10);

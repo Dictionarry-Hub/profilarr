@@ -14,7 +14,7 @@
  */
 
 import { test } from '@playwright/test';
-import type { FakeArr, Resource } from '$flows/helpers/sync/fakeArr.ts';
+import type { FakeArr, Resource } from './fakeArr.ts';
 
 const GB = 1024 ** 3;
 

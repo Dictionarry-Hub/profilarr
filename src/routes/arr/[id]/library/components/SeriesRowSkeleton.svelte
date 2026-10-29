@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Column } from '$ui/table/types';
-	import type { SonarrSeriesItem } from '$utils/arr/types.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { SonarrSeriesItem } from '#arr/types.ts';
 
 	export let column: Column<SonarrSeriesItem>;
 

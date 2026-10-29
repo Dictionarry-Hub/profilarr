@@ -4,12 +4,12 @@
 	import Film from '@lucide/svelte/icons/film';
 	import { browser } from '$app/env';
 	import type { PageData } from './$types';
-	import type { RadarrLibraryItem, SonarrSeriesItem } from '$utils/arr/types.ts';
-	import { compareOptionalDates, sortTitle } from '$shared/utils/sort.ts';
-	import { getPersistentSearchStore } from '$stores/search';
-	import type { FilterFieldDef, FilterTag } from '$ui/filter/types';
-	import { applySmartFilters } from '$ui/filter/match';
-	import { createViewModeStore } from '#lib/client/stores/dataPage.js';
+	import type { RadarrLibraryItem, SonarrSeriesItem } from '#arr/types.ts';
+	import { compareOptionalDates, sortTitle } from '#shared/utils/sort.ts';
+	import { getPersistentSearchStore } from '#stores/search.ts';
+	import type { FilterFieldDef, FilterTag } from '#ui/filter/types.ts';
+	import { applySmartFilters } from '#ui/filter/match.ts';
+	import { createViewModeStore } from '#stores/dataPage.ts';
 	import {
 		createLibraryCardFieldsPref,
 		createLibraryColumnsPref,
@@ -17,7 +17,7 @@
 		createLibraryExpandAllPref,
 		createLibrarySortPref,
 		toggleSetPref
-	} from '$stores/libraryPrefs';
+	} from '#stores/libraryPrefs.ts';
 	import {
 		RADARR_CARD_FIELDS,
 		RADARR_RELEASE_DATE_KEYS,
@@ -29,11 +29,11 @@
 		type RadarrToggleableColumn,
 		type SonarrCardField,
 		type SonarrToggleableColumn
-	} from '$shared/utils/libraryPrefs';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
-	import { getDisplayUrl } from '#lib/client/utils/arrDisplayUrl.ts';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	} from '#shared/utils/libraryPrefs.ts';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
+	import { getDisplayUrl } from '#client/utils/arrDisplayUrl.ts';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 
 	import LibraryActionBar from './components/LibraryActionBar.svelte';
 	import RadarrTableView from './components/RadarrTableView.svelte';

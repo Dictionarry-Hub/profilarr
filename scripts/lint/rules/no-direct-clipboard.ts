@@ -45,7 +45,7 @@ export const noDirectClipboardCopy: Rule.RuleModule = {
 		schema: [],
 		messages: {
 			directCopy:
-				"Direct clipboard copy: import `copyToClipboard` from '#lib/client/utils/clipboard'"
+				"Direct clipboard copy: import `copyToClipboard` from '#client/utils/clipboard.ts'"
 		}
 	},
 	create(context) {
@@ -65,7 +65,7 @@ export const noDirectClipboardPaste: Rule.RuleModule = {
 		docs: { description: 'Paste through PasteModal' },
 		schema: [],
 		messages: {
-			directPaste: "Direct clipboard paste: use `PasteModal` from '$ui/modal/PasteModal.svelte'"
+			directPaste: "Direct clipboard paste: use `PasteModal` from '#ui/modal/PasteModal.svelte'"
 		}
 	},
 	create(context) {

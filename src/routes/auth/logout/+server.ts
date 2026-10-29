@@ -1,8 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { sessionsQueries } from '$db/queries/sessions.ts';
-import { usersQueries } from '$db/queries/users.ts';
-import { logger } from '$logger/logger.ts';
+import { sessionsQueries } from '#db/queries/sessions.ts';
+import { usersQueries } from '#db/queries/users.ts';
+import { logger } from '#logger/logger.ts';
 
 export const POST: RequestHandler = async ({ cookies }) => {
 	const sessionId = cookies.get('session');

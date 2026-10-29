@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import { renderMarkdown } from '$shared/utils/markdown.ts';
-	import type { Column } from '$ui/table/types';
-	import type { TestDiff, TestSnapshot } from './types';
+	import Table from '#ui/table/Table.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { TestDiff, TestSnapshot } from './types.ts';
 
 	export let rows: TestDiff[] = [];
 

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import DiscordConfiguration from './DiscordConfiguration.svelte';
 	import NtfyConfiguration from './NtfyConfiguration.svelte';
 	import WebhookConfiguration from './WebhookConfiguration.svelte';
 	import TelegramConfiguration from './TelegramConfiguration.svelte';
-	import { groupNotificationTypesByCategory } from '$shared/notifications/types';
+	import { groupNotificationTypesByCategory } from '#shared/notifications/types.ts';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Save from '@lucide/svelte/icons/save';
 	import ListChecks from '@lucide/svelte/icons/list-checks';
@@ -13,13 +13,13 @@
 	import XCircle from '@lucide/svelte/icons/circle-x';
 	import Rss from '@lucide/svelte/icons/rss';
 	import { siDiscord, siNtfy, siTelegram } from 'simple-icons';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import type { Column } from '$ui/table/types';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import type { Column } from '#ui/table/types.ts';
 
 	export let mode: 'create' | 'edit' = 'create';
 	export let initialData: {

@@ -1,16 +1,16 @@
 /* eslint-disable profilarr/secret-destination -- the TMDB key goes to a fixed host; the AI endpoint is unused */
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
-import { logSettingsQueries } from '$db/queries/logSettings.ts';
-import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
-import { aiSettingsQueries } from '$db/queries/aiSettings.ts';
-import { tmdbSettingsQueries } from '$db/queries/tmdbSettings.ts';
-import { generalSettingsQueries, type DateFormat } from '$db/queries/generalSettings.ts';
-import { logSettings } from '$logger/settings.ts';
-import { logger } from '$logger/logger.ts';
-import { scheduleBackupJobs, scheduleLogCleanup } from '#lib/server/jobs/init.ts';
-import { FEATURES } from '$shared/features.ts';
-import { isLandingPage } from '$shared/landingPages.ts';
+import { logSettingsQueries } from '#db/queries/logSettings.ts';
+import { backupSettingsQueries } from '#db/queries/backupSettings.ts';
+import { aiSettingsQueries } from '#db/queries/aiSettings.ts';
+import { tmdbSettingsQueries } from '#db/queries/tmdbSettings.ts';
+import { generalSettingsQueries, type DateFormat } from '#db/queries/generalSettings.ts';
+import { logSettings } from '#logger/settings.ts';
+import { logger } from '#logger/logger.ts';
+import { scheduleBackupJobs, scheduleLogCleanup } from '#server/jobs/init.ts';
+import { FEATURES } from '#shared/features.ts';
+import { isLandingPage } from '#shared/landingPages.ts';
 
 const DATE_FORMATS = ['auto', 'mdy', 'dmy', 'ymd'] as const;
 

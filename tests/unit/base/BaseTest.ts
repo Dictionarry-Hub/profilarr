@@ -6,7 +6,7 @@
 import { test } from 'vitest';
 import { mkdir, readFile, rm, stat } from 'node:fs/promises';
 import { assertExists } from '@std/assert';
-import { isNotFound } from '$utils/fs.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 export interface TestContext {
 	/** Unique temporary directory for this test */

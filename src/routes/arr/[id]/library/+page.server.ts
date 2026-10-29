@@ -1,8 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { cache } from '$cache/cache.ts';
-import { cleanupJobsForArrInstance } from '#lib/server/jobs/cleanup.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { cache } from '#utils/cache/cache.ts';
+import { cleanupJobsForArrInstance } from '#server/jobs/cleanup.ts';
 
 export const actions: Actions = {
 	delete: ({ params }) => {

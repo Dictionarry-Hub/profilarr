@@ -1,6 +1,6 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { renameRunBlockReason, type RenameRunState } from '$shared/rename/runBlock.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { renameRunBlockReason, type RenameRunState } from '#shared/rename/runBlock.ts';
 
 const ready: RenameRunState = { hasConfig: true, dirty: false, running: false };
 

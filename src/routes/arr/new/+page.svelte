@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$stores/page';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import InstanceForm from '../components/InstanceForm.svelte';
+	import { page } from '#stores/page.ts';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import InstanceForm from '#routes/arr/components/InstanceForm.svelte';
 	import type { ActionData } from './$types';
 
 	export let form: ActionData;

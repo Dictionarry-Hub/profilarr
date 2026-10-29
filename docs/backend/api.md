@@ -118,10 +118,10 @@ deno task generate:api-types
 This bundles `docs/api/v1/openapi.yaml` into `src/lib/api/v1.openapi.json`,
 then runs `openapi-typescript` and outputs `src/lib/api/v1.d.ts`. Both
 generated files should be committed alongside spec changes. Import types from
-`$api/v1` in endpoint handlers:
+`#api/v1.d.ts` in endpoint handlers:
 
 ```ts
-import type { components } from '$api/v1';
+import type { components } from '#api/v1.d.ts';
 type MyResponse = components['schemas']['MySchema'];
 ```
 
@@ -137,7 +137,7 @@ export const GET: RequestHandler = async () => {
 };
 ```
 
-Use generated types from `$api/v1` to ensure responses match the spec.
+Use generated types from `#api/v1.d.ts` to ensure responses match the spec.
 
 ## Writing Endpoint Descriptions
 

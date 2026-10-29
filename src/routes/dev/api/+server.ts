@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { escapeHtml } from '$shared/utils/sanitize';
+import { escapeHtml } from '#shared/utils/sanitize.ts';
 
 export const GET: RequestHandler = async ({ url }) => {
 	if (import.meta.env.VITE_CHANNEL !== 'dev') {

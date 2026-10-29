@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-	import { balancedGrid } from '#lib/client/utils/balancedGrid.ts';
-	import Toggle from '$ui/toggle/Toggle.svelte';
+	import type { DelayProfilesRow } from '#shared/pcd/display.ts';
+	import { balancedGrid } from '#client/utils/balancedGrid.ts';
+	import Toggle from '#ui/toggle/Toggle.svelte';
 	import SyncFooter from './SyncFooter.svelte';
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import { alertStore } from '#lib/client/alerts/store.ts';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
-	import { jobStatus } from '$stores/jobStatus';
+	import { jobStatus } from '#stores/jobStatus.ts';
 
 	interface DatabaseWithProfiles {
 		id: number;

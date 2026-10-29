@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
 
 export const load: ServerLoad = ({ params }) => {
 	const id = parseInt(params.id || '', 10);

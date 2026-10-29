@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { themeStore } from '$stores/theme.ts';
+	import { themeStore } from '#stores/theme.ts';
 	import MoonStar from '@lucide/svelte/icons/moon-star';
 	import Sun from '@lucide/svelte/icons/sun';
 

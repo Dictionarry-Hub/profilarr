@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { refreshAll } from '$app/navigation';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Modal from './Modal.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import type { EntityType } from '$shared/pcd/portable.ts';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import type { EntityType } from '#shared/pcd/portable.ts';
 
 	export let open = false;
 	export let databaseId: number;

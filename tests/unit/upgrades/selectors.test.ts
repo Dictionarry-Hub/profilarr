@@ -3,14 +3,14 @@
  * Tests all selectors from shared/selectors.ts
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals, assert } from '@std/assert';
 import {
 	selectors,
 	getSelector,
 	isValidSelector,
 	getAllSelectorIds
-} from '../../../src/lib/shared/upgrades/selectors.ts';
+} from '#shared/upgrades/selectors.ts';
 
 interface MockItem {
 	id: number;

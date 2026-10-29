@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import * as namingQueries from '$pcd/entities/mediaManagement/naming/index.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import * as namingQueries from '#entities/mediaManagement/naming/index.ts';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const dbId = parseInt(params.databaseId, 10);

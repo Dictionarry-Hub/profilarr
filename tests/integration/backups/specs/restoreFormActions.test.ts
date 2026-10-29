@@ -13,11 +13,11 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { startServer, stopServer } from '$test-harness/server.ts';
-import { createUser, login } from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { startServer, stopServer } from '#tests/harness/server.ts';
+import { createUser, login } from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
 
 const PORT = PORTS.backups.restoreFormActions;
 const ORIGIN = `http://localhost:${PORT}`;
