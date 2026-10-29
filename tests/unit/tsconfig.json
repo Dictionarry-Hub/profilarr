@@ -4,6 +4,5 @@
 		"types": ["$app/types", "node"],
 		"noEmit": true
 	},
-	"include": ["**/*.ts", "../../vitest.config.ts"],
-	"exclude": ["pr/**", "release/**"]
+	"include": ["**/*.ts", "../../vitest.config.ts"]
 }

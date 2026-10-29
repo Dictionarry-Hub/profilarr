@@ -104,10 +104,6 @@ const UNIT_ALIASES: Record<string, string> = {
 	processor: 'tests/unit/rename/processor.test.ts'
 };
 
-// Unit tests of Deno scripts, run with `deno test` until the scripts move off
-// Deno. Everything else in tests/unit runs on Vitest (vitest.config.ts).
-const UNIT_DENO_PATHS = ['tests/unit/pr', 'tests/unit/release'];
-
 // ─── Arg Parsing ─────────────────────────────────────────────────────────────
 
 const COMMANDS = new Set(['unit', 'integration', 'zap', 'semgrep']);
@@ -182,35 +178,10 @@ async function runUnit(target?: string): Promise<number> {
 	console.log(`Running unit tests: ${testPath}\n`);
 
 	const env = { ...Deno.env.toObject(), APP_BASE_PATH: './dist/test' };
-	const denoPaths = UNIT_DENO_PATHS.filter(
-		(path) => !target || path.startsWith(testPath) || testPath.startsWith(path)
-	);
-	const insideDenoPath = UNIT_DENO_PATHS.some((path) => testPath.startsWith(path));
-
-	if (!insideDenoPath) {
-		const vitestArgs = ['node_modules/vitest/vitest.mjs', 'run'];
-		if (target) vitestArgs.push(testPath);
-		const { code } = await new Deno.Command('node', {
-			args: vitestArgs,
-			env,
-			stdout: 'inherit',
-			stderr: 'inherit'
-		}).output();
-		if (code !== 0) return code;
-	}
-
-	if (denoPaths.length === 0) return 0;
-
-	const { code } = await new Deno.Command('deno', {
-		args: [
-			'test',
-			...(insideDenoPath ? [testPath] : denoPaths),
-			'--allow-read',
-			'--allow-write',
-			'--allow-env',
-			'--allow-run',
-			'--allow-net'
-		],
+	const vitestArgs = ['node_modules/vitest/vitest.mjs', 'run'];
+	if (target) vitestArgs.push(testPath);
+	const { code } = await new Deno.Command('node', {
+		args: vitestArgs,
 		env,
 		stdout: 'inherit',
 		stderr: 'inherit'
