@@ -1,9 +1,9 @@
 /**
  * ESLint config for Profilarr.
  *
- * General rules cover JS and TS outside `src/routes/` and `tests/`. Routes and
- * Svelte components only get the project's own rules (`scripts/lint/rules/`),
- * each scoped to the files it's about.
+ * General rules cover JS and TS outside `src/routes/` and `tests/`. Routes,
+ * Svelte components and tests only get the project's own rules
+ * (`scripts/lint/rules/`), each scoped to the files it's about.
  *
  * Every disable comment needs a reason after `--`.
  */
@@ -13,20 +13,22 @@ import js from '@eslint/js';
 import ts from 'typescript-eslint';
 import svelte from 'eslint-plugin-svelte';
 
-import disableComments from './scripts/lint/rules/disable-comments.ts';
+import disableComments from '#scripts/lint/rules/disable-comments.ts';
+import importPaths from '#scripts/lint/rules/import-paths.ts';
 import {
 	noDirectClipboardCopy,
 	noDirectClipboardPaste
-} from './scripts/lint/rules/no-direct-clipboard.ts';
-import noInsecureUuid from './scripts/lint/rules/no-insecure-uuid.ts';
-import noRawDates from './scripts/lint/rules/no-raw-dates.ts';
-import noRawUi from './scripts/lint/rules/no-raw-ui.ts';
-import pageMeta from './scripts/lint/rules/page-meta.ts';
-import secretDestination from './scripts/lint/rules/secret-destination.ts';
+} from '#scripts/lint/rules/no-direct-clipboard.ts';
+import noInsecureUuid from '#scripts/lint/rules/no-insecure-uuid.ts';
+import noRawDates from '#scripts/lint/rules/no-raw-dates.ts';
+import noRawUi from '#scripts/lint/rules/no-raw-ui.ts';
+import pageMeta from '#scripts/lint/rules/page-meta.ts';
+import secretDestination from '#scripts/lint/rules/secret-destination.ts';
 
 const profilarr = {
 	rules: {
 		'disable-comments': disableComments,
+		'import-paths': importPaths,
 		'no-direct-clipboard-copy': noDirectClipboardCopy,
 		'no-direct-clipboard-paste': noDirectClipboardPaste,
 		'no-insecure-uuid': noInsecureUuid,
@@ -98,7 +100,7 @@ export default defineConfig(
 		languageOptions: { parserOptions: { parser: ts.parser } }
 	},
 	{
-		files: ['src/routes/**/*.{ts,js}'],
+		files: ['src/routes/**/*.{ts,js}', 'tests/**/*.ts'],
 		languageOptions: { parser: ts.parser }
 	},
 
@@ -113,6 +115,10 @@ export default defineConfig(
 		rules: {
 			'profilarr/disable-comments': ['error', { locked: ['profilarr/no-insecure-uuid'] }]
 		}
+	},
+	{
+		files: [`src/**/*.${CODE}`, `scripts/**/*.${CODE}`, 'tests/**/*.ts', `*.config.{js,ts}`],
+		rules: { 'profilarr/import-paths': ['error', { maxDepth: 2, unlimited: ['#routes'] }] }
 	},
 	{
 		files: ['src/routes/**/*.svelte', 'src/lib/client/**/*.svelte'],
