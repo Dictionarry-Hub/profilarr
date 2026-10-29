@@ -22,7 +22,7 @@
 		"@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.3.1",
 		"@tailwindcss/vite": "npm:@tailwindcss/vite@^4.3.3",
 		"@types/deno": "npm:@types/deno@^2.7.0",
-		"@types/node": "npm:@types/node@^22.20.5",
+		"@types/node": "npm:@types/node@^24.19.2",
 		"esbuild": "npm:esbuild@^0.28.2",
 		"eslint": "npm:eslint@^10.13.0",
 		"eslint-plugin-svelte": "npm:eslint-plugin-svelte@^3.23.1",
