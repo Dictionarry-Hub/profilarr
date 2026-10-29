@@ -606,11 +606,11 @@ The form warns under the fields before saving, and an alert confirms the
 removal. Test Connection falls back to an instance's saved credentials only
 while its URL is unchanged.
 
-`deno task lint:secret-destination` (`scripts/lint/secretDestination.ts`)
-keeps the decision explicit. Every `+page.server.ts` that reads a secret form
-field must import the guard or carry
-`// lint-disable-file secret-destination -- <reason>`, used by the create-only
-actions and by forms whose secret goes to a fixed host.
+The ESLint rule `profilarr/secret-destination`
+(`scripts/lint/rules/secret-destination.ts`) keeps the decision explicit.
+Every `+page.server.ts` that reads a secret form field must import the guard
+or start with `/* eslint-disable profilarr/secret-destination -- <reason> */`,
+used by the create-only actions and by forms whose secret goes to a fixed host.
 
 ### XSS via Markdown / {@html}
 

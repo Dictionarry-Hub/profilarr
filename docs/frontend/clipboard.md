@@ -2,7 +2,8 @@
 
 **Source:** `src/lib/client/utils/clipboard.ts`,
 `src/lib/client/ui/modal/PasteModal.svelte`
-**Lint rule:** `scripts/lint/clipboard.ts` (`deno task lint:clipboard`)
+**Lint rules:** `profilarr/no-direct-clipboard-copy`, `profilarr/no-direct-clipboard-paste`
+(`scripts/lint/rules/no-direct-clipboard.ts`)
 
 Browser clipboard access depends on secure contexts. Localhost is usually
 allowed, but plain HTTP over a LAN is not. Profilarr is often accessed from
@@ -20,14 +21,11 @@ Do not call `navigator.clipboard.readText()` directly. Browser paste fallback
 cannot silently read arbitrary clipboard data, so use
 `$ui/modal/PasteModal.svelte` and let the user paste into a textarea.
 
-The clipboard lint script enforces both rules:
+Two ESLint rules enforce both, in client code and non-server routes
+(`deno task lint:eslint`):
 
-```bash
-deno task lint:clipboard
-```
-
-- `no-direct-clipboard-copy` catches direct writes and `execCommand('copy')`.
-- `no-direct-clipboard-paste` catches direct reads.
+- `profilarr/no-direct-clipboard-copy` catches direct writes and `execCommand('copy')`.
+- `profilarr/no-direct-clipboard-paste` catches direct reads.
 
 `src/lib/client/utils/clipboard.ts` is exempt because it owns the copy helper
 implementation.

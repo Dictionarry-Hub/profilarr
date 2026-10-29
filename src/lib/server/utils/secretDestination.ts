@@ -10,7 +10,7 @@
  *
  * Every `+page.server.ts` that reads a secret form field must use this guard
  * or switch `profilarr/secret-destination` off for the file with a reason
- * (`scripts/lint/rules/secret-destination.js`).
+ * (`scripts/lint/rules/secret-destination.ts`).
  */
 
 export interface SecretDestinationCheck {
