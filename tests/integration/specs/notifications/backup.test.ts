@@ -8,10 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, test } from 'vitest';
 import type { MockHttpServer } from '#integration/harness/http.ts';
 import { PORTS } from '#integration/harness/ports.ts';
-import {
-	createMockServer,
-	type CapturedRequest
-} from '#integration/specs/notifications/harness/mock-server.ts';
+import { createMockServer, type CapturedRequest } from './harness/mock-server.ts';
 import { DiscordNotifier } from '#notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '#notifications/notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from '#notifications/notifiers/webhook/WebhookNotifier.ts';

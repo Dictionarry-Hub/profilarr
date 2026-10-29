@@ -23,7 +23,7 @@ import {
 	deleteDatabaseInstance,
 	insertAnnouncement,
 	tryInsertOrphanAnnouncement
-} from '#integration/specs/announcements/harness/setup.ts';
+} from './harness/setup.ts';
 
 const PORT = PORTS.announcements.cascade;
 

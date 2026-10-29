@@ -15,7 +15,7 @@ import { afterAll, beforeAll, test } from 'vitest';
 import { PORTS } from '#integration/harness/ports.ts';
 import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
 import { openDb } from '#integration/harness/db.ts';
-import { createDatabaseInstance } from '#integration/specs/announcements/harness/setup.ts';
+import { createDatabaseInstance } from './harness/setup.ts';
 
 const PORT = PORTS.announcements.firstSync;
 const BASE_PATH = `./dist/integration-${PORT}`;

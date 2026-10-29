@@ -9,7 +9,7 @@ import { PORTS } from '#integration/harness/ports.ts';
 import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import { opCheckpoint } from '#integration/specs/pcd/harness/pcd.ts';
 import { write } from '#integration/specs/pcd/harness/write.ts';
-// eslint-disable-next-line profilarr/import-paths -- 3 folders deep until the integration suite moves to Playwright (#963)
+
 import { createScenarioFactory, userOpsSince } from '#integration/specs/pcd/write/regex/helpers.ts';
 import type { ConditionData } from '#shared/pcd/display.ts';
 

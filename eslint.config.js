@@ -117,7 +117,9 @@ export default defineConfig(
 	},
 	{
 		files: [`src/**/*.${CODE}`, `scripts/**/*.${CODE}`, 'tests/**/*.ts', `*.config.{js,ts}`],
-		rules: { 'profilarr/import-paths': ['error', { maxDepth: 2, unlimited: ['#routes'] }] }
+		rules: {
+			'profilarr/import-paths': ['error', { maxDepth: 2, unlimited: ['#routes', '#integration'] }]
+		}
 	},
 	{
 		files: ['src/routes/**/*.svelte', 'src/lib/client/**/*.svelte'],
