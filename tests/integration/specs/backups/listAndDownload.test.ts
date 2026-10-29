@@ -5,11 +5,18 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { TestClient } from '#tests/harness/client.ts';
-import { createUser, login, setApiKey } from '#tests/harness/setup.ts';
+import { execFile } from 'node:child_process';
+import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { createUser, login, setApiKey } from '#integration/harness/setup.ts';
+
+const execFileAsync = promisify(execFile);
 
 const PORT = PORTS.backups.listAndDownload;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -29,20 +36,15 @@ let apiKeyClient: TestClient;
  * headers, so we don't need a real DB inside.
  */
 async function createDummyBackup(filename: string, content: string = 'dummy'): Promise<void> {
-	const tmpDir = await Deno.makeTempDir();
-	await Deno.mkdir(`${tmpDir}/data`);
-	await Deno.writeTextFile(`${tmpDir}/data/data.txt`, content);
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-'));
+	await mkdir(`${tmpDir}/data`);
+	await writeFile(`${tmpDir}/data/data.txt`, content);
 
-	const cmd = new Deno.Command('tar', {
-		args: ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data'],
-		stdout: 'null',
-		stderr: 'null'
-	});
-	await cmd.output();
-	await Deno.remove(tmpDir, { recursive: true });
+	await execFileAsync('tar', ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data']);
+	await rm(tmpDir, { recursive: true, force: true });
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 
 	client = new TestClient(ORIGIN);
@@ -54,7 +56,7 @@ setup(async () => {
 	await setApiKey(getDbPath(PORT), API_KEY);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -84,9 +86,9 @@ test('GET /api/v1/backups without auth returns 401', async () => {
 
 test('GET /api/v1/backups returns empty array when no backups exist', async () => {
 	// Clean out any existing backups
-	for await (const entry of Deno.readDir(BACKUPS_DIR)) {
+	for (const entry of await readdir(BACKUPS_DIR, { withFileTypes: true })) {
 		if (entry.name.endsWith('.tar.gz')) {
-			await Deno.remove(`${BACKUPS_DIR}/${entry.name}`);
+			await rm(`${BACKUPS_DIR}/${entry.name}`);
 		}
 	}
 
@@ -166,5 +168,3 @@ test('GET /api/v1/backups/{filename} returns 400 for path traversal', async () =
 	const res = await client.get('/api/v1/backups/backup-..%2F..%2Fetc%2Fpasswd.tar.gz');
 	assertEquals(res.status, 400);
 });
-
-await run();

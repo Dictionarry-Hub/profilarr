@@ -2,12 +2,13 @@
  * PCD write tests: quality profile qualities update.
  */
 
+import { readFileSync } from 'node:fs';
 import { assert, assertEquals, assertExists } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
 	normalizeSql,
 	opCheckpoint,
@@ -15,8 +16,11 @@ import {
 	parseMetadata,
 	type OpRow,
 	type PcdTestContext
-} from '#integration/pcd/harness/pcd.ts';
-import { write, type QualityProfileQualityItemInput } from '#integration/pcd/harness/write.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
+import {
+	write,
+	type QualityProfileQualityItemInput
+} from '#integration/specs/pcd/harness/write.ts';
 import { createScenarioFactory, userOpsSince } from './helpers.ts';
 
 const PORT = PORTS.pcd.writeQualityProfilesQualitiesUpdate;
@@ -43,11 +47,11 @@ type QualityGroupMemberRow = {
 
 const { seededPcd } = createScenarioFactory(PORT, 'pcd-write-quality-profile-qualities-update');
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -357,7 +361,7 @@ function compiledQualityState(ctx: PcdTestContext): {
 
 	try {
 		replay.exec('PRAGMA foreign_keys = ON');
-		replay.exec(Deno.readTextFileSync('docs/backend/0.schema.sql'));
+		replay.exec(readFileSync('docs/backend/0.schema.sql', 'utf8'));
 
 		const ops = source
 			.prepare(
@@ -429,5 +433,3 @@ function latestHistories(db: ReturnType<typeof openDb>, databaseId: number): Map
 	}
 	return latest;
 }
-
-run();

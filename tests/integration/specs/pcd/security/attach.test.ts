@@ -7,18 +7,19 @@
  * written.
  */
 
+import { mkdir, realpath, stat, writeFile } from 'node:fs/promises';
 import { assert, assertEquals } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 import {
 	compilePcd,
 	insertOp,
 	seedBase,
 	setupPcd,
 	type PcdTestContext
-} from '#integration/pcd/harness/pcd.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
 
 const PORT = PORTS.pcd.securityAttach;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -40,11 +41,11 @@ interface AttachForm {
 
 let counter = 0;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -242,7 +243,7 @@ test('base op cannot attach in-memory or temporary databases', async () => {
  */
 test('schema file cannot write to the app database', async () => {
 	const s = await scenario('schema');
-	await Deno.writeTextFile(`${s.ctx.pcdPath}/deps/schema/ops/1.attach.sql`, plainAttach(s));
+	await writeFile(`${s.ctx.pcdPath}/deps/schema/ops/1.attach.sql`, plainAttach(s));
 	await compilePcd(s.ctx);
 
 	assertEquals(appTableExists(s, s.marker), false, `schema file created ${s.marker}`);
@@ -260,8 +261,8 @@ test('schema file cannot write to the app database', async () => {
  */
 test('tweak file cannot write to the app database', async () => {
 	const s = await scenario('tweak');
-	await Deno.mkdir(`${s.ctx.pcdPath}/tweaks`, { recursive: true });
-	await Deno.writeTextFile(`${s.ctx.pcdPath}/tweaks/1.attach.sql`, plainAttach(s));
+	await mkdir(`${s.ctx.pcdPath}/tweaks`, { recursive: true });
+	await writeFile(`${s.ctx.pcdPath}/tweaks/1.attach.sql`, plainAttach(s));
 	await compilePcd(s.ctx);
 
 	assertEquals(appTableExists(s, s.marker), false, `tweak file created ${s.marker}`);
@@ -292,8 +293,8 @@ async function scenario(label: string, uuid?: string): Promise<Scenario> {
 	const ctx = await setupPcd({ port: PORT, name: `attach-${label}-${counter}`, uuid });
 	return {
 		ctx,
-		appDb: await Deno.realPath(ctx.dbPath),
-		baseDir: await Deno.realPath(ctx.basePath),
+		appDb: await realpath(ctx.dbPath),
+		baseDir: await realpath(ctx.basePath),
 		marker: `attach_marker_${counter}`
 	};
 }
@@ -324,10 +325,10 @@ function appTableExists(s: Scenario, table: string): boolean {
 
 async function fileExists(path: string): Promise<boolean> {
 	try {
-		await Deno.stat(path);
+		await stat(path);
 		return true;
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) return false;
+		if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
 		throw error;
 	}
 }
@@ -355,5 +356,3 @@ function latestOpHistory(
 		db.close();
 	}
 }
-
-await run();

@@ -12,11 +12,11 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUser, setApiKey } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUser, setApiKey } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.apiKey;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -24,14 +24,14 @@ const API_KEY = 'test-api-key-valid-12345';
 
 let client: TestClient;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 	await createUser(client, 'admin', 'password123', ORIGIN);
 	await setApiKey(getDbPath(PORT), API_KEY);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -98,5 +98,3 @@ test('API key cannot create API keys', async () => {
 	);
 	assertEquals(res.status, 403, `Expected 403 for key creation with API key, got ${res.status}`);
 });
-
-await run();

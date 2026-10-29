@@ -7,17 +7,17 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
 	normalizeSql,
 	opCheckpoint,
 	parseDesiredState,
 	parseMetadata
-} from '#integration/pcd/harness/pcd.ts';
-import { write } from '#integration/pcd/harness/write.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
+import { write } from '#integration/specs/pcd/harness/write.ts';
 import {
 	createScenarioFactory,
 	entityForArrType,
@@ -31,11 +31,11 @@ const ORIGIN = `http://localhost:${PORT}`;
 
 const { seededPcd } = createScenarioFactory(PORT, 'pcd-write-media-settings-delete');
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -118,5 +118,3 @@ for (const arrType of MEDIA_SETTINGS_ARR_TYPES) {
 		);
 	});
 }
-
-await run();

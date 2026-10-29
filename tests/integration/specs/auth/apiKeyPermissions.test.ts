@@ -21,12 +21,12 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUser, setApiKey, deleteApiKey } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUser, setApiKey, deleteApiKey } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { openDb } from '#integration/harness/db.ts';
 
 const PORT = PORTS.auth.apiKeyPermissions;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -46,7 +46,7 @@ async function errorOf(res: Response): Promise<string> {
 	return body.error ?? '';
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	// Creating the user logs that client in; key requests use a separate
 	// client so a rejected key can't fall back to the session.
@@ -73,7 +73,7 @@ setup(async () => {
 	await setApiKey(dbPath, DELETED_KEY, { name: 'deleted' });
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -163,5 +163,3 @@ test('last_used_at is recorded when a key is used', () => {
 		db.close();
 	}
 });
-
-await run();

@@ -19,12 +19,23 @@
  */
 
 import { assert, assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath, getServerOutput } from '#tests/harness/server.ts';
-import { createUser, createUserDirect, formResult, login, queryDb } from '#tests/harness/setup.ts';
-import { completeOidcLogin, OIDC_SETTINGS } from '#tests/harness/oidc.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import {
+	startServer,
+	stopServer,
+	getDbPath,
+	getServerOutput
+} from '#integration/harness/server.ts';
+import {
+	createUser,
+	createUserDirect,
+	formResult,
+	login,
+	queryDb
+} from '#integration/harness/setup.ts';
+import { completeOidcLogin, OIDC_SETTINGS } from '#integration/harness/oidc.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const A = PORTS.auth.loginPasswordSetup;
 const B = PORTS.auth.loginPasswordOnly;
@@ -76,7 +87,7 @@ async function callbackWithValidState(port: number): Promise<Response> {
 	});
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await Promise.all([
 		startServer(A, { AUTH: 'on', ORIGIN: origin(A) }, 'preview'),
 		startServer(B, { AUTH: 'on', ORIGIN: origin(B) }, 'preview'),
@@ -106,7 +117,7 @@ setup(async () => {
 	await stopServer(H, { keepData: true });
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await Promise.all([A, B, C, D, E, F, G, H, I].map((port) => stopServer(port)));
 });
 
@@ -406,5 +417,3 @@ test('I: two setup submissions at once create only one account', async () => {
 	const signedIn = clients.filter((c) => c.getCookie('session') !== undefined);
 	assertEquals(signedIn.length, 1, 'Only the winning submission should be signed in');
 });
-
-await run();

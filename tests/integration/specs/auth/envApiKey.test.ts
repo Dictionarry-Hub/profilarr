@@ -8,11 +8,11 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUser, login, setApiKey } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUser, login, setApiKey } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.envApiKey;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -21,14 +21,14 @@ const DB_API_KEY = 'test-db-api-key-valid-1234567890';
 
 let client: TestClient;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN, PROFILARR_API_KEY: API_KEY }, 'preview');
 	client = new TestClient(ORIGIN);
 	await createUser(client, 'admin', 'password123', ORIGIN);
 	await setApiKey(getDbPath(PORT), DB_API_KEY);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -68,5 +68,3 @@ test('session user cannot create a key named "Environment"', async () => {
 		`Expected form failure status 400 for reserved key name, got ${body}`
 	);
 });
-
-await run();

@@ -3,12 +3,15 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { afterAll, beforeAll, test } from 'vitest';
+import type { MockHttpServer } from '#integration/harness/http.ts';
+import { PORTS } from '#integration/harness/ports.ts';
 import {
 	createMockServer,
 	type CapturedRequest
-} from '#integration/notifications/harness/mock-server.ts';
+} from '#integration/specs/notifications/harness/mock-server.ts';
 import { DiscordNotifier } from '#notifications/notifiers/discord/DiscordNotifier.ts';
 import { NtfyNotifier } from '#notifications/notifiers/ntfy/NtfyNotifier.ts';
 import { WebhookNotifier } from '#notifications/notifiers/webhook/WebhookNotifier.ts';
@@ -19,7 +22,7 @@ import type { UpgradeJobLog } from '#server/upgrades/types.ts';
 
 const MOCK_PORT = PORTS.notifications.upgrade;
 let captured: CapturedRequest[];
-let mockServer: Deno.HttpServer;
+let mockServer: MockHttpServer;
 
 let REAL_DISCORD: string | undefined;
 let REAL_NTFY_URL: string | undefined;
@@ -28,8 +31,8 @@ let REAL_WEBHOOK_URL: string | undefined;
 let REAL_TELEGRAM_TOKEN: string | undefined;
 let REAL_TELEGRAM_CHAT_ID: string | undefined;
 try {
-	const envPath = new URL('../.env', import.meta.url).pathname;
-	const content = await Deno.readTextFile(envPath);
+	const envPath = fileURLToPath(new URL('./.env', import.meta.url));
+	const content = await readFile(envPath, 'utf8');
 	for (const line of content.split('\n')) {
 		const trimmed = line.trim();
 		if (!trimmed || trimmed.startsWith('#')) continue;
@@ -49,13 +52,13 @@ try {
 	/* no .env */
 }
 
-setup(() => {
-	const mock = createMockServer(MOCK_PORT);
+beforeAll(async () => {
+	const mock = await createMockServer(MOCK_PORT);
 	captured = mock.captured;
 	mockServer = mock.server;
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await mockServer.shutdown();
 });
 
@@ -599,5 +602,3 @@ test('real: sends upgrade to Telegram', async () => {
 	});
 	await notifier.notify(upgrade({ log: makeLog() }));
 });
-
-await run();

@@ -2,19 +2,20 @@
  * PCD conflict tests: custom format tests.
  */
 
+import { readFileSync } from 'node:fs';
 import { assertEquals, assertStringIncludes } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
 	compilePcd,
 	opCheckpoint,
 	queryOpsSince,
 	seedBase,
 	setupPcd
-} from '#integration/pcd/harness/pcd.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
 
 const PORT = PORTS.pcd.conflictsCustomFormatTests;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -23,11 +24,11 @@ const READ_ONLY_MESSAGE = 'Entity tests are read-only for this database';
 
 let counter = 0;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -92,7 +93,7 @@ function compiledTestCount(dbPath: string, databaseId: number): number {
 	const replay = openDb(':memory:');
 	try {
 		replay.exec('PRAGMA foreign_keys = ON');
-		replay.exec(Deno.readTextFileSync('docs/backend/0.schema.sql'));
+		replay.exec(readFileSync('docs/backend/0.schema.sql', 'utf8'));
 
 		const ops = source
 			.prepare(
@@ -117,5 +118,3 @@ function compiledTestCount(dbPath: string, databaseId: number): number {
 		source.close();
 	}
 }
-
-await run();

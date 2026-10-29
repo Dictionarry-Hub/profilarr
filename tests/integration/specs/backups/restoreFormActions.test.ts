@@ -13,11 +13,18 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { createUser, login } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { execFile } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { createUser, login } from '#integration/harness/setup.ts';
+import { PORTS } from '#integration/harness/ports.ts';
+
+const execFileAsync = promisify(execFile);
 
 const PORT = PORTS.backups.restoreFormActions;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -30,28 +37,23 @@ let client: TestClient;
 
 async function exists(path: string): Promise<boolean> {
 	try {
-		await Deno.stat(path);
+		await stat(path);
 		return true;
 	} catch (err) {
-		if (err instanceof Deno.errors.NotFound) return false;
+		if ((err as NodeJS.ErrnoException).code === 'ENOENT') return false;
 		throw err;
 	}
 }
 
 async function createDummyBackup(filename: string): Promise<void> {
-	const tmpDir = await Deno.makeTempDir();
-	await Deno.mkdir(`${tmpDir}/data`);
-	await Deno.writeTextFile(`${tmpDir}/data/data.txt`, 'dummy');
-	const tar = new Deno.Command('tar', {
-		args: ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data'],
-		stdout: 'null',
-		stderr: 'null'
-	});
-	await tar.output();
-	await Deno.remove(tmpDir, { recursive: true });
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-'));
+	await mkdir(`${tmpDir}/data`);
+	await writeFile(`${tmpDir}/data/data.txt`, 'dummy');
+	await execFileAsync('tar', ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data']);
+	await rm(tmpDir, { recursive: true, force: true });
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 	await createUser(client, 'admin', 'password123', ORIGIN);
@@ -59,13 +61,13 @@ setup(async () => {
 	await createDummyBackup(BACKUP_FILENAME);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
 test('restoreBackup writes a sentinel pointing at the resolved archive path', async () => {
 	// Make sure we start clean.
-	if (await exists(SENTINEL_PATH)) await Deno.remove(SENTINEL_PATH);
+	if (await exists(SENTINEL_PATH)) await rm(SENTINEL_PATH);
 
 	const res = await client.postForm(
 		'/settings/backups?/restoreBackup',
@@ -79,7 +81,7 @@ test('restoreBackup writes a sentinel pointing at the resolved archive path', as
 
 	assertEquals(await exists(SENTINEL_PATH), true, 'sentinel should be written');
 
-	const contents = (await Deno.readTextFile(SENTINEL_PATH)).trim();
+	const contents = (await readFile(SENTINEL_PATH, 'utf8')).trim();
 	assert(
 		contents.endsWith(`/backups/${BACKUP_FILENAME}`),
 		`sentinel should point at the archive (got ${contents})`
@@ -89,7 +91,7 @@ test('restoreBackup writes a sentinel pointing at the resolved archive path', as
 test('cancelRestore removes the sentinel', async () => {
 	// Pre-condition: a sentinel exists from the previous test.
 	if (!(await exists(SENTINEL_PATH))) {
-		await Deno.writeTextFile(SENTINEL_PATH, `${BACKUPS_DIR}/${BACKUP_FILENAME}`);
+		await writeFile(SENTINEL_PATH, `${BACKUPS_DIR}/${BACKUP_FILENAME}`);
 	}
 
 	const res = await client.postForm(
@@ -105,7 +107,7 @@ test('cancelRestore removes the sentinel', async () => {
 
 test('cancelRestore is idempotent when no sentinel exists', async () => {
 	// Make sure no sentinel.
-	if (await exists(SENTINEL_PATH)) await Deno.remove(SENTINEL_PATH);
+	if (await exists(SENTINEL_PATH)) await rm(SENTINEL_PATH);
 
 	const res = await client.postForm(
 		'/settings/backups?/cancelRestore',
@@ -117,5 +119,3 @@ test('cancelRestore is idempotent when no sentinel exists', async () => {
 
 	assertEquals(await exists(SENTINEL_PATH), false);
 });
-
-await run();

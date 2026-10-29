@@ -2,7 +2,7 @@
  * Integration tests: Path traversal (SA-01)
  *
  * Three endpoints accept client-supplied file paths that flow into
- * filesystem operations (Deno.readTextFile, Deno.copyFile). Without
+ * filesystem operations (file reads and copies). Without
  * validation, an attacker can use ../ sequences or absolute paths to
  * read, exfiltrate, or push arbitrary files.
  *
@@ -16,13 +16,16 @@
  * 9-10.  symlink escape rejected across both endpoints
  */
 
+import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, login } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, login } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { openDb } from '#integration/harness/db.ts';
 
 const PORT = PORTS.auth.pathTraversal;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -58,7 +61,7 @@ function seedDatabase(dbPath: string): { id: number; uuid: string } {
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	const dbPath = getDbPath(PORT);
 
@@ -69,19 +72,19 @@ setup(async () => {
 
 	// Create repo directory and a symlink pointing outside it
 	const repoDir = `./dist/integration-${PORT}/data/databases/${dbUuid}`;
-	outsideDir = await Deno.makeTempDir({ prefix: 'profilarr-symlink-test-' });
-	await Deno.writeTextFile(`${outsideDir}/secret.txt`, 'sensitive data');
-	await Deno.mkdir(repoDir, { recursive: true });
-	await Deno.symlink(outsideDir, `${repoDir}/evil`);
+	outsideDir = await mkdtemp(join(tmpdir(), 'profilarr-symlink-test-'));
+	await writeFile(`${outsideDir}/secret.txt`, 'sensitive data');
+	await mkdir(repoDir, { recursive: true });
+	await symlink(outsideDir, `${repoDir}/evil`);
 
 	sessionClient = new TestClient(ORIGIN);
 	await login(sessionClient, 'admin', 'password123', ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	try {
-		await Deno.remove(outsideDir, { recursive: true });
+		await rm(outsideDir, { recursive: true, force: true });
 	} catch {
 		// cleanup best-effort
 	}
@@ -156,5 +159,3 @@ test('preview action rejects symlink escape', async () => {
 		`Expected inner status 400 for symlink escape, got ${body.status}`
 	);
 });
-
-await run();

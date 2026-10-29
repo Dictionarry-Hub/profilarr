@@ -20,12 +20,17 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { TestClient } from '#tests/harness/client.ts';
-import { createUser, login, setApiKey } from '#tests/harness/setup.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { execFile } from 'node:child_process';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { createUser, login, setApiKey } from '#integration/harness/setup.ts';
+import { openDb } from '#integration/harness/db.ts';
+
+const execFileAsync = promisify(execFile);
 
 const PORT_A = PORTS.backups.restoreA;
 const PORT_B = PORTS.backups.restoreB;
@@ -79,7 +84,7 @@ async function createAndReadBackup(client: TestClient, port: number): Promise<Ui
 	const backups = await listRes.json();
 	if (backups.length === 0) throw new Error('No backup files after job completed');
 
-	return await Deno.readFile(`./dist/integration-${port}/backups/${backups[0].filename}`);
+	return await readFile(`./dist/integration-${port}/backups/${backups[0].filename}`);
 }
 
 /**
@@ -88,24 +93,20 @@ async function createAndReadBackup(client: TestClient, port: number): Promise<Ui
 async function extractBackup(archiveBytes: Uint8Array): Promise<void> {
 	// Write archive to a temp file
 	const tarPath = `${BASE_B}/restore.tar.gz`;
-	await Deno.writeFile(tarPath, archiveBytes);
+	await writeFile(tarPath, archiveBytes);
 
 	// Extract into B's base path (backup contains a data/ directory)
-	const cmd = new Deno.Command('tar', {
-		args: ['-xzf', tarPath, '-C', BASE_B],
-		stdout: 'piped',
-		stderr: 'piped'
-	});
-	const { code, stderr } = await cmd.output();
-	if (code !== 0) {
-		throw new Error(`tar extract failed: ${new TextDecoder().decode(stderr)}`);
+	try {
+		await execFileAsync('tar', ['-xzf', tarPath, '-C', BASE_B]);
+	} catch (err) {
+		throw new Error(`tar extract failed: ${(err as { stderr?: string }).stderr ?? err}`);
 	}
 
 	// Clean up the archive
-	await Deno.remove(tarPath);
+	await rm(tarPath);
 }
 
-setup(async () => {
+beforeAll(async () => {
 	// ── Server A: create backup with known data ──────────────────────────
 	await startServer(PORT_A, { AUTH: 'on', ORIGIN: ORIGIN_A }, 'preview');
 
@@ -122,10 +123,10 @@ setup(async () => {
 	// ── Server B: restore from backup ────────────────────────────────────
 	// Create B's directory structure (startServer does this, but we need it
 	// before starting so we can extract the backup first)
-	await Deno.mkdir(`${BASE_B}/data`, { recursive: true });
-	await Deno.mkdir(`${BASE_B}/logs`, { recursive: true });
-	await Deno.mkdir(`${BASE_B}/backups`, { recursive: true });
-	await Deno.mkdir(`${BASE_B}/data/databases`, { recursive: true });
+	await mkdir(`${BASE_B}/data`, { recursive: true });
+	await mkdir(`${BASE_B}/logs`, { recursive: true });
+	await mkdir(`${BASE_B}/backups`, { recursive: true });
+	await mkdir(`${BASE_B}/data/databases`, { recursive: true });
 
 	await extractBackup(archiveBytes);
 
@@ -134,7 +135,7 @@ setup(async () => {
 	clientB = new TestClient(ORIGIN_B);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT_A);
 	await stopServer(PORT_B);
 });
@@ -179,5 +180,3 @@ test('restored server can create new backups', async () => {
 	assertExists(body.jobId);
 	assertEquals(typeof body.jobId, 'number');
 });
-
-await run();

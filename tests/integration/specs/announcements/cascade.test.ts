@@ -13,9 +13,9 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
 import {
 	countAnnouncements,
 	countAnnouncementsFor,
@@ -23,18 +23,18 @@ import {
 	deleteDatabaseInstance,
 	insertAnnouncement,
 	tryInsertOrphanAnnouncement
-} from '#integration/announcements/harness/setup.ts';
+} from '#integration/specs/announcements/harness/setup.ts';
 
 const PORT = PORTS.announcements.cascade;
 
 let dbPath: string;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off' }, 'preview');
 	dbPath = getDbPath(PORT);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -90,5 +90,3 @@ test('total table count reflects all surviving rows after cascades', () => {
 	// scenario (one per database). That sums to three.
 	assertEquals(countAnnouncements(dbPath), 3);
 });
-
-await run();

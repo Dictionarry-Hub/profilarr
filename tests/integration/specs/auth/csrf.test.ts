@@ -19,11 +19,11 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUser, createUserDirect } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUser, createUserDirect } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.csrf;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -36,13 +36,13 @@ const NO_ORIGIN_URL = `http://localhost:${NO_ORIGIN_PORT}`;
 const PROXY_PORT = PORTS.auth.csrfProxy;
 const PROXY_ORIGIN = 'https://profilarr.mydomain.com';
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	const client = new TestClient(ORIGIN);
 	await createUser(client, 'admin', 'password123', ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	await stopServer(NO_ORIGIN_PORT);
 	await stopServer(PROXY_PORT);
@@ -119,5 +119,3 @@ test('ORIGIN env (reverse proxy) — POST with evil origin returns 403', async (
 	);
 	assertEquals(res.status, 403);
 });
-
-await run();

@@ -3,10 +3,10 @@
  */
 
 import { assert, assertEquals, assertExists } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 import {
 	compilePcd,
 	insertOp,
@@ -14,7 +14,7 @@ import {
 	type ConflictStrategy,
 	type OpRow,
 	type PcdTestContext
-} from '#integration/pcd/harness/pcd.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
 
 const PORT = PORTS.pcd.conflictsEngineRegressions;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -27,11 +27,11 @@ type LatestHistory = {
 
 let counter = 0;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -289,5 +289,3 @@ function assertNoPendingConflicts(ctx: PcdTestContext): void {
 function sqlValue(value: string): string {
 	return `'${value.replace(/'/g, "''")}'`;
 }
-
-await run();

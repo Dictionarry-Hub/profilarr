@@ -7,12 +7,12 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { TestClient } from '#tests/harness/client.ts';
-import { createUser, login } from '#tests/harness/setup.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { createUser, login } from '#integration/harness/setup.ts';
+import { openDb } from '#integration/harness/db.ts';
 
 const PORT = PORTS.settings.landingPage;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -65,7 +65,7 @@ async function landingRedirect(): Promise<string | null> {
 	return res.headers.get('location');
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 
 	client = new TestClient(ORIGIN);
@@ -73,7 +73,7 @@ setup(async () => {
 	await login(client, 'admin', 'password123', ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -99,5 +99,3 @@ test('switching back to Automatic clears the stored page', async () => {
 	assertEquals(storedLandingPage(), null);
 	assertEquals(await landingRedirect(), '/databases');
 });
-
-await run();

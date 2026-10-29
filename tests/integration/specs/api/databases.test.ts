@@ -39,12 +39,12 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, setApiKey } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, setApiKey } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { openDb } from '#integration/harness/db.ts';
 
 const PORT = PORTS.api.databases;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -66,7 +66,7 @@ function seedDatabase(dbPath: string): void {
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN, INTEGRATION_TEST: '1' }, 'preview');
 	const dbPath = getDbPath(PORT);
 	await createUserDirect(dbPath, 'admin', 'password123');
@@ -74,7 +74,7 @@ setup(async () => {
 	client = new TestClient(ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -368,5 +368,3 @@ test('GET /api/v1/databases/{id} returns 404 after delete', async () => {
 	});
 	assertEquals(res.status, 404);
 });
-
-await run();

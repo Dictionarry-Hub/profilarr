@@ -13,11 +13,14 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUser, createUserDirect, login } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUser, createUserDirect, login } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+
+// Caddy serves HTTPS with a self-signed cert on localhost, so skip TLS verification here.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // HTTPS: Caddy on :7443 → server on :7003
 const HTTPS_PORT = PORTS.auth.cookieHttps;
@@ -27,7 +30,7 @@ const HTTPS_ORIGIN = 'https://localhost:7443';
 const HTTP_PORT = PORTS.auth.cookieHttp;
 const HTTP_ORIGIN = `http://localhost:${HTTP_PORT}`;
 
-setup(async () => {
+beforeAll(async () => {
 	// HTTPS server — Caddy terminates TLS on :7443 and proxies to :7003
 	await startServer(HTTPS_PORT, { AUTH: 'on', ORIGIN: HTTPS_ORIGIN }, 'preview');
 	// Create user directly in DB (bypasses CSRF — can't POST through Caddy during setup)
@@ -39,7 +42,7 @@ setup(async () => {
 	await createUser(httpSetup, 'admin', 'password123', HTTP_ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(HTTPS_PORT);
 	await stopServer(HTTP_PORT);
 });
@@ -76,5 +79,3 @@ test('login cookie has expiration date', async () => {
 	const attrs = client.getCookieAttributes('session');
 	assertNotEquals(attrs?.['expires'], undefined);
 });
-
-await run();

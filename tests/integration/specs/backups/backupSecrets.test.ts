@@ -24,14 +24,21 @@
  * on-disk archive is bytewise unchanged by the download.
  */
 
+import { execFile } from 'node:child_process';
+import { mkdir, mkdtemp, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
 import { assert, assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, login } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, login } from '#integration/harness/setup.ts';
+import { PORTS } from '#integration/harness/ports.ts';
+import { openDb } from '#integration/harness/db.ts';
 import { hash } from '#utils/auth/bcrypt.ts';
+
+const execFileAsync = promisify(execFile);
 
 const PORT = PORTS.backups.backupSecrets;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -77,8 +84,8 @@ async function seedSecrets(dbPath: string) {
 		);
 
 		const repoPath = `./dist/integration-${PORT}/data/databases/${uuid}`;
-		await Deno.mkdir(`${repoPath}/.git`, { recursive: true });
-		await Deno.writeTextFile(
+		await mkdir(`${repoPath}/.git`, { recursive: true });
+		await writeFile(
 			`${repoPath}/.git/config`,
 			`[core]
 \trepositoryformatversion = 0
@@ -88,8 +95,8 @@ async function seedSecrets(dbPath: string) {
 \tfetch = +refs/heads/*:refs/remotes/origin/*
 `
 		);
-		await Deno.mkdir(`${repoPath}/deps/schema/.git`, { recursive: true });
-		await Deno.writeTextFile(
+		await mkdir(`${repoPath}/deps/schema/.git`, { recursive: true });
+		await writeFile(
 			`${repoPath}/deps/schema/.git/config`,
 			`[core]
 \trepositoryformatversion = 0
@@ -173,7 +180,7 @@ async function downloadAndExtractBackup(
 	const onDiskArchivePath = `${BACKUPS_DIR}/${backupFilename}`;
 
 	// Capture bytes BEFORE download.
-	onDiskBytesBefore = await Deno.readFile(onDiskArchivePath);
+	onDiskBytesBefore = await readFile(onDiskArchivePath);
 
 	// Download triggers sanitize-on-egress.
 	const res = await client.get(`/api/v1/backups/${backupFilename}`);
@@ -181,31 +188,27 @@ async function downloadAndExtractBackup(
 
 	// Capture bytes AFTER download. Should match exactly: the on-disk source
 	// is never mutated.
-	onDiskBytesAfter = await Deno.readFile(onDiskArchivePath);
+	onDiskBytesAfter = await readFile(onDiskArchivePath);
 
-	const tmpDir = await Deno.makeTempDir({ prefix: 'profilarr-backup-test-' });
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-backup-test-'));
 	const tarPath = `${tmpDir}/backup.tar.gz`;
 	const data = new Uint8Array(await res.arrayBuffer());
-	await Deno.writeFile(tarPath, data);
+	await writeFile(tarPath, data);
 
 	extractDir = `${tmpDir}/extracted`;
-	await Deno.mkdir(extractDir, { recursive: true });
-	const extract = new Deno.Command('tar', {
-		args: ['-xzf', tarPath, '-C', extractDir],
-		stdout: 'piped',
-		stderr: 'piped'
-	});
-	const { code } = await extract.output();
-	if (code !== 0) {
+	await mkdir(extractDir, { recursive: true });
+	try {
+		await execFileAsync('tar', ['-xzf', tarPath, '-C', extractDir]);
+	} catch {
 		throw new Error('Failed to extract backup tar.gz');
 	}
 
 	const dbPath = `${extractDir}/data/profilarr.db`;
-	await Deno.stat(dbPath);
+	await stat(dbPath);
 	return { dbPath, infoPath: `${extractDir}/data/INFO.json` };
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 	await seedSecrets(getDbPath(PORT));
@@ -237,12 +240,12 @@ setup(async () => {
 	infoPath = paths.infoPath;
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	if (extractDir) {
 		try {
 			const tmpDir = extractDir.replace('/extracted', '');
-			await Deno.remove(tmpDir, { recursive: true });
+			await rm(tmpDir, { recursive: true, force: true });
 		} catch {
 			// best effort
 		}
@@ -326,11 +329,13 @@ test('downloaded archive: database_instances rows preserved with PAT nulled', ()
 });
 
 test('downloaded archive: cloned repository git remotes have credentials stripped', async () => {
-	const repoConfig = await Deno.readTextFile(
-		`${extractDir}/data/databases/${databaseUuid}/.git/config`
+	const repoConfig = await readFile(
+		`${extractDir}/data/databases/${databaseUuid}/.git/config`,
+		'utf8'
 	);
-	const depConfig = await Deno.readTextFile(
-		`${extractDir}/data/databases/${databaseUuid}/deps/schema/.git/config`
+	const depConfig = await readFile(
+		`${extractDir}/data/databases/${databaseUuid}/deps/schema/.git/config`,
+		'utf8'
 	);
 
 	assertEquals(
@@ -399,10 +404,10 @@ test('live database api_keys are untouched by the download', () => {
 
 async function collectFiles(dir: string): Promise<string[]> {
 	const files: string[] = [];
-	for await (const entry of Deno.readDir(dir)) {
+	for (const entry of await readdir(dir, { withFileTypes: true })) {
 		const path = `${dir}/${entry.name}`;
-		if (entry.isDirectory) files.push(...(await collectFiles(path)));
-		else if (entry.isFile) files.push(path);
+		if (entry.isDirectory()) files.push(...(await collectFiles(path)));
+		else if (entry.isFile()) files.push(path);
 	}
 	return files;
 }
@@ -424,7 +429,7 @@ test('downloaded archive: no secret bytes remain in any file', async () => {
 	const decoder = new TextDecoder('latin1');
 	const found: string[] = [];
 	for (const file of await collectFiles(`${extractDir}/data`)) {
-		const text = decoder.decode(await Deno.readFile(file));
+		const text = decoder.decode(await readFile(file));
 		for (const [label, secret] of Object.entries(secrets)) {
 			if (text.includes(secret)) found.push(`${label} in ${file.slice(extractDir.length + 1)}`);
 		}
@@ -436,7 +441,7 @@ test('downloaded archive: no secret bytes remain in any file', async () => {
 // ─── INFO.json + on-disk integrity ───────────────────────────────────────────
 
 test('downloaded archive: INFO.json has sanitized=true', async () => {
-	const raw = await Deno.readTextFile(infoPath);
+	const raw = await readFile(infoPath, 'utf8');
 	const info = JSON.parse(raw) as { sanitized?: boolean };
 	assertEquals(info.sanitized, true, 'INFO.json.sanitized should be flipped to true on download');
 });
@@ -448,5 +453,3 @@ test('local on-disk archive is bytewise unchanged after download', () => {
 		'Download must not modify the source archive on disk'
 	);
 });
-
-await run();

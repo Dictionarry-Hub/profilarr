@@ -12,7 +12,7 @@ import {
 	type OpRow,
 	type PcdTestContext,
 	type SetupPcdOptions
-} from '#integration/pcd/harness/pcd.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
 
 export function createScenarioFactory(port: number, prefix: string) {
 	let counter = 0;

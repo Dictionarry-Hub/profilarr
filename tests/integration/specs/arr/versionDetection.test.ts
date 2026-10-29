@@ -8,11 +8,12 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { TestClient } from '#integration/harness/client.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { serve, type MockHttpServer } from '#integration/harness/http.ts';
+import { PORTS } from '#integration/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
 
 const PORT = PORTS.arr.versionDetection;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -21,13 +22,13 @@ const FAKE_URL = `http://localhost:${FAKE_PORT}`;
 const FAKE_KEY = 'fake-sonarr-key';
 
 let client: TestClient;
-let fakeArr: Deno.HttpServer;
+let fakeArr: MockHttpServer;
 
 /** What the fake Arr claims to be; tests switch it between v5 and v4. */
 let fake = { version: '5.0.0.2569', current: 'v5', deprecated: ['v3'] };
 
-function startFakeArr(): Deno.HttpServer {
-	return Deno.serve({ port: FAKE_PORT, onListen: () => {} }, (req) => {
+function startFakeArr(): Promise<MockHttpServer> {
+	return serve(FAKE_PORT, (req) => {
 		const path = new URL(req.url).pathname;
 		if (req.headers.get('x-api-key') !== FAKE_KEY) {
 			return new Response(null, { status: 401 });
@@ -70,8 +71,8 @@ function readInstance(name: string) {
 	}
 }
 
-setup(async () => {
-	fakeArr = startFakeArr();
+beforeAll(async () => {
+	fakeArr = await startFakeArr();
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 	const db = openDb(getDbPath(PORT));
@@ -82,7 +83,7 @@ setup(async () => {
 	}
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	await fakeArr.shutdown();
 });
@@ -141,5 +142,3 @@ test('the Test button without an instance id stores nothing', async () => {
 	const row = readInstance('Sonarr v5');
 	assertEquals(row?.detected_version, '4.0.20.3014');
 });
-
-await run();

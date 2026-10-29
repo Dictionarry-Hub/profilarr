@@ -5,11 +5,18 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { TestClient } from '#tests/harness/client.ts';
-import { createUser, login, setApiKey } from '#tests/harness/setup.ts';
+import { execFile } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { createUser, login, setApiKey } from '#integration/harness/setup.ts';
+
+const execFileAsync = promisify(execFile);
 
 const PORT = PORTS.backups.upload;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -22,47 +29,37 @@ let apiKeyClient: TestClient;
 
 /** Create a valid tar.gz in a temp location and return its path. */
 async function createTarGz(name: string, content: string = 'test'): Promise<string> {
-	const tmpDir = await Deno.makeTempDir();
-	await Deno.writeTextFile(`${tmpDir}/data.txt`, content);
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-'));
+	await writeFile(`${tmpDir}/data.txt`, content);
 
 	const archivePath = `${tmpDir}/${name}`;
-	const cmd = new Deno.Command('tar', {
-		args: ['-czf', archivePath, '-C', tmpDir, 'data.txt'],
-		stdout: 'null',
-		stderr: 'null'
-	});
-	await cmd.output();
+	await execFileAsync('tar', ['-czf', archivePath, '-C', tmpDir, 'data.txt']);
 	return archivePath;
 }
 
 /** Create a tar.gz with a zip slip path traversal entry. */
 async function createZipSlipTarGz(): Promise<string> {
-	const tmpDir = await Deno.makeTempDir();
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-'));
 	const dataDir = `${tmpDir}/data`;
-	await Deno.mkdir(dataDir, { recursive: true });
-	await Deno.writeTextFile(`${dataDir}/evil.txt`, 'malicious');
+	await mkdir(dataDir, { recursive: true });
+	await writeFile(`${dataDir}/evil.txt`, 'malicious');
 
 	const archivePath = `${tmpDir}/backup-zipslip.tar.gz`;
-	const cmd = new Deno.Command('tar', {
-		args: [
-			'-czf',
-			archivePath,
-			'--transform',
-			's|data/evil.txt|../../etc/evil.txt|',
-			'-C',
-			tmpDir,
-			'data/evil.txt'
-		],
-		stdout: 'null',
-		stderr: 'null'
-	});
-	await cmd.output();
+	await execFileAsync('tar', [
+		'-czf',
+		archivePath,
+		'--transform',
+		's|data/evil.txt|../../etc/evil.txt|',
+		'-C',
+		tmpDir,
+		'data/evil.txt'
+	]);
 	return archivePath;
 }
 
 /** Build a FormData with a file from disk. */
 async function buildUploadForm(filePath: string, fieldName: string = 'file'): Promise<FormData> {
-	const data = await Deno.readFile(filePath);
+	const data = await readFile(filePath);
 	const filename = filePath.split('/').pop()!;
 	const blob = new Blob([data], { type: 'application/gzip' });
 	const formData = new FormData();
@@ -70,7 +67,7 @@ async function buildUploadForm(filePath: string, fieldName: string = 'file'): Pr
 	return formData;
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 
 	client = new TestClient(ORIGIN);
@@ -82,7 +79,7 @@ setup(async () => {
 	await setApiKey(getDbPath(PORT), API_KEY);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -126,11 +123,11 @@ test('POST /api/v1/backups/upload without auth returns 401', async () => {
 // ─── Validation ──────────────────────────────────────────────────────────────
 
 test('upload with non-tar.gz file returns 400', async () => {
-	const tmpDir = await Deno.makeTempDir();
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-'));
 	const fakePath = `${tmpDir}/notabackup.zip`;
-	await Deno.writeTextFile(fakePath, 'fake zip content');
+	await writeFile(fakePath, 'fake zip content');
 
-	const data = await Deno.readFile(fakePath);
+	const data = await readFile(fakePath);
 	const formData = new FormData();
 	formData.append('file', new Blob([data]), 'notabackup.zip');
 
@@ -209,5 +206,3 @@ test('upload with duplicate filename returns 400', async () => {
 	const body = await res2.json();
 	assertEquals(body.error.includes('already exists'), true);
 });
-
-await run();

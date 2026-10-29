@@ -10,21 +10,21 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.localBypass;
 const ORIGIN = `http://localhost:${PORT}`;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -35,5 +35,3 @@ test('local requests require auth', async () => {
 	assertEquals(res.status, 303, 'Unauthenticated local request should redirect');
 	assertEquals(res.headers.get('location'), '/auth/login', 'Redirect should target login');
 });
-
-await run();

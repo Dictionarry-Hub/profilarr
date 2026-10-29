@@ -18,16 +18,16 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 import {
 	setupPcd,
 	seedBase,
 	compilePcd,
 	type PcdTestContext
-} from '#integration/pcd/harness/pcd.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 
 const PORT = PORTS.auth.xss;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -52,7 +52,7 @@ function assertNotRendered(body: string, label: string) {
 	);
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 	ctx = await setupPcd({ port: PORT, name: 'xss-probe' });
 	seedBase(ctx, [
@@ -62,7 +62,7 @@ setup(async () => {
 	await compilePcd(ctx);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -79,5 +79,3 @@ test('/quality-profiles/[dbId] does not render an unquoted onerror handler', asy
 	assertEquals(body.includes(QP_NAME), true, 'seeded quality profile is missing from the page');
 	assertNotRendered(body, '/quality-profiles');
 });
-
-await run();

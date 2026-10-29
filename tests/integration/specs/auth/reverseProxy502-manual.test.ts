@@ -1,10 +1,11 @@
 /**
  * Manual integration check: reverse proxy SSR pages work after header fix
  *
- * This spec is intentionally interactive and is excluded from normal
- * `deno task test integration` runs. Run it explicitly:
+ * This spec is intentionally interactive and is skipped in normal
+ * integration runs. It needs the auth Docker stack (nginx) running and a
+ * human at the terminal. Run it explicitly:
  *
- *   deno task test integration reverseProxy502-manual
+ *   INTEGRATION_MANUAL=1 deno task test:integration tests/integration/specs/auth/reverseProxy502-manual.test.ts
  *
  * It starts:
  * - Profilarr preview on PORTS.auth.reverseProxy502Manual
@@ -20,44 +21,40 @@
  * - nginx does not log "upstream sent too big header"
  */
 
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, describe, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.reverseProxy502Manual;
 const PROXY_ORIGIN = 'http://localhost:7446';
-
-setup(async () => {
-	await startServer(PORT, { AUTH: 'on', ORIGIN: PROXY_ORIGIN }, 'preview');
-	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
-});
-
-teardown(async () => {
-	await stopServer(PORT);
-});
+const execFileAsync = promisify(execFile);
 
 async function waitForEnter(message: string): Promise<void> {
 	console.log(`\n${message}`);
 	console.log('Press Enter to continue...');
-	await Deno.stdin.read(new Uint8Array(1024));
+	await new Promise<void>((resolve) => {
+		process.stdin.once('data', () => {
+			process.stdin.pause();
+			resolve();
+		});
+		process.stdin.resume();
+	});
 }
 
 async function printNginxLogs(label: string): Promise<void> {
-	const result = await new Deno.Command('docker', {
-		args: [
-			'compose',
-			'-f',
-			'tests/integration/auth/docker-compose.yml',
-			'logs',
-			'nginx',
-			'--tail=50'
-		],
-		stdout: 'piped',
-		stderr: 'piped'
-	}).output();
+	const { stdout, stderr } = await execFileAsync('docker', [
+		'compose',
+		'-f',
+		'tests/integration/specs/auth/docker-compose.yml',
+		'logs',
+		'nginx',
+		'--tail=50'
+	]);
 
-	const logs = new TextDecoder().decode(result.stdout) + new TextDecoder().decode(result.stderr);
+	const logs = stdout + stderr;
 	const filtered = logs
 		.split('\n')
 		.filter(
@@ -76,24 +73,33 @@ async function printNginxLogs(label: string): Promise<void> {
 	console.log('--- end nginx logs ---\n');
 }
 
-test('manual repro flow', async () => {
-	console.log(`Open ${PROXY_ORIGIN}/auth/login`);
-	console.log('Login with: admin / password123');
+describe.skipIf(process.env.INTEGRATION_MANUAL !== '1')('reverse proxy 502 (manual)', () => {
+	beforeAll(async () => {
+		await startServer(PORT, { AUTH: 'on', ORIGIN: PROXY_ORIGIN }, 'preview');
+		await createUserDirect(getDbPath(PORT), 'admin', 'password123');
+	});
 
-	await waitForEnter(
-		'Step 1: after login, use in-app navigation to reach /databases. Confirm that it works.'
-	);
-	await printNginxLogs('step 1');
+	afterAll(async () => {
+		await stopServer(PORT);
+	});
 
-	await waitForEnter(
-		'Step 2: while still logged in, go directly to /databases in the address bar (or open it in a new tab). Confirm that it works.'
-	);
-	await printNginxLogs('step 2');
+	test('manual repro flow', async () => {
+		console.log(`Open ${PROXY_ORIGIN}/auth/login`);
+		console.log('Login with: admin / password123');
 
-	await waitForEnter(
-		'Step 3: start from /auth/login, navigate to /databases, then refresh the /databases page manually. Confirm that refresh also works.'
-	);
-	await printNginxLogs('step 3');
+		await waitForEnter(
+			'Step 1: after login, use in-app navigation to reach /databases. Confirm that it works.'
+		);
+		await printNginxLogs('step 1');
+
+		await waitForEnter(
+			'Step 2: while still logged in, go directly to /databases in the address bar (or open it in a new tab). Confirm that it works.'
+		);
+		await printNginxLogs('step 2');
+
+		await waitForEnter(
+			'Step 3: start from /auth/login, navigate to /databases, then refresh the /databases page manually. Confirm that refresh also works.'
+		);
+		await printNginxLogs('step 3');
+	});
 });
-
-await run();

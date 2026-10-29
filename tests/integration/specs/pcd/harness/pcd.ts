@@ -2,10 +2,11 @@
  * Shared PCD integration harness.
  */
 
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { assert } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { getDbPath } from '#tests/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { getDbPath } from '#integration/harness/server.ts';
 
 export type ConflictStrategy = 'override' | 'align' | 'ask';
 export type OpOrigin = 'base' | 'user';
@@ -91,10 +92,10 @@ export async function setupPcd(options: SetupPcdOptions): Promise<PcdTestContext
 export async function createPcdRepo(basePath: string, uuid: string): Promise<string> {
 	const pcdPath = `${basePath}/data/databases/${uuid}`;
 	const schemaDir = `${pcdPath}/deps/schema/ops`;
-	await Deno.mkdir(schemaDir, { recursive: true });
+	await mkdir(schemaDir, { recursive: true });
 
-	const schema = await Deno.readTextFile('docs/backend/0.schema.sql');
-	await Deno.writeTextFile(`${schemaDir}/0.schema.sql`, schema);
+	const schema = await readFile('docs/backend/0.schema.sql', 'utf8');
+	await writeFile(`${schemaDir}/0.schema.sql`, schema);
 
 	return pcdPath;
 }

@@ -2,12 +2,13 @@
  * PCD conflict tests: sonarr quality definitions.
  */
 
+import { readFileSync } from 'node:fs';
 import { assert, assertEquals, assertExists, assertStringIncludes } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
 	compilePcd,
 	insertOp,
@@ -20,8 +21,8 @@ import {
 	type OpRow,
 	type PcdTestContext,
 	type SeedOperation
-} from '#integration/pcd/harness/pcd.ts';
-import { write } from '#integration/pcd/harness/write.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
+import { write } from '#integration/specs/pcd/harness/write.ts';
 
 const PORT = PORTS.pcd.conflictsQualityDefinitionsSonarr;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -47,11 +48,11 @@ const SEED_TIERS = [
 
 let counter = 0;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -514,7 +515,7 @@ function compiledSonarrQualityDefinitions(ctx: PcdTestContext): SonarrQualityDef
 
 	try {
 		replay.exec('PRAGMA foreign_keys = ON');
-		replay.exec(Deno.readTextFileSync('docs/backend/0.schema.sql'));
+		replay.exec(readFileSync('docs/backend/0.schema.sql', 'utf8'));
 
 		const baseOps = source
 			.prepare(
@@ -637,5 +638,3 @@ function sqlValue(value: unknown): string {
 	if (typeof value === 'boolean') return value ? '1' : '0';
 	return `'${String(value).replace(/'/g, "''")}'`;
 }
-
-await run();

@@ -14,21 +14,24 @@
  */
 
 import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, queryDb } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, queryDb } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+
+// Caddy serves HTTPS with a self-signed cert on localhost, so skip TLS verification here.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const PORT = PORTS.auth.proxy;
 const PROXY_ORIGIN = 'https://localhost:7444';
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN: PROXY_ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -105,5 +108,3 @@ test('POST with mismatched Origin through proxy returns 403', async () => {
 	);
 	assertEquals(res.status, 403);
 });
-
-await run();

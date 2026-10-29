@@ -5,7 +5,7 @@
  * constraints under test.
  */
 
-import { openDb } from '#tests/harness/db.ts';
+import { openDb } from '#integration/harness/db.ts';
 
 export interface CreateDbOpts {
 	uuid: string;

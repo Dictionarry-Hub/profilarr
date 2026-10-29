@@ -6,12 +6,12 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { TestClient } from '#tests/harness/client.ts';
-import { createUser, login, setApiKey, queryDb } from '#tests/harness/setup.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { createUser, login, setApiKey, queryDb } from '#integration/harness/setup.ts';
+import { openDb } from '#integration/harness/db.ts';
 
 const PORT = PORTS.backups.jobStatus;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -83,7 +83,7 @@ function insertRunHistory(
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 
 	client = new TestClient(ORIGIN);
@@ -95,7 +95,7 @@ setup(async () => {
 	await setApiKey(getDbPath(PORT), API_KEY);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -202,5 +202,3 @@ test('queued job has result: null', async () => {
 	assertEquals(body.status, 'queued');
 	assertEquals(body.result, null);
 });
-
-await run();

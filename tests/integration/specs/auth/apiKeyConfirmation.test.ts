@@ -18,8 +18,8 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import {
 	clearLoginAttempts,
 	createUserDirect,
@@ -27,9 +27,9 @@ import {
 	getSessionConfirmedAt,
 	login,
 	setSessionConfirmedAt
-} from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+} from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.apiKeyConfirmation;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -66,12 +66,12 @@ const confirmedAt = (sessionId: string) => getSessionConfirmedAt(getDbPath(PORT)
 const age = (sessionId: string, minutes: number) =>
 	setSessionConfirmedAt(getDbPath(PORT), sessionId, minutes);
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', password);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -165,5 +165,3 @@ test('repeated wrong passwords are rate limited like the login page', async () =
 	assertEquals(await createKey(client), 403);
 	clearLoginAttempts(getDbPath(PORT));
 });
-
-await run();

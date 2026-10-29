@@ -23,12 +23,20 @@
  */
 
 import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { formResult, getSessionConfirmedAt, setSessionConfirmedAt } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { completeOidcLogin, MOCK_OIDC_STALE_URL, OIDC_SETTINGS } from '#tests/harness/oidc.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import {
+	formResult,
+	getSessionConfirmedAt,
+	setSessionConfirmedAt
+} from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import {
+	completeOidcLogin,
+	MOCK_OIDC_STALE_URL,
+	OIDC_SETTINGS
+} from '#integration/harness/oidc.ts';
 import { REAUTH_SKEW_SECONDS } from '#utils/auth/confirmation.ts';
 
 const PORT = PORTS.auth.oidcReauth;
@@ -61,7 +69,7 @@ async function createKey(client: TestClient, base: string): Promise<number> {
 	return (await formResult(res)).status;
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN, ...OIDC_SETTINGS }, 'preview');
 	await startServer(
 		STALE_PORT,
@@ -70,7 +78,7 @@ setup(async () => {
 	);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	await stopServer(STALE_PORT);
 });
@@ -153,5 +161,3 @@ test('an SSO session cannot confirm with a password', async () => {
 	assertEquals((await formResult(res)).status, 403);
 	assertEquals(await createKey(client, ORIGIN), 403);
 });
-
-await run();

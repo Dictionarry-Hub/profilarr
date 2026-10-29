@@ -6,10 +6,17 @@
  * row at the current host's data/databases/{uuid} directory.
  */
 
+import { execFile } from 'node:child_process';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { Database } from '#db/sqlite.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
 import { config } from '#utils/config/config.ts';
+
+const execFileAsync = promisify(execFile);
 
 const SENTINEL_NAME = '.restore-pending';
 
@@ -17,11 +24,11 @@ let baseDir: string;
 let applyPendingRestore: () => Promise<void>;
 
 async function createRestoreArchive(archivePath: string, uuid: string): Promise<void> {
-	const stage = await Deno.makeTempDir({ prefix: 'profilarr-restore-local-paths-' });
+	const stage = await mkdtemp(join(tmpdir(), 'profilarr-restore-local-paths-'));
 	try {
 		const dataDir = `${stage}/data`;
-		await Deno.mkdir(`${dataDir}/databases/${uuid}`, { recursive: true });
-		await Deno.writeTextFile(`${dataDir}/databases/${uuid}/pcd.json`, '{}');
+		await mkdir(`${dataDir}/databases/${uuid}`, { recursive: true });
+		await writeFile(`${dataDir}/databases/${uuid}/pcd.json`, '{}');
 
 		const database = new Database(`${dataDir}/profilarr.db`);
 		try {
@@ -41,17 +48,13 @@ async function createRestoreArchive(archivePath: string, uuid: string): Promise<
 			database.close();
 		}
 
-		const tar = new Deno.Command('tar', {
-			args: ['-czf', archivePath, '-C', stage, 'data'],
-			stdout: 'piped',
-			stderr: 'piped'
-		});
-		const { code, stderr } = await tar.output();
-		if (code !== 0) {
-			throw new Error(`tar create failed: ${new TextDecoder().decode(stderr)}`);
+		try {
+			await execFileAsync('tar', ['-czf', archivePath, '-C', stage, 'data']);
+		} catch (err) {
+			throw new Error(`tar create failed: ${(err as { stderr?: string }).stderr ?? err}`);
 		}
 	} finally {
-		await Deno.remove(stage, { recursive: true });
+		await rm(stage, { recursive: true, force: true });
 	}
 }
 
@@ -67,16 +70,16 @@ function readRestoredLocalPath(dbPath: string): string {
 	}
 }
 
-setup(async () => {
-	baseDir = await Deno.makeTempDir({ prefix: 'profilarr-restore-local-paths-' });
+beforeAll(async () => {
+	baseDir = await mkdtemp(join(tmpdir(), 'profilarr-restore-local-paths-'));
 	config.setBasePath(baseDir);
-	await Deno.mkdir(config.paths.data, { recursive: true });
+	await mkdir(config.paths.data, { recursive: true });
 	({ applyPendingRestore } = await import('#utils/backup/applyPending.ts'));
 });
 
-teardown(async () => {
+afterAll(async () => {
 	if (baseDir) {
-		await Deno.remove(baseDir, { recursive: true });
+		await rm(baseDir, { recursive: true, force: true });
 	}
 });
 
@@ -84,12 +87,10 @@ test('restore rewrites database_instances.local_path for the current host', asyn
 	const uuid = crypto.randomUUID();
 	const archivePath = `${baseDir}/backup-restore-local-paths.tar.gz`;
 	await createRestoreArchive(archivePath, uuid);
-	await Deno.writeTextFile(`${baseDir}/${SENTINEL_NAME}`, archivePath);
+	await writeFile(`${baseDir}/${SENTINEL_NAME}`, archivePath);
 
 	await applyPendingRestore();
 
 	assertEquals(readRestoredLocalPath(config.paths.database), `${config.paths.databases}/${uuid}`);
-	assertEquals(await Deno.readTextFile(`${config.paths.databases}/${uuid}/pcd.json`), '{}');
+	assertEquals(await readFile(`${config.paths.databases}/${uuid}/pcd.json`, 'utf8'), '{}');
 });
-
-await run();

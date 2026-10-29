@@ -5,11 +5,18 @@
  */
 
 import { assertEquals, assertExists } from '@std/assert';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { TestClient } from '#tests/harness/client.ts';
-import { createUser, login, setApiKey } from '#tests/harness/setup.ts';
+import { execFile } from 'node:child_process';
+import { mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { promisify } from 'node:util';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { createUser, login, setApiKey } from '#integration/harness/setup.ts';
+
+const execFileAsync = promisify(execFile);
 
 const PORT = PORTS.backups.createAndDelete;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -22,29 +29,24 @@ let apiKeyClient: TestClient;
 
 /** Create a dummy backup file for delete tests. */
 async function createDummyBackup(filename: string): Promise<void> {
-	const tmpDir = await Deno.makeTempDir();
-	await Deno.writeTextFile(`${tmpDir}/data.txt`, 'dummy');
+	const tmpDir = await mkdtemp(join(tmpdir(), 'profilarr-'));
+	await writeFile(`${tmpDir}/data.txt`, 'dummy');
 
-	const cmd = new Deno.Command('tar', {
-		args: ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data.txt'],
-		stdout: 'null',
-		stderr: 'null'
-	});
-	await cmd.output();
-	await Deno.remove(tmpDir, { recursive: true });
+	await execFileAsync('tar', ['-czf', `${BACKUPS_DIR}/${filename}`, '-C', tmpDir, 'data.txt']);
+	await rm(tmpDir, { recursive: true, force: true });
 }
 
 /** Check if a file exists. */
 async function fileExists(path: string): Promise<boolean> {
 	try {
-		await Deno.stat(path);
+		await stat(path);
 		return true;
 	} catch {
 		return false;
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 
 	client = new TestClient(ORIGIN);
@@ -56,7 +58,7 @@ setup(async () => {
 	await setApiKey(getDbPath(PORT), API_KEY);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -158,5 +160,3 @@ test('file is actually deleted after successful DELETE', async () => {
 
 	assertEquals(await fileExists(`${BACKUPS_DIR}/backup-verify-deleted.tar.gz`), false);
 });
-
-await run();

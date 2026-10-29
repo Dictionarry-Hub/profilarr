@@ -3,11 +3,11 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { TestClient } from '#integration/harness/client.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { PORTS } from '#integration/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
 
 const PORT = PORTS.arr.instanceTargets;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -64,13 +64,13 @@ function disableDefaultDelayProfiles(): void {
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 	disableDefaultDelayProfiles();
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -147,5 +147,3 @@ test('same URL with different Arr type is allowed', async () => {
 
 	assertEquals(countArrInstances(), 2);
 });
-
-await run();

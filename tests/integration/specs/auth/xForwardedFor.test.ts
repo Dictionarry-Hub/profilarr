@@ -16,21 +16,21 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, clearLoginAttempts, queryDb } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, clearLoginAttempts, queryDb } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.xForwardedFor;
 const ORIGIN = `http://localhost:${PORT}`;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -119,5 +119,3 @@ test('failed login attempts recorded under real IP, not spoofed header', async (
 		'login_attempts should record real TCP IP, not spoofed X-Forwarded-For'
 	);
 });
-
-await run();

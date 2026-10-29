@@ -12,40 +12,45 @@
  * - nginx logs do not report "upstream sent too big header"
  */
 
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { assertEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, login } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, login } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.reverseProxy502;
 const PROXY_ORIGIN = 'http://localhost:7446';
+const execFileAsync = promisify(execFile);
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN: PROXY_ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
 async function getNginxLogs(): Promise<string> {
-	const result = await new Deno.Command('docker', {
-		args: [
-			'compose',
-			'-f',
-			'tests/integration/auth/docker-compose.yml',
-			'logs',
-			'nginx',
-			'--tail=50'
-		],
-		stdout: 'piped',
-		stderr: 'piped'
-	}).output();
-
-	return new TextDecoder().decode(result.stdout) + new TextDecoder().decode(result.stderr);
+	const args = [
+		'compose',
+		'-f',
+		'tests/integration/specs/auth/docker-compose.yml',
+		'logs',
+		'nginx',
+		'--tail=50'
+	];
+	try {
+		const { stdout, stderr } = await execFileAsync('docker', args);
+		return stdout + stderr;
+	} catch (err) {
+		// A failed log read returns whatever was printed, as the test only greps it.
+		const e = err as { stdout?: string; stderr?: string };
+		return (e.stdout ?? '') + (e.stderr ?? '');
+	}
 }
 
 function getHeaderSizes(headers: Headers): { totalBytes: number; linkBytes: number } {
@@ -131,5 +136,3 @@ test('proxy serves full SSR /databases page without upstream header errors', asy
 		throw new Error('nginx still reports "upstream sent too big header" for /databases');
 	}
 });
-
-await run();

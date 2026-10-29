@@ -3,14 +3,14 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
-import { opCheckpoint } from '#integration/pcd/harness/pcd.ts';
-import { write } from '#integration/pcd/harness/write.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
+import { opCheckpoint } from '#integration/specs/pcd/harness/pcd.ts';
+import { write } from '#integration/specs/pcd/harness/write.ts';
 // eslint-disable-next-line profilarr/import-paths -- 3 folders deep until the integration suite moves to Playwright (#963)
-import { createScenarioFactory, userOpsSince } from '#integration/pcd/write/regex/helpers.ts';
+import { createScenarioFactory, userOpsSince } from '#integration/specs/pcd/write/regex/helpers.ts';
 import type { ConditionData } from '#shared/pcd/display.ts';
 
 const PORT = PORTS.pcd.writeCustomFormatConditions;
@@ -19,11 +19,11 @@ const GB = 1024 * 1024 * 1024;
 
 const { seededPcd } = createScenarioFactory(PORT, 'pcd-write-custom-format-conditions');
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -107,5 +107,3 @@ function sizeCondition(size: { minBytes: number | null; maxBytes: number | null 
 		size
 	};
 }
-
-await run();

@@ -17,12 +17,15 @@
  */
 
 import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { queryDb, createUserDirect } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { completeOidcLogin, OIDC_SETTINGS } from '#tests/harness/oidc.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { queryDb, createUserDirect } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { completeOidcLogin, OIDC_SETTINGS } from '#integration/harness/oidc.ts';
+
+// Caddy serves HTTPS with a self-signed cert on localhost, so skip TLS verification here.
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 const PORT = PORTS.auth.oidc;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -36,7 +39,7 @@ const AUTH_ON_ORIGIN = `http://localhost:${AUTH_ON_PORT}`;
 
 const OIDC_ENV = { AUTH: 'on', ...OIDC_SETTINGS };
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { ORIGIN, ...OIDC_ENV }, 'preview');
 	await startServer(PROXY_PORT, { ORIGIN: PROXY_ORIGIN, ...OIDC_ENV }, 'preview');
 	await startServer(AUTH_ON_PORT, { AUTH: 'on', ORIGIN: AUTH_ON_ORIGIN }, 'preview');
@@ -44,7 +47,7 @@ setup(async () => {
 	await createUserDirect(getDbPath(AUTH_ON_PORT), 'admin', 'password123');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	await stopServer(PROXY_PORT);
 	await stopServer(AUTH_ON_PORT);
@@ -172,5 +175,3 @@ test('full OIDC flow through reverse proxy', async () => {
 	const pageRes = await client.get('/databases');
 	assertNotEquals(pageRes.status, 303, 'Should not redirect to login through proxy');
 });
-
-await run();

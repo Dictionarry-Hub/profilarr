@@ -47,12 +47,12 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { createUserDirect, login, queryDb } from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { openDb } from '#tests/harness/db.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { createUserDirect, login, queryDb } from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { openDb } from '#integration/harness/db.ts';
 import { hash } from '#utils/auth/bcrypt.ts';
 
 const PORT = PORTS.auth.secretExposure;
@@ -206,13 +206,13 @@ function assertNotExposed(body: string, secret: string, label: string) {
 	assertEquals(body.includes(secret), false, `Response body contains ${label}: ${secret}`);
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	await createUserDirect(getDbPath(PORT), 'admin', 'password123');
 	await seedSecrets(getDbPath(PORT));
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -367,5 +367,3 @@ test('failed send history does not expose the Telegram bot token', async () => {
 		'Telegram bot token in notification history'
 	);
 });
-
-await run();

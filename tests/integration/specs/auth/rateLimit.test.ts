@@ -21,16 +21,16 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import {
 	createUser,
 	login,
 	clearLoginAttempts,
 	insertExpiredAttempts
-} from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+} from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.rateLimit;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -49,13 +49,13 @@ async function getFormStatus(res: Response): Promise<number> {
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	const client = new TestClient(ORIGIN);
 	await createUser(client, 'myuser', 'password123', ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -161,5 +161,3 @@ test('429 response includes error message', async () => {
 	const body = await res.text();
 	assertEquals(body.includes('Too many login attempts'), true);
 });
-
-await run();

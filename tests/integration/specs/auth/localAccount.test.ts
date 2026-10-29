@@ -15,12 +15,12 @@
  */
 
 import { assert, assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
-import { formResult, login, queryDb, setApiKey } from '#tests/harness/setup.ts';
-import { completeOidcLogin, OIDC_SETTINGS } from '#tests/harness/oidc.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
+import { formResult, login, queryDb, setApiKey } from '#integration/harness/setup.ts';
+import { completeOidcLogin, OIDC_SETTINGS } from '#integration/harness/oidc.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.localAccount;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -76,7 +76,7 @@ function changePassword(client: TestClient, current: string, next: string): Prom
 	);
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN, ...OIDC_SETTINGS }, 'preview');
 	await setApiKey(getDbPath(PORT), API_KEY);
 
@@ -86,7 +86,7 @@ setup(async () => {
 	await startServer(RACE_PORT, { AUTH: 'on', ORIGIN: RACE_ORIGIN, ...OIDC_SETTINGS }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	await stopServer(RACE_PORT);
 });
@@ -299,5 +299,3 @@ test('two create submissions at once make only one local account', async () => {
 	assertEquals(rows[0].count, 1, 'Only one password account may exist');
 	assertEquals(statuses.sort(), [200, 409]);
 });
-
-await run();

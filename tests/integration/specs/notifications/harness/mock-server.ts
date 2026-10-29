@@ -3,6 +3,8 @@
  * Used to verify what notifiers actually send.
  */
 
+import { serve, type MockHttpServer } from '#integration/harness/http.ts';
+
 export interface CapturedRequest {
 	method: string;
 	path: string;
@@ -12,15 +14,16 @@ export interface CapturedRequest {
 
 /**
  * Create a mock HTTP server that captures all incoming requests.
- * Returns the captured requests array (mutated in place) and the server handle.
+ * Resolves once listening, with the captured requests array (mutated in place)
+ * and the server handle.
  */
-export function createMockServer(
+export async function createMockServer(
 	port: number,
 	responseStatus: number = 200
-): { captured: CapturedRequest[]; server: Deno.HttpServer } {
+): Promise<{ captured: CapturedRequest[]; server: MockHttpServer }> {
 	const captured: CapturedRequest[] = [];
 
-	const server = Deno.serve({ port, onListen: () => {} }, async (req) => {
+	const server = await serve(port, async (req) => {
 		const url = new URL(req.url);
 		let body: unknown = null;
 		try {

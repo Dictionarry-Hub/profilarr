@@ -7,12 +7,13 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
-import { formResult } from '#tests/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { TestClient } from '#integration/harness/client.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { serve, type MockHttpServer } from '#integration/harness/http.ts';
+import { PORTS } from '#integration/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
+import { formResult } from '#integration/harness/setup.ts';
 
 const PORT = PORTS.arr.basicAuth;
 const ORIGIN = `http://localhost:${PORT}`;
@@ -24,11 +25,11 @@ const PROXY_PASSWORD = 'proxy-password';
 const FAKE_VERSION = '4.0.20.3014';
 
 let client: TestClient;
-let fakeArr: Deno.HttpServer;
+let fakeArr: MockHttpServer;
 
-function startFakeArr(): Deno.HttpServer {
+function startFakeArr(): Promise<MockHttpServer> {
 	const expected = `Basic ${btoa(`${PROXY_USER}:${PROXY_PASSWORD}`)}`;
-	return Deno.serve({ port: FAKE_PORT, onListen: () => {} }, (req) => {
+	return serve(FAKE_PORT, (req) => {
 		if (req.headers.get('authorization') !== expected) {
 			return new Response(null, {
 				status: 401,
@@ -128,8 +129,8 @@ function readInstance(name: string) {
 	}
 }
 
-setup(async () => {
-	fakeArr = startFakeArr();
+beforeAll(async () => {
+	fakeArr = await startFakeArr();
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 	client = new TestClient(ORIGIN);
 	const db = openDb(getDbPath(PORT));
@@ -140,7 +141,7 @@ setup(async () => {
 	}
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 	await fakeArr.shutdown();
 });
@@ -334,5 +335,3 @@ test('Test Connection never sends saved Basic Auth to a different URL', async ()
 	);
 	assertEquals(res.status, 400);
 });
-
-await run();

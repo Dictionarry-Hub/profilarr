@@ -3,18 +3,18 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { startServer, stopServer } from '#tests/harness/server.ts';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { base } from '#integration/pcd/harness/fixtures.ts';
+import { startServer, stopServer } from '#integration/harness/server.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { base } from '#integration/specs/pcd/harness/fixtures.ts';
 import {
 	compilePcd,
 	normalizeSql,
 	opCheckpoint,
 	parseDesiredState,
 	parseMetadata
-} from '#integration/pcd/harness/pcd.ts';
-import { write } from '#integration/pcd/harness/write.ts';
+} from '#integration/specs/pcd/harness/pcd.ts';
+import { write } from '#integration/specs/pcd/harness/write.ts';
 import { assertActionFailed, createScenarioFactory, userOpsSince } from './helpers.ts';
 
 const PORT = PORTS.pcd.writeRegexCreate;
@@ -22,11 +22,11 @@ const ORIGIN = `http://localhost:${PORT}`;
 
 const { newPcd, seededPcd } = createScenarioFactory(PORT, 'pcd-write-regex-create');
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off', ORIGIN }, 'preview');
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -167,5 +167,3 @@ test('duplicate name fails without writing ops', async () => {
 function countOccurrences(value: string, search: string): number {
 	return value.split(search).length - 1;
 }
-
-await run();

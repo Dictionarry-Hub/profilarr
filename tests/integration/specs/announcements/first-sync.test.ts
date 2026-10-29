@@ -9,12 +9,13 @@
  * captured before sync runs, NOT on row count.
  */
 
+import { mkdir, writeFile } from 'node:fs/promises';
 import { assertEquals, assert } from '@std/assert';
-import { run, setup, teardown, test } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
-import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
-import { openDb } from '#tests/harness/db.ts';
-import { createDatabaseInstance } from '#integration/announcements/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#integration/harness/server.ts';
+import { openDb } from '#integration/harness/db.ts';
+import { createDatabaseInstance } from '#integration/specs/announcements/harness/setup.ts';
 
 const PORT = PORTS.announcements.firstSync;
 const BASE_PATH = `./dist/integration-${PORT}`;
@@ -36,8 +37,8 @@ let modsPromise: Promise<ReconcileMods> | null = null;
 
 async function loadMods(): Promise<ReconcileMods> {
 	if (!modsPromise) {
-		Deno.env.set('APP_BASE_PATH', BASE_PATH);
-		Deno.env.set('AUTH', 'off');
+		process.env.APP_BASE_PATH = BASE_PATH;
+		process.env.AUTH = 'off';
 		modsPromise = (async () => {
 			const [serviceMod, configMod, dbMod] = await Promise.all([
 				import('#server/announcements/database/service.ts'),
@@ -56,7 +57,7 @@ async function loadMods(): Promise<ReconcileMods> {
 
 async function writeAnnouncementFile(uuid: string, id: string, title: string): Promise<void> {
 	const dir = `${BASE_PATH}/data/databases/${uuid}/announcements`;
-	await Deno.mkdir(dir, { recursive: true });
+	await mkdir(dir, { recursive: true });
 	const content = `---
 title: ${title}
 severity: info
@@ -65,7 +66,7 @@ published_at: 2026-04-20T10:00:00Z
 
 Body for ${id}.
 `;
-	await Deno.writeTextFile(`${dir}/${id}.md`, content);
+	await writeFile(`${dir}/${id}.md`, content);
 }
 
 function setLastSyncedAt(databaseId: number, value: string | null): void {
@@ -89,12 +90,12 @@ function readReadAt(databaseId: number, announcementId: string): string | null {
 	}
 }
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'off' }, 'preview');
 	dbPath = getDbPath(PORT);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -152,5 +153,3 @@ test('subsequent reconciles do not refire newlyInserted for unchanged ids', asyn
 	const second = await reconcileFromWorkingCopy(databaseId, { isFirstSync: false });
 	assertEquals(second.newlyInserted.length, 0);
 });
-
-await run();

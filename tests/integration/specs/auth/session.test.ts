@@ -15,28 +15,28 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '#tests/harness/client.ts';
-import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { TestClient } from '#integration/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#integration/harness/server.ts';
 import {
 	createUser,
 	login,
 	expireSession,
 	setSessionExpiry,
 	getSessionExpiry
-} from '#tests/harness/setup.ts';
-import { setup, teardown, test, run } from '#tests/harness/runner.ts';
-import { PORTS } from '#tests/harness/ports.ts';
+} from '#integration/harness/setup.ts';
+import { afterAll, beforeAll, test } from 'vitest';
+import { PORTS } from '#integration/harness/ports.ts';
 
 const PORT = PORTS.auth.session;
 const ORIGIN = `http://localhost:${PORT}`;
 
-setup(async () => {
+beforeAll(async () => {
 	await startServer(PORT, { AUTH: 'on', ORIGIN }, 'preview');
 	const client = new TestClient(ORIGIN);
 	await createUser(client, 'admin', 'password123', ORIGIN);
 });
 
-teardown(async () => {
+afterAll(async () => {
 	await stopServer(PORT);
 });
 
@@ -110,5 +110,3 @@ test('POST /auth/logout without Origin — blocked by CSRF', async () => {
 	const res = await client.postForm('/auth/logout', {});
 	assertEquals(res.status, 403, `Expected 403 for POST without Origin, got ${res.status}`);
 });
-
-await run();
