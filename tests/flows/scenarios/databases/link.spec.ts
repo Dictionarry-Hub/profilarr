@@ -7,7 +7,7 @@
  * - Unlinking removes the row, the clone and the database's scheduled sync,
  *   and every section page falls back to "No Databases Linked".
  * - Reaches the internet, so it carries the `@online` tag and is skipped
- *   unless the run has network (`deno task flows --online`).
+ *   unless the run has network (`deno task test:flows --online`).
  * - The app runs without the harness's URL rewrite, so git reaches GitHub
  *   instead of the test's local upstream.
  */

@@ -186,7 +186,7 @@ jobs:
         run: deno run -A npm:@sveltejs/kit sync
 
       - name: Run unit tests
-        run: deno task test
+        run: deno task test:unit
 
   semgrep:
     name: Semgrep
@@ -281,7 +281,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /tmp/docker-images.tar
-          key: docker-images-${{ hashFiles('tests/integration/auth/docker-compose.yml') }}
+          key: docker-images-${{ hashFiles('tests/integration/specs/auth/docker-compose.yml') }}
 
       - name: Load cached Docker images
         if: steps.docker-cache.outputs.cache-hit == 'true'
@@ -296,7 +296,7 @@ jobs:
           docker save ghcr.io/navikt/mock-oauth2-server:3.0.1 caddy:2-alpine nginx:alpine -o /tmp/docker-images.tar
 
       - name: Run integration tests
-        run: deno task test integration
+        run: deno task test:integration
 
   # The suite is split across four runners. Each runs every fourth spec file
   # (`--deal`), so a slow area's files spread across them.
@@ -368,7 +368,7 @@ jobs:
       # gives the container network, so the tests tagged @online, which link a
       # real database from GitHub, run here too.
       - name: Run flow tests
-        run: deno task flows --online --deal=${{ matrix.shard }}/4
+        run: deno task test:flows --online --deal=${{ matrix.shard }}/4
 
       # The blob report holds every result and its traces. Flow Tests merges them.
       - name: Upload blob report

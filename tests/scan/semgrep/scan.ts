@@ -8,8 +8,8 @@
  * Requires: semgrep CLI installed
  *
  * Usage:
- *   deno task test semgrep           Full scan
- *   deno task test semgrep --quick   Local rules only
+ *   deno task scan:semgrep           Full scan
+ *   deno task scan:semgrep --quick   Local rules only
  */
 
 const LOCAL_CONFIG = 'tests/scan/semgrep/';

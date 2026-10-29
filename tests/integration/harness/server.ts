@@ -3,27 +3,66 @@
  * Each instance gets a unique APP_BASE_PATH and PORT.
  *
  * Supports two modes:
- *   - 'dev' (default): spawns Vite dev server
+ *   - 'dev' (default): spawns the Vite dev server on Node
  *   - 'preview': runs the compiled production binary (requires deno task build first)
  */
 
+import { spawn } from 'node:child_process';
+import type { ChildProcess } from 'node:child_process';
+import { mkdir, rm } from 'node:fs/promises';
+import type { Readable } from 'node:stream';
 import { log } from './log.ts';
 
 export type ServerMode = 'dev' | 'preview';
 
+interface ExitStatus {
+	code: number | null;
+	signal: NodeJS.Signals | null;
+}
+
 interface ServerInstance {
-	process: Deno.ChildProcess;
+	process: ChildProcess;
 	port: number;
 	basePath: string;
 	url: string;
 	stdoutBuf: string[];
 	stderrBuf: string[];
-	exitStatus: Deno.CommandStatus | null;
+	exitStatus: ExitStatus | null;
+	exited: Promise<void>;
 	startedAt: number;
 }
 
 const instances = new Map<number, ServerInstance>();
-const DEBUG_VERBOSE = Deno.env.get('INTEGRATION_DEBUG') === '1';
+const DEBUG_VERBOSE = process.env.INTEGRATION_DEBUG === '1';
+
+/**
+ * Variables Vitest sets in its own process and workers. They are removed from
+ * the server's env so the Vite dev server and SvelteKit plugins don't switch
+ * into their test-runner behaviour.
+ */
+const VITEST_ENV_KEYS = [
+	'TEST',
+	'VITEST',
+	'VITEST_MODE',
+	'VITEST_POOL_ID',
+	'VITEST_WORKER_ID',
+	'FORCE_TTY',
+	'BASE_URL',
+	'MODE',
+	'DEV',
+	'PROD',
+	'SSR'
+];
+
+function serverBaseEnv(): Record<string, string> {
+	const env: Record<string, string> = {};
+	for (const [key, value] of Object.entries(process.env)) {
+		if (value !== undefined) env[key] = value;
+	}
+	for (const key of VITEST_ENV_KEYS) delete env[key];
+	if (env.NODE_ENV === 'test') delete env.NODE_ENV;
+	return env;
+}
 
 /**
  * Spawn a server with the given port and env overrides.
@@ -47,13 +86,13 @@ export async function startServer(
 	log.server(port, `Starting [${mode}]${envDesc ? ` (${envDesc})` : ''}`);
 
 	// Ensure the base path directories exist
-	await Deno.mkdir(`${basePath}/data`, { recursive: true });
-	await Deno.mkdir(`${basePath}/logs`, { recursive: true });
-	await Deno.mkdir(`${basePath}/backups`, { recursive: true });
-	await Deno.mkdir(`${basePath}/data/databases`, { recursive: true });
+	await mkdir(`${basePath}/data`, { recursive: true });
+	await mkdir(`${basePath}/logs`, { recursive: true });
+	await mkdir(`${basePath}/backups`, { recursive: true });
+	await mkdir(`${basePath}/data/databases`, { recursive: true });
 
 	const env: Record<string, string> = {
-		...Deno.env.toObject(),
+		...serverBaseEnv(),
 		PORT: String(port),
 		HOST: '0.0.0.0',
 		APP_BASE_PATH: basePath,
@@ -62,59 +101,67 @@ export async function startServer(
 		...envOverrides
 	};
 
-	let cmd: Deno.Command;
+	let command: string;
+	let args: string[];
 
 	if (mode === 'preview') {
-		cmd = new Deno.Command('./dist/build/profilarr', {
-			env,
-			stdout: 'piped',
-			stderr: 'piped'
-		});
+		command = './dist/build/profilarr';
+		args = [];
 	} else {
 		env.DENO_ENV = 'development';
 		env.VITE_PLATFORM = 'linux-amd64';
 		env.VITE_CHANNEL = 'test';
-		cmd = new Deno.Command('deno', {
-			args: ['run', '-A', 'vite', 'dev', '--port', String(port)],
-			env,
-			stdout: 'piped',
-			stderr: 'piped'
-		});
+		command = process.execPath;
+		args = ['node_modules/vite/bin/vite.js', 'dev', '--port', String(port)];
 	}
 
 	const startedAt = Date.now();
-	const process = cmd.spawn();
+	const child = spawn(command, args, { env, stdio: ['ignore', 'pipe', 'pipe'] });
 
 	const stdoutBuf: string[] = [];
 	const stderrBuf: string[] = [];
 	const url = `http://localhost:${port}`;
 
+	// Track exit so waitForReady can detect early death. A spawn failure
+	// (e.g. missing binary) emits 'error' and may never emit 'exit'.
+	let resolveExited: () => void = () => {};
+	const exited = new Promise<void>((resolve) => {
+		resolveExited = resolve;
+	});
+
 	const instance: ServerInstance = {
-		process,
+		process: child,
 		port,
 		basePath,
 		url,
 		stdoutBuf,
 		stderrBuf,
 		exitStatus: null,
+		exited,
 		startedAt
 	};
 	instances.set(port, instance);
 
-	captureStream(process.stdout, stdoutBuf, port, 'stdout');
-	captureStream(process.stderr, stderrBuf, port, 'stderr');
+	if (child.stdout) captureStream(child.stdout, stdoutBuf, port, 'stdout');
+	if (child.stderr) captureStream(child.stderr, stderrBuf, port, 'stderr');
 
-	// Track exit so waitForReady can detect early death.
-	process.status.then((status) => {
+	const markExited = (status: ExitStatus): void => {
+		if (instance.exitStatus) return;
 		instance.exitStatus = status;
 		const elapsed = Date.now() - startedAt;
 		log.server(
 			port,
 			`Process exited (code=${status.code}, signal=${status.signal ?? 'none'}) after ${elapsed}ms`
 		);
+		resolveExited();
+	};
+	child.on('exit', (code, signal) => markExited({ code, signal }));
+	child.on('error', (err) => {
+		pushLine(stderrBuf, `spawn error: ${err.message}`);
+		markExited({ code: null, signal: null });
 	});
 
-	log.server(port, `PID ${process.pid} | Waiting for health check...`);
+	log.server(port, `PID ${child.pid ?? 'n/a'} | Waiting for health check...`);
 	try {
 		await waitForReady(instance, 60_000);
 		log.server(port, `Ready at ${url} (${Date.now() - startedAt}ms)`);
@@ -139,8 +186,8 @@ export async function stopServer(
 
 	log.server(port, 'Stopping...');
 	try {
-		instance.process.kill('SIGTERM');
-		await instance.process.status;
+		if (!instance.exitStatus) instance.process.kill('SIGTERM');
+		await instance.exited;
 	} catch {
 		// Process may already be dead
 	}
@@ -148,9 +195,9 @@ export async function stopServer(
 	if (!options.keepData) {
 		log.server(port, `Cleaning up ${instance.basePath}`);
 		try {
-			await Deno.remove(instance.basePath, { recursive: true });
+			await rm(instance.basePath, { recursive: true, force: true });
 		} catch {
-			// Directory may not exist
+			// Removal errors don't block cleanup
 		}
 	}
 
@@ -235,43 +282,43 @@ async function waitForReady(instance: ServerInstance, timeoutMs: number): Promis
 }
 
 /**
+ * Append a line to a capture buffer, dropping the oldest once it holds 1000.
+ */
+function pushLine(buf: string[], line: string): void {
+	if (buf.length >= 1000) buf.shift();
+	buf.push(line);
+}
+
+/**
  * Pipe a child stream into a buffer (so we can dump it on failure) and, if
  * INTEGRATION_DEBUG=1, mirror it live so we can see what the server is doing.
  * Buffer is bounded at 1000 lines per stream; oldest dropped first.
  */
 function captureStream(
-	stream: ReadableStream<Uint8Array>,
+	stream: Readable,
 	buf: string[],
 	port: number,
 	tag: 'stdout' | 'stderr'
 ): void {
-	const decoder = new TextDecoder();
-	const reader = stream.getReader();
+	stream.setEncoding('utf8');
 	let leftover = '';
-	(async () => {
-		try {
-			while (true) {
-				const { done, value } = await reader.read();
-				if (done) break;
-				const text = leftover + decoder.decode(value, { stream: true });
-				const lines = text.split('\n');
-				leftover = lines.pop() ?? '';
-				for (const line of lines) {
-					if (buf.length >= 1000) buf.shift();
-					buf.push(line);
-					if (DEBUG_VERBOSE) {
-						console.error(`[${port}:${tag}] ${line}`);
-					}
-				}
+	stream.on('data', (chunk: string) => {
+		const lines = (leftover + chunk).split('\n');
+		leftover = lines.pop() ?? '';
+		for (const line of lines) {
+			pushLine(buf, line);
+			if (DEBUG_VERBOSE) {
+				console.error(`[${port}:${tag}] ${line}`);
 			}
-			if (leftover) {
-				if (buf.length >= 1000) buf.shift();
-				buf.push(leftover);
-			}
-		} catch {
-			// Stream closed
 		}
-	})();
+	});
+	stream.on('end', () => {
+		if (leftover) pushLine(buf, leftover);
+		leftover = '';
+	});
+	stream.on('error', () => {
+		// Stream closed
+	});
 }
 
 /**
@@ -288,7 +335,7 @@ function dumpDiagnostics(
 		`\n──── DIAG [:${instance.port}] ${reason} (${elapsed}ms since start) ─────────────────`
 	);
 	console.error(
-		`  pid=${instance.process.pid} ` +
+		`  pid=${instance.process.pid ?? 'n/a'} ` +
 			`exit=${instance.exitStatus ? `code=${instance.exitStatus.code} signal=${instance.exitStatus.signal ?? 'none'}` : 'still running'}`
 	);
 	console.error(`  basePath=${instance.basePath}`);
@@ -301,7 +348,7 @@ function dumpDiagnostics(
 
 /**
  * Dump diagnostics for every running server instance in this process. Called
- * from harness/runner.ts when a setup or test fails so the spec's stderr
+ * from harness/vitest.setup.ts when a spec's beforeAll fails so the spec's stderr
  * captures whatever the server logged before it died (or what it's still
  * doing if it's still alive).
  */
@@ -314,7 +361,7 @@ export function dumpAllServerDiagnostics(reason: string = 'post-failure dump'): 
 
 /**
  * Dump diagnostics only for server instances that have already exited
- * (process.status resolved). Used after a test failure to surface a server
+ * (exit observed). Used after a test failure to surface a server
  * crash without spamming output when the server is still healthy and the
  * test failed for normal assertion reasons.
  *

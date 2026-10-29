@@ -245,7 +245,7 @@ export class TestClient {
 	 * Parse Set-Cookie headers from a response and update the jar.
 	 */
 	private parseSetCookies(response: Response): void {
-		// Use getSetCookie() if available (Deno supports this)
+		// Use getSetCookie() if available (Node and Deno support it)
 		const setCookies =
 			(response.headers as unknown as { getSetCookie?: () => string[] }).getSetCookie?.() ?? [];
 

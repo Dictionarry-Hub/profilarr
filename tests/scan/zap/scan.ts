@@ -13,8 +13,8 @@
  * Requires: compiled binary (deno task build), Docker
  *
  * Usage:
- *   deno task test zap --baseline
- *   deno task test zap --full
+ *   deno task scan:zap --baseline
+ *   deno task scan:zap --full
  */
 
 const BINARY = './dist/build/profilarr';
@@ -35,7 +35,7 @@ function parseScanMode(): ScanMode {
 	if (Deno.args.includes('--full')) return 'full';
 	if (Deno.args.includes('--api')) return 'api';
 
-	console.error('Usage: deno task test zap <mode>\n');
+	console.error('Usage: deno task scan:zap <mode>\n');
 	console.error('Modes:');
 	console.error('  --baseline   Passive scan only (spider + check responses)');
 	console.error('  --full       Passive + active attacks (SQLi, XSS, etc.)');

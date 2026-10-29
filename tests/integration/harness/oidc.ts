@@ -1,6 +1,6 @@
 /**
  * OIDC helpers for integration tests that sign in through mock-oauth2-server
- * (see tests/integration/auth/docker-compose.yml).
+ * (see tests/integration/specs/auth/docker-compose.yml).
  */
 
 import { assertEquals, assertStringIncludes } from '@std/assert';

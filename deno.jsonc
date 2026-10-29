@@ -52,7 +52,11 @@
 		"check": "deno task check:client && deno task check:tests",
 		"check:client": "NODE_ENV=development deno run -A svelte-check --tsconfig ./tsconfig.json",
 		"check:tests": "node node_modules/typescript/bin/tsc -p tests/unit/tsconfig.json",
-		"test": "deno run -A tests/runner.ts",
+		"test:unit": "node node_modules/vitest/vitest.mjs run",
+		"test:integration": "node node_modules/vitest/vitest.mjs run --config vitest.integration.config.ts",
+		"test:flows": "node scripts/flows/run.ts",
+		"scan:zap": "deno run -A --no-check tests/scan/zap/scan.ts",
+		"scan:semgrep": "deno run -A --no-check tests/scan/semgrep/scan.ts",
 		"release:dry": "node scripts/release.ts dry",
 		"release:scan": "node scripts/release.ts scan",
 		"release": "node scripts/release.ts tag",
@@ -61,7 +65,6 @@
 		"generate:pcd-types": "node scripts/generate/pcd-types.ts",
 		"fixtures:update": "node scripts/flows/fixtures-update.ts",
 		"fixtures:arr": "node scripts/flows/arr-record.ts",
-		"flows": "node scripts/flows/run.ts",
 		"flows:timings": "node scripts/flows/timings.ts"
 	},
 	"compilerOptions": {

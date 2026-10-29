@@ -34,7 +34,7 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.test
-tests/integration/notifications/.env
+tests/integration/specs/notifications/.env
 
 # Local release planning
 .release-plan.md
