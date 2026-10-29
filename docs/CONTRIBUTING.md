@@ -30,7 +30,7 @@ For the branching model, release process, and versioning, see
 | ----------------------------------------- | -------------------- | -------- | -------------------------------------------------------- |
 | [Git](https://git-scm.com/)               | 2.x+                 | Yes      | Version control; also used at runtime for PCD operations |
 | [Deno](https://deno.com/)                 | See `.tool-versions` | Yes      | Runtime, task runner, and package manager                |
-| [Node.js](https://nodejs.org/)            | See `.tool-versions` | Yes      | Required by Vite and svelte-check                        |
+| [Node.js](https://nodejs.org/)            | See `.tool-versions` | Yes      | Used by Vite and svelte-check; runs scripts and tests    |
 | [.NET SDK](https://dotnet.microsoft.com/) | See `.tool-versions` | No       | Only needed for the parser service (CF/QP testing)       |
 
 ```bash
@@ -255,9 +255,9 @@ AI-assisted contributions must still follow the normal project rules:
 - Be ready to answer questions and make follow-up changes yourself.
 
 When reporting validation, use this project's commands. For code changes, that
-usually means the same Deno-based checks used by CI: `deno task lint`,
-`deno task check`, `deno task build`, or the relevant `deno task test ...`
-command. Do not list unrelated npm, framework, or generated tool commands as if
+usually means the same `deno task` checks used by CI: `deno task lint`,
+`deno task check`, `deno task build`, or the relevant `deno task test:unit`,
+`deno task test:integration`, or `deno task test:flows` command. Do not list unrelated npm, framework, or generated tool commands as if
 they validate Profilarr.
 
 If you could not run a relevant check, say that plainly and explain why. A PR
