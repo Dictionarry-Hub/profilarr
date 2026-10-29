@@ -141,6 +141,7 @@ export async function applyPendingRestore(): Promise<void> {
 			meta: { archivePath, error: message }
 		});
 		await removeIfExists(stagingPath, { recursive: true });
+		// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 		throw new Error(`Restore archive does not contain data/profilarr.db: ${message}`);
 	}
 

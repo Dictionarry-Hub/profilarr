@@ -51,6 +51,7 @@ export async function loadOperationsFromDir(
 			});
 		}
 	} catch (error) {
+		// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 		throw new Error(`Failed to read operations from ${dirPath}: ${error}`);
 	}
 

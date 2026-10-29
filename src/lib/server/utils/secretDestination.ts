@@ -9,8 +9,8 @@
  * a wrong one replaces the stored secret instead of exposing it.
  *
  * Every `+page.server.ts` that reads a secret form field must use this guard
- * or carry a `lint-disable-file secret-destination` directive with a reason
- * (`scripts/lint/secretDestination.ts`).
+ * or switch `profilarr/secret-destination` off for the file with a reason
+ * (`scripts/lint/rules/secret-destination.js`).
  */
 
 export interface SecretDestinationCheck {

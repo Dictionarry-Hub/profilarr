@@ -38,7 +38,6 @@
 	export let mode: 'create' | 'edit';
 	export let instance: ArrInstancePublic | undefined = undefined;
 	export let initialType: string = '';
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
 	export let cleanupSettings: CleanupSettings | null = null;
 	/** Edit mode: whether Basic Auth is saved. The values never reach the browser. */

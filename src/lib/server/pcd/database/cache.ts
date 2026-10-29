@@ -325,6 +325,7 @@ export class PCDCache {
 							});
 						}
 					}
+					// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 					throw new Error(
 						`Failed to execute operation ${operation.filename} in ${operation.layer} layer: ${error}`
 					);

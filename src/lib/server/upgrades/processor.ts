@@ -183,6 +183,7 @@ async function monitorQueueDuringCommand<T>(options: {
 	}) => Promise<void>;
 }): Promise<ArrCommand> {
 	const startTime = Date.now();
+	// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 	let command: ArrCommand | null = null;
 	let completedAt: number | null = null;
 	let reportedDownloads: number | null = null;
@@ -245,6 +246,7 @@ async function monitorQueueDuringCommand<T>(options: {
 						observedDownloads: options.getObservedCount(),
 						graceElapsedMs
 					});
+					// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 					mismatchLogged = true;
 				}
 

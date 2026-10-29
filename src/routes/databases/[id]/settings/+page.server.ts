@@ -1,4 +1,4 @@
-// lint-disable-file secret-destination -- the PAT only goes to github.com and the repository URL cannot be changed here
+/* eslint-disable profilarr/secret-destination -- the PAT only goes to github.com and the repository URL cannot be changed here */
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';

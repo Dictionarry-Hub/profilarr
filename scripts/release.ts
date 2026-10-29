@@ -33,6 +33,7 @@ export async function readNotes(path: string | undefined): Promise<string | null
 		text = (await Deno.readTextFile(path)).trim();
 	} catch (error) {
 		if (error instanceof Deno.errors.NotFound) {
+			// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 			throw new Error(`Release notes file ${path} was not found.`);
 		}
 

@@ -5,7 +5,7 @@
 
 import { sortTitle } from '$shared/utils/sort.ts';
 
-// deno-lint-ignore no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- selectors apply to items of any shape
 export interface Selector<T = any> {
 	id: string;
 	label: string;

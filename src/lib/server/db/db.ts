@@ -95,6 +95,7 @@ class DatabaseManager {
 				source: 'DatabaseManager',
 				meta: error
 			});
+			// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 			throw new Error(`Failed to initialize database: ${message}`);
 		}
 	}
