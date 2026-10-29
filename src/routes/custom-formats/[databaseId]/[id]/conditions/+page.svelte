@@ -1,25 +1,25 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { tick } from 'svelte';
 	import Plus from '@lucide/svelte/icons/plus';
 	import Save from '@lucide/svelte/icons/save';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import Info from '@lucide/svelte/icons/info';
 	import ConditionCard from './components/ConditionCard.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import SyncPromptModal from '$ui/modal/SyncPromptModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '$alerts/store';
-	import { sortConditions } from '$shared/pcd/conditions';
-	import { current, isDirty, initEdit, update } from '#lib/client/stores/dirty.js';
+	import Badge from '#ui/badge/Badge.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import SyncPromptModal from '#ui/modal/SyncPromptModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { sortConditions } from '#shared/pcd/conditions.ts';
+	import { current, isDirty, initEdit, update } from '#stores/dirty.ts';
 	import type { PageData } from './$types';
-	import type { ConditionData } from '$shared/pcd/display.ts';
-	import type { AffectedArr } from '$shared/sync/types.ts';
+	import type { ConditionData } from '#shared/pcd/display.ts';
+	import type { AffectedArr } from '#shared/sync/types.ts';
 
 	let infoModalOpen = false;
 	let showSyncModal = false;

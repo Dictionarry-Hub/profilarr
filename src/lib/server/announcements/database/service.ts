@@ -13,21 +13,21 @@
  * published.
  */
 
-import { db } from '$db/db.ts';
-import { databaseAnnouncementQueries } from '$db/queries/databaseAnnouncements.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { logger } from '$logger/logger.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { reconcile } from '../shared/reconcile.ts';
-import type { ReconcilePlan } from '../shared/types.ts';
+import { db } from '#db/db.ts';
+import { databaseAnnouncementQueries } from '#db/queries/databaseAnnouncements.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { logger } from '#logger/logger.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { reconcile } from '#server/announcements/shared/reconcile.ts';
+import type { ReconcilePlan } from '#server/announcements/shared/types.ts';
 import { parseAnnouncementsDir, type ParseError } from './parser.ts';
 import {
 	rowToRecord,
 	type DatabaseAnnouncementParsed,
 	type DatabaseAnnouncementRecord
 } from './types.ts';
-import { getPCDPath } from '$pcd/utils/operations.ts';
+import { getPCDPath } from '#pcd/utils/operations.ts';
 
 /** Match the bulletin cap. Misbehaving PCDs can't blow up the table. */
 export const DATABASE_ANNOUNCEMENTS_CAP = 1000;

@@ -1,20 +1,16 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import {
-	parseWithCacheBatch,
-	isParserHealthy,
-	matchPatternsBatch
-} from '#lib/server/utils/arr/parser/index.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { parseWithCacheBatch, isParserHealthy, matchPatternsBatch } from '#arr/parser/index.ts';
 import {
 	getAllConditionsForEvaluation,
 	evaluateCustomFormat,
 	getParsedInfo,
 	extractPatternsByType,
 	filterConditionsForArrType
-} from '$pcd/entities/customFormats/index.ts';
-import type { EvaluationArrType, PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
-import type { EvaluateRequest, EvaluateResponse, ReleaseEvaluation } from '$shared/pcd/display.ts';
+} from '#entities/customFormats/index.ts';
+import type { EvaluationArrType, PatternMatchMaps } from '#entities/customFormats/index.ts';
+import type { EvaluateRequest, EvaluateResponse, ReleaseEvaluation } from '#shared/pcd/display.ts';
 
 function getArrTypeForRelease(type: 'movie' | 'series'): EvaluationArrType {
 	return type === 'movie' ? 'radarr' : 'sonarr';

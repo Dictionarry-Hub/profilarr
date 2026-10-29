@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { CustomFormatTableRow } from '$shared/pcd/display.ts';
+	import type { CustomFormatTableRow } from '#shared/pcd/display.ts';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import { renderMarkdown } from '$shared/utils/markdown';
-	import { page } from '$stores/page';
-	import { sortConditions } from '$shared/pcd/conditions';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
-	import { FEATURES } from '$shared/features.ts';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
+	import { page } from '#stores/page.ts';
+	import { sortConditions } from '#shared/pcd/conditions.ts';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
+	import { FEATURES } from '#shared/features.ts';
 
 	export let formats: CustomFormatTableRow[];
 

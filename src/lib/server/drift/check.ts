@@ -1,6 +1,6 @@
-import type { BaseArrClient } from '$arr/base.ts';
-import type { DriftCounts, DriftDiff } from '$shared/drift.ts';
-import type { SyncArrType } from '$sync/mappings.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { DriftCounts, DriftDiff } from '#shared/drift.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 import {
 	buildExpectedCustomFormatsPerDatabase,
 	compareCustomFormatDriftPerDatabase
@@ -12,7 +12,7 @@ import {
 	buildExpectedQualityProfilesPerDatabase,
 	compareQualityProfileDriftPerDatabase
 } from './qualityProfiles.ts';
-import { createProfileSizeSource } from '$sync/qualityProfiles/sizeSource.ts';
+import { createProfileSizeSource } from '#server/sync/qualityProfiles/sizeSource.ts';
 
 export interface DriftCheckResult {
 	status: 'clean' | 'drift_detected';

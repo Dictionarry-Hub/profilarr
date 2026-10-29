@@ -10,7 +10,7 @@
  * synchronous is per-connection but only affects crash safety, not concurrency.
  */
 
-import { Database } from '$db/sqlite.ts';
+import { Database } from '#db/sqlite.ts';
 
 export function openDb(dbPath: string): Database {
 	const db = new Database(dbPath);

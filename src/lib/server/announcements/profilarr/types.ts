@@ -7,7 +7,7 @@
  *  3. Service record types: camelCase shape exposed to API routes and load functions.
  */
 
-import type { AnnouncementSeverity } from '../shared/types.ts';
+import type { AnnouncementSeverity } from '#server/announcements/shared/types.ts';
 
 export type { AnnouncementSeverity };
 

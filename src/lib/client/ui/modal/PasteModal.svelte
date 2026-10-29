@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, tick } from 'svelte';
 	import Modal from './Modal.svelte';
-	import CodeInput from '$ui/form/CodeInput.svelte';
+	import CodeInput from '#ui/form/CodeInput.svelte';
 
 	export let open = false;
 	export let header = 'Paste';

@@ -3,7 +3,7 @@
  *
  * `crypto.randomUUID` only exists in browser secure contexts (HTTPS or
  * localhost). Profilarr is often served over plain HTTP on a LAN, where the
- * call throws and crashes the page. Use `uuid()` from `$shared/utils/uuid`,
+ * call throws and crashes the page. Use `uuid()` from `#shared/utils/uuid.ts`,
  * which falls back outside secure contexts.
  *
  * Severity and scope are set in the config: an error in client code and
@@ -29,7 +29,7 @@ const rule: Rule.RuleModule = {
 		schema: [],
 		messages: {
 			insecureUuid:
-				"crypto.randomUUID() crashes over plain HTTP: import `uuid` from '$shared/utils/uuid'"
+				"crypto.randomUUID() crashes over plain HTTP: import `uuid` from '#shared/utils/uuid.ts'"
 		}
 	},
 	create(context) {

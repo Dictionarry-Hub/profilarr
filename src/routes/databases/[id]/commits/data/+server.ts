@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { countCommits, getCommits, getStatus } from '$utils/git/index.ts';
-import type { Commit } from '$utils/git/types.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { countCommits, getCommits, getStatus } from '#utils/git/index.ts';
+import type { Commit } from '#utils/git/types.ts';
 
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 200;

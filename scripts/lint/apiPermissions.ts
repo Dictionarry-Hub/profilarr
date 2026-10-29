@@ -23,8 +23,8 @@
  *   deno task lint:api-permissions
  */
 
-import { getApiRequirement } from '../../src/lib/server/utils/auth/apiPermissions.ts';
-import { isPublicPath } from '../../src/lib/server/utils/auth/publicPaths.ts';
+import { getApiRequirement } from '#utils/auth/apiPermissions.ts';
+import { isPublicPath } from '#utils/auth/publicPaths.ts';
 
 const SPEC_PATH = 'src/lib/api/v1.openapi.json';
 const ROUTES_ROOT = 'src/routes';

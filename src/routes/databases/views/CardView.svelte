@@ -6,16 +6,16 @@
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
 	import Clock from '@lucide/svelte/icons/clock';
 	import GitPullRequest from '@lucide/svelte/icons/git-pull-request';
-	import Button from '$ui/button/Button.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import type { DatabaseInstanceSummary } from '../+page.server.ts';
-	import { formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.js';
-	import { serverTimezone } from '#lib/client/stores/timezone.js';
+	import Button from '#ui/button/Button.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import type { DatabaseInstanceSummary } from '#routes/databases/+page.server.ts';
+	import { formatDateTime } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 	import { createEventDispatcher } from 'svelte';
-	import DatabaseAvatar from '../components/DatabaseAvatar.svelte';
+	import DatabaseAvatar from '#routes/databases/components/DatabaseAvatar.svelte';
 
 	export let databases: DatabaseInstanceSummary[];
 

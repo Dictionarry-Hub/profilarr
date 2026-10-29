@@ -18,19 +18,19 @@ import {
 	type APIResponse,
 	type Page
 } from '@playwright/test';
-import type { components } from '$api/v1.d.ts';
-import type { App } from '$flows/harness/app.ts';
-import { git } from '$flows/harness/git.ts';
-import { FIXTURES_NAME, FLOWS_TOKEN, fixturesRepo as seededRepo } from '$flows/harness/seed.ts';
+import type { components } from '#api/v1.d.ts';
+import type { App } from '#flows/harness/app.ts';
+import { git } from '#flows/harness/git.ts';
+import { FIXTURES_NAME, FLOWS_TOKEN, fixturesRepo as seededRepo } from '#flows/harness/seed.ts';
 import {
 	chooseOption,
 	saveForm,
 	waitForAction,
 	type ActionResult
-} from '$flows/helpers/core/forms.ts';
-import type { ScheduledJob } from '$flows/helpers/core/jobs.ts';
-import { openDatabase, openPage, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+} from '#flows/helpers/core/forms.ts';
+import type { ScheduledJob } from '#flows/helpers/core/jobs.ts';
+import { openDatabase, openPage, openSidebarPage, openTab } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 /** The token tests save to publish, for tests that type one in */
 export { FLOWS_TOKEN };

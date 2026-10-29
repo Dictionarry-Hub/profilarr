@@ -1,14 +1,14 @@
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
-import { config } from '$config';
-import { usersQueries } from '$db/queries/users.ts';
-import { sessionsQueries } from '$db/queries/sessions.ts';
-import { authSettingsQueries } from '$db/queries/authSettings.ts';
-import { hashPassword } from '$auth/password.ts';
-import { needsSetup, validateNewLocalAccount } from '$auth/loginOptions.ts';
-import { getClientIp } from '$auth/network.ts';
-import { parseUserAgent } from '$auth/userAgent.ts';
-import { logger } from '$logger/logger.ts';
+import { config } from '#utils/config/config.ts';
+import { usersQueries } from '#db/queries/users.ts';
+import { sessionsQueries } from '#db/queries/sessions.ts';
+import { authSettingsQueries } from '#db/queries/authSettings.ts';
+import { hashPassword } from '#utils/auth/password.ts';
+import { needsSetup, validateNewLocalAccount } from '#utils/auth/loginOptions.ts';
+import { getClientIp } from '#utils/auth/network.ts';
+import { parseUserAgent } from '#utils/auth/userAgent.ts';
+import { logger } from '#logger/logger.ts';
 
 function setupOpen(): boolean {
 	return needsSetup({

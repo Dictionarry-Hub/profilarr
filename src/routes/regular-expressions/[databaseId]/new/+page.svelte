@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import RegularExpressionForm from '../components/RegularExpressionForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import RegularExpressionForm from '#routes/regular-expressions/[databaseId]/components/RegularExpressionForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

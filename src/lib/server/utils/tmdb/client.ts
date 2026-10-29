@@ -1,5 +1,5 @@
-import { BaseHttpClient } from '../http/client.ts';
-import { logger } from '../logger/logger.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
+import { logger } from '#logger/logger.ts';
 import type { TMDBMovieSearchResponse, TMDBTVSearchResponse, TMDBAuthResponse } from './types.ts';
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';

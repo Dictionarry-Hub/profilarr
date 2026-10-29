@@ -1,9 +1,12 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { logger } from '$logger/logger.ts';
-import { regex101CacheQueries } from '$db/queries/regex101Cache.ts';
-import { config } from '$config';
-import type { Regex101UnitTest, Regex101Response } from '../types';
+import { logger } from '#logger/logger.ts';
+import { regex101CacheQueries } from '#db/queries/regex101Cache.ts';
+import { config } from '#utils/config/config.ts';
+import type {
+	Regex101UnitTest,
+	Regex101Response
+} from '#routes/regular-expressions/regex101/types.ts';
 
 /**
  * Run regex tests using the parser service (.NET regex engine)

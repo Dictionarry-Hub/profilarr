@@ -1,9 +1,9 @@
 import * as fs from 'node:fs/promises';
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1.d.ts';
-import { config } from '$config';
-import { formatFileSize } from '$utils/backup/validation.ts';
-import { validateArchiveEntries } from '$utils/backup/archive.ts';
+import type { components } from '#api/v1.d.ts';
+import { config } from '#utils/config/config.ts';
+import { formatFileSize } from '#utils/backup/validation.ts';
+import { validateArchiveEntries } from '#utils/backup/archive.ts';
 
 type BackupUploadResponse = components['schemas']['BackupUploadResponse'];
 type ErrorResponse = components['schemas']['ErrorResponse'];

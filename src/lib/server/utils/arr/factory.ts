@@ -4,7 +4,7 @@ import { RadarrClient } from './clients/radarr.ts';
 import { SonarrClient } from './clients/sonarr.ts';
 import { LidarrClient } from './clients/lidarr.ts';
 import { ChaptarrClient } from './clients/chaptarr.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
 
 /**
  * Factory function to create an arr client instance

@@ -4,23 +4,16 @@
 	import Save from '@lucide/svelte/icons/save';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import { alertStore } from '$alerts/store';
-	import {
-		isDirty,
-		initEdit,
-		initCreate,
-		update,
-		current,
-		clear
-	} from '#lib/client/stores/dirty.js';
-	import type { AnnouncementSeverity } from '$announcements/database/types.ts';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import DateInput from '$ui/form/DateInput.svelte';
-	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { isDirty, initEdit, initCreate, update, current, clear } from '#stores/dirty.ts';
+	import type { AnnouncementSeverity } from '#server/announcements/database/types.ts';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import DateInput from '#ui/form/DateInput.svelte';
+	import MarkdownInput from '#ui/form/MarkdownInput.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
 	import WithdrawAnnouncementModal from './WithdrawAnnouncementModal.svelte';
 
 	export let mode: 'create' | 'edit';

@@ -6,33 +6,26 @@
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import Eraser from '@lucide/svelte/icons/eraser';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import { formatSmartDateTime } from '$shared/utils/dates';
-	import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl';
-	import { dateFormat } from '#lib/client/stores/dateFormat.js';
-	import { serverTimezone } from '#lib/client/stores/timezone.js';
+	import { formatSmartDateTime } from '#shared/utils/dates.ts';
+	import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 	import CleanupModal from './CleanupModal.svelte';
-	import { alertStore } from '$alerts/store';
-	import {
-		isDirty,
-		initEdit,
-		initCreate,
-		update,
-		current,
-		clear
-	} from '#lib/client/stores/dirty.js';
-	import type { ArrInstancePublic } from '$db/queries/arrInstances.ts';
-	import type { CleanupSettings } from '$db/queries/arrCleanupSettings.ts';
-	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
-	import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import CronInput from '$ui/cron/CronInput.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { isDirty, initEdit, initCreate, update, current, clear } from '#stores/dirty.ts';
+	import type { ArrInstancePublic } from '#db/queries/arrInstances.ts';
+	import type { CleanupSettings } from '#db/queries/arrCleanupSettings.ts';
+	import { isExperimentalVersion } from '#shared/arr/capabilities.ts';
+	import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import TagInput from '#ui/form/TagInput.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import CronInput from '#ui/cron/CronInput.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
 
 	// Props
 	export let mode: 'create' | 'edit';

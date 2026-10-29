@@ -1,5 +1,5 @@
-import { db } from '../db.ts';
-import { toUTC } from '$shared/utils/dates.ts';
+import { db } from '#db/db.ts';
+import { toUTC } from '#shared/utils/dates.ts';
 
 /**
  * Types for sessions table

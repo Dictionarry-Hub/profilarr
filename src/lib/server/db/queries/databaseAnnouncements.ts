@@ -1,8 +1,8 @@
-import { db } from '../db.ts';
+import { db } from '#db/db.ts';
 import type {
 	DatabaseAnnouncementParsed,
 	DatabaseAnnouncementRow
-} from '$announcements/database/types.ts';
+} from '#server/announcements/database/types.ts';
 
 /**
  * Queries for the database_announcements table (per-PCD announcements).

@@ -8,7 +8,7 @@
 
 import { test } from 'vitest';
 import { assertEquals, assertMatch, assertNotMatch } from '@std/assert';
-import { renderMarkdown } from '$shared/utils/markdown.ts';
+import { renderMarkdown } from '#shared/utils/markdown.ts';
 
 const PAYLOAD = '<img src=x onerror=window.xssFired++>';
 const ESCAPED_PAYLOAD = '&lt;img src=x onerror=window.xssFired++&gt;';

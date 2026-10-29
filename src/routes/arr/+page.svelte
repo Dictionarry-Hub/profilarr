@@ -4,18 +4,18 @@
 	import Info from '@lucide/svelte/icons/info';
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import EmptyState from '$ui/state/EmptyState.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ViewToggle from '$ui/actions/ViewToggle.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import EmptyState from '#ui/state/EmptyState.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ViewToggle from '#ui/actions/ViewToggle.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
-	import { alertStore } from '$alerts/store';
+	import { createDataPageStore } from '#stores/dataPage.ts';
+	import { alertStore } from '#client/alerts/store.ts';
 	import type { PageData } from './$types';
 	import type { ArrInstanceSummary } from './+page.server.ts';
 

@@ -1,4 +1,4 @@
-import type { FilterTag, FilterFieldDef } from './types';
+import type { FilterTag, FilterFieldDef } from './types.ts';
 
 interface NumberCondition {
 	operator: '>' | '<' | '>=' | '<=' | '=' | 'range';

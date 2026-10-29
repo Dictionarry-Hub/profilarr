@@ -1,6 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { inbox, type InboxSource } from '$announcements/index.ts';
+import { inbox, type InboxSource } from '#server/announcements/index.ts';
 
 export const load: PageServerLoad = async () => {
 	const items = inbox.listInbox();

@@ -1,22 +1,22 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Ban from '@lucide/svelte/icons/ban';
 	import Replace from '@lucide/svelte/icons/replace';
 	import List from '@lucide/svelte/icons/list';
-	import type { NamingListItem } from '$shared/pcd/display.ts';
+	import type { NamingListItem } from '#shared/pcd/display.ts';
 	import {
 		getMultiEpisodeStyleLabel,
 		type SonarrColonReplacementFormat
-	} from '$shared/pcd/mediaManagement.ts';
-	import radarrLogo from '#lib/client/assets/Radarr.svg';
-	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
-	import { FEATURES } from '$shared/features.ts';
+	} from '#shared/pcd/mediaManagement.ts';
+	import radarrLogo from '#client/assets/Radarr.svg';
+	import sonarrLogo from '#client/assets/Sonarr.svg';
+	import { FEATURES } from '#shared/features.ts';
 
 	export let configs: NamingListItem[];
 	export let databaseId: number;

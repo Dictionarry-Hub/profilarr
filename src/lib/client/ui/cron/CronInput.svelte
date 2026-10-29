@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Cron } from 'croner';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import TimeInput from '$ui/form/TimeInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import TimeInput from '#ui/form/TimeInput.svelte';
 
 	export let value: string = '0 * * * *';
 	export let disabled: boolean = false;

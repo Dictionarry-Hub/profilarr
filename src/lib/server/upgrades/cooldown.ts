@@ -10,11 +10,11 @@
  * Future: Advanced mode with adaptive backoff per scratchpad.md
  */
 
-import type { ArrTag, RadarrMovie, SonarrSeries } from '#lib/server/utils/arr/types.ts';
-import type { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
-import type { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
+import type { ArrTag, RadarrMovie, SonarrSeries } from '#arr/types.ts';
+import type { RadarrClient } from '#arr/clients/radarr.ts';
+import type { SonarrClient } from '#arr/clients/sonarr.ts';
 
-export { getFilterTagLabel, resolveTagLabel } from '$shared/upgrades/filters.ts';
+export { getFilterTagLabel, resolveTagLabel } from '#shared/upgrades/filters.ts';
 
 const FILTER_TAG_PREFIX = 'profilarr-';
 

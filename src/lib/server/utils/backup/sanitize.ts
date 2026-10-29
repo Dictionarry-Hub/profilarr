@@ -35,9 +35,9 @@
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import * as fs from 'node:fs/promises';
-import { Database } from '$db/sqlite.ts';
-import { runCommand } from '../command.ts';
-import { isNotFound } from '../fs.ts';
+import { Database } from '#db/sqlite.ts';
+import { runCommand } from '#utils/command.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 /**
  * SQL applied to a backup database copy at download time. Order matters

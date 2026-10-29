@@ -3,7 +3,7 @@
  */
 
 import { sql } from 'kysely';
-import type { PCDCache } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
 import type {
 	Tag,
 	QualityProfileTableRow,
@@ -11,7 +11,7 @@ import type {
 	ProfileLanguage,
 	CustomFormatCounts,
 	QualityProfileOption
-} from '$shared/pcd/display.ts';
+} from '#shared/pcd/display.ts';
 
 /**
  * Get quality profiles with full data for table/card views

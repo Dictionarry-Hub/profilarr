@@ -2,11 +2,11 @@
  * Delete a custom format operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
-import { getProfileRefsForCustomFormat } from '$pcd/references.ts';
-import { uuid } from '$shared/utils/uuid.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import { generalSettingsQueries } from '#db/queries/generalSettings.ts';
+import { getProfileRefsForCustomFormat } from '#pcd/references.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 
 interface DeleteCustomFormatOptions {
 	databaseId: number;

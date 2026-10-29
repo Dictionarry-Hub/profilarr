@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { enhance } from '$app/forms';
 	import Plus from '@lucide/svelte/icons/plus';
 	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
@@ -8,17 +8,17 @@
 	import X from '@lucide/svelte/icons/x';
 	import Pencil from '@lucide/svelte/icons/pencil';
 	import Trash2 from '@lucide/svelte/icons/trash';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import type { Column } from '$ui/table/types';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import type { Column } from '#ui/table/types.ts';
 	import type { PageData } from './$types';
-	import type { TestWithResult } from './+page.server';
-	import { clear } from '#lib/client/stores/dirty.js';
-	import { alertStore } from '#lib/client/alerts/store.js';
+	import type { TestWithResult } from './+page.server.ts';
+	import { clear } from '#stores/dirty.ts';
+	import { alertStore } from '#client/alerts/store.ts';
 
 	export let data: PageData;
 	let readOnly = false;

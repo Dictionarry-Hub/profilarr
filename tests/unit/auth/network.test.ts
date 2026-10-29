@@ -4,7 +4,7 @@
 
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { getClientIp } from '$auth/network.ts';
+import { getClientIp } from '#utils/auth/network.ts';
 
 // --- getClientIp: X-Forwarded-For spoofing ---
 

@@ -1,7 +1,7 @@
-import { migrationRunner } from '$db/migrations.ts';
-import { config } from '$config';
-import { build } from '#lib/shared/build.ts';
-import { getVersionsSnapshot } from '$announcements/index.ts';
+import { migrationRunner } from '#db/migrations.ts';
+import { config } from '#utils/config/config.ts';
+import { build } from '#shared/build.ts';
+import { getVersionsSnapshot } from '#server/announcements/index.ts';
 
 interface ReleaseRow {
 	tag_name: string;

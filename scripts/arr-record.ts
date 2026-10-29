@@ -21,7 +21,7 @@ import {
 	recordingName,
 	target as findTarget,
 	type Target
-} from '$flows/helpers/sync/targets.ts';
+} from '#flows/helpers/sync/targets.ts';
 
 const OUT_DIR = 'tests/flows/data/arr';
 const SOURCE_FILE = join(OUT_DIR, 'source.json');

@@ -12,26 +12,26 @@ import {
 	pull,
 	type GitStatus,
 	type UpdateInfo
-} from '$utils/git/index.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import type { DatabaseInstance, DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
-import { loadManifest, type Manifest } from '../manifest/manifest.ts';
-import { getPCDPath } from '../utils/operations.ts';
+} from '#utils/git/index.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import type { DatabaseInstance, DatabaseInstancePublic } from '#db/queries/databaseInstances.ts';
+import { loadManifest, type Manifest } from '#pcd/manifest/manifest.ts';
+import { getPCDPath } from '#pcd/utils/operations.ts';
 import {
 	processDependencies,
 	syncDependencies,
 	validateDependencies
-} from '../git/dependencies.ts';
-import { removeSavedTokens } from '../git/remotes.ts';
-import { compile, invalidate } from '../database/compiler.ts';
-import { getCache } from '../database/registry.ts';
-import { logger } from '$logger/logger.ts';
-import { triggerSyncs } from '$sync/processor.ts';
+} from '#pcd/git/dependencies.ts';
+import { removeSavedTokens } from '#pcd/git/remotes.ts';
+import { compile, invalidate } from '#pcd/database/compiler.ts';
+import { getCache } from '#pcd/database/registry.ts';
+import { logger } from '#logger/logger.ts';
+import { triggerSyncs } from '#server/sync/processor.ts';
 import type { LinkOptions, SyncResult, SyncTrigger } from './types.ts';
-import { importBaseOps } from '../ops/importBaseOps.ts';
-import { cleanupJobsForDatabase } from '#lib/server/jobs/cleanup.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import { notifications } from '$notifications/definitions/index.ts';
+import { importBaseOps } from '#pcd/ops/importBaseOps.ts';
+import { cleanupJobsForDatabase } from '#server/jobs/cleanup.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import { notifications } from '#notifications/definitions/index.ts';
 
 async function readSchemaVersion(pcdPath: string): Promise<string | null> {
 	try {

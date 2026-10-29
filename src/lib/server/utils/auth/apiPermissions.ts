@@ -7,8 +7,8 @@
  * a label are denied to scoped keys; `all` keys pass everything.
  */
 
-import openApiSpec from '$api/v1.openapi.json' with { type: 'json' };
-import { apiAreaId, hasApiAccess, type ApiArea, type ApiKeyAccess } from '$shared/apiKeys.ts';
+import openApiSpec from '#api/v1.openapi.json' with { type: 'json' };
+import { apiAreaId, hasApiAccess, type ApiArea, type ApiKeyAccess } from '#shared/apiKeys.ts';
 import type { ResolvedApiKey } from './apiKeyAuth.ts';
 
 interface SpecOperation {

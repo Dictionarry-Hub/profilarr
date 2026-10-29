@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { parseAnnouncementsDir } from '$announcements/database/index.ts';
-import { getPCDPath } from '$pcd/utils/operations.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { parseAnnouncementsDir } from '#server/announcements/database/index.ts';
+import { getPCDPath } from '#pcd/utils/operations.ts';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);

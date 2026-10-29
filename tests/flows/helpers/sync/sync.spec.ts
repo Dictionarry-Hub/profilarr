@@ -5,9 +5,9 @@
  * that syncs quality profiles, so a new target is covered as soon as it's in
  * the registry.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import type { FakeArr, Resource } from '$flows/helpers/sync/fakeArr.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import type { FakeArr, Resource } from './fakeArr.ts';
 import {
 	addArrAndOpenSync,
 	chooseDelayProfile,
@@ -15,8 +15,8 @@ import {
 	setUpProfileSync,
 	syncRegion,
 	syncSection
-} from '$flows/helpers/sync/sync.ts';
-import { targetsWith, type Target } from '$flows/helpers/sync/targets.ts';
+} from './sync.ts';
+import { targetsWith, type Target } from './targets.ts';
 
 test('syncSection waits for a sync that succeeds', async ({ page, fakeRadarr }) => {
 	await addArrAndOpenSync(page, fakeRadarr);

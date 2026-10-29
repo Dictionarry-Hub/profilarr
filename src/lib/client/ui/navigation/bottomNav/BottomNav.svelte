@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import FolderTree from '@lucide/svelte/icons/folder-tree';
 	import Link from '@lucide/svelte/icons/link';
 	import Sliders from '@lucide/svelte/icons/sliders-vertical';
@@ -11,7 +11,7 @@
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import CheckCircle2 from '@lucide/svelte/icons/circle-check';
 	import XCircle from '@lucide/svelte/icons/circle-x';
-	import { jobStatus } from '$stores/jobStatus';
+	import { jobStatus } from '#stores/jobStatus.ts';
 	import { slide } from 'svelte/transition';
 
 	function formatDuration(ms: number): string {

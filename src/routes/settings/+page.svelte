@@ -7,7 +7,7 @@
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Archive from '@lucide/svelte/icons/archive';
 	import Info from '@lucide/svelte/icons/info';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 
 	const settingsItems = [
 		{

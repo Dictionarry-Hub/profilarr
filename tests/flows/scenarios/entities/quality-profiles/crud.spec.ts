@@ -9,14 +9,14 @@
  *   order, enabled and upgrade-until.
  */
 import type { Locator, Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures, type FixtureQuality } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, deleteEntity, fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity, openTab } from '$flows/helpers/core/nav.ts';
-import { setScreen } from '$flows/helpers/core/screen.ts';
-import { customFormatPages } from '$flows/helpers/entities/customFormats.ts';
-import { qualityProfilePages } from '$flows/helpers/entities/qualityProfiles.ts';
-import type { OrderedItem, QualityProfileScoring } from '$shared/pcd/display.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures, type FixtureQuality } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, deleteEntity, fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity, openTab } from '#flows/helpers/core/nav.ts';
+import { setScreen } from '#flows/helpers/core/screen.ts';
+import { customFormatPages } from '#flows/helpers/entities/customFormats.ts';
+import { qualityProfilePages } from '#flows/helpers/entities/qualityProfiles.ts';
+import type { OrderedItem, QualityProfileScoring } from '#shared/pcd/display.ts';
 
 const RADARR_PROFILE = fixture.qualityProfile('Radarr Profile');
 const SONARR_PROFILE = fixture.qualityProfile('Sonarr Profile');

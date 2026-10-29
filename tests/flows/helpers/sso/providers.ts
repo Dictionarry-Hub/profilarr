@@ -11,8 +11,8 @@
  */
 
 import type { Page } from '@playwright/test';
-import { authelia } from '$flows/helpers/auth/sso/authelia.ts';
-import { fakeOidc } from '$flows/helpers/auth/sso/fakeOidc.ts';
+import { authelia } from './authelia.ts';
+import { fakeOidc } from './fakeOidc.ts';
 
 export interface SsoUser {
 	/** What the user types on the provider's login page */

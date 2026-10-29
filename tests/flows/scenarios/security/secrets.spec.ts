@@ -12,9 +12,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { addArr } from '$flows/helpers/sync/arrs.ts';
-import { createBackup, downloadBackup, openArchive } from '$flows/helpers/settings/backups.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { addArr } from '#flows/helpers/sync/arrs.ts';
+import { createBackup, downloadBackup, openArchive } from '#flows/helpers/settings/backups.ts';
 
 /** Tables the sanitizer empties; a row left in any of them is a leak */
 const EMPTIED_TABLES = [

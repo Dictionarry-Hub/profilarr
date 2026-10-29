@@ -6,13 +6,13 @@
  *   profiles scoring them all stay.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { deleteEntity, expectDeleteBlocked, saveForm } from '$flows/helpers/core/forms.ts';
-import { openEntity, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { conditionFromFixture, customFormatPages } from '$flows/helpers/entities/customFormats.ts';
-import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
+import { deleteEntity, expectDeleteBlocked, saveForm } from '#flows/helpers/core/forms.ts';
+import { openEntity, openSidebarPage, openTab } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { conditionFromFixture, customFormatPages } from '#flows/helpers/entities/customFormats.ts';
+import { regularExpressionPages } from '#flows/helpers/entities/regularExpressions.ts';
 
 const TITLE = fixture.regularExpression('Title Regex');
 const EVERY_CONDITION = fixture.customFormat('Every Condition');

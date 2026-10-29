@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
+	import Table from '#ui/table/Table.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { QualityProfileTableRow } from '#shared/pcd/display.ts';
 	import Tag from '@lucide/svelte/icons/tag';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Layers from '@lucide/svelte/icons/layers';
@@ -12,9 +12,9 @@
 	import Earth from '@lucide/svelte/icons/earth';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import { renderMarkdown } from '$shared/utils/markdown.ts';
-	import { escapeHtml } from '$shared/utils/sanitize.ts';
-	import { FEATURES } from '$shared/features.ts';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
+	import { escapeHtml } from '#shared/utils/sanitize.ts';
+	import { FEATURES } from '#shared/features.ts';
 
 	export let profiles: QualityProfileTableRow[];
 	export let databaseId: number;

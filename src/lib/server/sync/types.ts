@@ -3,8 +3,8 @@
  * Consolidates all sync infrastructure types
  */
 
-import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
 
 // =============================================================================
 // SYNC RESULT TYPES

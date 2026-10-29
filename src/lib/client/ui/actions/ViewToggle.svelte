@@ -1,12 +1,12 @@
 <script lang="ts">
 	import ActionButton from './ActionButton.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
 	import Eye from '@lucide/svelte/icons/eye';
 	import LayoutGrid from '@lucide/svelte/icons/layout-grid';
 	import Table from '@lucide/svelte/icons/table';
-	import type { ViewMode } from '#lib/client/stores/dataPage.js';
+	import type { ViewMode } from '#stores/dataPage.ts';
 
 	export let value: ViewMode = 'cards';
 	export let position: 'left' | 'right' | 'middle' = 'right';

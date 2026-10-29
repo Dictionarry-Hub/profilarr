@@ -4,8 +4,8 @@
  *   make the provider break one way each.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import type { Misbehaviour } from '$flows/helpers/auth/sso/providers.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import type { Misbehaviour } from './providers.ts';
 
 test.use({ appEnv: { AUTH: 'on' }, ssoProvider: 'fake' });
 

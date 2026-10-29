@@ -17,8 +17,8 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import process from 'node:process';
-import { SERVICE_IMAGES } from '$flows/harness/images.ts';
-import { dealSpecFiles, listSpecFiles } from '$flows/harness/specFiles.ts';
+import { SERVICE_IMAGES } from '#flows/harness/images.ts';
+import { dealSpecFiles, listSpecFiles } from '#flows/harness/specFiles.ts';
 
 const APP_BINARY = 'dist/build/profilarr';
 const FLOWS_DIR = 'tests/flows';

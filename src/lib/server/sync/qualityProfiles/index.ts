@@ -17,7 +17,7 @@ export {
 } from './transformer.ts';
 
 // Re-export from centralized references module
-export { getCustomFormatsForProfile } from '$pcd/references.ts';
+export { getCustomFormatsForProfile } from '#pcd/references.ts';
 
 // Transformer types (internal PCD representations)
 export type {
@@ -27,9 +27,9 @@ export type {
 	PcdCustomFormatScore
 } from './transformer.ts';
 
-// Arr types - import directly from $arr/types.ts
+// Arr types - import directly from #arr/types.ts
 export type {
 	ArrQualityProfilePayload,
 	ArrQualityProfileItem,
 	QualityProfileFormatItem
-} from '$arr/types.ts';
+} from '#arr/types.ts';

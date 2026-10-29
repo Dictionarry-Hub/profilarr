@@ -4,8 +4,8 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { config } from '$config';
-import type { Operation } from '../core/types.ts';
+import { config } from '#utils/config/config.ts';
+import type { Operation } from '#pcd/core/types.ts';
 
 /**
  * Check if a path exists

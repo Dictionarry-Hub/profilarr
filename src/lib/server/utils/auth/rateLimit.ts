@@ -6,8 +6,8 @@
  * than typos (wrong password, similar username).
  */
 
-import { loginAttemptsQueries } from '$db/queries/loginAttempts.ts';
-import type { AttemptCategory } from '$auth/loginAnalysis.ts';
+import { loginAttemptsQueries } from '#db/queries/loginAttempts.ts';
+import type { AttemptCategory } from './loginAnalysis.ts';
 
 const WINDOW_MINUTES = 15;
 

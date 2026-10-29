@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { getRepoInfo, getBranch } from '$utils/git/index.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { getRepoInfo, getBranch } from '#utils/git/index.ts';
 
 export const load: LayoutServerLoad = async ({ params }) => {
 	const id = parseInt(params.id || '', 10);

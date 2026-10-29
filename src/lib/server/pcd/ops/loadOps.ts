@@ -3,10 +3,10 @@
  * Loads base/user ops from the database and schema/tweaks from files.
  */
 
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import type { PcdOp, PcdOpState } from '$db/queries/pcdOps.ts';
-import { loadOperationsFromDir } from '../utils/operations.ts';
-import type { Operation } from '../core/types.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import type { PcdOp, PcdOpState } from '#db/queries/pcdOps.ts';
+import { loadOperationsFromDir } from '#pcd/utils/operations.ts';
+import type { Operation } from '#pcd/core/types.ts';
 
 const DRAFT_SEQUENCE_BASE = 3_000_000_000;
 

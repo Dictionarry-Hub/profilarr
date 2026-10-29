@@ -5,7 +5,7 @@
 import * as fs from 'node:fs/promises';
 import process from 'node:process';
 import { parseAuthConfig, type AuthMode, type OidcSettings } from './auth.ts';
-import { colors } from '$logger/colors.ts';
+import { colors } from '#logger/colors.ts';
 
 export type { AuthMode };
 

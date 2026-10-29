@@ -4,7 +4,7 @@
 
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { isPublicPath } from '$auth/publicPaths.ts';
+import { isPublicPath } from '#utils/auth/publicPaths.ts';
 
 // Public paths (no session required)
 test('isPublicPath: /auth/login', () => {

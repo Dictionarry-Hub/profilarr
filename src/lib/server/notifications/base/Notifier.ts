@@ -1,4 +1,4 @@
-import type { Notification } from '../types.ts';
+import type { Notification } from '#notifications/types.ts';
 
 /**
  * Base interface that all notification service implementations must follow

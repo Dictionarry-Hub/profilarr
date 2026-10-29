@@ -1,21 +1,21 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
-import { cleanupJobsForArrInstance } from '#lib/server/jobs/cleanup.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrCleanupSettingsQueries } from '#db/queries/arrCleanupSettings.ts';
+import { cleanupJobsForArrInstance } from '#server/jobs/cleanup.ts';
 import {
 	scheduleCleanupForInstance,
 	scheduleLibraryRefreshForInstance
-} from '#lib/server/jobs/init.ts';
-import { calculateNextRun } from '#lib/server/jobs/scheduleUtils.ts';
-import { enqueueJob } from '#lib/server/jobs/queueService.ts';
-import { logger } from '$logger/logger.ts';
-import { requireSecretForDestinationChange } from '$utils/secretDestination.ts';
-import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
-import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
-import { createArrClient } from '$arr/factory.ts';
-import { probeAndRecordVersion } from '$arr/version.ts';
-import type { ArrType } from '$arr/types.ts';
+} from '#server/jobs/init.ts';
+import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
+import { logger } from '#logger/logger.ts';
+import { requireSecretForDestinationChange } from '#utils/secretDestination.ts';
+import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
+import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
+import { createArrClient } from '#arr/factory.ts';
+import { probeAndRecordVersion } from '#arr/version.ts';
+import type { ArrType } from '#arr/types.ts';
 
 export const load = ({ params }) => {
 	const id = parseInt(params.id || '', 10);

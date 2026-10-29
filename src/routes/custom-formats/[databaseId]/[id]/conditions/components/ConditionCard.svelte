@@ -3,13 +3,13 @@
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import { createEventDispatcher } from 'svelte';
-	import RadarrIcon from '#lib/client/assets/Radarr.svg';
-	import SonarrIcon from '#lib/client/assets/Sonarr.svg';
-	import Button from '$ui/button/Button.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import RadarrIcon from '#client/assets/Radarr.svg';
+	import SonarrIcon from '#client/assets/Sonarr.svg';
+	import Button from '#ui/button/Button.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import DropdownCombobox from '#ui/dropdown/DropdownCombobox.svelte';
 	import {
 		CONDITION_TYPES,
 		PATTERN_TYPES,
@@ -18,8 +18,8 @@
 		QUALITY_MODIFIER_VALUES,
 		RELEASE_TYPE_VALUES,
 		INDEXER_FLAG_VALUES
-	} from '$shared/pcd/conditions';
-	import type { ConditionData } from '$shared/pcd/display.ts';
+	} from '#shared/pcd/conditions.ts';
+	import type { ConditionData } from '#shared/pcd/display.ts';
 
 	const dispatch = createEventDispatcher<{
 		remove: void;

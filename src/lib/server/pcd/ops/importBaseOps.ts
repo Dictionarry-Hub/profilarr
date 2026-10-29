@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
-import { logger } from '$logger/logger.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { extractOrderFromFilename, getBaseOpsPath } from '../utils/operations.ts';
+import { logger } from '#logger/logger.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import { extractOrderFromFilename, getBaseOpsPath } from '#pcd/utils/operations.ts';
 
 const UNPREFIXED_SEQUENCE_BASE = 2_000_000_000;
 

@@ -10,7 +10,7 @@
  *   deno task generate:pcd-types --local=/path/to/schema.sql  # Uses local file
  */
 
-import { Database } from '$db/sqlite.ts';
+import { Database } from '#db/sqlite.ts';
 
 // ============================================================================
 // CONFIGURATION

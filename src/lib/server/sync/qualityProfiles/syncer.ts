@@ -12,28 +12,28 @@
  * 3. Sync quality profiles using the formatIdMap
  */
 
-import { BaseSyncer, type SyncResult } from '../base.ts';
-import { arrSyncQueries, type ProfileSelection } from '$db/queries/arrSync.ts';
-import { getCache, getCachedDatabaseIds } from '$pcd/index.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { logger } from '$logger/logger.ts';
-import type { SyncArrType } from '../mappings.ts';
+import { BaseSyncer, type SyncResult } from '#server/sync/base.ts';
+import { arrSyncQueries, type ProfileSelection } from '#db/queries/arrSync.ts';
+import { getCache, getCachedDatabaseIds } from '#pcd/index.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { logger } from '#logger/logger.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 
 // Custom formats
 import {
 	fetchCustomFormatFromPcd,
 	syncCustomFormats,
 	type PcdCustomFormat
-} from '../customFormats/index.ts';
+} from '#server/sync/customFormats/index.ts';
 import {
 	fetchQualityProfileFromPcd,
 	getQualityApiMappings,
 	transformQualityProfile,
 	type PcdQualityProfile
 } from './transformer.ts';
-import { getCustomFormatsForProfile } from '$pcd/references.ts';
+import { getCustomFormatsForProfile } from '#pcd/references.ts';
 import { createProfileSizeSource, type ProfileSizeSource } from './sizeSource.ts';
-import type { ArrQualityProfile, ArrQualityProfilePayload } from '$arr/types.ts';
+import type { ArrQualityProfile, ArrQualityProfilePayload } from '#arr/types.ts';
 
 // Internal types for sync data
 interface ProfileSyncData {

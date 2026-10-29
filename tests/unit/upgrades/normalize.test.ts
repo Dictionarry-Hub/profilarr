@@ -3,20 +3,20 @@
  * Tests normalizeRadarrItem() and normalizeRadarrItems() from upgrades/normalize.ts
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals, assertAlmostEquals } from '@std/assert';
 import {
 	normalizeRadarrItem,
 	normalizeRadarrItems,
 	normalizeSonarrItem
-} from '../../../src/lib/server/upgrades/normalize.ts';
+} from '#server/upgrades/normalize.ts';
 import type {
 	RadarrMovie,
 	RadarrMovieFile,
 	ArrQualityProfile,
 	SonarrEpisodeFile,
 	SonarrSeries
-} from '../../../src/lib/server/utils/arr/types.ts';
+} from '#arr/types.ts';
 
 class NormalizeTest extends BaseTest {
 	/**

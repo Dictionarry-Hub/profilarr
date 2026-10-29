@@ -2,10 +2,10 @@
  * Tests for upgrade rate limiting: getRunsPerHour, calculateMaxCount, validateCronExpression
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals } from '@std/assert';
-import { getRunsPerHour, calculateMaxCount } from '../../../src/lib/shared/upgrades/filters.ts';
-import { validateCronExpression } from '../../../src/lib/server/jobs/scheduleUtils.ts';
+import { getRunsPerHour, calculateMaxCount } from '#shared/upgrades/filters.ts';
+import { validateCronExpression } from '#server/jobs/scheduleUtils.ts';
 
 class GetRunsPerHourTest extends BaseTest {
 	runTests(): void {

@@ -3,9 +3,9 @@
  */
 
 import { sql } from 'kysely';
-import type { PCDCache } from '$pcd/index.ts';
-import type { Tag, RegularExpressionWithTags } from '$shared/pcd/display.ts';
-import { getConditionRefCountsForRegexes } from '$pcd/references.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { Tag, RegularExpressionWithTags } from '#shared/pcd/display.ts';
+import { getConditionRefCountsForRegexes } from '#pcd/references.ts';
 
 /**
  * List all regular expressions with tags

@@ -4,7 +4,7 @@
  */
 
 import type { PCDCache } from './database/cache.ts';
-import type { SyncArrType } from '../sync/mappings.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 
 /**
  * Get all custom format names referenced by a quality profile

@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
-import { groupSonarrReleases } from '$utils/arr/releaseImport.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import { groupSonarrReleases } from '#arr/releaseImport.ts';
+import { logger } from '#logger/logger.ts';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);

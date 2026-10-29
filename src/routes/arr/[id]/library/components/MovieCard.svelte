@@ -11,16 +11,16 @@
 	import Clock from '@lucide/svelte/icons/clock';
 	import Calendar from '@lucide/svelte/icons/calendar';
 	import Star from '@lucide/svelte/icons/star';
-	import Label from '$ui/label/Label.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import DateTime from '$ui/datetime/DateTime.svelte';
-	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
+	import Label from '#ui/label/Label.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import CustomFormatBadge from '#ui/arr/CustomFormatBadge.svelte';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import DateTime from '#ui/datetime/DateTime.svelte';
+	import type { RadarrLibraryItem } from '#arr/types.ts';
 	import MovieAvailabilityBadge from './MovieAvailabilityBadge.svelte';
 
 	export let movie: RadarrLibraryItem;

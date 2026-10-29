@@ -1,10 +1,10 @@
-import { getCache } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import type { OrderedItem } from '$shared/pcd/display.ts';
-import { qualities as readQualities } from '../qualities/read.ts';
-import { updateQualities } from '../qualities/update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { orderedItemsEqual } from '$pcd/conflicts/overrideUtils.ts';
+import { getCache } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import type { OrderedItem } from '#shared/pcd/display.ts';
+import { qualities as readQualities } from '#entities/qualityProfiles/qualities/read.ts';
+import { updateQualities } from '#entities/qualityProfiles/qualities/update.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { orderedItemsEqual } from '#pcd/conflicts/overrideUtils.ts';
 import { resolveProfileName } from './resolve.ts';
 
 /**

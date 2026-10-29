@@ -6,13 +6,13 @@
 	import HelpCircle from '@lucide/svelte/icons/circle-question-mark';
 	import Heart from '@lucide/svelte/icons/heart';
 	import Package from '@lucide/svelte/icons/package';
-	import BuildIdentity from '$ui/version/BuildIdentity.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import type { Column } from '$ui/table/types';
-	import DateTime from '$ui/datetime/DateTime.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import BuildIdentity from '#ui/version/BuildIdentity.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import DateTime from '#ui/datetime/DateTime.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 
 	export let data: PageData;
 

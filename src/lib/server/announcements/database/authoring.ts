@@ -13,9 +13,9 @@
 
 import * as fs from 'node:fs/promises';
 import { dump as stringifyYaml } from 'js-yaml';
-import { generateUlid } from '$shared/utils/ulid.ts';
+import { generateUlid } from '#shared/utils/ulid.ts';
 import type { AnnouncementSeverity } from './types.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 const ANNOUNCEMENTS_SUBDIR = 'announcements';
 

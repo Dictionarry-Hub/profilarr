@@ -1,6 +1,6 @@
-import { db } from '../db.ts';
-import { toUTC } from '$shared/utils/dates.ts';
-import type { RenameJobLog } from '#lib/server/rename/types.ts';
+import { db } from '#db/db.ts';
+import { toUTC } from '#shared/utils/dates.ts';
+import type { RenameJobLog } from '#server/rename/types.ts';
 
 /**
  * Database row type for rename_runs table

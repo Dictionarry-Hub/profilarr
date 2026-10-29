@@ -1,9 +1,9 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
-import { logger } from '$logger/logger.ts';
-import { enqueueJob } from '$jobs/queueService.ts';
-import { stashLinkPat } from '$jobs/handlers/pcdLink.ts';
-import { validateLinkInput, checkNameConflict } from '$pcd/core/validate.ts';
+import { logger } from '#logger/logger.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
+import { stashLinkPat } from '#server/jobs/handlers/pcdLink.ts';
+import { validateLinkInput, checkNameConflict } from '#pcd/core/validate.ts';
 
 function getFirstNonEmptyFormValue(formData: FormData, key: string): string | undefined {
 	const values = formData

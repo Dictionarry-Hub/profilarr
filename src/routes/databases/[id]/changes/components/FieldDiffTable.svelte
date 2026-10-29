@@ -1,14 +1,14 @@
 <script lang="ts">
-	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import { renderMarkdown } from '$shared/utils/markdown.ts';
+	import Table from '#ui/table/Table.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import { renderMarkdown } from '#shared/utils/markdown.ts';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import {
 		getColonReplacementLabel,
 		getMultiEpisodeStyleLabel
-	} from '$shared/pcd/mediaManagement.ts';
-	import type { Column } from '$ui/table/types';
-	import type { FieldRow, OperationType } from './types';
+	} from '#shared/pcd/mediaManagement.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { FieldRow, OperationType } from './types.ts';
 
 	export let rows: FieldRow[] = [];
 	export let operation: OperationType = 'update';

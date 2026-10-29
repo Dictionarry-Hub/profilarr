@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import { spawnSync } from 'node:child_process';
 import process from 'node:process';
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
-import type { CommandResult } from '$utils/command.ts';
+import type { CommandResult } from '#utils/command.ts';
 
 function importConfig(env: Record<string, string>): CommandResult {
 	const base = { ...process.env };

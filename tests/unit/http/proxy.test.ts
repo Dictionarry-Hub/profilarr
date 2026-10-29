@@ -5,7 +5,7 @@
 
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { getProxyEnv } from '$http/proxy.ts';
+import { getProxyEnv } from '#utils/http/proxy.ts';
 
 const envOf = (vars: Record<string, string>) => (name: string) => vars[name];
 

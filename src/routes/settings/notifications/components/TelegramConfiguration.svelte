@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FormInput from '$ui/form/FormInput.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
 	export let config: Record<string, unknown> = {};
 	export let mode: 'create' | 'edit' = 'create';
 

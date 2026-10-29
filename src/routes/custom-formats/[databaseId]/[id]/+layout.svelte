@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import { page } from '$stores/page';
+	import Tabs from '#ui/navigation/tabs/Tabs.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import { page } from '#stores/page.ts';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Filter from '@lucide/svelte/icons/funnel';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';

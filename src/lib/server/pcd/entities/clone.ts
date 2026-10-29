@@ -5,9 +5,9 @@
  * The existing create functions handle name uniqueness validation.
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import type { OperationLayer } from '$pcd/index.ts';
-import type { EntityType } from '$shared/pcd/portable.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { OperationLayer } from '#pcd/index.ts';
+import type { EntityType } from '#shared/pcd/portable.ts';
 import * as serialize from './serialize.ts';
 import * as deserialize from './deserialize.ts';
 

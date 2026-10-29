@@ -1,11 +1,11 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { createArrClient } from '$arr/factory.ts';
-import { recordDetectedVersion } from '$arr/version.ts';
-import type { ArrType, ArrVersionInfo } from '$arr/types.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { HtmlResponseError } from '$http/types.ts';
-import { logger } from '$logger/logger.ts';
-import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
+import { createArrClient } from '#arr/factory.ts';
+import { recordDetectedVersion } from '#arr/version.ts';
+import type { ArrType, ArrVersionInfo } from '#arr/types.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { HtmlResponseError } from '#utils/http/types.ts';
+import { logger } from '#logger/logger.ts';
+import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
 
 const VALID_TYPES = ['radarr', 'sonarr'];
 

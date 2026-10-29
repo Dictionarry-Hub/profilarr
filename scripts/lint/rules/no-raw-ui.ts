@@ -1,7 +1,7 @@
 /**
  * no-raw-ui
  *
- * UI code uses the wrapper components from `$ui/*`, not raw HTML elements.
+ * UI code uses the wrapper components from `#ui/*`, not raw HTML elements.
  * Banned: <button>, <input>, <select>, <textarea>, <dialog>, <table>.
  *
  * `<input type="hidden">` is allowed when `type` is a static string: hidden
@@ -17,21 +17,21 @@ import type { Rule } from 'eslint';
 import { type AST, svelteVisitors } from './svelte.ts';
 
 const SIMPLE_SUGGESTIONS: Record<string, string> = {
-	button: '$ui/button/Button.svelte',
-	select: '$ui/dropdown/DropdownSelect.svelte',
-	textarea: '$ui/form/MarkdownInput.svelte',
-	dialog: '$ui/modal/Modal.svelte',
-	table: '$ui/table/Table.svelte'
+	button: '#ui/button/Button.svelte',
+	select: '#ui/dropdown/DropdownSelect.svelte',
+	textarea: '#ui/form/MarkdownInput.svelte',
+	dialog: '#ui/modal/Modal.svelte',
+	table: '#ui/table/Table.svelte'
 };
 
 const INPUT_SUGGESTIONS: Record<string, string> = {
-	checkbox: '$ui/toggle/Toggle.svelte (or $ui/form/IconCheckbox.svelte)',
-	number: '$ui/form/NumberInput.svelte',
-	date: '$ui/form/DateInput.svelte',
-	time: '$ui/form/TimeInput.svelte'
+	checkbox: '#ui/toggle/Toggle.svelte (or #ui/form/IconCheckbox.svelte)',
+	number: '#ui/form/NumberInput.svelte',
+	date: '#ui/form/DateInput.svelte',
+	time: '#ui/form/TimeInput.svelte'
 };
 
-const INPUT_DEFAULT = '$ui/form/FormInput.svelte';
+const INPUT_DEFAULT = '#ui/form/FormInput.svelte';
 
 /** The `type` attribute's value if it's a static string, `''` if absent, else `null`. */
 function staticType(element: AST.SvelteHTMLElement): string | null {
@@ -51,7 +51,7 @@ function staticType(element: AST.SvelteHTMLElement): string | null {
 const rule: Rule.RuleModule = {
 	meta: {
 		type: 'problem',
-		docs: { description: 'Use the $ui wrapper components instead of raw HTML elements' },
+		docs: { description: 'Use the #ui wrapper components instead of raw HTML elements' },
 		schema: [],
 		messages: { rawUi: 'Raw <{{tag}}>: use {{component}}' }
 	},

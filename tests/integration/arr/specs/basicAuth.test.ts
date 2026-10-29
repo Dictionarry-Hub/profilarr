@@ -7,12 +7,12 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { openDb } from '$test-harness/db.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { run, setup, teardown, test } from '$test-harness/runner.ts';
-import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
-import { formResult } from '$test-harness/setup.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { openDb } from '#tests/harness/db.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { run, setup, teardown, test } from '#tests/harness/runner.ts';
+import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
+import { formResult } from '#tests/harness/setup.ts';
 
 const PORT = PORTS.arr.basicAuth;
 const ORIGIN = `http://localhost:${PORT}`;

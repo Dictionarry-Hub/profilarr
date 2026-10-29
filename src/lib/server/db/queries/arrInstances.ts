@@ -1,6 +1,6 @@
-import { db } from '../db.ts';
-import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
-import { normalizeArrInstanceUrl } from '$shared/utils/arrUrl.ts';
+import { db } from '#db/db.ts';
+import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
+import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
 import { arrSyncQueries } from './arrSync.ts';
 
 /**

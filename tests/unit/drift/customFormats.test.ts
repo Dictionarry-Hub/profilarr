@@ -1,8 +1,11 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { compareCustomFormatDrift, type CustomFormatDriftDiff } from '$drift/customFormats.ts';
-import { hashDriftDiff } from '$drift/hash.ts';
-import type { ArrCustomFormat } from '$sync/customFormats/transformer.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import {
+	compareCustomFormatDrift,
+	type CustomFormatDriftDiff
+} from '#server/drift/customFormats.ts';
+import { hashDriftDiff } from '#server/drift/hash.ts';
+import type { ArrCustomFormat } from '#server/sync/customFormats/transformer.ts';
 
 function customFormat(input: Partial<ArrCustomFormat> & { name: string }): ArrCustomFormat {
 	return {

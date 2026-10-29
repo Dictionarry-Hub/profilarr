@@ -9,10 +9,10 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import { saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
-import { latestJobRunId, waitForNextJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
-import { openTab, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+import { saveForm, waitForAction } from '#flows/helpers/core/forms.ts';
+import { latestJobRunId, waitForNextJobRun, type JobRun } from '#flows/helpers/core/jobs.ts';
+import { openTab, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 /** One drifted item the Drift tab lists */
 export interface DriftEntity {

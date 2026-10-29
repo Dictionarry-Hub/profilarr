@@ -2,13 +2,13 @@
  * Naming read operations (list and get)
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import type { RadarrNamingRow, SonarrNamingRow, NamingListItem } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { RadarrNamingRow, SonarrNamingRow, NamingListItem } from '#shared/pcd/display.ts';
 import {
 	colonReplacementFromDb,
 	multiEpisodeStyleFromDb,
 	type SonarrColonReplacementFormat
-} from '$shared/pcd/mediaManagement.ts';
+} from '#shared/pcd/mediaManagement.ts';
 
 // Note: name is PRIMARY KEY so never null, but Kysely types it as nullable
 // because the generator doesn't detect non-INTEGER primary keys

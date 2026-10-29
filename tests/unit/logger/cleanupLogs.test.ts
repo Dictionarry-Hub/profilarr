@@ -4,8 +4,8 @@
  */
 
 import { writeFile } from 'node:fs/promises';
-import { BaseTest } from '../base/BaseTest.ts';
-import { cleanupLogs } from '../../../src/lib/server/jobs/logic/cleanupLogs.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import { cleanupLogs } from '#server/jobs/logic/cleanupLogs.ts';
 import { assertEquals } from '@std/assert';
 
 class CleanupLogsTest extends BaseTest {

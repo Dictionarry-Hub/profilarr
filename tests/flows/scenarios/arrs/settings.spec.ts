@@ -8,10 +8,10 @@
  *   settings or jobs behind.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
-import { scheduledJobs, waitForIdleJobs, waitForJobRun } from '$flows/helpers/core/jobs.ts';
-import { openTab, sidebar, waitForHydration } from '$flows/helpers/core/nav.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { saveForm, waitForAction } from '#flows/helpers/core/forms.ts';
+import { scheduledJobs, waitForIdleJobs, waitForJobRun } from '#flows/helpers/core/jobs.ts';
+import { openTab, sidebar, waitForHydration } from '#flows/helpers/core/nav.ts';
 import {
 	addArr,
 	arrInstance,
@@ -20,21 +20,21 @@ import {
 	deleteArr,
 	editArr,
 	openArr
-} from '$flows/helpers/sync/arrs.ts';
-import { basicAuthHeader, type FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+} from '#flows/helpers/sync/arrs.ts';
+import { basicAuthHeader, type FakeArr } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	addArrAndOpenSync,
 	chooseDelayProfile,
 	syncConfig,
 	syncSection
-} from '$flows/helpers/sync/sync.ts';
+} from '#flows/helpers/sync/sync.ts';
 import {
 	addDefaultFilter,
 	openUpgrades,
 	saveUpgrades,
 	setUpgradeCore,
 	upgradesData
-} from '$flows/helpers/sync/upgrades.ts';
+} from '#flows/helpers/sync/upgrades.ts';
 
 const NAME = 'Flow Radarr';
 const OTHER_NAME = 'Second Radarr';

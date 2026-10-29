@@ -10,30 +10,30 @@
 	import Sliders from '@lucide/svelte/icons/sliders-vertical';
 	import Check from '@lucide/svelte/icons/check';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
-	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
+	import Tabs from '#ui/navigation/tabs/Tabs.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
 	import AddEntityModal from './components/AddEntityModal.svelte';
 	import QuickParseModal from './components/QuickParseModal.svelte';
 	import ReleaseModal from './components/ReleaseModal.svelte';
 	import ImportReleasesModal from './components/ImportReleasesModal.svelte';
 	import EntityTable from './components/EntityTable.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { createDataPageStore } from '#lib/client/stores/dataPage.js';
-	import { alertStore } from '#lib/client/alerts/store.js';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { createDataPageStore } from '#stores/dataPage.ts';
+	import { alertStore } from '#client/alerts/store.ts';
 	import type { PageData } from './$types';
 	import type {
 		TestEntity,
 		TestRelease,
 		EvaluateResponse,
 		ReleaseEvaluation
-	} from '$shared/pcd/display.ts';
+	} from '#shared/pcd/display.ts';
 
 	export let data: PageData;
 

@@ -5,13 +5,13 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import type { ArrQualityProfileItem } from '$arr/types.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import type { ArrQualityProfileItem } from '#arr/types.ts';
 import {
 	transformQualityProfile,
 	type PcdQualityProfile
-} from '$sync/qualityProfiles/transformer.ts';
-import type { QualitySizeMap } from '$sync/qualityProfiles/sizes.ts';
+} from '#server/sync/qualityProfiles/transformer.ts';
+import type { QualitySizeMap } from '#server/sync/qualityProfiles/sizes.ts';
 
 function profile(): PcdQualityProfile {
 	return {

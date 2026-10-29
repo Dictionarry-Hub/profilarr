@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
+	import Table from '#ui/table/Table.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { DelayProfilesRow } from '#shared/pcd/display.ts';
 	import Tag from '@lucide/svelte/icons/tag';
 	import Clock from '@lucide/svelte/icons/clock';
 	import Zap from '@lucide/svelte/icons/zap';
 	import Shield from '@lucide/svelte/icons/shield';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import { escapeHtml } from '$shared/utils/sanitize.ts';
-	import { page } from '$stores/page';
-	import { FEATURES } from '$shared/features.ts';
-	import { formatDelay } from '$shared/utils/duration.ts';
+	import { escapeHtml } from '#shared/utils/sanitize.ts';
+	import { page } from '#stores/page.ts';
+	import { FEATURES } from '#shared/features.ts';
+	import { formatDelay } from '#shared/utils/duration.ts';
 
 	export let profiles: DelayProfilesRow[];
 

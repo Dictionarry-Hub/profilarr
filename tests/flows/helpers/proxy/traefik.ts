@@ -18,16 +18,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { serviceDir, startService, waitForService, type Service } from '$flows/harness/docker.ts';
-import { serviceImage } from '$flows/harness/images.ts';
-import { freePort } from '$flows/harness/ports.ts';
-import { certificatePaths, httpsGet } from '$flows/harness/tls.ts';
-import type {
-	ProxiedRequest,
-	ProxyOptions,
-	ReverseProxy,
-	RunningProxy
-} from '$flows/helpers/proxy/proxies.ts';
+import { serviceDir, startService, waitForService, type Service } from '#flows/harness/docker.ts';
+import { serviceImage } from '#flows/harness/images.ts';
+import { freePort } from '#flows/harness/ports.ts';
+import { certificatePaths, httpsGet } from '#flows/harness/tls.ts';
+import type { ProxiedRequest, ProxyOptions, ReverseProxy, RunningProxy } from './proxies.ts';
 
 /** One line of Traefik's JSON access log, the fields read here */
 interface AccessLogEntry {

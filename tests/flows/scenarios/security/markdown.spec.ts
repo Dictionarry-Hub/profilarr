@@ -5,11 +5,11 @@
  *   anything left (src/lib/shared/utils/markdown.ts, sanitize.ts).
  */
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME, type App } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { openDatabase, openSidebarPage } from '$flows/helpers/core/nav.ts';
-import { pullDatabase } from '$flows/helpers/git/databases.ts';
-import { upstream } from '$flows/helpers/git/upstream.ts';
+import { test, expect, FIXTURES_NAME, type App } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import { openDatabase, openSidebarPage } from '#flows/helpers/core/nav.ts';
+import { pullDatabase } from '#flows/helpers/git/databases.ts';
+import { upstream } from '#flows/helpers/git/upstream.ts';
 
 /**
  * An inline event handler with an unquoted attribute. The handler must not

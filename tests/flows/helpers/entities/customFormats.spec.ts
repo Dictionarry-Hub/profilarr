@@ -1,10 +1,10 @@
 /**
  * Checks for the readers in helpers/entities/customFormats.ts.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { openEntity, openSidebarPage, openTab } from '$flows/helpers/core/nav.ts';
-import { customFormatPages } from '$flows/helpers/entities/customFormats.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
+import { openEntity, openSidebarPage, openTab } from '#flows/helpers/core/nav.ts';
+import { customFormatPages } from './customFormats.ts';
 
 test('list reads every custom format', async ({ page }) => {
 	await openSidebarPage(page, 'Custom Formats');

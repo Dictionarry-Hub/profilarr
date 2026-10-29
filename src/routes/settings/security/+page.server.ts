@@ -1,16 +1,16 @@
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
-import { usersQueries } from '$db/queries/users.ts';
-import { sessionsQueries } from '$db/queries/sessions.ts';
-import { apiKeysQueries } from '$db/queries/apiKeys.ts';
-import { hashPassword, verifyPassword } from '$auth/password.ts';
-import { isOidcUsername, validateNewLocalAccount } from '$auth/loginOptions.ts';
-import { requiredConfirmation } from '$auth/confirmation.ts';
-import { sha256Hex } from '$auth/hash.ts';
-import { API_AREAS } from '$auth/apiPermissions.ts';
-import { config } from '$config';
-import { isApiKeyExpired } from '$shared/apiKeys.ts';
-import { logger } from '$logger/logger.ts';
+import { usersQueries } from '#db/queries/users.ts';
+import { sessionsQueries } from '#db/queries/sessions.ts';
+import { apiKeysQueries } from '#db/queries/apiKeys.ts';
+import { hashPassword, verifyPassword } from '#utils/auth/password.ts';
+import { isOidcUsername, validateNewLocalAccount } from '#utils/auth/loginOptions.ts';
+import { requiredConfirmation } from '#utils/auth/confirmation.ts';
+import { sha256Hex } from '#utils/auth/hash.ts';
+import { API_AREAS } from '#utils/auth/apiPermissions.ts';
+import { config } from '#utils/config/config.ts';
+import { isApiKeyExpired } from '#shared/apiKeys.ts';
+import { logger } from '#logger/logger.ts';
 
 function loadApiKeys() {
 	return {

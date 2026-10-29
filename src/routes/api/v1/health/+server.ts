@@ -7,10 +7,10 @@
  */
 
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1';
-import { db } from '$db/db.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { getCache } from '$pcd/database/registry.ts';
+import type { components } from '#api/v1.d.ts';
+import { db } from '#db/db.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { getCache } from '#pcd/database/registry.ts';
 
 type HealthCheckResponse = components['schemas']['HealthCheckResponse'];
 type HealthStatus = components['schemas']['HealthStatus'];

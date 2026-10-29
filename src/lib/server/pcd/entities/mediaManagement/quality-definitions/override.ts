@@ -1,10 +1,10 @@
-import { getCache } from '$pcd/index.ts';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import type { QualityDefinitionEntry } from '$shared/pcd/display.ts';
+import { getCache } from '#pcd/index.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import type { QualityDefinitionEntry } from '#shared/pcd/display.ts';
 import { getRadarrByName, getSonarrByName } from './read.ts';
 import { updateRadarrQualityDefinitions, updateSonarrQualityDefinitions } from './update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, followRenameChain } from '$pcd/conflicts/overrideUtils.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, followRenameChain } from '#pcd/conflicts/overrideUtils.ts';
 
 type QdTable = 'radarr_quality_definitions' | 'sonarr_quality_definitions';
 

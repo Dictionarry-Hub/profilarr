@@ -1,14 +1,14 @@
 import * as fs from 'node:fs/promises';
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
-import { config } from '$config';
-import { logger } from '$logger/logger.ts';
-import { enqueueJob } from '#lib/server/jobs/queueService.ts';
-import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
-import { listBackups } from '$utils/backup/list.ts';
-import { isValidBackupFilename, resolveBackupPath } from '$utils/backup/validation.ts';
-import { SANITIZED_CATEGORIES } from '$utils/backup/sanitize.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { config } from '#utils/config/config.ts';
+import { logger } from '#logger/logger.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
+import { buildJobDisplayName } from '#server/jobs/display.ts';
+import { listBackups } from '#utils/backup/list.ts';
+import { isValidBackupFilename, resolveBackupPath } from '#utils/backup/validation.ts';
+import { SANITIZED_CATEGORIES } from '#utils/backup/sanitize.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 export const load = async () => {
 	const backups = await listBackups(config.paths.backups);

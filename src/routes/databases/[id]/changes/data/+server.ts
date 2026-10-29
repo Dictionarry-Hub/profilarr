@@ -1,10 +1,10 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { databaseAnnouncementQueries } from '$db/queries/databaseAnnouncements.ts';
-import { getBranches, getIncomingChanges, getRepoInfo, getStatus } from '$utils/git/index.ts';
-import { listDraftEntityChanges, type DraftEntityChange } from '$pcd/ops/draftChanges.ts';
-import { parseAnnouncementFile } from '$announcements/database/index.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { databaseAnnouncementQueries } from '#db/queries/databaseAnnouncements.ts';
+import { getBranches, getIncomingChanges, getRepoInfo, getStatus } from '#utils/git/index.ts';
+import { listDraftEntityChanges, type DraftEntityChange } from '#pcd/ops/draftChanges.ts';
+import { parseAnnouncementFile } from '#server/announcements/database/index.ts';
 
 const FILE_CHANGE_EXCLUDED_PREFIXES = ['deps/', 'ops/'];
 const ANNOUNCEMENT_PATH_RE = /^announcements\/([^/]+)\.md$/;

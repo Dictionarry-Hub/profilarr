@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { Database } from '../../../src/lib/server/db/sqlite.ts';
+import { Database } from '#db/sqlite.ts';
 
 function withDatabase(fn: (db: Database) => void) {
 	const db = new Database(':memory:');

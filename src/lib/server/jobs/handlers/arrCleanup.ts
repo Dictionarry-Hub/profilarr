@@ -1,23 +1,23 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { arrCleanupSettingsQueries } from '$db/queries/arrCleanupSettings.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
-import type { ArrType } from '$utils/arr/types.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { arrCleanupSettingsQueries } from '#db/queries/arrCleanupSettings.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import type { ArrType } from '#arr/types.ts';
 import {
 	scanForStaleItems,
 	deleteStaleItems,
 	type CleanupScanResult
-} from '#lib/server/sync/cleanup.ts';
+} from '#server/sync/cleanup.ts';
 import {
 	scanForRemovedEntities,
 	deleteRemovedEntities,
 	type EntityScanResult
-} from '#lib/server/sync/entityCleanup.ts';
-import { calculateNextRun } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
+} from '#server/sync/entityCleanup.ts';
+import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
 
 interface PreScanned {
 	staleConfigs: CleanupScanResult;

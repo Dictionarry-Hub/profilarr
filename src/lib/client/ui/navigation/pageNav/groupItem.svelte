@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import type { Component } from 'svelte';
-	import Label from '$ui/label/Label.svelte';
+	import Label from '#ui/label/Label.svelte';
 
 	interface Props {
 		label: string;

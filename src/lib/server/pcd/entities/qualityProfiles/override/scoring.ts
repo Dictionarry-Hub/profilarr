@@ -1,8 +1,8 @@
-import { getCache, writeOperation } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import { scoring as readScoring } from '../scoring/read.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, valuesEqual, followRenameChain } from '$pcd/conflicts/overrideUtils.ts';
+import { getCache, writeOperation } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import { scoring as readScoring } from '#entities/qualityProfiles/scoring/read.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, valuesEqual, followRenameChain } from '#pcd/conflicts/overrideUtils.ts';
 import { resolveProfileName } from './resolve.ts';
 
 /**

@@ -9,12 +9,12 @@
  *   endpoints. The schedule stays off, so no scheduled run lands.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { latestJobRunId } from '$flows/helpers/core/jobs.ts';
-import { logEntries } from '$flows/helpers/core/logs.ts';
-import { addArr, arrInstance } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
-import { seedLibrary } from '$flows/helpers/sync/library.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { latestJobRunId } from '#flows/helpers/core/jobs.ts';
+import { logEntries } from '#flows/helpers/core/logs.ts';
+import { addArr, arrInstance } from '#flows/helpers/sync/arrs.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
+import { seedLibrary } from '#flows/helpers/sync/library.ts';
 import {
 	cancelRenameNow,
 	confirmRenameNow,
@@ -38,7 +38,7 @@ import {
 	type RenameChanges,
 	type RenameRun,
 	type RenameTitle
-} from '$flows/helpers/sync/renames.ts';
+} from '#flows/helpers/sync/renames.ts';
 
 const IGNORE_TAG = 'no-rename';
 /** The folder a move gives title A */

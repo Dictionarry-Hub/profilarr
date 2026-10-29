@@ -1,7 +1,7 @@
 <script lang="ts">
-	import SonarrNamingForm from '../../components/SonarrNamingForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import SonarrNamingForm from '#routes/media-management/[databaseId]/naming/components/SonarrNamingForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

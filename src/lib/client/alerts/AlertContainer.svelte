@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { alertStore } from './store';
+	import { alertStore } from './store.ts';
 	import Alert from './Alert.svelte';
-	import { alertSettingsStore, type AlertPosition } from './settings';
-	import { sidebarCollapsed } from '$stores/sidebar';
-	import { page } from '$stores/page';
+	import { alertSettingsStore, type AlertPosition } from './settings.ts';
+	import { sidebarCollapsed } from '#stores/sidebar.ts';
+	import { page } from '#stores/page.ts';
 
 	const positionClasses: Record<AlertPosition, string> = {
 		'top-left': 'top-4 left-4',

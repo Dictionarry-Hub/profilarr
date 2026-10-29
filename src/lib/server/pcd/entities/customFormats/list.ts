@@ -3,9 +3,9 @@
  */
 
 import { sql } from 'kysely';
-import type { PCDCache } from '$pcd/index.ts';
-import type { Tag, CustomFormatTableRow, ConditionRef } from '$shared/pcd/display.ts';
-import { getProfileRefCountsForCustomFormats } from '$pcd/references.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { Tag, CustomFormatTableRow, ConditionRef } from '#shared/pcd/display.ts';
+import { getProfileRefCountsForCustomFormats } from '#pcd/references.ts';
 
 /**
  * Get custom formats with full data for table/card views

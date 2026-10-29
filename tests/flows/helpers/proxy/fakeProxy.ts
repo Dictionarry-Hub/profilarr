@@ -11,14 +11,9 @@
 import { createServer as createHttpServer, request, type IncomingMessage } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
 import type { ServerResponse } from 'node:http';
-import { freePort } from '$flows/harness/ports.ts';
-import { certificate } from '$flows/harness/tls.ts';
-import type {
-	ProxiedRequest,
-	ProxyOptions,
-	ReverseProxy,
-	RunningProxy
-} from '$flows/helpers/proxy/proxies.ts';
+import { freePort } from '#flows/harness/ports.ts';
+import { certificate } from '#flows/harness/tls.ts';
+import type { ProxiedRequest, ProxyOptions, ReverseProxy, RunningProxy } from './proxies.ts';
 
 /** Bytes in a response's status line and headers, as a proxy buffers them */
 function headerBytes(response: IncomingMessage): number {

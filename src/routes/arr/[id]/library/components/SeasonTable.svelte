@@ -1,8 +1,8 @@
 <script lang="ts">
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { SonarrSeasonItem, SonarrEpisodeItem } from '#arr/types.ts';
 	import EpisodeTable from './EpisodeTable.svelte';
 
 	export let seasons: SonarrSeasonItem[];

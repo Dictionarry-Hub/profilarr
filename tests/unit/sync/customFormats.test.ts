@@ -1,6 +1,9 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import { transformCustomFormat, type PcdCustomFormat } from '$sync/customFormats/transformer.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import {
+	transformCustomFormat,
+	type PcdCustomFormat
+} from '#server/sync/customFormats/transformer.ts';
 
 function customFormat(conditions: PcdCustomFormat['conditions']): PcdCustomFormat {
 	return {

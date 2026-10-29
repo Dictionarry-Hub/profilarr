@@ -1,7 +1,7 @@
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import { AUTO_ALIGN_ENTITIES } from '#entities/registry.ts';
 
 // ── Types ──
 

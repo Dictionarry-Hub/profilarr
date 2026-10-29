@@ -2,12 +2,12 @@
  * Delete a regular expression operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
-import { getConditionRefsForRegex } from '$pcd/references.ts';
-import type { RegularExpressionWithTags } from '$shared/pcd/display.ts';
-import { uuid } from '$shared/utils/uuid.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import { generalSettingsQueries } from '#db/queries/generalSettings.ts';
+import { getConditionRefsForRegex } from '#pcd/references.ts';
+import type { RegularExpressionWithTags } from '#shared/pcd/display.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 
 interface DeleteRegularExpressionOptions {
 	databaseId: number;

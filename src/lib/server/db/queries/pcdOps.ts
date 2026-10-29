@@ -1,4 +1,4 @@
-import { db } from '../db.ts';
+import { db } from '#db/db.ts';
 
 export type PcdOpOrigin = 'base' | 'user';
 export type PcdOpState = 'published' | 'draft' | 'superseded' | 'dropped' | 'orphaned';

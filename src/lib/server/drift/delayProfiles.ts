@@ -1,9 +1,9 @@
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrDelayProfile } from '$arr/types.ts';
-import { getCache } from '$pcd/index.ts';
-import { getByName as getDelayProfileByName } from '$pcd/entities/delayProfiles/index.ts';
-import { transformDelayProfile } from '$sync/delayProfiles/transformer.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { ArrDelayProfile } from '#arr/types.ts';
+import { getCache } from '#pcd/index.ts';
+import { getByName as getDelayProfileByName } from '#entities/delayProfiles/index.ts';
+import { transformDelayProfile } from '#server/sync/delayProfiles/transformer.ts';
 import type { DriftFieldDiff } from './customFormats.ts';
 import { stringifyCanonical } from './hash.ts';
 

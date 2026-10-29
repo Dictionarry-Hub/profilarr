@@ -1,9 +1,9 @@
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { jobRunHistoryQueries } from '$db/queries/jobRunHistory.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
+import { jobRunHistoryQueries } from '#db/queries/jobRunHistory.ts';
 import { buildJobDisplayName } from './display.ts';
 import { jobQueueRegistry } from './queueRegistry.ts';
 import type { JobHandlerResult, JobQueueRecord, JobStatus } from './queueTypes.ts';
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 import { jobEvents, getJobRunningLabel, getJobCompletedLabel } from './jobEvents.ts';
 import './handlers/index.ts';
 

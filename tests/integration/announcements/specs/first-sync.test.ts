@@ -10,11 +10,11 @@
  */
 
 import { assertEquals, assert } from '@std/assert';
-import { run, setup, teardown, test } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { getDbPath, startServer, stopServer } from '$test-harness/server.ts';
-import { openDb } from '$test-harness/db.ts';
-import { createDatabaseInstance } from '../harness/setup.ts';
+import { run, setup, teardown, test } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { getDbPath, startServer, stopServer } from '#tests/harness/server.ts';
+import { openDb } from '#tests/harness/db.ts';
+import { createDatabaseInstance } from '#integration/announcements/harness/setup.ts';
 
 const PORT = PORTS.announcements.firstSync;
 const BASE_PATH = `./dist/integration-${PORT}`;
@@ -40,9 +40,9 @@ async function loadMods(): Promise<ReconcileMods> {
 		Deno.env.set('AUTH', 'off');
 		modsPromise = (async () => {
 			const [serviceMod, configMod, dbMod] = await Promise.all([
-				import('../../../../src/lib/server/announcements/database/service.ts'),
-				import('../../../../src/lib/server/utils/config/config.ts'),
-				import('../../../../src/lib/server/db/db.ts')
+				import('#server/announcements/database/service.ts'),
+				import('#utils/config/config.ts'),
+				import('#db/db.ts')
 			]);
 			await configMod.config.init();
 			await dbMod.db.initialize();

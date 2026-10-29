@@ -1,10 +1,10 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { arrRenameSettingsQueries } from '$db/queries/arrRenameSettings.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { processRenameConfig } from '#lib/server/rename/processor.ts';
-import { calculateNextRun } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { arrRenameSettingsQueries } from '#db/queries/arrRenameSettings.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { processRenameConfig } from '#server/rename/processor.ts';
+import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
 
 const renameRunHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);

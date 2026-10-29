@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { ENTITY_TYPES } from '$shared/pcd/portable.ts';
-import type { EntityType } from '$shared/pcd/portable.ts';
-import type { PCDCache } from '$pcd/database/cache.ts';
-import * as serialize from '$pcd/entities/serialize.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { ENTITY_TYPES } from '#shared/pcd/portable.ts';
+import type { EntityType } from '#shared/pcd/portable.ts';
+import type { PCDCache } from '#pcd/database/cache.ts';
+import * as serialize from '#entities/serialize.ts';
 
 interface ErrorResponse {
 	error: string;

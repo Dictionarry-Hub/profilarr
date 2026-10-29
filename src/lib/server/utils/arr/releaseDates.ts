@@ -1,4 +1,4 @@
-import { dateSortValue } from '$shared/utils/sort.ts';
+import { dateSortValue } from '#shared/utils/sort.ts';
 import type { RadarrMovie } from './types.ts';
 
 export function resolveRadarrInitialReleaseDate(movie: RadarrMovie): string | undefined {

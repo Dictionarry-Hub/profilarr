@@ -23,13 +23,13 @@
  */
 
 import { assertEquals, assertNotEquals, assertStringIncludes } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
-import { formResult, getSessionConfirmedAt, setSessionConfirmedAt } from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { completeOidcLogin, MOCK_OIDC_STALE_URL, OIDC_SETTINGS } from '$test-harness/oidc.ts';
-import { REAUTH_SKEW_SECONDS } from '$auth/confirmation.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
+import { formResult, getSessionConfirmedAt, setSessionConfirmedAt } from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { completeOidcLogin, MOCK_OIDC_STALE_URL, OIDC_SETTINGS } from '#tests/harness/oidc.ts';
+import { REAUTH_SKEW_SECONDS } from '#utils/auth/confirmation.ts';
 
 const PORT = PORTS.auth.oidcReauth;
 const ORIGIN = `http://localhost:${PORT}`;

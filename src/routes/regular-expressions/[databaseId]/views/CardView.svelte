@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { RegularExpressionWithTags } from '$shared/pcd/display';
+	import type { RegularExpressionWithTags } from '#shared/pcd/display.ts';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import { page } from '$stores/page';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import CodeBlock from '$ui/display/CodeBlock.svelte';
-	import Markdown from '$ui/display/Markdown.svelte';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
-	import { FEATURES } from '$shared/features.ts';
+	import { page } from '#stores/page.ts';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import CodeBlock from '#ui/display/CodeBlock.svelte';
+	import Markdown from '#ui/display/Markdown.svelte';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
+	import { FEATURES } from '#shared/features.ts';
 
 	export let expressions: RegularExpressionWithTags[];
 

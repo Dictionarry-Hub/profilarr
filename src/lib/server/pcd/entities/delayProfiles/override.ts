@@ -1,10 +1,10 @@
-import { getCache } from '$pcd/index.ts';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import type { PreferredProtocol } from '$shared/pcd/display.ts';
+import { getCache } from '#pcd/index.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import type { PreferredProtocol } from '#shared/pcd/display.ts';
 import { get as getDelayProfile } from './read.ts';
 import { update } from './update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, followRenameChain, valuesEqual } from '$pcd/conflicts/overrideUtils.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, followRenameChain, valuesEqual } from '#pcd/conflicts/overrideUtils.ts';
 
 async function resolveProfileName(
 	cache: PCDCache,

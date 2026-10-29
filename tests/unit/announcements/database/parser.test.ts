@@ -5,9 +5,9 @@
  */
 
 import { mkdir, writeFile } from 'node:fs/promises';
-import { BaseTest } from '../../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals, assertExists } from '@std/assert';
-import { parseAnnouncementsDir } from '$announcements/database/parser.ts';
+import { parseAnnouncementsDir } from '#server/announcements/database/parser.ts';
 
 const VALID = `---
 title: Migration to v2

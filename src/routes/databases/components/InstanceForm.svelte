@@ -9,24 +9,17 @@
 	import Database from '@lucide/svelte/icons/database';
 	import GitBranch from '@lucide/svelte/icons/git-branch';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
-	import { alertStore } from '$alerts/store';
-	import { jobStatus } from '$stores/jobStatus';
-	import {
-		isDirty,
-		initEdit,
-		initCreate,
-		update,
-		current,
-		clear
-	} from '#lib/client/stores/dirty.js';
-	import type { DatabaseInstancePublic } from '$db/queries/databaseInstances.ts';
-	import type { RepoInfo } from '$utils/git/types';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
+	import { isDirty, initEdit, initCreate, update, current, clear } from '#stores/dirty.ts';
+	import type { DatabaseInstancePublic } from '#db/queries/databaseInstances.ts';
+	import type { RepoInfo } from '#utils/git/types.ts';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
 
 	// Props
 	export let mode: 'create' | 'edit';

@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { jobEvents } from '$jobs/jobEvents.ts';
+import { jobEvents } from '#server/jobs/jobEvents.ts';
 
 /**
  * GET /jobs/events

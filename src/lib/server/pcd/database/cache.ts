@@ -2,28 +2,28 @@
  * PCD Cache - In-memory compiled view of PCD operations
  */
 
-import { openIsolatedDatabase, type Database } from '$db/sqlite.ts';
-import { createSqliteDialect } from '$db/kyselyDialect.ts';
+import { openIsolatedDatabase, type Database } from '#db/sqlite.ts';
+import { createSqliteDialect } from '#db/kyselyDialect.ts';
 import { Kysely } from 'kysely';
-import { logger } from '$logger/logger.ts';
-import { loadAllOperations } from '../ops/loadOps.ts';
-import { validateOperations } from '../utils/operations.ts';
+import { logger } from '#logger/logger.ts';
+import { loadAllOperations } from '#pcd/ops/loadOps.ts';
+import { validateOperations } from '#pcd/utils/operations.ts';
 import {
 	databaseInstancesQueries,
 	disableDatabaseInstance
-} from '$db/queries/databaseInstances.ts';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import type { PCDDatabase } from '$shared/pcd/types.ts';
-import type { CacheBuildStats, ValidationResult } from '../core/types.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import type { PcdOpHistoryStatus } from '$db/queries/pcdOpHistory.ts';
+} from '#db/queries/databaseInstances.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import type { PCDDatabase } from '#shared/pcd/types.ts';
+import type { CacheBuildStats, ValidationResult } from '#pcd/core/types.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import type { PcdOpHistoryStatus } from '#db/queries/pcdOpHistory.ts';
 import {
 	evaluateAutoAlign,
 	parseDesiredState,
 	parseOpMetadata
-} from '$pcd/conflicts/autoAlign/index.ts';
-import { checkFullListConflict } from '$pcd/conflicts/fullListCheck.ts';
+} from '#pcd/conflicts/autoAlign/index.ts';
+import { checkFullListConflict } from '#pcd/conflicts/fullListCheck.ts';
 
 /**
  * PCDCache - Manages an in-memory compiled database for a single PCD

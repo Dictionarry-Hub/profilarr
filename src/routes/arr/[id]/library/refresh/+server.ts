@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { cache } from '$cache/cache.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { cache } from '#utils/cache/cache.ts';
+import { logger } from '#logger/logger.ts';
 
 export const POST: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);

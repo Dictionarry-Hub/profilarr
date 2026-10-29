@@ -2,20 +2,24 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { get } from 'svelte/store';
 	import { enhance } from '$app/forms';
-	import { alertStore } from '$alerts/store';
-	import { navIconStore, type NavIconStyle } from '$stores/navIcons';
-	import { alertSettingsStore, type AlertPosition, DEFAULT_ALERT_SETTINGS } from '$alerts/settings';
-	import { dateFormat as dateFormatStore } from '$stores/dateFormat';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { navIconStore, type NavIconStyle } from '#stores/navIcons.ts';
+	import {
+		alertSettingsStore,
+		type AlertPosition,
+		DEFAULT_ALERT_SETTINGS
+	} from '#client/alerts/settings.ts';
+	import { dateFormat as dateFormatStore } from '#stores/dateFormat.ts';
 	import {
 		fontStore,
 		sansFontOptions,
 		monoFontOptions,
 		type SansFont,
 		type MonoFont
-	} from '$stores/font';
-	import { initEdit, update, isDirty, resetFromServer, clear } from '$stores/dirty';
-	import { FEATURES } from '$shared/features.ts';
-	import { LANDING_PAGES } from '$shared/landingPages.ts';
+	} from '#stores/font.ts';
+	import { initEdit, update, isDirty, resetFromServer, clear } from '#stores/dirty.ts';
+	import { FEATURES } from '#shared/features.ts';
+	import { LANDING_PAGES } from '#shared/landingPages.ts';
 	import Save from '@lucide/svelte/icons/save';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
@@ -24,14 +28,14 @@
 	import XCircle from '@lucide/svelte/icons/circle-x';
 	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import Info from '@lucide/svelte/icons/info';
-	import ExpandableCard from '$ui/card/ExpandableCard.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import ExpandableCard from '#ui/card/ExpandableCard.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	type DateFormat = 'auto' | 'mdy' | 'dmy' | 'ymd';

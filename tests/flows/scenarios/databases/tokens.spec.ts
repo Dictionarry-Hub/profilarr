@@ -11,11 +11,11 @@
  *   resets such an origin to the plain URL.
  */
 import { join } from 'node:path';
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture, fixturesSource } from '$flows/helpers/core/fixtureData.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
-import { logEntries } from '$flows/helpers/core/logs.ts';
-import { openDatabase, openEntity, openPage } from '$flows/helpers/core/nav.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixture, fixturesSource } from '#flows/helpers/core/fixtureData.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
+import { logEntries } from '#flows/helpers/core/logs.ts';
+import { openDatabase, openEntity, openPage } from '#flows/helpers/core/nav.ts';
 import {
 	cloneFilesHolding,
 	clonedRemote,
@@ -24,8 +24,8 @@ import {
 	publishChanges,
 	setClonedOrigin,
 	setDeveloperAccess
-} from '$flows/helpers/git/databases.ts';
-import { upstream } from '$flows/helpers/git/upstream.ts';
+} from '#flows/helpers/git/databases.ts';
+import { upstream } from '#flows/helpers/git/upstream.ts';
 
 const REPOSITORY = fixturesSource.fixtures.repository;
 

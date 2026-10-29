@@ -2,13 +2,13 @@
  * Upgrade notification definition
  */
 
-import type { Notification, NotificationBlock } from '../types.ts';
+import type { Notification, NotificationBlock } from '#notifications/types.ts';
 import type {
 	UpgradeJobLog,
 	UpgradeSelectionItem,
 	UpgradeOriginalEpisode,
 	UpgradeNewRelease
-} from '#lib/server/upgrades/types.ts';
+} from '#server/upgrades/types.ts';
 
 interface UpgradeNotificationParams {
 	log: UpgradeJobLog;

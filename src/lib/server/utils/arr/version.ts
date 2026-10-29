@@ -1,5 +1,5 @@
-import { arrInstancesQueries, type ArrInstance } from '$db/queries/arrInstances.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries, type ArrInstance } from '#db/queries/arrInstances.ts';
+import { logger } from '#logger/logger.ts';
 import type { BaseArrClient } from './base.ts';
 import type { ArrVersionInfo } from './types.ts';
 

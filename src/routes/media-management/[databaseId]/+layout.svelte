@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Tabs from '$ui/navigation/tabs/Tabs.svelte';
-	import { page } from '$stores/page';
+	import Tabs from '#ui/navigation/tabs/Tabs.svelte';
+	import { page } from '#stores/page.ts';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;

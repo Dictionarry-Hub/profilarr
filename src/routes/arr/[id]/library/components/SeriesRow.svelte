@@ -5,16 +5,16 @@
 	import Play from '@lucide/svelte/icons/play';
 	import Square from '@lucide/svelte/icons/square';
 	import Clock from '@lucide/svelte/icons/clock';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import type { SonarrSeriesItem } from '$utils/arr/types.ts';
-	import type { Column } from '$ui/table/types';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import type { SonarrSeriesItem } from '#arr/types.ts';
+	import type { Column } from '#ui/table/types.ts';
 	import { primaryReleaseGroup } from './releaseGroups.ts';
-	import { formatDate } from '$shared/utils/dates.ts';
-	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import { formatDate } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 
 	export let row: SonarrSeriesItem;
 	export let column: Column<SonarrSeriesItem>;

@@ -6,27 +6,27 @@ import { redirect } from '@sveltejs/kit';
 const isReload = (globalThis as Record<string, unknown>).__profilarr_initialized__ === true;
 (globalThis as Record<string, unknown>).__profilarr_initialized__ = true;
 
-import { config } from '$config';
-import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '$logger/startup.ts';
-import { logSettings } from '$logger/settings.ts';
-import { logger } from '$logger/logger.ts';
-import { db } from '$db/db.ts';
-import { runMigrations } from '$db/migrations.ts';
-import { applyPendingRestore } from '$utils/backup/applyPending.ts';
-import { initializeJobs } from '$jobs/init.ts';
-import { recoverInterruptedSyncs } from '#lib/server/sync/utils.ts';
-import { pcdManager } from '$pcd/core/manager.ts';
+import { config } from '#utils/config/config.ts';
+import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '#logger/startup.ts';
+import { logSettings } from '#logger/settings.ts';
+import { logger } from '#logger/logger.ts';
+import { db } from '#db/db.ts';
+import { runMigrations } from '#db/migrations.ts';
+import { applyPendingRestore } from '#utils/backup/applyPending.ts';
+import { initializeJobs } from '#server/jobs/init.ts';
+import { recoverInterruptedSyncs } from '#server/sync/utils.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
 import {
 	getAuthState,
 	isPublicPath,
 	maybeExtendSession,
 	cleanupExpiredSessions
-} from '$auth/middleware.ts';
-import { cleanupExpiredAttempts } from '$auth/rateLimit.ts';
-import { checkApiKeyAccess } from '$auth/apiPermissions.ts';
-import { getStartupAuthError } from '$auth/loginOptions.ts';
-import { setupStateQueries } from '$db/queries/setupState.ts';
-import { usersQueries } from '$db/queries/users.ts';
+} from '#utils/auth/middleware.ts';
+import { cleanupExpiredAttempts } from '#utils/auth/rateLimit.ts';
+import { checkApiKeyAccess } from '#utils/auth/apiPermissions.ts';
+import { getStartupAuthError } from '#utils/auth/loginOptions.ts';
+import { setupStateQueries } from '#db/queries/setupState.ts';
+import { usersQueries } from '#db/queries/users.ts';
 
 if (!isReload) {
 	// Initialize configuration on server startup
@@ -118,7 +118,7 @@ if (!isReload) {
 	}
 
 	// TODO(v3.0.0): Remove this warning along with the AUTH=oidc alias
-	// (see parseAuthConfig in $utils/config/auth.ts).
+	// (see parseAuthConfig in #utils/config/auth.ts).
 	if (config.deprecatedOidcMode) {
 		const leftover = usersQueries.existsLocal()
 			? ' A local password account exists, so the login page now also shows the password form.'

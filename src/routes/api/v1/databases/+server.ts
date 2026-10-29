@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { validateLinkInput, checkNameConflict } from '$pcd/core/validate.ts';
-import { schedulePcdSyncForDatabase } from '#lib/server/jobs/init.ts';
-import { logger } from '$logger/logger.ts';
+import type { components } from '#api/v1.d.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { validateLinkInput, checkNameConflict } from '#pcd/core/validate.ts';
+import { schedulePcdSyncForDatabase } from '#server/jobs/init.ts';
+import { logger } from '#logger/logger.ts';
 
 type DatabaseInstance = components['schemas']['DatabaseInstance'];
 type ErrorResponse = components['schemas']['ErrorResponse'];

@@ -9,14 +9,14 @@
 	import Earth from '@lucide/svelte/icons/earth';
 	import Layers from '@lucide/svelte/icons/layers';
 	import { createEventDispatcher } from 'svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Score from '$ui/arr/Score.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import { alertStore } from '#lib/client/alerts/store.js';
-	import type { Column } from '$ui/table/types';
-	import type { TestRelease, ReleaseEvaluation } from '$shared/pcd/display.ts';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Score from '#ui/arr/Score.svelte';
+	import CustomFormatBadge from '#ui/arr/CustomFormatBadge.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { TestRelease, ReleaseEvaluation } from '#shared/pcd/display.ts';
 
 	interface CfScore {
 		radarr: number | null;

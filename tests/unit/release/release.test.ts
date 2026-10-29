@@ -1,5 +1,5 @@
 import { assertEquals, assertRejects } from '@std/assert';
-import { cliffArgs, readNotes, tagArgs } from '../../../scripts/release.ts';
+import { cliffArgs, readNotes, tagArgs } from '#scripts/release.ts';
 
 const NOTES = '### Upgrade notes\n\n- `AUTH=oidc` is deprecated.';
 

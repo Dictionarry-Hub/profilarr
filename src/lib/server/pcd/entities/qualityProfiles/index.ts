@@ -1,7 +1,7 @@
 /**
  * Quality Profile queries and mutations
  *
- * Types: import from '$shared/pcd/display.ts'
+ * Types: import from '#shared/pcd/display.ts'
  */
 
 // List queries

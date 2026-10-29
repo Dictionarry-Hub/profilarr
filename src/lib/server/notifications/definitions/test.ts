@@ -2,7 +2,7 @@
  * Test notification definition
  */
 
-import type { Notification } from '../types.ts';
+import type { Notification } from '#notifications/types.ts';
 
 /**
  * Test notification for verifying service configuration

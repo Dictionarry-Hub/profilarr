@@ -3,21 +3,21 @@
  * Evaluates conditions against parsed release titles
  */
 
-import type { ParseResult } from '#lib/server/utils/arr/parser/types.ts';
+import type { ParseResult } from '#arr/parser/types.ts';
 import {
 	QualitySource,
 	QualityModifier,
 	Resolution,
 	ReleaseType,
 	Language
-} from '#lib/server/utils/arr/parser/types.ts';
+} from '#arr/parser/types.ts';
 import type {
 	ConditionData,
 	ConditionResult,
 	EvaluationResult,
 	ParsedInfo,
 	CustomFormatWithConditions
-} from '$shared/pcd/display.ts';
+} from '#shared/pcd/display.ts';
 
 /**
  * Patterns grouped by condition type — each type matches against different text

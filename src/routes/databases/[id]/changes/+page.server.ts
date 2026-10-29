@@ -1,19 +1,22 @@
 import * as fs from 'node:fs/promises';
 import { fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import { logger } from '$logger/logger.ts';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { reconcileAndNotify, reconcileFromWorkingCopy } from '$announcements/database/index.ts';
-import { compile } from '$pcd/database/compiler.ts';
-import { findDraftDropBlockers, listDraftEntityChanges } from '$pcd/ops/draftChanges.ts';
-import { exportDraftOps, previewDraftOps } from '$pcd/ops/exporter.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import { validateFilePaths } from '$utils/paths.ts';
-import { getStatus, restorePathsToHead } from '$utils/git/index.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import { logger } from '#logger/logger.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import {
+	reconcileAndNotify,
+	reconcileFromWorkingCopy
+} from '#server/announcements/database/index.ts';
+import { compile } from '#pcd/database/compiler.ts';
+import { findDraftDropBlockers, listDraftEntityChanges } from '#pcd/ops/draftChanges.ts';
+import { exportDraftOps, previewDraftOps } from '#pcd/ops/exporter.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import { validateFilePaths } from '#utils/paths.ts';
+import { getStatus, restorePathsToHead } from '#utils/git/index.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 export const load: PageServerLoad = async ({ parent }) => {
 	const { database } = await parent();

@@ -1,5 +1,5 @@
 import { Cron } from 'croner';
-import { parseUTC } from '$shared/utils/dates.ts';
+import { parseUTC } from '#shared/utils/dates.ts';
 
 /**
  * Validate a cron expression and check minimum interval.

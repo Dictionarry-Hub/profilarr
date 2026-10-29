@@ -1,5 +1,5 @@
-import { db } from '../db.ts';
-import type { AttemptCategory } from '$auth/loginAnalysis.ts';
+import { db } from '#db/db.ts';
+import type { AttemptCategory } from '#utils/auth/loginAnalysis.ts';
 
 /**
  * All queries for login_attempts table

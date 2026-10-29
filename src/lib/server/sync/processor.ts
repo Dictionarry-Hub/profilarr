@@ -7,13 +7,13 @@
  * - schedule: Cron expressions evaluated by evaluateScheduledSyncs() before processing
  */
 
-import { arrInstancesQueries, type ArrInstance } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
+import { arrInstancesQueries, type ArrInstance } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
 import { calculateNextRun } from './utils.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
-import type { ArrType } from '$arr/types.ts';
-import { logger } from '$logger/logger.ts';
-import { upsertScheduledJob } from '#lib/server/jobs/queueService.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import type { ArrType } from '#arr/types.ts';
+import { logger } from '#logger/logger.ts';
+import { upsertScheduledJob } from '#server/jobs/queueService.ts';
 import type {
 	SectionType,
 	SectionHandler,

@@ -1,14 +1,14 @@
 /* eslint-disable profilarr/secret-destination -- create only: there is no stored key to re-point */
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { basicAuthPairError } from '$shared/arr/basicAuth.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
-import { createArrClient } from '$arr/factory.ts';
-import { getDefaultDelayProfile } from '$arr/defaults.ts';
-import { probeAndRecordVersion } from '$arr/version.ts';
-import type { ArrType } from '$arr/types.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
+import { generalSettingsQueries } from '#db/queries/generalSettings.ts';
+import { createArrClient } from '#arr/factory.ts';
+import { getDefaultDelayProfile } from '#arr/defaults.ts';
+import { probeAndRecordVersion } from '#arr/version.ts';
+import type { ArrType } from '#arr/types.ts';
+import { logger } from '#logger/logger.ts';
 
 const VALID_TYPES = ['radarr', 'sonarr'];
 

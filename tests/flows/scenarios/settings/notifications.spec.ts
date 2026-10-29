@@ -9,11 +9,11 @@
  *   once it is deleted.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
-import { openPage } from '$flows/helpers/core/nav.ts';
-import { createBackup } from '$flows/helpers/settings/backups.ts';
-import type { FakeWebhook } from '$flows/helpers/settings/fakeWebhook.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
+import { openPage } from '#flows/helpers/core/nav.ts';
+import { createBackup } from '#flows/helpers/settings/backups.ts';
+import type { FakeWebhook } from '#flows/helpers/settings/fakeWebhook.ts';
 import {
 	createNotificationService,
 	deleteNotificationService,
@@ -23,7 +23,7 @@ import {
 	notificationServices,
 	sendTestNotification,
 	serviceRow
-} from '$flows/helpers/settings/notifications.ts';
+} from '#flows/helpers/settings/notifications.ts';
 
 const SERVICE = 'Flow Webhook';
 const RENAMED = 'Renamed Webhook';

@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
 import { assertEquals } from '@std/assert';
-import type { SyncTrigger } from '$db/queries/arrSync.ts';
+import type { SyncTrigger } from '#db/queries/arrSync.ts';
 
 type Section = 'qualityProfiles' | 'delayProfiles' | 'mediaManagement';
 
@@ -21,13 +21,13 @@ describe('on pull syncs only the sections that use the pulled database', async (
 	const baseDir = await mkdtemp(join(tmpdir(), 'profilarr-on-pull-'));
 	process.env.APP_BASE_PATH = baseDir;
 
-	const { db } = await import('$db/db.ts');
-	const { runMigrations } = await import('$db/migrations.ts');
-	const { arrInstancesQueries } = await import('$db/queries/arrInstances.ts');
-	const { arrSyncQueries } = await import('$db/queries/arrSync.ts');
-	const { jobQueueQueries } = await import('$db/queries/jobQueue.ts');
-	const { jobDispatcher } = await import('$jobs/dispatcher.ts');
-	const { triggerSyncs } = await import('$sync/processor.ts');
+	const { db } = await import('#db/db.ts');
+	const { runMigrations } = await import('#db/migrations.ts');
+	const { arrInstancesQueries } = await import('#db/queries/arrInstances.ts');
+	const { arrSyncQueries } = await import('#db/queries/arrSync.ts');
+	const { jobQueueQueries } = await import('#db/queries/jobQueue.ts');
+	const { jobDispatcher } = await import('#server/jobs/dispatcher.ts');
+	const { triggerSyncs } = await import('#server/sync/processor.ts');
 
 	const A = 1;
 	const B = 2;

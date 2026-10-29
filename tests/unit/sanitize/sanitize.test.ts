@@ -15,7 +15,7 @@
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
 import { marked } from 'marked';
-import { sanitizeHtml } from '$shared/utils/sanitize.ts';
+import { sanitizeHtml } from '#shared/utils/sanitize.ts';
 
 // --- Helpers ---
 

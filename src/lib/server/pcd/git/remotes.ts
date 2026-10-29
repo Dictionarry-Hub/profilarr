@@ -9,7 +9,7 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { execGit, execGitSafe } from '$utils/git/exec.ts';
+import { execGit, execGitSafe } from '#utils/git/exec.ts';
 
 export interface RemovedTokens {
 	/** Whether the database clone's own origin held a token */

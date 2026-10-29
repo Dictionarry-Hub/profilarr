@@ -1,7 +1,7 @@
 /**
  * Custom Format queries and mutations
  *
- * Types: import from '$shared/pcd/display.ts'
+ * Types: import from '#shared/pcd/display.ts'
  */
 
 // General queries/mutations

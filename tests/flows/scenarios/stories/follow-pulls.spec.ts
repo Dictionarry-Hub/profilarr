@@ -9,30 +9,30 @@
  * - One user, Sonarr 5, the built-in fixtures database, login off.
  */
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME, type App } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
+import { test, expect, FIXTURES_NAME, type App } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
 import {
 	latestJobRunId,
 	scheduledJobs,
 	waitForIdleJobs,
 	waitForNextJobRun
-} from '$flows/helpers/core/jobs.ts';
+} from '#flows/helpers/core/jobs.ts';
 import {
 	openDatabase,
 	openEntity,
 	openPage,
 	openSidebarPage,
 	openTab
-} from '$flows/helpers/core/nav.ts';
-import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
-import { conflictsPage, resolveConflict } from '$flows/helpers/git/conflicts.ts';
-import { pullDatabase, setConflictStrategy } from '$flows/helpers/git/databases.ts';
-import { upstream } from '$flows/helpers/git/upstream.ts';
-import { arrInstance, openArr } from '$flows/helpers/sync/arrs.ts';
-import { driftState, enableDrift, runDriftCheck } from '$flows/helpers/sync/drift.ts';
-import { expectedDelayProfile } from '$flows/helpers/sync/expected.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+} from '#flows/helpers/core/nav.ts';
+import { regularExpressionPages } from '#flows/helpers/entities/regularExpressions.ts';
+import { conflictsPage, resolveConflict } from '#flows/helpers/git/conflicts.ts';
+import { pullDatabase, setConflictStrategy } from '#flows/helpers/git/databases.ts';
+import { upstream } from '#flows/helpers/git/upstream.ts';
+import { arrInstance, openArr } from '#flows/helpers/sync/arrs.ts';
+import { driftState, enableDrift, runDriftCheck } from '#flows/helpers/sync/drift.ts';
+import { expectedDelayProfile } from '#flows/helpers/sync/expected.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	addArrAndOpenSync,
 	arrSyncStatus,
@@ -44,7 +44,7 @@ import {
 	SYNC_SECTIONS,
 	syncSection,
 	type SyncSection
-} from '$flows/helpers/sync/sync.ts';
+} from '#flows/helpers/sync/sync.ts';
 
 const INSTANCE = 'Home Sonarr';
 const PROFILE = fixture.qualityProfile('Sonarr Profile');

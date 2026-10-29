@@ -5,7 +5,7 @@
 
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { getLoginOptions, getStartupAuthError, needsSetup } from '$auth/loginOptions.ts';
+import { getLoginOptions, getStartupAuthError, needsSetup } from '#utils/auth/loginOptions.ts';
 
 // --- getLoginOptions ---
 

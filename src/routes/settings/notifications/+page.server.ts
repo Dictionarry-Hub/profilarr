@@ -1,9 +1,9 @@
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
-import { logger } from '$logger/logger.ts';
-import { notificationServicesQueries } from '$db/queries/notificationServices.ts';
-import { notificationHistoryQueries } from '$db/queries/notificationHistory.ts';
-import type { NotificationService } from '$db/queries/notificationServices.ts';
+import { logger } from '#logger/logger.ts';
+import { notificationServicesQueries } from '#db/queries/notificationServices.ts';
+import { notificationHistoryQueries } from '#db/queries/notificationHistory.ts';
+import type { NotificationService } from '#db/queries/notificationServices.ts';
 
 interface NotificationServiceWithStats extends Omit<NotificationService, 'config'> {
 	successCount: number;
@@ -107,8 +107,8 @@ export const actions: Actions = {
 		}
 
 		try {
-			const { notificationManager } = await import('$notifications/NotificationManager.ts');
-			const { test } = await import('$notifications/definitions/test.ts');
+			const { notificationManager } = await import('#notifications/NotificationManager.ts');
+			const { test } = await import('#notifications/definitions/test.ts');
 
 			const result = await notificationManager.sendToService(id, test());
 			if (!result.success) {

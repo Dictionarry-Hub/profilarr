@@ -4,11 +4,11 @@
  */
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { DOCKER_TAG } from '$flows/helpers/core/realServices.ts';
-import { dockerAvailable, serviceDir, startService } from '$flows/harness/docker.ts';
-import { serviceImage } from '$flows/harness/images.ts';
-import { freePort } from '$flows/harness/ports.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { DOCKER_TAG } from '#flows/helpers/core/realServices.ts';
+import { dockerAvailable, serviceDir, startService } from './docker.ts';
+import { serviceImage } from './images.ts';
+import { freePort } from './ports.ts';
 
 /**
  * Flow:

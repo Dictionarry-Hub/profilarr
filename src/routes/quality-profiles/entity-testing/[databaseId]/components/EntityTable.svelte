@@ -6,13 +6,13 @@
 	import Import from '@lucide/svelte/icons/import';
 	import Plus from '@lucide/svelte/icons/plus';
 	import { createEventDispatcher } from 'svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Label from '$ui/label/Label.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Label from '#ui/label/Label.svelte';
 	import ReleaseTable from './ReleaseTable.svelte';
-	import { alertStore } from '#lib/client/alerts/store.js';
-	import type { Column } from '$ui/table/types';
-	import type { TestEntity, TestRelease, ReleaseEvaluation } from '$shared/pcd/display.ts';
+	import { alertStore } from '#client/alerts/store.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import type { TestEntity, TestRelease, ReleaseEvaluation } from '#shared/pcd/display.ts';
 
 	interface CfScore {
 		radarr: number | null;

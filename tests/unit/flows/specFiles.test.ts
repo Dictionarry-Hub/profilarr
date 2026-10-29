@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import { assertEquals } from '@std/assert';
-import { dealSpecFiles } from '../../flows/harness/specFiles.ts';
+import { dealSpecFiles } from '#flows/harness/specFiles.ts';
 
 const FILES = ['a.spec.ts', 'b.spec.ts', 'c.spec.ts', 'd.spec.ts', 'e.spec.ts'];
 

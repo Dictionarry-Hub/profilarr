@@ -2,8 +2,8 @@
  * Create test entity operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
 
 interface CreateEntityInput {
 	type: 'movie' | 'series';

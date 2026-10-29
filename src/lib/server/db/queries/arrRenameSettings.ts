@@ -1,5 +1,5 @@
-import { db } from '../db.ts';
-import { toUTC } from '$shared/utils/dates.ts';
+import { db } from '#db/db.ts';
+import { toUTC } from '#shared/utils/dates.ts';
 
 /**
  * Database row type for arr_rename_settings table

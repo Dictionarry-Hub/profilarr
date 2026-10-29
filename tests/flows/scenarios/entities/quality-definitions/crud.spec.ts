@@ -7,17 +7,17 @@
  * - Every save returns to the quality definitions list.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
 import {
 	fixture,
 	fixtures,
 	type ArrType,
 	type FixtureQualityDefinitions
-} from '$flows/helpers/core/fixtureData.ts';
-import { deleteEntity, fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity } from '$flows/helpers/core/nav.ts';
-import { qualityDefinitionsPages } from '$flows/helpers/entities/mediaManagement.ts';
-import type { QualityDefinitionEntry } from '$shared/pcd/display.ts';
+} from '#flows/helpers/core/fixtureData.ts';
+import { deleteEntity, fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity } from '#flows/helpers/core/nav.ts';
+import { qualityDefinitionsPages } from '#flows/helpers/entities/mediaManagement.ts';
+import type { QualityDefinitionEntry } from '#shared/pcd/display.ts';
 
 const FIXTURE = {
 	radarr: fixture.qualityDefinitions('radarr', 'Fixture Radarr'),

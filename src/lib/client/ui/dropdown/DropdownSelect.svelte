@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Component } from 'svelte';
 	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
-	import { clickOutside } from '#lib/client/utils/clickOutside.js';
+	import { clickOutside } from '#client/utils/clickOutside.ts';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
-	import Button from '$ui/button/Button.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import Dropdown from './Dropdown.svelte';
 	import DropdownItem from './DropdownItem.svelte';
 	import DropdownHeader from './DropdownHeader.svelte';

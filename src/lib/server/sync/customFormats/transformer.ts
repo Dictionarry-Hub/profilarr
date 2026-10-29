@@ -3,7 +3,7 @@
  * Transforms PCD custom format data to arr API format
  */
 
-import type { PCDCache } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
 import {
 	type SyncArrType,
 	getSource,
@@ -12,8 +12,8 @@ import {
 	getQualityModifier,
 	getReleaseType,
 	getLanguage
-} from '../mappings.ts';
-import { sortConditions } from '$shared/pcd/conditions.ts';
+} from '#server/sync/mappings.ts';
+import { sortConditions } from '#shared/pcd/conditions.ts';
 
 const BYTES_PER_GB = 1024 * 1024 * 1024;
 const SIZE_GB_DECIMALS = 2;

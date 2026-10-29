@@ -1,4 +1,4 @@
-import type { Stage } from '$cutscene/types.ts';
+import type { Stage } from '#client/cutscene/types.ts';
 
 export const personalizeStage: Stage = {
 	id: 'personalize',

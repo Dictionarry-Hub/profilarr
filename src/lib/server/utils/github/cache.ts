@@ -2,9 +2,9 @@
  * GitHub API caching utilities
  */
 
-import { githubCacheQueries } from '$db/queries/githubCache.ts';
-import { logger } from '$logger/logger.ts';
-import type { RepoInfo } from '../git/types.ts';
+import { githubCacheQueries } from '#db/queries/githubCache.ts';
+import { logger } from '#logger/logger.ts';
+import type { RepoInfo } from '#utils/git/types.ts';
 
 /**
  * TTL Configuration (in minutes)

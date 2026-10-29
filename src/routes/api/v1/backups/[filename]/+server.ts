@@ -1,10 +1,10 @@
 import * as fs from 'node:fs/promises';
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1.d.ts';
-import { config } from '$config';
-import { logger } from '$logger/logger.ts';
-import { isValidBackupFilename, resolveBackupPath } from '$utils/backup/validation.ts';
-import { buildSanitizedArchive } from '$utils/backup/sanitize.ts';
+import type { components } from '#api/v1.d.ts';
+import { config } from '#utils/config/config.ts';
+import { logger } from '#logger/logger.ts';
+import { isValidBackupFilename, resolveBackupPath } from '#utils/backup/validation.ts';
+import { buildSanitizedArchive } from '#utils/backup/sanitize.ts';
 
 type ErrorResponse = components['schemas']['ErrorResponse'];
 
@@ -15,7 +15,7 @@ type ErrorResponse = components['schemas']['ErrorResponse'];
  * downloaded copy is sanitized on the fly before being streamed back: arr
  * instances and notification services are deleted (cascading through their
  * sync/history tables), users/sessions are wiped, and other secret-bearing
- * fields are nulled. See `$utils/backup/sanitize.ts` for the exact policy.
+ * fields are nulled. See `#utils/backup/sanitize.ts` for the exact policy.
  */
 export const GET: RequestHandler = async ({ params }) => {
 	const { filename } = params;

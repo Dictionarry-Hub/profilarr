@@ -1,12 +1,12 @@
 <script lang="ts">
-	import MediaSettingsForm from '../components/MediaSettingsForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { page } from '$stores/page';
+	import MediaSettingsForm from '#routes/media-management/[databaseId]/media-settings/components/MediaSettingsForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { page } from '#stores/page.ts';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
-	import type { ArrType } from '$shared/pcd/types.ts';
+	import type { ArrType } from '#shared/pcd/types.ts';
 
 	export let data: PageData;
 

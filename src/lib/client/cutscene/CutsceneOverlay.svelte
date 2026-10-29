@@ -2,8 +2,8 @@
 	import { onDestroy, tick } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
-	import { cutscene } from './store';
-	import { sidebarCollapsed } from '$stores/sidebar';
+	import { cutscene } from './store.ts';
+	import { sidebarCollapsed } from '#stores/sidebar.ts';
 	import { setupCompletion, teardownCompletion } from './completions.ts';
 	import { STAGES } from './definitions/index.ts';
 	import { routeResolvers } from './routeResolvers.ts';

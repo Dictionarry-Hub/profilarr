@@ -2,13 +2,17 @@
  * Media management section handler
  */
 
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
-import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { hasProfileItemSizes } from '#shared/arr/capabilities.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
 import { MediaManagementSyncer } from './syncer.ts';
-import type { ArrType } from '$arr/types.ts';
-import { registerSection, type SectionHandler, type ScheduledConfig } from '../registry.ts';
+import type { ArrType } from '#arr/types.ts';
+import {
+	registerSection,
+	type SectionHandler,
+	type ScheduledConfig
+} from '#server/sync/registry.ts';
 
 export const mediaManagementHandler: SectionHandler = {
 	type: 'mediaManagement',

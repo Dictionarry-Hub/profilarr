@@ -1,13 +1,13 @@
 <script lang="ts">
-	import RadarrNamingForm from '../components/RadarrNamingForm.svelte';
-	import SonarrNamingForm from '../components/SonarrNamingForm.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { page } from '$stores/page';
+	import RadarrNamingForm from '#routes/media-management/[databaseId]/naming/components/RadarrNamingForm.svelte';
+	import SonarrNamingForm from '#routes/media-management/[databaseId]/naming/components/SonarrNamingForm.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { page } from '#stores/page.ts';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
-	import type { ArrType } from '$shared/pcd/types.ts';
+	import type { ArrType } from '#shared/pcd/types.ts';
 
 	export let data: PageData;
 

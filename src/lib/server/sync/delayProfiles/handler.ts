@@ -2,11 +2,15 @@
  * Delay profiles section handler
  */
 
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import type { BaseArrClient } from '$arr/base.ts';
-import type { ArrInstance } from '$db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
 import { DelayProfileSyncer } from './syncer.ts';
-import { registerSection, type SectionHandler, type ScheduledConfig } from '../registry.ts';
+import {
+	registerSection,
+	type SectionHandler,
+	type ScheduledConfig
+} from '#server/sync/registry.ts';
 
 export const delayProfilesHandler: SectionHandler = {
 	type: 'delayProfiles',

@@ -7,21 +7,21 @@
 </script>
 
 <script lang="ts">
-	import type { QualityProfileTableRow } from '$shared/pcd/display.ts';
-	import Toggle from '$ui/toggle/Toggle.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import DraggableCard from '$ui/list/DraggableCard.svelte';
+	import type { QualityProfileTableRow } from '#shared/pcd/display.ts';
+	import Toggle from '#ui/toggle/Toggle.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import DraggableCard from '#ui/list/DraggableCard.svelte';
 	import SyncFooter from './SyncFooter.svelte';
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import { alertStore } from '#lib/client/alerts/store.ts';
+	import { alertStore } from '#client/alerts/store.ts';
 	import { deserialize } from '$app/forms';
-	import { jobStatus } from '$stores/jobStatus';
-	import { balancedGrid } from '#lib/client/utils/balancedGrid.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
+	import { balancedGrid } from '#client/utils/balancedGrid.ts';
 
 	interface DatabaseWithProfiles {
 		id: number;

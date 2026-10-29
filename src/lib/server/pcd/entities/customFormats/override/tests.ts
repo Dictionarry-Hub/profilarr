@@ -1,10 +1,10 @@
-import { getCache } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import { getTest } from '../tests/read.ts';
-import { createTest } from '../tests/create.ts';
-import { updateTest } from '../tests/update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, normalizeText } from '$pcd/conflicts/overrideUtils.ts';
+import { getCache } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import { getTest } from '#entities/customFormats/tests/read.ts';
+import { createTest } from '#entities/customFormats/tests/create.ts';
+import { updateTest } from '#entities/customFormats/tests/update.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, normalizeText } from '#pcd/conflicts/overrideUtils.ts';
 import { resolveFormatName } from './resolve.ts';
 
 /**

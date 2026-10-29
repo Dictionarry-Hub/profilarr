@@ -1,6 +1,6 @@
-import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '../base.ts';
-import { HttpError } from '$utils/http/types.ts';
-import { resolveRadarrInitialReleaseDate } from '../releaseDates.ts';
+import { BaseArrClient, INTERACTIVE_SEARCH_TIMEOUT_MS } from '#arr/base.ts';
+import { HttpError } from '#utils/http/types.ts';
+import { resolveRadarrInitialReleaseDate } from '#arr/releaseDates.ts';
 import type {
 	RadarrMovie,
 	RadarrMovieFile,
@@ -11,7 +11,7 @@ import type {
 	RadarrRelease,
 	RadarrQueueItem,
 	RenamePreviewItem
-} from '../types.ts';
+} from '#arr/types.ts';
 
 /**
  * Radarr API client

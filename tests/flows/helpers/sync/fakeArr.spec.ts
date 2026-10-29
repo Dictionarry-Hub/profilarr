@@ -3,9 +3,9 @@
  * Starting state is checked for every target; behaviour, which every target
  * shares through its resource kinds, on the default Radarr.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
-import { TARGETS, targetsWith } from '$flows/helpers/sync/targets.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import type { FakeArr } from './fakeArr.ts';
+import { TARGETS, targetsWith } from './targets.ts';
 
 function call(fake: FakeArr, method: string, path: string, body?: unknown, apiKey = fake.apiKey) {
 	return fetch(`${fake.url}${path}`, {

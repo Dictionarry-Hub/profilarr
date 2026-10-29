@@ -1,4 +1,4 @@
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
 import type { JobQueueRecord, JobType } from './queueTypes.ts';
 
 function readId(raw: unknown): number | null {

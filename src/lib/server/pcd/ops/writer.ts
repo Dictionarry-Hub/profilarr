@@ -3,14 +3,19 @@
  * Writes operations to pcd_ops instead of filesystem layers.
  */
 
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import type { PcdOpOrigin } from '$db/queries/pcdOps.ts';
-import { logger } from '$logger/logger.ts';
-import { compiledQueryToSql } from '../utils/sql.ts';
-import { compile } from '../database/compiler.ts';
-import { getCache } from '../database/registry.ts';
-import type { OperationMetadata, OperationType, WriteOptions, WriteResult } from '../core/types.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import type { PcdOpOrigin } from '#db/queries/pcdOps.ts';
+import { logger } from '#logger/logger.ts';
+import { compiledQueryToSql } from '#pcd/utils/sql.ts';
+import { compile } from '#pcd/database/compiler.ts';
+import { getCache } from '#pcd/database/registry.ts';
+import type {
+	OperationMetadata,
+	OperationType,
+	WriteOptions,
+	WriteResult
+} from '#pcd/core/types.ts';
 
 function buildMetadataJson(metadata?: OperationMetadata): string | null {
 	if (!metadata) return null;

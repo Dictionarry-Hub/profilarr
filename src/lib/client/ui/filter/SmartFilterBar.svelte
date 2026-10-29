@@ -3,13 +3,13 @@
 	import { browser } from '$app/env';
 	import Filter from '@lucide/svelte/icons/funnel';
 	import FilterTagComponent from './FilterTag.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownFooter from '$ui/dropdown/DropdownFooter.svelte';
-	import type { FilterFieldDef, FilterTag, SerializedFilterTag } from './types';
-	import { uuid } from '$shared/utils/uuid';
+	import Label from '#ui/label/Label.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import DropdownFooter from '#ui/dropdown/DropdownFooter.svelte';
+	import type { FilterFieldDef, FilterTag, SerializedFilterTag } from './types.ts';
+	import { uuid } from '#shared/utils/uuid.ts';
 
 	interface SmartFilterDraft {
 		inputValue: string;

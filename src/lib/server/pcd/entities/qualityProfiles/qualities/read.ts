@@ -3,8 +3,8 @@
  */
 
 import { sql } from 'kysely';
-import type { PCDCache } from '$pcd/index.ts';
-import type { QualitiesPageData, OrderedItem, QualitiesGroup } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { QualitiesPageData, OrderedItem, QualitiesGroup } from '#shared/pcd/display.ts';
 import { hasQualityGroupMembersPositionInCache } from './groupMembersSchema.ts';
 
 /**

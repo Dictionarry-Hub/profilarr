@@ -1,28 +1,28 @@
 <script lang="ts">
-	import '../app.css';
-	import '$stores/font';
-	import logo from '$assets/logo-512.png';
-	import Navbar from '$ui/navigation/navbar/navbar.svelte';
-	import PageNav from '$ui/navigation/pageNav/pageNav.svelte';
-	import BottomNav from '$ui/navigation/bottomNav/BottomNav.svelte';
-	import AlertContainer from '$alerts/AlertContainer.svelte';
-	import HelpButton from '$ui/help/HelpButton.svelte';
-	import CutsceneOverlay from '#lib/client/cutscene/CutsceneOverlay.svelte';
+	import '#client/styles/app.css';
+	import '#stores/font.ts';
+	import logo from '#client/assets/logo-512.png';
+	import Navbar from '#ui/navigation/navbar/navbar.svelte';
+	import PageNav from '#ui/navigation/pageNav/pageNav.svelte';
+	import BottomNav from '#ui/navigation/bottomNav/BottomNav.svelte';
+	import AlertContainer from '#client/alerts/AlertContainer.svelte';
+	import HelpButton from '#ui/help/HelpButton.svelte';
+	import CutsceneOverlay from '#client/cutscene/CutsceneOverlay.svelte';
 
-	import CutsceneComplete from '#lib/client/cutscene/CutsceneComplete.svelte';
-	import { cutscene } from '#lib/client/cutscene/store.js';
-	import { sidebarCollapsed } from '$stores/sidebar';
-	import { dateFormat } from '$stores/dateFormat';
-	import { serverTimezone } from '$stores/timezone';
-	import { FEATURES } from '#lib/shared/features.js';
+	import CutsceneComplete from '#client/cutscene/CutsceneComplete.svelte';
+	import { cutscene } from '#client/cutscene/store.ts';
+	import { sidebarCollapsed } from '#stores/sidebar.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
+	import { FEATURES } from '#shared/features.ts';
 	import { dev } from '$app/env';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import { onMount } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import X from '@lucide/svelte/icons/x';
-	import Button from '$ui/button/Button.svelte';
+	import Button from '#ui/button/Button.svelte';
 
 	export let data;
 

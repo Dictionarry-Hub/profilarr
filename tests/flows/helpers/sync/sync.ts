@@ -19,14 +19,14 @@
  */
 
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import { FIXTURES_NAME } from '$flows/harness/seed.ts';
-import { fixtures } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, saveForm, waitForAction } from '$flows/helpers/core/forms.ts';
-import { openTab } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { addArr, openArr } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
-import { hasCapability } from '$flows/helpers/sync/targets.ts';
+import { FIXTURES_NAME } from '#flows/harness/seed.ts';
+import { fixtures } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, saveForm, waitForAction } from '#flows/helpers/core/forms.ts';
+import { openTab } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { addArr, openArr } from './arrs.ts';
+import type { FakeArr } from './fakeArr.ts';
+import { hasCapability } from './targets.ts';
 
 export const SYNC_SECTIONS = {
 	'Quality Profiles': { key: 'qualityProfiles', action: 'syncQualityProfiles' },

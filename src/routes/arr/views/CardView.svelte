@@ -4,16 +4,16 @@
 	import ArrowUpCircle from '@lucide/svelte/icons/circle-arrow-up';
 	import Type from '@lucide/svelte/icons/type';
 	import Trash2 from '@lucide/svelte/icons/trash';
-	import Button from '$ui/button/Button.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import { isExperimentalVersion } from '$shared/arr/capabilities.ts';
-	import { getDisplayUrl } from '#lib/client/utils/arrDisplayUrl.ts';
-	import type { ArrInstanceSummary } from '../+page.server.ts';
-	import radarrLogo from '#lib/client/assets/Radarr.svg';
-	import sonarrLogo from '#lib/client/assets/Sonarr.svg';
+	import Button from '#ui/button/Button.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import { isExperimentalVersion } from '#shared/arr/capabilities.ts';
+	import { getDisplayUrl } from '#client/utils/arrDisplayUrl.ts';
+	import type { ArrInstanceSummary } from '#routes/arr/+page.server.ts';
+	import radarrLogo from '#client/assets/Radarr.svg';
+	import sonarrLogo from '#client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
 
 	export let instances: ArrInstanceSummary[];

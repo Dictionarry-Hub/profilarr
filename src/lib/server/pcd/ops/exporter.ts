@@ -1,23 +1,23 @@
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import * as fs from 'node:fs/promises';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import { logger } from '$logger/logger.ts';
-import { stage, commit, configureIdentity } from '$utils/git/write.ts';
-import { execGit } from '$utils/git/exec.ts';
-import { openIsolatedDatabase, type Database } from '$db/sqlite.ts';
-import { getBranch, getStatus } from '$utils/git/read.ts';
-import { compile } from '../database/compiler.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import { logger } from '#logger/logger.ts';
+import { stage, commit, configureIdentity } from '#utils/git/write.ts';
+import { execGit } from '#utils/git/exec.ts';
+import { openIsolatedDatabase, type Database } from '#db/sqlite.ts';
+import { getBranch, getStatus } from '#utils/git/read.ts';
+import { compile } from '#pcd/database/compiler.ts';
 import { canWriteToBase } from './writer.ts';
 import { listDraftEntityChanges } from './draftChanges.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import { validateFilePaths } from '$utils/paths.ts';
-import { getMaxOpNumber } from '$pcd/utils/git.ts';
-import { loadManifest } from '$pcd/manifest/manifest.ts';
-import { loadOperationsFromDir } from '$pcd/utils/operations.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import { validateFilePaths } from '#utils/paths.ts';
+import { getMaxOpNumber } from '#pcd/utils/git.ts';
+import { loadManifest } from '#pcd/manifest/manifest.ts';
+import { loadOperationsFromDir } from '#pcd/utils/operations.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 type ExportResult =
 	| {

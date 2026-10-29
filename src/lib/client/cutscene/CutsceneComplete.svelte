@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { cutscene } from './store';
-	import Modal from '$ui/modal/Modal.svelte';
-	import Button from '$ui/button/Button.svelte';
+	import { cutscene } from './store.ts';
+	import Modal from '#ui/modal/Modal.svelte';
+	import Button from '#ui/button/Button.svelte';
 	import X from '@lucide/svelte/icons/x';
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import Bird from '@lucide/svelte/icons/bird';

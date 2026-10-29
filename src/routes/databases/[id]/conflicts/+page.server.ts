@@ -1,11 +1,11 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import type { OperationMetadata } from '$pcd/core/types.ts';
-import { alignConflict, overrideConflict } from '$pcd/conflicts/index.ts';
-import { getCache } from '$pcd/index.ts';
-import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
-import { followRenameChain } from '$pcd/conflicts/overrideUtils.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import type { OperationMetadata } from '#pcd/core/types.ts';
+import { alignConflict, overrideConflict } from '#pcd/conflicts/index.ts';
+import { getCache } from '#pcd/index.ts';
+import { AUTO_ALIGN_ENTITIES } from '#entities/registry.ts';
+import { followRenameChain } from '#pcd/conflicts/overrideUtils.ts';
 
 type FieldConflict = {
 	field: string;

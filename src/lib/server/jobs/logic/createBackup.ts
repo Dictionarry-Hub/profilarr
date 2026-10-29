@@ -14,13 +14,13 @@
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import * as fs from 'node:fs/promises';
-import { Database } from '$db/sqlite.ts';
-import { db } from '$db/db.ts';
-import { migrationRunner } from '$db/migrations.ts';
-import { logger } from '$logger/logger.ts';
-import { runCommand } from '$utils/command.ts';
-import { build } from '#lib/shared/build.ts';
-import { isNotFound } from '$utils/fs.ts';
+import { Database } from '#db/sqlite.ts';
+import { db } from '#db/db.ts';
+import { migrationRunner } from '#db/migrations.ts';
+import { logger } from '#logger/logger.ts';
+import { runCommand } from '#utils/command.ts';
+import { build } from '#shared/build.ts';
+import { isNotFound } from '#utils/fs.ts';
 
 export interface CreateBackupResult {
 	success: boolean;

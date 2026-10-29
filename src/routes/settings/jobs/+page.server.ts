@@ -1,10 +1,10 @@
 import type { Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { jobRunHistoryQueries } from '$db/queries/jobRunHistory.ts';
-import { buildJobDisplayName } from '#lib/server/jobs/display.ts';
-import type { JobQueueRecord } from '$jobs/queueTypes.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
+import { jobRunHistoryQueries } from '#db/queries/jobRunHistory.ts';
+import { buildJobDisplayName } from '#server/jobs/display.ts';
+import type { JobQueueRecord } from '#server/jobs/queueTypes.ts';
 
 export const load = () => {
 	const arrInstances = arrInstancesQueries.getAll();

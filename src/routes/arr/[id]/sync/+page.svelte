@@ -3,18 +3,18 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { refreshAll } from '$app/navigation';
 	import Info from '@lucide/svelte/icons/info';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import QualityProfiles from './components/QualityProfiles.svelte';
 	import DelayProfiles from './components/DelayProfiles.svelte';
 	import MediaManagement from './components/MediaManagement.svelte';
-	import type { SyncTrigger } from '$db/queries/arrSync.ts';
-	import { initEdit, update, clear } from '#lib/client/stores/dirty.js';
-	import { jobStatus } from '$stores/jobStatus';
-	import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
+	import type { SyncTrigger } from '#db/queries/arrSync.ts';
+	import { initEdit, update, clear } from '#stores/dirty.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
+	import { hasProfileItemSizes } from '#shared/arr/capabilities.ts';
 	import type { ProfileSyncState } from './components/QualityProfiles.svelte';
 
 	export let data: PageData;

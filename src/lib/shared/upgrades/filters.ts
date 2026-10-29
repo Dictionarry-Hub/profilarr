@@ -4,7 +4,7 @@
  */
 
 import { Cron } from 'croner';
-import { uuid } from '../utils/uuid.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 
 /** App types relevant to upgrade filters */
 export type UpgradeAppType = 'radarr' | 'sonarr';

@@ -12,7 +12,7 @@ import {
 	REAUTH_SKEW_SECONDS,
 	evaluateReauth,
 	isRecentlyConfirmed
-} from '$auth/confirmation.ts';
+} from '#utils/auth/confirmation.ts';
 
 const NOW = Date.parse('2026-10-14T12:00:00Z');
 const minutesAgo = (m: number) => new Date(NOW - m * 60_000).toISOString();

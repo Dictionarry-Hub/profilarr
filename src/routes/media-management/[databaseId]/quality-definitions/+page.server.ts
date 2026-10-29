@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { list } from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { list } from '#entities/mediaManagement/quality-definitions/read.ts';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { databaseId } = params;

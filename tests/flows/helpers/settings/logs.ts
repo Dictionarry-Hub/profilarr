@@ -5,12 +5,12 @@
  */
 
 import { expect, test, type Page } from '@playwright/test';
-import type { App } from '$flows/harness/app.ts';
-import { writeLogFile } from '$flows/harness/settings.ts';
-import { waitForAction } from '$flows/helpers/core/forms.ts';
-import { waitForJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
-import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+import type { App } from '#flows/harness/app.ts';
+import { writeLogFile } from '#flows/harness/settings.ts';
+import { waitForAction } from '#flows/helpers/core/forms.ts';
+import { waitForJobRun, type JobRun } from '#flows/helpers/core/jobs.ts';
+import { openSidebarPage, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 /** One file in the Logs page's Log Files list */
 export interface LogFile {

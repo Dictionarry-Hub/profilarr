@@ -19,11 +19,11 @@ import {
 	saveForm,
 	setSwitch,
 	waitForAction
-} from '$flows/helpers/core/forms.ts';
-import { latestJobRunId, waitForNextJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
-import { openTab, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pageData, unflatten } from '$flows/helpers/core/pageData.ts';
-import { openArr } from '$flows/helpers/sync/arrs.ts';
+} from '#flows/helpers/core/forms.ts';
+import { latestJobRunId, waitForNextJobRun, type JobRun } from '#flows/helpers/core/jobs.ts';
+import { openTab, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pageData, unflatten } from '#flows/helpers/core/pageData.ts';
+import { openArr } from './arrs.ts';
 
 /** A stored rule: a field, an operator and a value, as the app's ids */
 export interface FilterRule {

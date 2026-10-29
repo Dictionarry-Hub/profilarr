@@ -19,34 +19,30 @@
 		type FilterConfig,
 		type FilterGroup,
 		type UpgradeAppType
-	} from '$shared/upgrades/filters';
-	import { uuid } from '$shared/utils/uuid';
-	import { selectors } from '$shared/upgrades/selectors';
-	import {
-		createSearchStore,
-		getPersistentSearchStore,
-		type SearchStore
-	} from '#lib/client/stores/search.js';
+	} from '#shared/upgrades/filters.ts';
+	import { uuid } from '#shared/utils/uuid.ts';
+	import { selectors } from '#shared/upgrades/selectors.ts';
+	import { createSearchStore, getPersistentSearchStore, type SearchStore } from '#stores/search.ts';
 	import type { Readable } from 'svelte/store';
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import FilterGroupComponent from './FilterGroup.svelte';
 	import FilterPreviewModal from './FilterPreviewModal.svelte';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
-	import DropdownSelect from '$ui/dropdown/DropdownSelect.svelte';
-	import ActionsBar from '$ui/actions/ActionsBar.svelte';
-	import ActionButton from '$ui/actions/ActionButton.svelte';
-	import SearchAction from '$ui/actions/SearchAction.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import PasteModal from '$ui/modal/PasteModal.svelte';
-	import type { Column } from '$ui/table/types';
-	import { alertStore } from '$alerts/store';
-	import { copyToClipboard } from '#lib/client/utils/clipboard.js';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
+	import DropdownSelect from '#ui/dropdown/DropdownSelect.svelte';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import PasteModal from '#ui/modal/PasteModal.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { copyToClipboard } from '#client/utils/clipboard.ts';
 
 	let searchStore: SearchStore = createSearchStore();
 	let debouncedQuery: Readable<string> = searchStore.debouncedQuery;

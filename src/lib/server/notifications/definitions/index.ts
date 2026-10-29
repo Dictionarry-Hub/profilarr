@@ -5,7 +5,7 @@
  * Definitions are service-agnostic. Notifiers handle rendering.
  *
  * @example
- * import { notifications } from '$notifications/definitions/index.ts';
+ * import { notifications } from '#notifications/definitions/index.ts';
  * await notificationManager.notify(notifications.rename({ log, summaryNotifications }));
  */
 

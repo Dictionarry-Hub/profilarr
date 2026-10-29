@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { ServerLoad } from '@sveltejs/kit';
-import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '#db/queries/arrInstances.ts';
 
 export const load: ServerLoad = ({ params, url }) => {
 	const id = parseInt(params.id || '', 10);

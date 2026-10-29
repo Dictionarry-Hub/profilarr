@@ -1,15 +1,15 @@
-import { getCache } from '$pcd/index.ts';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
+import { getCache } from '#pcd/index.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
 import { get as getRegex } from './read.ts';
 import { update } from './update.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
 import {
 	getDesiredTo,
 	followRenameChain,
 	normalizeTags,
 	normalizeText,
 	tagsEqual
-} from '$pcd/conflicts/overrideUtils.ts';
+} from '#pcd/conflicts/overrideUtils.ts';
 
 async function resolveRegexName(
 	cache: PCDCache,

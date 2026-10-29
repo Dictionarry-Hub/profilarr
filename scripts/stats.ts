@@ -368,7 +368,7 @@ function classifyExtra(relFromRoot: string): { group: Group; basename: string } 
 		const head = slash === -1 ? '_root' : rest.slice(0, slash);
 		return { group: ns.group, basename: head };
 	}
-	// Not in a namespace: lives under src/ directly (app.css, adapter/, ...).
+	// Not in a namespace: lives under src/ directly (hooks, adapter/, ...).
 	// Group everything under 'app'. Single-file descendants of src/ collapse
 	// to a single 'app/_root' module.
 	const afterSrc = relFromRoot.startsWith('src/') ? relFromRoot.slice('src/'.length) : relFromRoot;

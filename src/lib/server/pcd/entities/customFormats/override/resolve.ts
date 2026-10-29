@@ -1,6 +1,6 @@
-import type { PCDCache } from '$pcd/index.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
-import { getDesiredTo, followRenameChain } from '$pcd/conflicts/overrideUtils.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
+import { getDesiredTo, followRenameChain } from '#pcd/conflicts/overrideUtils.ts';
 
 /**
  * Resolve the custom format name from op metadata / desired_state.

@@ -3,9 +3,9 @@
  */
 
 import { assert } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { openDb } from '$test-harness/db.ts';
-import { getDbPath } from '$test-harness/server.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { openDb } from '#tests/harness/db.ts';
+import { getDbPath } from '#tests/harness/server.ts';
 
 export type ConflictStrategy = 'override' | 'align' | 'ask';
 export type OpOrigin = 'base' | 'user';

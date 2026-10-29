@@ -17,14 +17,8 @@ import { createServer, type IncomingMessage, type ServerResponse } from 'node:ht
 import { randomUUID } from 'node:crypto';
 import { expect, test, type Page } from '@playwright/test';
 import { SignJWT, exportJWK, generateKeyPair } from 'jose';
-import { freePort } from '$flows/harness/ports.ts';
-import type {
-	Misbehaviour,
-	RunningSso,
-	SsoProvider,
-	SsoRequest,
-	SsoUser
-} from '$flows/helpers/auth/sso/providers.ts';
+import { freePort } from '#flows/harness/ports.ts';
+import type { Misbehaviour, RunningSso, SsoProvider, SsoRequest, SsoUser } from './providers.ts';
 
 const CLIENT_ID = 'profilarr-flows';
 const CLIENT_SECRET = 'flows-sso-secret';

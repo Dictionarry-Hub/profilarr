@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { RadarrClient } from '$utils/arr/clients/radarr.ts';
-import { arrClientOptionsFromInstance } from '$utils/arr/factory.ts';
-import { groupRadarrReleases } from '$utils/arr/releaseImport.ts';
-import { logger } from '$logger/logger.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { RadarrClient } from '#arr/clients/radarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import { groupRadarrReleases } from '#arr/releaseImport.ts';
+import { logger } from '#logger/logger.ts';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const instanceId = parseInt(params.id ?? '', 10);

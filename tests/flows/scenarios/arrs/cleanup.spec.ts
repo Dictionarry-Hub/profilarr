@@ -8,28 +8,28 @@
  * - Each test checks the preview, the run and the fake Arr's state after it.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import type { JobRun } from '$flows/helpers/core/jobs.ts';
-import { logEntries } from '$flows/helpers/core/logs.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { arrInstance, setCleanup } from '$flows/helpers/sync/arrs.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import type { JobRun } from '#flows/helpers/core/jobs.ts';
+import { logEntries } from '#flows/helpers/core/logs.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { arrInstance, setCleanup } from '#flows/helpers/sync/arrs.ts';
 import {
 	cleanupDialog,
 	cleanupSettings,
 	confirmCleanup,
 	openCleanup,
 	type StaleItem
-} from '$flows/helpers/sync/cleanup.ts';
-import { expectedScores } from '$flows/helpers/sync/expected.ts';
+} from '#flows/helpers/sync/cleanup.ts';
+import { expectedScores } from '#flows/helpers/sync/expected.ts';
 import {
 	removedMediaHealth,
 	type FakeArr,
 	type HealthItem,
 	type LibraryItem
-} from '$flows/helpers/sync/fakeArr.ts';
-import { setUpProfileSync, syncSection } from '$flows/helpers/sync/sync.ts';
-import type { Target } from '$flows/helpers/sync/targets.ts';
+} from '#flows/helpers/sync/fakeArr.ts';
+import { setUpProfileSync, syncSection } from '#flows/helpers/sync/sync.ts';
+import type { Target } from '#flows/helpers/sync/targets.ts';
 
 /** A format a user added in the Arr, which no sync uses */
 const ARR_ONLY = 'Arr Only';

@@ -2,8 +2,8 @@
  * Custom format test read queries
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import type { CustomFormatBasic, CustomFormatTest } from '$shared/pcd/display.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import type { CustomFormatBasic, CustomFormatTest } from '#shared/pcd/display.ts';
 
 /**
  * Get custom format basic info by ID

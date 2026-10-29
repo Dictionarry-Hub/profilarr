@@ -3,18 +3,18 @@
  */
 
 import { assert, assertEquals } from '@std/assert';
-import { startServer, stopServer } from '$test-harness/server.ts';
-import { run, setup, teardown, test } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
-import { base } from '../../harness/fixtures.ts';
+import { startServer, stopServer } from '#tests/harness/server.ts';
+import { run, setup, teardown, test } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
+import { base } from '#integration/pcd/harness/fixtures.ts';
 import {
 	compilePcd,
 	normalizeSql,
 	opCheckpoint,
 	parseDesiredState,
 	parseMetadata
-} from '../../harness/pcd.ts';
-import { write } from '../../harness/write.ts';
+} from '#integration/pcd/harness/pcd.ts';
+import { write } from '#integration/pcd/harness/write.ts';
 import { assertActionFailed, createScenarioFactory, userOpsSince } from './helpers.ts';
 
 const PORT = PORTS.pcd.writeRegexCreate;

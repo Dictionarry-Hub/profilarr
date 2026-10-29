@@ -8,14 +8,14 @@
  * - The integration tests apiKeyPermissions.test.ts and apiKey.test.ts cover
  *   the permission matrix, expiry and last use against the server.
  */
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { createAccount } from '$flows/helpers/auth/accounts.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { createAccount } from '#flows/helpers/auth/accounts.ts';
 import {
 	apiWithKey,
 	createApiKey,
 	deleteApiKey,
 	securityPages
-} from '$flows/helpers/auth/security.ts';
+} from '#flows/helpers/auth/security.ts';
 
 test.use({ appEnv: { AUTH: 'on' } });
 

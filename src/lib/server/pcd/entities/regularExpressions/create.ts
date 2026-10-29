@@ -2,9 +2,9 @@
  * Create a regular expression operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import { logger } from '$logger/logger.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import { logger } from '#logger/logger.ts';
 
 interface CreateRegularExpressionInput {
 	name: string;

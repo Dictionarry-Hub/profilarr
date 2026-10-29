@@ -8,7 +8,7 @@ import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
-import { runCommand } from '$utils/command.ts';
+import { runCommand } from '#utils/command.ts';
 
 const decode = (bytes: Uint8Array) => new TextDecoder().decode(bytes);
 

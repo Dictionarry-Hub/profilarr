@@ -2,8 +2,8 @@
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
 	import CheckCircle2 from '@lucide/svelte/icons/circle-check';
 	import XCircle from '@lucide/svelte/icons/circle-x';
-	import { jobStatus } from '$stores/jobStatus';
-	import Card from '$ui/card/Card.svelte';
+	import { jobStatus } from '#stores/jobStatus.ts';
+	import Card from '#ui/card/Card.svelte';
 
 	function formatDuration(ms: number): string {
 		if (ms < 1000) return `${ms}ms`;

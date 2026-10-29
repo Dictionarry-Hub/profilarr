@@ -9,14 +9,14 @@
  *   resolution, not only what the Conflicts tab shows.
  */
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME, type App } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
-import { newEntity, openDatabase, openEntity, openSidebarPage } from '$flows/helpers/core/nav.ts';
-import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
-import { conflictsPage, resolveConflict } from '$flows/helpers/git/conflicts.ts';
-import { pullDatabase, setConflictStrategy } from '$flows/helpers/git/databases.ts';
-import { upstream } from '$flows/helpers/git/upstream.ts';
+import { test, expect, FIXTURES_NAME, type App } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
+import { newEntity, openDatabase, openEntity, openSidebarPage } from '#flows/helpers/core/nav.ts';
+import { regularExpressionPages } from '#flows/helpers/entities/regularExpressions.ts';
+import { conflictsPage, resolveConflict } from '#flows/helpers/git/conflicts.ts';
+import { pullDatabase, setConflictStrategy } from '#flows/helpers/git/databases.ts';
+import { upstream } from '#flows/helpers/git/upstream.ts';
 
 const UNUSED = fixture.regularExpression('Unused Regex');
 const TITLE = fixture.regularExpression('Title Regex');

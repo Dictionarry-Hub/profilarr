@@ -14,24 +14,24 @@
  * 4. PUT the full config back to arr
  */
 
-import { BaseSyncer, type SyncResult } from '../base.ts';
-import type { SyncedItem } from '../types.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { getCache, type PCDCache } from '$pcd/index.ts';
+import { BaseSyncer, type SyncResult } from '#server/sync/base.ts';
+import type { SyncedItem } from '#server/sync/types.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { getCache, type PCDCache } from '#pcd/index.ts';
 import {
 	getRadarrByName as getRadarrMediaSettings,
 	getSonarrByName as getSonarrMediaSettings
-} from '$pcd/entities/mediaManagement/media-settings/read.ts';
+} from '#entities/mediaManagement/media-settings/read.ts';
 import {
 	getRadarrByName as getRadarrNaming,
 	getSonarrByName as getSonarrNaming
-} from '$pcd/entities/mediaManagement/naming/read.ts';
+} from '#entities/mediaManagement/naming/read.ts';
 import {
 	getRadarrByName as getRadarrQualityDefs,
 	getSonarrByName as getSonarrQualityDefs
-} from '$pcd/entities/mediaManagement/quality-definitions/read.ts';
-import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '$shared/pcd/display.ts';
-import type { ArrType, RadarrNamingConfig, SonarrNamingConfig } from '$arr/types.ts';
+} from '#entities/mediaManagement/quality-definitions/read.ts';
+import type { RadarrMediaSettingsRow, SonarrMediaSettingsRow } from '#shared/pcd/display.ts';
+import type { ArrType, RadarrNamingConfig, SonarrNamingConfig } from '#arr/types.ts';
 import {
 	applyQualityDefinitionsToArr,
 	mergeMediaSettingsConfig,
@@ -39,7 +39,7 @@ import {
 	mergeSonarrNamingConfig,
 	transformQualityDefinitionsForArr
 } from './transformer.ts';
-import { logger } from '$logger/logger.ts';
+import { logger } from '#logger/logger.ts';
 
 export class MediaManagementSyncer extends BaseSyncer {
 	private instanceType: ArrType;

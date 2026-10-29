@@ -6,9 +6,9 @@
  * synced before quality profiles since profiles reference format IDs.
  */
 
-import type { BaseArrClient } from '$arr/base.ts';
-import { logger } from '$logger/logger.ts';
-import type { SyncArrType } from '../mappings.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import { logger } from '#logger/logger.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 import { transformCustomFormat, type PcdCustomFormat } from './transformer.ts';
 
 /**

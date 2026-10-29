@@ -5,12 +5,12 @@
  *   doesn't use, delays entered in hours and stored in minutes, and booleans
  *   stored as 0 or 1.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures, type FixtureDelayProfile } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, deleteEntity, fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity } from '$flows/helpers/core/nav.ts';
-import { delayProfilePages } from '$flows/helpers/entities/delayProfiles.ts';
-import type { DelayProfilesRow } from '$shared/pcd/display.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures, type FixtureDelayProfile } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, deleteEntity, fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity } from '#flows/helpers/core/nav.ts';
+import { delayProfilePages } from '#flows/helpers/entities/delayProfiles.ts';
+import type { DelayProfilesRow } from '#shared/pcd/display.ts';
 import type { Page } from '@playwright/test';
 
 const PREFER_USENET = fixture.delayProfile('Prefer Usenet');

@@ -1,13 +1,13 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareDelayProfileDrift,
 	type DelayProfileDriftDiff,
 	type DelayProfileDriftExpected
-} from '$drift/delayProfiles.ts';
-import { buildDriftDisplayEntities } from '$drift/display.ts';
-import { hashDriftDiff } from '$drift/hash.ts';
-import type { ArrDelayProfile } from '$arr/types.ts';
+} from '#server/drift/delayProfiles.ts';
+import { buildDriftDisplayEntities } from '#server/drift/display.ts';
+import { hashDriftDiff } from '#server/drift/hash.ts';
+import type { ArrDelayProfile } from '#arr/types.ts';
 
 function arrDelayProfile(input: Partial<ArrDelayProfile> = {}): ArrDelayProfile {
 	return {

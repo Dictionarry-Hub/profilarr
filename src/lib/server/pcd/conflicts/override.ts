@@ -1,8 +1,8 @@
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { compile } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import { logger } from '$logger/logger.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import { compile } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import { logger } from '#logger/logger.ts';
 import {
 	dropOp,
 	parseJson,
@@ -14,31 +14,31 @@ import {
 import {
 	overrideCreate as cfOverrideCreate,
 	overrideUpdate as cfOverrideUpdate
-} from '$pcd/entities/customFormats/override/index.ts';
+} from '#entities/customFormats/override/index.ts';
 import {
 	overrideCreate as qpOverrideCreate,
 	overrideUpdate as qpOverrideUpdate
-} from '$pcd/entities/qualityProfiles/override/index.ts';
+} from '#entities/qualityProfiles/override/index.ts';
 import {
 	overrideCreate as reOverrideCreate,
 	overrideUpdate as reOverrideUpdate
-} from '$pcd/entities/regularExpressions/override.ts';
+} from '#entities/regularExpressions/override.ts';
 import {
 	overrideCreate as dpOverrideCreate,
 	overrideUpdate as dpOverrideUpdate
-} from '$pcd/entities/delayProfiles/override.ts';
+} from '#entities/delayProfiles/override.ts';
 import {
 	overrideCreate as namingOverrideCreate,
 	overrideUpdate as namingOverrideUpdate
-} from '$pcd/entities/mediaManagement/naming/override.ts';
+} from '#entities/mediaManagement/naming/override.ts';
 import {
 	overrideCreate as msOverrideCreate,
 	overrideUpdate as msOverrideUpdate
-} from '$pcd/entities/mediaManagement/media-settings/override.ts';
+} from '#entities/mediaManagement/media-settings/override.ts';
 import {
 	overrideCreate as qdOverrideCreate,
 	overrideUpdate as qdOverrideUpdate
-} from '$pcd/entities/mediaManagement/quality-definitions/override.ts';
+} from '#entities/mediaManagement/quality-definitions/override.ts';
 
 type OverrideConflictResult = {
 	success: boolean;

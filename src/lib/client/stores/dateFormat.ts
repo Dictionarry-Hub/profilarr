@@ -6,7 +6,7 @@
  */
 
 import { writable } from 'svelte/store';
-import type { DateFormat } from '$shared/utils/dates.ts';
+import type { DateFormat } from '#shared/utils/dates.ts';
 
 function createDateFormatStore() {
 	const { subscribe, set } = writable<DateFormat>('auto');

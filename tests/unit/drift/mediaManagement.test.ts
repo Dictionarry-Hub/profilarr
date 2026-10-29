@@ -1,24 +1,24 @@
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import {
 	compareMediaManagementDrift,
 	type MediaManagementDriftDiff,
 	type MediaSettingsDriftExpected,
 	type NamingDriftExpected,
 	type QualityDefinitionsDriftExpected
-} from '$drift/mediaManagement.ts';
-import { buildDriftDisplayEntities } from '$drift/display.ts';
-import { hashDriftDiff } from '$drift/hash.ts';
+} from '#server/drift/mediaManagement.ts';
+import { buildDriftDisplayEntities } from '#server/drift/display.ts';
+import { hashDriftDiff } from '#server/drift/hash.ts';
 import type {
 	ArrMediaManagementConfig,
 	ArrQualityDefinition,
 	RadarrNamingConfig,
 	SonarrNamingConfig
-} from '$arr/types.ts';
+} from '#arr/types.ts';
 import {
 	transformMediaSettings,
 	transformQualityDefinitionsForArr
-} from '$sync/mediaManagement/transformer.ts';
+} from '#server/sync/mediaManagement/transformer.ts';
 
 function expectedMediaSettings(
 	input: Partial<MediaSettingsDriftExpected> = {}

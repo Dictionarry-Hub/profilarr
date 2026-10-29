@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1.d.ts';
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { jobRunHistoryQueries } from '$db/queries/jobRunHistory.ts';
+import type { components } from '#api/v1.d.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
+import { jobRunHistoryQueries } from '#db/queries/jobRunHistory.ts';
 
 type JobResponse = components['schemas']['JobResponse'];
 type ErrorResponse = components['schemas']['ErrorResponse'];

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { build } from '#lib/shared/build.ts';
+	import { build } from '#shared/build.ts';
 	import ArrowUp from '@lucide/svelte/icons/arrow-up';
-	import type { VersionStatusInfo } from '$announcements/index.ts';
-	import Label from '$ui/label/Label.svelte';
+	import type { VersionStatusInfo } from '#server/announcements/index.ts';
+	import Label from '#ui/label/Label.svelte';
 
 	export let status: VersionStatusInfo | null = null;
 

@@ -3,7 +3,7 @@ import { browser } from '$app/env';
 import type { CutsceneState } from './types.ts';
 import { STAGES } from './definitions/index.ts';
 import { checkPrerequisites } from './prerequisites.ts';
-import { alertStore } from '#lib/client/alerts/store.js';
+import { alertStore } from '#client/alerts/store.ts';
 
 const STORAGE_KEY = 'cutscene-progress';
 

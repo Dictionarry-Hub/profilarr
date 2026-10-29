@@ -3,13 +3,13 @@
  * Coordinates fetching, filtering, selection, and searching
  */
 
-import { RadarrClient } from '#lib/server/utils/arr/clients/radarr.ts';
-import { SonarrClient } from '#lib/server/utils/arr/clients/sonarr.ts';
-import { arrClientOptionsFromInstance } from '#lib/server/utils/arr/factory.ts';
-import type { ArrInstance } from '#lib/server/db/queries/arrInstances.ts';
-import type { UpgradeConfig, FilterConfig } from '$shared/upgrades/filters.ts';
-import { evaluateGroup } from '$shared/upgrades/filters.ts';
-import { getSelector } from '$shared/upgrades/selectors.ts';
+import { RadarrClient } from '#arr/clients/radarr.ts';
+import { SonarrClient } from '#arr/clients/sonarr.ts';
+import { arrClientOptionsFromInstance } from '#arr/factory.ts';
+import type { ArrInstance } from '#db/queries/arrInstances.ts';
+import type { UpgradeConfig, FilterConfig } from '#shared/upgrades/filters.ts';
+import { evaluateGroup } from '#shared/upgrades/filters.ts';
+import { getSelector } from '#shared/upgrades/selectors.ts';
 import type { UpgradeItem, UpgradeJobLog, UpgradeSelectionItem, UpgradeOriginal } from './types.ts';
 import type {
 	RadarrMovie,
@@ -19,7 +19,7 @@ import type {
 	ArrCommand,
 	RadarrQueueItem,
 	SonarrQueueItem
-} from '#lib/server/utils/arr/types.ts';
+} from '#arr/types.ts';
 import { normalizeRadarrItems, normalizeSonarrItems } from './normalize.ts';
 import {
 	averageEpisodeFileScore,
@@ -43,8 +43,8 @@ import {
 	logUpgradeCommandCompleted
 } from './logger.ts';
 import { parseDownloadedReportCount } from './commandMessages.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
 
 /**
  * In-memory cache for dry run exclusions

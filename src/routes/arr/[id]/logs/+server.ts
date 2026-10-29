@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
-import type { ArrType } from '$arr/types.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import type { ArrType } from '#arr/types.ts';
 
 export const GET: RequestHandler = async ({ params, url }) => {
 	const id = parseInt(params.id || '', 10);

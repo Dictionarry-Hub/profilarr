@@ -3,10 +3,10 @@
  */
 
 import type { CompiledQuery } from 'kysely';
-import type { PCDCache, WriteResult } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import type { QualityDefinitionEntry, QualityDefinitionsConfig } from '$shared/pcd/display.ts';
-import { uuid } from '$shared/utils/uuid.ts';
+import type { PCDCache, WriteResult } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import type { QualityDefinitionEntry, QualityDefinitionsConfig } from '#shared/pcd/display.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 
 type QualityDefinitionsTable = 'radarr_quality_definitions' | 'sonarr_quality_definitions';
 

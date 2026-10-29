@@ -5,8 +5,8 @@
 import * as fs from 'node:fs/promises';
 import { execGit, execGitSafe } from './exec.ts';
 import { fetch } from './write.ts';
-import { validateFilePaths } from '../paths.ts';
-import { runCommand } from '../command.ts';
+import { validateFilePaths } from '#utils/paths.ts';
+import { runCommand } from '#utils/command.ts';
 import type { GitStatus, UpdateInfo, Commit, CommitStatus, IncomingChanges } from './types.ts';
 
 function normalizeAuthorName(name: string): string {

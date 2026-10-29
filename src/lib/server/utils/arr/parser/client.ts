@@ -3,11 +3,11 @@
  * Calls the C# parser microservice with optional caching
  */
 
-import { config } from '$config';
-import { logger } from '$logger/logger.ts';
-import { BaseHttpClient } from '../../http/client.ts';
-import { parsedReleaseCacheQueries } from '$db/queries/parsedReleaseCache.ts';
-import { patternMatchCacheQueries } from '$db/queries/patternMatchCache.ts';
+import { config } from '#utils/config/config.ts';
+import { logger } from '#logger/logger.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
+import { parsedReleaseCacheQueries } from '#db/queries/parsedReleaseCache.ts';
+import { patternMatchCacheQueries } from '#db/queries/patternMatchCache.ts';
 import {
 	QualitySource,
 	QualityModifier,

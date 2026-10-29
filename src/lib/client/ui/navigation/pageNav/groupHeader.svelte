@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$stores/page';
+	import { page } from '#stores/page.ts';
 	import type { Component } from 'svelte';
-	import Label from '$ui/label/Label.svelte';
+	import Label from '#ui/label/Label.svelte';
 
 	export let label: string;
 	export let href: string;

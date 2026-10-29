@@ -9,17 +9,17 @@
  * - Two Radarrs, one per install. Login off.
  */
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { latestJobRunId, waitForIdleJobs, waitForNextJobRun } from '$flows/helpers/core/jobs.ts';
-import { openDatabase, openPage, openTab } from '$flows/helpers/core/nav.ts';
-import { qualityProfilePages, setProfileScores } from '$flows/helpers/entities/qualityProfiles.ts';
-import { conflictsPage } from '$flows/helpers/git/conflicts.ts';
-import { publishChanges, pullDatabase, setDeveloperAccess } from '$flows/helpers/git/databases.ts';
-import { upstream } from '$flows/helpers/git/upstream.ts';
-import { openArr } from '$flows/helpers/sync/arrs.ts';
-import { expectedProfileSettings, expectedScores } from '$flows/helpers/sync/expected.ts';
-import type { FakeArr, Resource } from '$flows/helpers/sync/fakeArr.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixture } from '#flows/helpers/core/fixtureData.ts';
+import { latestJobRunId, waitForIdleJobs, waitForNextJobRun } from '#flows/helpers/core/jobs.ts';
+import { openDatabase, openPage, openTab } from '#flows/helpers/core/nav.ts';
+import { qualityProfilePages, setProfileScores } from '#flows/helpers/entities/qualityProfiles.ts';
+import { conflictsPage } from '#flows/helpers/git/conflicts.ts';
+import { publishChanges, pullDatabase, setDeveloperAccess } from '#flows/helpers/git/databases.ts';
+import { upstream } from '#flows/helpers/git/upstream.ts';
+import { openArr } from '#flows/helpers/sync/arrs.ts';
+import { expectedProfileSettings, expectedScores } from '#flows/helpers/sync/expected.ts';
+import type { FakeArr, Resource } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	addArrAndOpenSync,
 	chooseDelayProfile,
@@ -30,7 +30,7 @@ import {
 	syncConfig,
 	syncSection,
 	type SyncSection
-} from '$flows/helpers/sync/sync.ts';
+} from '#flows/helpers/sync/sync.ts';
 
 const HOME = 'Home Radarr';
 const DEV = 'Dev Radarr';

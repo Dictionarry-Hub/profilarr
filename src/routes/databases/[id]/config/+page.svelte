@@ -3,23 +3,23 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
 	import Save from '@lucide/svelte/icons/save';
-	import FormInput from '$ui/form/FormInput.svelte';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import KeyValueList from '$ui/form/KeyValueList.svelte';
-	import TagInput from '$ui/form/TagInput.svelte';
-	import MarkdownInput from '$ui/form/MarkdownInput.svelte';
-	import DirtyModal from '$ui/modal/DirtyModal.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { alertStore } from '#lib/client/alerts/store.js';
+	import FormInput from '#ui/form/FormInput.svelte';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import KeyValueList from '#ui/form/KeyValueList.svelte';
+	import TagInput from '#ui/form/TagInput.svelte';
+	import MarkdownInput from '#ui/form/MarkdownInput.svelte';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 	import {
 		isDirty,
 		initEdit,
 		update as dirtyUpdate,
 		resetFromServer,
 		clear as clearDirty
-	} from '#lib/client/stores/dirty.js';
+	} from '#stores/dirty.ts';
 
 	export let data: PageData;
 

@@ -3,9 +3,9 @@
 	import { enhance } from '$app/forms';
 	import { refreshAll } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { alertStore } from '#lib/client/alerts/store.js';
-	import { isDirty, initEdit, update, current, clear } from '#lib/client/stores/dirty.js';
-	import { jobStatus } from '$stores/jobStatus';
+	import { alertStore } from '#client/alerts/store.ts';
+	import { isDirty, initEdit, update, current, clear } from '#stores/dirty.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
 	import Info from '@lucide/svelte/icons/info';
 	import Save from '@lucide/svelte/icons/save';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
@@ -13,12 +13,12 @@
 	import RenameSettings from './components/RenameSettings.svelte';
 	import RenameRunHistory from './components/RenameRunHistory.svelte';
 	import RenameInfoModal from './components/RenameInfoModal.svelte';
-	import DirtyModal from '#lib/client/ui/modal/DirtyModal.svelte';
-	import Modal from '$ui/modal/Modal.svelte';
-	import StickyCard from '$ui/card/StickyCard.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import { renameRunBlockReason } from '$shared/rename/runBlock.ts';
+	import DirtyModal from '#ui/modal/DirtyModal.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
+	import StickyCard from '#ui/card/StickyCard.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import { renameRunBlockReason } from '#shared/rename/runBlock.ts';
 
 	export let data: PageData;
 	export let form: ActionData;

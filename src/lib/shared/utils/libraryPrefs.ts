@@ -1,7 +1,7 @@
 /**
  * Library view preferences: option lists, defaults, and pure parsers for
  * values persisted in localStorage. Storage access lives in
- * `$stores/libraryPrefs.ts`; this module has no browser dependencies so it can
+ * `#stores/libraryPrefs.ts`; this module has no browser dependencies so it can
  * be unit tested.
  */
 

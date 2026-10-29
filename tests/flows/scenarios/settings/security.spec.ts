@@ -8,7 +8,7 @@
  *   apiKeyConfirmation.test.ts cover these against the server.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
 import {
 	FLOWS_USER,
 	createAccount,
@@ -16,10 +16,10 @@ import {
 	signInElsewhere,
 	signOut,
 	type LocalUser
-} from '$flows/helpers/auth/accounts.ts';
-import { securityPages } from '$flows/helpers/auth/security.ts';
-import { waitForAction } from '$flows/helpers/core/forms.ts';
-import { openSidebarPage, waitForHydration } from '$flows/helpers/core/nav.ts';
+} from '#flows/helpers/auth/accounts.ts';
+import { securityPages } from '#flows/helpers/auth/security.ts';
+import { waitForAction } from '#flows/helpers/core/forms.ts';
+import { openSidebarPage, waitForHydration } from '#flows/helpers/core/nav.ts';
 
 test.use({ appEnv: { AUTH: 'on' } });
 

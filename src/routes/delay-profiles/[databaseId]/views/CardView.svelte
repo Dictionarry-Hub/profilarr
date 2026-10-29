@@ -1,18 +1,18 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { DelayProfilesRow } from '$shared/pcd/display.ts';
-	import { page } from '$stores/page';
+	import type { DelayProfilesRow } from '#shared/pcd/display.ts';
+	import { page } from '#stores/page.ts';
 	import Clock from '@lucide/svelte/icons/clock';
 	import Zap from '@lucide/svelte/icons/zap';
 	import Copy from '@lucide/svelte/icons/copy';
 	import Download from '@lucide/svelte/icons/download';
-	import CardGrid from '$ui/card/CardGrid.svelte';
-	import Card from '$ui/card/Card.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
-	import { FEATURES } from '$shared/features.ts';
-	import { formatDelay } from '$shared/utils/duration.ts';
+	import CardGrid from '#ui/card/CardGrid.svelte';
+	import Card from '#ui/card/Card.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
+	import { FEATURES } from '#shared/features.ts';
+	import { formatDelay } from '#shared/utils/duration.ts';
 
 	export let profiles: DelayProfilesRow[];
 

@@ -9,17 +9,17 @@
 	import Star from '@lucide/svelte/icons/star';
 	import Calendar from '@lucide/svelte/icons/calendar';
 	import Users from '@lucide/svelte/icons/users';
-	import Label from '$ui/label/Label.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import Button from '$ui/button/Button.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import ProgressIndicator from '$ui/arr/ProgressIndicator.svelte';
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import InfoModal from '$ui/modal/InfoModal.svelte';
-	import DateTime from '$ui/datetime/DateTime.svelte';
-	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '$utils/arr/types.ts';
+	import Label from '#ui/label/Label.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import Button from '#ui/button/Button.svelte';
+	import CustomFormatBadge from '#ui/arr/CustomFormatBadge.svelte';
+	import ProgressIndicator from '#ui/arr/ProgressIndicator.svelte';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import InfoModal from '#ui/modal/InfoModal.svelte';
+	import DateTime from '#ui/datetime/DateTime.svelte';
+	import type { SonarrSeriesItem, SonarrSeasonItem, SonarrEpisodeItem } from '#arr/types.ts';
 	import { primaryReleaseGroup } from './releaseGroups.ts';
 
 	export let series: SonarrSeriesItem;

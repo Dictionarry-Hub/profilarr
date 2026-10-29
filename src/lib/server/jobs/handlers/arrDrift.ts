@@ -1,20 +1,20 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
-import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { FEATURES } from '$shared/features.ts';
-import { calculateNextRun } from '../scheduleUtils.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
-import { probeAndRecordVersion, withDetectedVersion } from '$arr/version.ts';
-import { hasProfileItemSizes } from '$shared/arr/capabilities.ts';
-import type { ArrType } from '$arr/types.ts';
-import { checkArrDrift } from '$drift/check.ts';
-import { buildDriftDisplayEntities } from '$drift/display.ts';
-import { hashDriftDiff } from '$drift/hash.ts';
-import { logger } from '$logger/logger.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { arrDriftSettingsQueries } from '#db/queries/arrDriftSettings.ts';
+import { arrDriftStatusQueries } from '#db/queries/arrDriftStatus.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { FEATURES } from '#shared/features.ts';
+import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '#arr/version.ts';
+import { hasProfileItemSizes } from '#shared/arr/capabilities.ts';
+import type { ArrType } from '#arr/types.ts';
+import { checkArrDrift } from '#server/drift/check.ts';
+import { buildDriftDisplayEntities } from '#server/drift/display.ts';
+import { hashDriftDiff } from '#server/drift/hash.ts';
+import { logger } from '#logger/logger.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
 
 const driftHandler: JobHandler = async (job) => {
 	const instanceId = Number(job.payload.instanceId);

@@ -2,14 +2,14 @@
  * Update quality profile scoring settings
  */
 
-import type { PCDCache } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
 import {
 	writeOperation,
 	recompileCache,
 	type OperationLayer,
 	type WriteResult
-} from '$pcd/index.ts';
-import { logger } from '$logger/logger.ts';
+} from '#pcd/index.ts';
+import { logger } from '#logger/logger.ts';
 import type { CompiledQuery } from 'kysely';
 
 // ============================================================================

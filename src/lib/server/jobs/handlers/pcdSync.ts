@@ -1,13 +1,13 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { pcdManager } from '$pcd/index.ts';
-import { calculateNextRunFromMinutes } from '../scheduleUtils.ts';
-import { logger } from '$logger/logger.ts';
-import { getCommitMessagesBetween } from '$utils/git/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { reconcileAndNotify } from '$announcements/database/index.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { pcdManager } from '#pcd/index.ts';
+import { calculateNextRunFromMinutes } from '#server/jobs/scheduleUtils.ts';
+import { logger } from '#logger/logger.ts';
+import { getCommitMessagesBetween } from '#utils/git/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { reconcileAndNotify } from '#server/announcements/database/index.ts';
 
 const dbSyncHandler: JobHandler = async (job) => {
 	const databaseId = Number(job.payload.databaseId);

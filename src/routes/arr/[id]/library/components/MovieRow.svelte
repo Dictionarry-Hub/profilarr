@@ -5,17 +5,17 @@
 	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
 	import Megaphone from '@lucide/svelte/icons/megaphone';
 	import Clapperboard from '@lucide/svelte/icons/clapperboard';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Score from '$ui/arr/Score.svelte';
-	import CustomFormatBadge from '$ui/arr/CustomFormatBadge.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
-	import type { RadarrLibraryItem } from '$utils/arr/types.ts';
-	import type { Column } from '$ui/table/types';
-	import { formatDate } from '$shared/utils/dates.ts';
-	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Score from '#ui/arr/Score.svelte';
+	import CustomFormatBadge from '#ui/arr/CustomFormatBadge.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
+	import type { RadarrLibraryItem } from '#arr/types.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import { formatDate } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 	import MovieAvailabilityBadge from './MovieAvailabilityBadge.svelte';
 
 	export let row: RadarrLibraryItem;

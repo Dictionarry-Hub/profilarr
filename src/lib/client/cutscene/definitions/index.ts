@@ -1,4 +1,4 @@
-import type { Stage, StageGroup } from '../types.ts';
+import type { Stage, StageGroup } from '#client/cutscene/types.ts';
 import { welcomeStage } from './stages/getting-started/welcome.ts';
 import { navigationStage } from './stages/getting-started/navigation.ts';
 import { personalizeStage } from './stages/getting-started/personalize.ts';

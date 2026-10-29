@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Breadcrumb from '$ui/navigation/breadcrumb/Breadcrumb.svelte';
+	import Breadcrumb from '#ui/navigation/breadcrumb/Breadcrumb.svelte';
 
 	export let position: 'top' | 'bottom' = 'top';
 	export let variant: 'default' | 'transparent' | 'blur' = 'default';

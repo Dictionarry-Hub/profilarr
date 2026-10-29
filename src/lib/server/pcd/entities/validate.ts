@@ -5,7 +5,7 @@
  * Returns a string error message if invalid, null if valid.
  */
 
-import type { EntityType } from '$shared/pcd/portable.ts';
+import type { EntityType } from '#shared/pcd/portable.ts';
 
 const VALID_PROTOCOLS = new Set(['prefer_usenet', 'prefer_torrent', 'only_usenet', 'only_torrent']);
 const VALID_COLON_FORMATS = new Set([

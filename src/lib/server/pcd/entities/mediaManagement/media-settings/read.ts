@@ -2,12 +2,12 @@
  * Media settings read operations (list and get)
  */
 
-import type { PCDCache } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
 import type {
 	RadarrMediaSettingsRow,
 	SonarrMediaSettingsRow,
 	MediaSettingsListItem
-} from '$shared/pcd/display.ts';
+} from '#shared/pcd/display.ts';
 
 export async function list(cache: PCDCache): Promise<MediaSettingsListItem[]> {
 	const db = cache.kb;

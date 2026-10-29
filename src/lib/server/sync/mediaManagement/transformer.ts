@@ -5,14 +5,14 @@ import type {
 	ArrQualityDefinition,
 	RadarrNamingConfig,
 	SonarrNamingConfig
-} from '$arr/types.ts';
+} from '#arr/types.ts';
 import type {
 	QualityDefinitionEntry,
 	RadarrMediaSettingsRow,
 	RadarrNamingRow,
 	SonarrMediaSettingsRow,
 	SonarrNamingRow
-} from '$shared/pcd/display.ts';
+} from '#shared/pcd/display.ts';
 import {
 	colonReplacementFromDb,
 	colonReplacementToDb,
@@ -21,8 +21,8 @@ import {
 	type MultiEpisodeStyle,
 	type RadarrColonReplacementFormat,
 	type SonarrColonReplacementFormat
-} from '$shared/pcd/mediaManagement.ts';
-import type { SyncArrType } from '$sync/mappings.ts';
+} from '#shared/pcd/mediaManagement.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 
 export interface ArrMediaSettingsManagedFields {
 	downloadPropersAndRepacks: ArrPropersAndRepacks;

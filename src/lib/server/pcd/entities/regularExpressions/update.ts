@@ -2,11 +2,11 @@
  * Update a regular expression operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer, type WriteResult } from '$pcd/index.ts';
-import type { RegularExpressionWithTags } from '$shared/pcd/display.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import { logger } from '$logger/logger.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer, type WriteResult } from '#pcd/index.ts';
+import type { RegularExpressionWithTags } from '#shared/pcd/display.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import { logger } from '#logger/logger.ts';
 import type { CompiledQuery } from 'kysely';
 
 interface UpdateRegularExpressionInput {

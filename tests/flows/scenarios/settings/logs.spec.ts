@@ -6,11 +6,11 @@
  */
 import * as fs from 'node:fs/promises';
 import { join } from 'node:path';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { saveForm } from '$flows/helpers/core/forms.ts';
-import { openSidebarPage } from '$flows/helpers/core/nav.ts';
-import { generalSettings, retentionField } from '$flows/helpers/settings/general.ts';
-import { logFiles, plantLogFile, runLogCleanup } from '$flows/helpers/settings/logs.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { saveForm } from '#flows/helpers/core/forms.ts';
+import { openSidebarPage } from '#flows/helpers/core/nav.ts';
+import { generalSettings, retentionField } from '#flows/helpers/settings/general.ts';
+import { logFiles, plantLogFile, runLogCleanup } from '#flows/helpers/settings/logs.ts';
 
 const RETENTION_DAYS = 1;
 const OLD_LOG = '2020-01-01.log';

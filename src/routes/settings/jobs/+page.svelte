@@ -1,12 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { formatDateTime as formatDT, formatRelative } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.js';
-	import { serverTimezone } from '#lib/client/stores/timezone.js';
-	import type { Column } from '#lib/client/ui/table/types.js';
-	import ExpandableTable from '#lib/client/ui/table/ExpandableTable.svelte';
-	import Badge from '#lib/client/ui/badge/Badge.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import { formatDateTime as formatDT, formatRelative } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
+	import type { Column } from '#ui/table/types.ts';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import JobHistory from './components/JobHistory.svelte';
 	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
 	import XCircle from '@lucide/svelte/icons/circle-x';

@@ -2,11 +2,11 @@
 	import Bell from '@lucide/svelte/icons/bell';
 	import CheckCircle from '@lucide/svelte/icons/circle-check-big';
 	import XCircle from '@lucide/svelte/icons/circle-x';
-	import { formatRelative } from '$shared/utils/dates';
-	import type { NotificationHistoryRecord } from '$db/queries/notificationHistory.ts';
-	import Table from '$ui/table/Table.svelte';
-	import Badge from '$ui/badge/Badge.svelte';
-	import type { Column } from '$ui/table/types';
+	import { formatRelative } from '#shared/utils/dates.ts';
+	import type { NotificationHistoryRecord } from '#db/queries/notificationHistory.ts';
+	import Table from '#ui/table/Table.svelte';
+	import Badge from '#ui/badge/Badge.svelte';
+	import type { Column } from '#ui/table/types.ts';
 
 	export let history: NotificationHistoryRecord[];
 	export let services: Array<{ id: string; name: string }>;

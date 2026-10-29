@@ -8,7 +8,7 @@ rules:
         - '**/*.svelte'
     message: >
       {@html} renders unescaped HTML. The content must come from
-      renderMarkdown() in $shared/utils/markdown or another reviewed
+      renderMarkdown() in #shared/utils/markdown.ts or another reviewed
       safe source (highlight.js output is safe). If reviewed and safe,
       add `// nosemgrep: profilarr.xss.at-html-usage` above this line.
     languages: [generic]
@@ -32,7 +32,7 @@ rules:
         - '/src/lib/shared/utils/markdown.ts'
     message: >
       marked is imported outside the shared renderer. Call
-      renderMarkdown() from $shared/utils/markdown instead. It escapes
+      renderMarkdown() from #shared/utils/markdown.ts instead. It escapes
       raw HTML, checks link and image URLs, and runs the output filter,
       so every page renders markdown the same way.
     languages: [generic]

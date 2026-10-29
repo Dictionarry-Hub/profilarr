@@ -18,8 +18,8 @@
  */
 
 import { assertEquals, assertNotEquals } from '@std/assert';
-import { TestClient } from '$test-harness/client.ts';
-import { startServer, stopServer, getDbPath } from '$test-harness/server.ts';
+import { TestClient } from '#tests/harness/client.ts';
+import { startServer, stopServer, getDbPath } from '#tests/harness/server.ts';
 import {
 	clearLoginAttempts,
 	createUserDirect,
@@ -27,9 +27,9 @@ import {
 	getSessionConfirmedAt,
 	login,
 	setSessionConfirmedAt
-} from '$test-harness/setup.ts';
-import { setup, teardown, test, run } from '$test-harness/runner.ts';
-import { PORTS } from '$test-harness/ports.ts';
+} from '#tests/harness/setup.ts';
+import { setup, teardown, test, run } from '#tests/harness/runner.ts';
+import { PORTS } from '#tests/harness/ports.ts';
 
 const PORT = PORTS.auth.apiKeyConfirmation;
 const ORIGIN = `http://localhost:${PORT}`;

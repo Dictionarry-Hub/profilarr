@@ -13,10 +13,10 @@ import type {
 	CustomFormatBasic,
 	CustomFormatGeneral,
 	CustomFormatTableRow
-} from '$shared/pcd/display.ts';
-import type { ProfileRef } from '$pcd/references.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { fixture, type FixtureCondition } from '$flows/helpers/core/fixtureData.ts';
+} from '#shared/pcd/display.ts';
+import type { ProfileRef } from '#pcd/references.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { fixture, type FixtureCondition } from '#flows/helpers/core/fixtureData.ts';
 
 /** A quality profile that scores the custom format */
 export type { ProfileRef };

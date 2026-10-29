@@ -19,8 +19,8 @@ import type {
 	RadarrNamingRow,
 	SonarrMediaSettingsRow,
 	SonarrNamingRow
-} from '$shared/pcd/display.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+} from '#shared/pcd/display.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 export interface QualityDefinitionsPage {
 	config: QualityDefinitionsConfig;

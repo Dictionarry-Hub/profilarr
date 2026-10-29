@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import { isParserHealthy } from '#lib/server/utils/arr/parser/client.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import { isParserHealthy } from '#arr/parser/client.ts';
 
 export const load: LayoutServerLoad = async ({ params }) => {
 	const databaseId = parseInt(params.databaseId, 10);

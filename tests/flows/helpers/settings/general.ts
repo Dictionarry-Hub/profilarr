@@ -7,9 +7,9 @@
  */
 
 import { test, type Locator, type Page } from '@playwright/test';
-import type { App } from '$flows/harness/app.ts';
-import { readTmdbToken } from '$flows/harness/settings.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+import type { App } from '#flows/harness/app.ts';
+import { readTmdbToken } from '#flows/harness/settings.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 export type LogLevel = 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
 

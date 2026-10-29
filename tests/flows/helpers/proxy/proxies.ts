@@ -8,8 +8,8 @@
  * that run behind it through `proxySetups()`, not a helper spec.
  */
 
-import { fakeProxy } from '$flows/helpers/proxy/fakeProxy.ts';
-import { traefik } from '$flows/helpers/proxy/traefik.ts';
+import { fakeProxy } from './fakeProxy.ts';
+import { traefik } from './traefik.ts';
 
 export interface ProxyOptions {
 	/** Which proxy; default `fake` */

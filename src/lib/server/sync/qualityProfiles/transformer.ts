@@ -3,19 +3,19 @@
  * Transforms PCD quality profile data to arr API format
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { hasQualityGroupMembersPositionInCache } from '$pcd/entities/qualityProfiles/qualities/groupMembersSchema.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { hasQualityGroupMembersPositionInCache } from '#entities/qualityProfiles/qualities/groupMembersSchema.ts';
 import type {
 	ArrQualityProfileItem,
 	ArrQualityProfilePayload,
 	QualityProfileFormatItem
-} from '$arr/types.ts';
+} from '#arr/types.ts';
 import {
 	getAllQualities,
 	getLanguageForProfile,
 	mapQualityName,
 	type SyncArrType
-} from '../mappings.ts';
+} from '#server/sync/mappings.ts';
 import { applySizesToItems, type QualitySizeMap } from './sizes.ts';
 
 // =============================================================================
@@ -412,4 +412,4 @@ export async function getQualityApiMappings(
 	return map;
 }
 
-// getReferencedCustomFormatNames moved to $pcd/references.ts as getCustomFormatsForProfile
+// getReferencedCustomFormatNames moved to #pcd/references.ts as getCustomFormatsForProfile

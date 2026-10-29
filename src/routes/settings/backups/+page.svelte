@@ -1,28 +1,28 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { refreshAll } from '$app/navigation';
-	import { alertStore } from '$alerts/store';
+	import { alertStore } from '#client/alerts/store.ts';
 	import Download from '@lucide/svelte/icons/download';
 	import Trash2 from '@lucide/svelte/icons/trash';
 	import RotateCcw from '@lucide/svelte/icons/rotate-ccw';
 	import Upload from '@lucide/svelte/icons/upload';
 	import FolderArchive from '@lucide/svelte/icons/folder-archive';
 	import BrushCleaning from '@lucide/svelte/icons/brush-cleaning';
-	import Modal from '$ui/modal/Modal.svelte';
+	import Modal from '#ui/modal/Modal.svelte';
 	import type { PageData } from './$types';
-	import Button from '$ui/button/Button.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import type { Column } from '$ui/table/types';
-	import ActionsBar from '#lib/client/ui/actions/ActionsBar.svelte';
-	import ActionButton from '#lib/client/ui/actions/ActionButton.svelte';
-	import SearchAction from '#lib/client/ui/actions/SearchAction.svelte';
-	import { getPersistentSearchStore } from '#lib/client/stores/search.js';
-	import { jobStatus } from '#lib/client/stores/jobStatus.js';
+	import Button from '#ui/button/Button.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import ActionsBar from '#ui/actions/ActionsBar.svelte';
+	import ActionButton from '#ui/actions/ActionButton.svelte';
+	import SearchAction from '#ui/actions/SearchAction.svelte';
+	import { getPersistentSearchStore } from '#stores/search.ts';
+	import { jobStatus } from '#stores/jobStatus.ts';
 	import { onMount } from 'svelte';
-	import { formatDateTime } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.js';
-	import { serverTimezone } from '#lib/client/stores/timezone.js';
+	import { formatDateTime } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 
 	export let data: PageData;
 

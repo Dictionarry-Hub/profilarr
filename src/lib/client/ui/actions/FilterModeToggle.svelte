@@ -1,12 +1,12 @@
 <script lang="ts">
 	import ActionButton from './ActionButton.svelte';
-	import Dropdown from '$ui/dropdown/Dropdown.svelte';
-	import DropdownHeader from '$ui/dropdown/DropdownHeader.svelte';
-	import DropdownItem from '$ui/dropdown/DropdownItem.svelte';
+	import Dropdown from '#ui/dropdown/Dropdown.svelte';
+	import DropdownHeader from '#ui/dropdown/DropdownHeader.svelte';
+	import DropdownItem from '#ui/dropdown/DropdownItem.svelte';
 	import Filter from '@lucide/svelte/icons/funnel';
 	import Search from '@lucide/svelte/icons/search';
 	import SlidersHorizontal from '@lucide/svelte/icons/sliders-horizontal';
-	import type { FilterMode } from '$stores/filterMode';
+	import type { FilterMode } from '#stores/filterMode.ts';
 
 	export let value: FilterMode = 'smart';
 	export let position: 'left' | 'right' | 'middle' = 'right';

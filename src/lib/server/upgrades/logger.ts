@@ -4,8 +4,8 @@
  * Stores run history in the database
  */
 
-import { logger } from '$logger/logger.ts';
-import { upgradeRunsQueries } from '$db/queries/upgradeRuns.ts';
+import { logger } from '#logger/logger.ts';
+import { upgradeRunsQueries } from '#db/queries/upgradeRuns.ts';
 import type { UpgradeJobLog } from './types.ts';
 
 const SOURCE = 'UpgradeJob';

@@ -1,9 +1,9 @@
-import { pcdOpsQueries } from '$db/queries/pcdOps.ts';
-import { pcdOpHistoryQueries } from '$db/queries/pcdOpHistory.ts';
-import { compile } from '$pcd/index.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { uuid } from '$shared/utils/uuid.ts';
-import { logger } from '$logger/logger.ts';
+import { pcdOpsQueries } from '#db/queries/pcdOps.ts';
+import { pcdOpHistoryQueries } from '#db/queries/pcdOpHistory.ts';
+import { compile } from '#pcd/index.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { uuid } from '#shared/utils/uuid.ts';
+import { logger } from '#logger/logger.ts';
 
 export type AlignConflictResult = {
 	success: boolean;

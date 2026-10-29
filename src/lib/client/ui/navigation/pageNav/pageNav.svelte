@@ -3,7 +3,7 @@
 	import GroupItem from './groupItem.svelte';
 	import Version from './version.svelte';
 	import JobStatus from './jobStatus.svelte';
-	import { jobStatus } from '$stores/jobStatus';
+	import { jobStatus } from '#stores/jobStatus.ts';
 	import { fade } from 'svelte/transition';
 	import FolderTree from '@lucide/svelte/icons/folder-tree';
 	import Link from '@lucide/svelte/icons/link';
@@ -18,12 +18,12 @@
 	import Film from '@lucide/svelte/icons/film';
 	import Tv from '@lucide/svelte/icons/tv';
 	import Megaphone from '@lucide/svelte/icons/megaphone';
-	import { mobileNavOpen } from '$stores/mobileNav';
-	import { sidebarCollapsed } from '$stores/sidebar';
-	import { page } from '$stores/page';
-	import logo from '$assets/logo-512.png';
-	import radarrLogo from '$assets/Radarr.svg';
-	import sonarrLogo from '$assets/Sonarr.svg';
+	import { mobileNavOpen } from '#stores/mobileNav.ts';
+	import { sidebarCollapsed } from '#stores/sidebar.ts';
+	import { page } from '#stores/page.ts';
+	import logo from '#client/assets/logo-512.png';
+	import radarrLogo from '#client/assets/Radarr.svg';
+	import sonarrLogo from '#client/assets/Sonarr.svg';
 
 	export let arrInstances: { id: number; name: string; type: string }[] = [];
 	export let databases: { id: number; name: string }[] = [];

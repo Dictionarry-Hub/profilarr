@@ -9,16 +9,16 @@ import {
 	deleteEntity,
 	saveForm,
 	type ActionResult
-} from '$flows/helpers/core/forms.ts';
-import type { BasicAuth, FakeArr } from '$flows/helpers/sync/fakeArr.ts';
+} from '#flows/helpers/core/forms.ts';
+import type { BasicAuth, FakeArr } from './fakeArr.ts';
 import {
 	openPage,
 	openSidebarPage,
 	openTab,
 	sidebar,
 	waitForHydration
-} from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+} from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
 
 export interface AddArrOptions {
 	/** Instance name shown in Profilarr */

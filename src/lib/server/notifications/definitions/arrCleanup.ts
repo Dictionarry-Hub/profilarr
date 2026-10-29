@@ -2,9 +2,9 @@
  * Arr cleanup notification definition
  */
 
-import type { Notification, NotificationBlock, SectionItem } from '../types.ts';
-import type { StaleItem } from '$sync/cleanup.ts';
-import type { RemovedEntity } from '$sync/entityCleanup.ts';
+import type { Notification, NotificationBlock, SectionItem } from '#notifications/types.ts';
+import type { StaleItem } from '#server/sync/cleanup.ts';
+import type { RemovedEntity } from '#server/sync/entityCleanup.ts';
 
 export interface ArrCleanupNotificationParams {
 	instanceName: string;

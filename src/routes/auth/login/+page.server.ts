@@ -1,20 +1,20 @@
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
-import { config } from '$config';
-import { usersQueries } from '$db/queries/users.ts';
-import { sessionsQueries } from '$db/queries/sessions.ts';
-import { authSettingsQueries } from '$db/queries/authSettings.ts';
-import { verifyPassword } from '$auth/password.ts';
-import { getClientIp } from '$auth/network.ts';
-import { parseUserAgent } from '$auth/userAgent.ts';
+import { config } from '#utils/config/config.ts';
+import { usersQueries } from '#db/queries/users.ts';
+import { sessionsQueries } from '#db/queries/sessions.ts';
+import { authSettingsQueries } from '#db/queries/authSettings.ts';
+import { verifyPassword } from '#utils/auth/password.ts';
+import { getClientIp } from '#utils/auth/network.ts';
+import { parseUserAgent } from '#utils/auth/userAgent.ts';
 import {
 	analyzeLoginFailure,
 	formatLoginFailure,
 	getAttemptCategory
-} from '$auth/loginAnalysis.ts';
-import { checkRateLimit, recordFailedAttempt, clearAttempts } from '$auth/rateLimit.ts';
-import { getLoginOptions, isOidcUsername, needsSetup } from '$auth/loginOptions.ts';
-import { logger } from '$logger/logger.ts';
+} from '#utils/auth/loginAnalysis.ts';
+import { checkRateLimit, recordFailedAttempt, clearAttempts } from '#utils/auth/rateLimit.ts';
+import { getLoginOptions, isOidcUsername, needsSetup } from '#utils/auth/loginOptions.ts';
+import { logger } from '#logger/logger.ts';
 
 export const load: ServerLoad = () => {
 	// AUTH=off: nothing to sign in to, e.g. an old bookmark to /auth/login

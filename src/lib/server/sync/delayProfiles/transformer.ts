@@ -1,5 +1,5 @@
-import type { ArrDelayProfile } from '$arr/types.ts';
-import type { DelayProfilesRow } from '$shared/pcd/display.ts';
+import type { ArrDelayProfile } from '#arr/types.ts';
+import type { DelayProfilesRow } from '#shared/pcd/display.ts';
 
 export function transformDelayProfile(profile: DelayProfilesRow): ArrDelayProfile {
 	let enableUsenet = true;

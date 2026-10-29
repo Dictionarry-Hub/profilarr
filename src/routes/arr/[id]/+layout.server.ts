@@ -1,8 +1,8 @@
 import { error } from '@sveltejs/kit';
 import type { LayoutServerLoad } from './$types';
-import { arrInstancesQueries, toPublicArrInstance } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { arrDriftStatusQueries } from '$db/queries/arrDriftStatus.ts';
+import { arrInstancesQueries, toPublicArrInstance } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { arrDriftStatusQueries } from '#db/queries/arrDriftStatus.ts';
 
 export const load: LayoutServerLoad = ({ params }) => {
 	const id = parseInt(params.id || '', 10);

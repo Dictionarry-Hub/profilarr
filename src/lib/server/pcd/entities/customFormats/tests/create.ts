@@ -2,7 +2,7 @@
  * Create a custom format test operation
  */
 
-import { getCache, writeOperation, type OperationLayer } from '$pcd/index.ts';
+import { getCache, writeOperation, type OperationLayer } from '#pcd/index.ts';
 
 interface CreateTestInput {
 	title: string;

@@ -1,13 +1,13 @@
 import { error, fail } from '@sveltejs/kit';
 import type { ServerLoad, Actions } from '@sveltejs/kit';
-import { pcdManager } from '$pcd/core/manager.ts';
-import type { OperationLayer } from '$pcd/core/types.ts';
-import { canWriteToBase } from '$pcd/ops/writer.ts';
-import * as customFormatQueries from '$pcd/entities/customFormats/index.ts';
-import type { ConditionResult, ParsedInfo } from '$shared/pcd/display.ts';
-import { parse, isParserHealthy, matchPatterns } from '#lib/server/utils/arr/parser/client.ts';
-import type { MediaType } from '#lib/server/utils/arr/parser/types.ts';
-import type { PatternMatchMaps } from '$pcd/entities/customFormats/index.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import type { OperationLayer } from '#pcd/core/types.ts';
+import { canWriteToBase } from '#pcd/ops/writer.ts';
+import * as customFormatQueries from '#entities/customFormats/index.ts';
+import type { ConditionResult, ParsedInfo } from '#shared/pcd/display.ts';
+import { parse, isParserHealthy, matchPatterns } from '#arr/parser/client.ts';
+import type { MediaType } from '#arr/parser/types.ts';
+import type { PatternMatchMaps } from '#entities/customFormats/index.ts';
 
 export type TestResult = 'pass' | 'fail' | 'unknown';
 

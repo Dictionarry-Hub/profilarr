@@ -1,6 +1,6 @@
-import type { SonarrClient } from '$utils/arr/clients/sonarr.ts';
-import type { SonarrEpisodeFile, SonarrSeries } from '$utils/arr/types.ts';
-import { filterGroupUsesField, type FilterConfig } from '$shared/upgrades/filters.ts';
+import type { SonarrClient } from '#arr/clients/sonarr.ts';
+import type { SonarrEpisodeFile, SonarrSeries } from '#arr/types.ts';
+import { filterGroupUsesField, type FilterConfig } from '#shared/upgrades/filters.ts';
 
 const EPISODE_FILE_FETCH_CONCURRENCY = 10;
 

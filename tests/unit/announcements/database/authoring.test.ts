@@ -4,15 +4,15 @@
  */
 
 import { readFile, readdir, stat } from 'node:fs/promises';
-import { BaseTest } from '../../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals, assertExists } from '@std/assert';
 import {
 	deleteAnnouncement,
 	generateAnnouncementId,
 	writeAnnouncement,
 	type AnnouncementFileInput
-} from '$announcements/database/authoring.ts';
-import { parseAnnouncementsDir } from '$announcements/database/parser.ts';
+} from '#server/announcements/database/authoring.ts';
+import { parseAnnouncementsDir } from '#server/announcements/database/parser.ts';
 
 function baseInput(): AnnouncementFileInput {
 	return {

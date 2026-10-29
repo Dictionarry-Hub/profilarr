@@ -9,14 +9,14 @@
  * - Radarr only: these settings are the same for every Arr.
  */
 import type { Page } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { waitForAction } from '$flows/helpers/core/forms.ts';
-import { scheduledJobs } from '$flows/helpers/core/jobs.ts';
-import { openTab } from '$flows/helpers/core/nav.ts';
-import { pageData, pick } from '$flows/helpers/core/pageData.ts';
-import { addArr, arrInstance } from '$flows/helpers/sync/arrs.ts';
-import type { FakeArr } from '$flows/helpers/sync/fakeArr.ts';
-import { seedLibrary } from '$flows/helpers/sync/library.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { waitForAction } from '#flows/helpers/core/forms.ts';
+import { scheduledJobs } from '#flows/helpers/core/jobs.ts';
+import { openTab } from '#flows/helpers/core/nav.ts';
+import { pageData, pick } from '#flows/helpers/core/pageData.ts';
+import { addArr, arrInstance } from '#flows/helpers/sync/arrs.ts';
+import type { FakeArr } from '#flows/helpers/sync/fakeArr.ts';
+import { seedLibrary } from '#flows/helpers/sync/library.ts';
 import {
 	dryRun,
 	openRenames,
@@ -29,8 +29,8 @@ import {
 	titleA,
 	titleB,
 	type RenameChanges
-} from '$flows/helpers/sync/renames.ts';
-import { clearOfScheduleMark } from '$flows/helpers/sync/upgrades.ts';
+} from '#flows/helpers/sync/renames.ts';
+import { clearOfScheduleMark } from '#flows/helpers/sync/upgrades.ts';
 
 const SAVE_FIRST = 'Save the config first';
 const UNSAVED = 'Save or discard your changes first';

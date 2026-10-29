@@ -39,20 +39,20 @@ describe('SQL time comparisons keep milliseconds', async () => {
 	const baseDir = await mkdtemp(join(tmpdir(), 'profilarr-time-comparisons-'));
 	process.env.APP_BASE_PATH = baseDir;
 
-	const { db } = await import('$db/db.ts');
-	const { runMigrations } = await import('$db/migrations.ts');
-	const { jobQueueQueries } = await import('$db/queries/jobQueue.ts');
-	const { sessionsQueries } = await import('$db/queries/sessions.ts');
-	const { githubCacheQueries } = await import('$db/queries/githubCache.ts');
-	const { databaseInstancesQueries } = await import('$db/queries/databaseInstances.ts');
-	const { upgradeConfigsQueries } = await import('$db/queries/upgradeConfigs.ts');
-	const { arrRenameSettingsQueries } = await import('$db/queries/arrRenameSettings.ts');
-	const { arrCleanupSettingsQueries } = await import('$db/queries/arrCleanupSettings.ts');
-	const { arrDriftSettingsQueries } = await import('$db/queries/arrDriftSettings.ts');
-	const { loginAttemptsQueries } = await import('$db/queries/loginAttempts.ts');
-	const { notificationHistoryQueries } = await import('$db/queries/notificationHistory.ts');
-	const { renameRunsQueries } = await import('$db/queries/renameRuns.ts');
-	const { upgradeRunsQueries } = await import('$db/queries/upgradeRuns.ts');
+	const { db } = await import('#db/db.ts');
+	const { runMigrations } = await import('#db/migrations.ts');
+	const { jobQueueQueries } = await import('#db/queries/jobQueue.ts');
+	const { sessionsQueries } = await import('#db/queries/sessions.ts');
+	const { githubCacheQueries } = await import('#db/queries/githubCache.ts');
+	const { databaseInstancesQueries } = await import('#db/queries/databaseInstances.ts');
+	const { upgradeConfigsQueries } = await import('#db/queries/upgradeConfigs.ts');
+	const { arrRenameSettingsQueries } = await import('#db/queries/arrRenameSettings.ts');
+	const { arrCleanupSettingsQueries } = await import('#db/queries/arrCleanupSettings.ts');
+	const { arrDriftSettingsQueries } = await import('#db/queries/arrDriftSettings.ts');
+	const { loginAttemptsQueries } = await import('#db/queries/loginAttempts.ts');
+	const { notificationHistoryQueries } = await import('#db/queries/notificationHistory.ts');
+	const { renameRunsQueries } = await import('#db/queries/renameRuns.ts');
+	const { upgradeRunsQueries } = await import('#db/queries/upgradeRuns.ts');
 
 	const lastId = () => db.queryFirst<{ id: number }>('SELECT last_insert_rowid() AS id')!.id;
 

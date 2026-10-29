@@ -1,5 +1,5 @@
-import { pcdManager } from '$pcd/index.ts';
-import * as qualityProfileQueries from '$pcd/entities/qualityProfiles/index.ts';
+import { pcdManager } from '#pcd/index.ts';
+import * as qualityProfileQueries from '#entities/qualityProfiles/index.ts';
 
 /**
  * Get all quality profile names from all enabled Profilarr databases

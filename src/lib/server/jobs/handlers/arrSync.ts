@@ -1,25 +1,25 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler, JobType } from '../queueTypes.ts';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { arrDriftSettingsQueries } from '$db/queries/arrDriftSettings.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$arr/factory.ts';
-import { probeAndRecordVersion, withDetectedVersion } from '$arr/version.ts';
-import type { ArrType } from '$arr/types.ts';
-import { calculateNextRun } from '#lib/server/sync/utils.ts';
-import type { SectionType } from '#lib/server/sync/types.ts';
-import { getSection } from '#lib/server/sync/registry.ts';
-import { enqueueJob } from '#lib/server/jobs/queueService.ts';
-import { logger } from '$logger/logger.ts';
-import { notifications } from '$notifications/definitions/index.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import type { ArrSyncSectionResult } from '$notifications/definitions/arrSync.ts';
-import { FEATURES } from '$shared/features.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler, JobType } from '#server/jobs/queueTypes.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { arrDriftSettingsQueries } from '#db/queries/arrDriftSettings.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import { probeAndRecordVersion, withDetectedVersion } from '#arr/version.ts';
+import type { ArrType } from '#arr/types.ts';
+import { calculateNextRun } from '#server/sync/utils.ts';
+import type { SectionType } from '#server/sync/types.ts';
+import { getSection } from '#server/sync/registry.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
+import { logger } from '#logger/logger.ts';
+import { notifications } from '#notifications/definitions/index.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import type { ArrSyncSectionResult } from '#notifications/definitions/arrSync.ts';
+import { FEATURES } from '#shared/features.ts';
 
 // Register sync handlers
-import '#lib/server/sync/qualityProfiles/handler.ts';
-import '#lib/server/sync/delayProfiles/handler.ts';
-import '#lib/server/sync/mediaManagement/handler.ts';
+import '#server/sync/qualityProfiles/handler.ts';
+import '#server/sync/delayProfiles/handler.ts';
+import '#server/sync/mediaManagement/handler.ts';
 
 const sectionOrder: SectionType[] = ['qualityProfiles', 'delayProfiles', 'mediaManagement'];
 

@@ -7,16 +7,16 @@
  *   "Block Referenced Deletes" setting is on.
  */
 import type { Locator } from '@playwright/test';
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures } from '$flows/helpers/core/fixtureData.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures } from '#flows/helpers/core/fixtureData.ts';
 import {
 	deleteEntity,
 	expectDeleteBlocked,
 	fillField,
 	saveForm
-} from '$flows/helpers/core/forms.ts';
-import { newEntity, openEntity } from '$flows/helpers/core/nav.ts';
-import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
+} from '#flows/helpers/core/forms.ts';
+import { newEntity, openEntity } from '#flows/helpers/core/nav.ts';
+import { regularExpressionPages } from '#flows/helpers/entities/regularExpressions.ts';
 
 const TITLE = fixture.regularExpression('Title Regex');
 const GROUP = fixture.regularExpression('Group Regex');

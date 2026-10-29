@@ -5,8 +5,8 @@
  */
 
 import { assertEquals } from '@std/assert';
-import { BaseTest } from '../base/BaseTest.ts';
-import type { ArrQualityProfileItem, ArrQualityProfileReadItem } from '$arr/types.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
+import type { ArrQualityProfileItem, ArrQualityProfileReadItem } from '#arr/types.ts';
 import {
 	applySizesToItems,
 	collectItemSizes,
@@ -15,7 +15,7 @@ import {
 	resolveDefinitionSizes,
 	resolveProfileSizes,
 	type QualitySizeMap
-} from '$sync/qualityProfiles/sizes.ts';
+} from '#server/sync/qualityProfiles/sizes.ts';
 
 function payloadQuality(name: string, id: number): ArrQualityProfileItem {
 	return { quality: { id, name, source: 'web', resolution: 1080 }, items: [], allowed: true };

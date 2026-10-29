@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import DropdownCombobox from '$ui/dropdown/DropdownCombobox.svelte';
+	import DropdownCombobox from '#ui/dropdown/DropdownCombobox.svelte';
 
 	export let label: string;
 	export let description: string = '';

@@ -1,7 +1,7 @@
 /**
  * Checks for the navigation helpers in helpers/core/nav.ts.
  */
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
+import { test, expect, FIXTURES_NAME } from './test.ts';
 import {
 	SIDEBAR_PAGES,
 	newEntity,
@@ -12,7 +12,7 @@ import {
 	openTab,
 	type EntitySection,
 	type PageTab
-} from '$flows/helpers/core/nav.ts';
+} from './nav.ts';
 
 /**
  * Flow:

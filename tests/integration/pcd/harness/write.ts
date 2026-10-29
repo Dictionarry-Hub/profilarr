@@ -1,6 +1,6 @@
 import { assert } from '@std/assert';
 import type { OpOrigin, PcdTestContext } from './pcd.ts';
-import type { ConditionData } from '$shared/pcd/display.ts';
+import type { ConditionData } from '#shared/pcd/display.ts';
 
 export interface RegexFormInput {
 	name: string;

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Table from '$ui/table/Table.svelte';
-	import type { Column } from '$ui/table/types';
-	import NumberInput from '$ui/form/NumberInput.svelte';
-	import IconCheckbox from '$ui/form/IconCheckbox.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import NumberInput from '#ui/form/NumberInput.svelte';
+	import IconCheckbox from '#ui/form/IconCheckbox.svelte';
 	import Check from '@lucide/svelte/icons/check';
-	import InlineLink from '$ui/link/InlineLink.svelte';
+	import InlineLink from '#ui/link/InlineLink.svelte';
 
 	export let databaseId: number;
 	export let formats: any[];

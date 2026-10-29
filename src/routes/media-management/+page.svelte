@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Database from '@lucide/svelte/icons/database';
 	import Plus from '@lucide/svelte/icons/plus';
-	import EmptyState from '$ui/state/EmptyState.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
+	import EmptyState from '#ui/state/EmptyState.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;

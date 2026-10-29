@@ -3,10 +3,10 @@
  * Determines which arr instances are affected by an entity change
  */
 
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { generalSettingsQueries } from '$db/queries/generalSettings.ts';
-import { getCache } from '$pcd/index.ts';
-import type { AffectedArr } from '$shared/sync/types.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { generalSettingsQueries } from '#db/queries/generalSettings.ts';
+import { getCache } from '#pcd/index.ts';
+import type { AffectedArr } from '#shared/sync/types.ts';
 
 type EntityType =
 	| 'qualityProfile'

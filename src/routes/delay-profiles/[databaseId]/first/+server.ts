@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { pcdManager } from '$pcd/core/manager.ts';
-import * as delayProfileQueries from '$pcd/entities/delayProfiles/index.ts';
+import { pcdManager } from '#pcd/core/manager.ts';
+import * as delayProfileQueries from '#entities/delayProfiles/index.ts';
 
 export const GET: RequestHandler = async ({ params }) => {
 	const dbId = parseInt(params.databaseId, 10);

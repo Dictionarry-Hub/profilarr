@@ -6,12 +6,12 @@
  * - Conflict Strategy only shows while the database has no token, or has
  *   Local Ops Only on.
  */
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixturesSource } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, fillField, saveForm } from '$flows/helpers/core/forms.ts';
-import { scheduledJobs } from '$flows/helpers/core/jobs.ts';
-import { openDatabase, openTab, sidebar, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { databasesApi, FLOWS_TOKEN } from '$flows/helpers/git/databases.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixturesSource } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, fillField, saveForm } from '#flows/helpers/core/forms.ts';
+import { scheduledJobs } from '#flows/helpers/core/jobs.ts';
+import { openDatabase, openTab, sidebar, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { databasesApi, FLOWS_TOKEN } from '#flows/helpers/git/databases.ts';
 
 const NEW_NAME = `${FIXTURES_NAME} Renamed`;
 const AUTHOR_NAME = 'Flow Developer';

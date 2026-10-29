@@ -3,7 +3,7 @@
 		"harness/docker.spec.ts": 1.1,
 		"helpers/auth/accounts.spec.ts": 17.3,
 		"helpers/auth/security.spec.ts": 36.6,
-		"helpers/auth/sso/fakeOidc.spec.ts": 17.5,
+		"helpers/sso/fakeOidc.spec.ts": 17.5,
 		"helpers/core/fixtureData.spec.ts": 82.8,
 		"helpers/core/forms.spec.ts": 66.4,
 		"helpers/core/nav.spec.ts": 142,

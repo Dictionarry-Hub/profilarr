@@ -1,5 +1,5 @@
-import type { WebhookConfig, Notification } from '../../types.ts';
-import { getWebhookClient } from '../../base/webhookClient.ts';
+import type { WebhookConfig, Notification } from '#notifications/types.ts';
+import { getWebhookClient } from '#notifications/base/webhookClient.ts';
 
 /**
  * Webhook notification service implementation.

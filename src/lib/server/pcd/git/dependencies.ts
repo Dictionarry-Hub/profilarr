@@ -4,9 +4,9 @@
  */
 
 import * as fs from 'node:fs/promises';
-import { checkout, clone, fetchTags } from '$utils/git/index.ts';
-import { loadManifest } from '../manifest/manifest.ts';
-import { logger } from '$logger/logger.ts';
+import { checkout, clone, fetchTags } from '#utils/git/index.ts';
+import { loadManifest } from '#pcd/manifest/manifest.ts';
+import { logger } from '#logger/logger.ts';
 
 export interface DependencySyncResult {
 	changed: boolean;

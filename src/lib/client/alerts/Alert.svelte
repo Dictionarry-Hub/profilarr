@@ -3,8 +3,8 @@
 	import XCircle from '@lucide/svelte/icons/circle-x';
 	import AlertTriangle from '@lucide/svelte/icons/triangle-alert';
 	import Info from '@lucide/svelte/icons/info';
-	import type { AlertType } from './store';
-	import { alertStore } from './store';
+	import type { AlertType } from './store.ts';
+	import { alertStore } from './store.ts';
 	import { fade, fly } from 'svelte/transition';
 
 	export let id: string;

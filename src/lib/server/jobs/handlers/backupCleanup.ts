@@ -1,10 +1,10 @@
 import * as fs from 'node:fs/promises';
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { backupSettingsQueries } from '$db/queries/backupSettings.ts';
-import { config } from '$config';
-import { logger } from '$logger/logger.ts';
-import { calculateNextRunFromSchedule } from '../scheduleUtils.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { backupSettingsQueries } from '#db/queries/backupSettings.ts';
+import { config } from '#utils/config/config.ts';
+import { logger } from '#logger/logger.ts';
+import { calculateNextRunFromSchedule } from '#server/jobs/scheduleUtils.ts';
 
 const backupCleanupHandler: JobHandler = async (job) => {
 	const settings = backupSettingsQueries.get();

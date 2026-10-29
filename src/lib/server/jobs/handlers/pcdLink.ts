@@ -1,11 +1,11 @@
-import { jobQueueRegistry } from '../queueRegistry.ts';
-import type { JobHandler } from '../queueTypes.ts';
-import { pcdManager } from '$pcd/index.ts';
-import type { LinkOptions } from '$pcd/core/types.ts';
-import { schedulePcdSyncForDatabase } from '../schedule.ts';
-import { logger } from '$logger/logger.ts';
-import { notificationManager } from '$notifications/NotificationManager.ts';
-import { notifications } from '$notifications/definitions/index.ts';
+import { jobQueueRegistry } from '#server/jobs/queueRegistry.ts';
+import type { JobHandler } from '#server/jobs/queueTypes.ts';
+import { pcdManager } from '#pcd/index.ts';
+import type { LinkOptions } from '#pcd/core/types.ts';
+import { schedulePcdSyncForDatabase } from '#server/jobs/schedule.ts';
+import { logger } from '#logger/logger.ts';
+import { notificationManager } from '#notifications/NotificationManager.ts';
+import { notifications } from '#notifications/definitions/index.ts';
 
 /**
  * Single-shot in-memory store for PATs used by `pcd.link` jobs.

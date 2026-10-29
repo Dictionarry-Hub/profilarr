@@ -3,7 +3,7 @@
  * Uses BaseHttpClient for connection pooling
  */
 
-import { BaseHttpClient } from '../../utils/http/client.ts';
+import { BaseHttpClient } from '#utils/http/client.ts';
 
 /**
  * Webhook HTTP client

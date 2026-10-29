@@ -8,7 +8,7 @@
 
 import process from 'node:process';
 import { test } from '@playwright/test';
-import { dockerAvailable } from '$flows/harness/docker.ts';
+import { dockerAvailable } from '#flows/harness/docker.ts';
 
 export const DOCKER_TAG = '@docker';
 export const ONLINE_TAG = '@online';

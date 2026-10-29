@@ -9,8 +9,8 @@ import {
 	checkApiKeyAccess,
 	getApiRequirement,
 	routeIdToSpecPath
-} from '$auth/apiPermissions.ts';
-import type { ApiKeyPermissions } from '$shared/apiKeys.ts';
+} from '#utils/auth/apiPermissions.ts';
+import type { ApiKeyPermissions } from '#shared/apiKeys.ts';
 
 function key(permissions: ApiKeyPermissions) {
 	return { id: 1, name: 'test', permissions };

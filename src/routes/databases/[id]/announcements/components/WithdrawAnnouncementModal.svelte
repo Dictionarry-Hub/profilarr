@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { enhance } from '$app/forms';
-	import Modal from '$ui/modal/Modal.svelte';
-	import { alertStore } from '$alerts/store';
+	import Modal from '#ui/modal/Modal.svelte';
+	import { alertStore } from '#client/alerts/store.ts';
 
 	export let open = false;
 	export let databaseId: string | number;

@@ -3,7 +3,7 @@
  * Tests evaluateRule() and evaluateGroup() from shared/filters.ts
  */
 
-import { BaseTest } from '../base/BaseTest.ts';
+import { BaseTest } from '#tests/unit/base/BaseTest.ts';
 import { assertEquals } from '@std/assert';
 import {
 	evaluateRule,
@@ -14,7 +14,7 @@ import {
 	normalizeFilterGroup,
 	type FilterRule,
 	type FilterGroup
-} from '$shared/upgrades/filters.ts';
+} from '#shared/upgrades/filters.ts';
 
 class FilterEvaluationTest extends BaseTest {
 	runTests(): void {

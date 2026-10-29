@@ -1,15 +1,15 @@
-import { arrSyncQueries } from '$db/queries/arrSync.ts';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { getCache } from '$pcd/index.ts';
-import { getCustomFormatsForProfile } from '$pcd/references.ts';
-import type { BaseArrClient } from '$arr/base.ts';
-import type { SyncArrType } from '$sync/mappings.ts';
+import { arrSyncQueries } from '#db/queries/arrSync.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { getCache } from '#pcd/index.ts';
+import { getCustomFormatsForProfile } from '#pcd/references.ts';
+import type { BaseArrClient } from '#arr/base.ts';
+import type { SyncArrType } from '#server/sync/mappings.ts';
 import {
 	fetchCustomFormatFromPcd,
 	transformCustomFormat,
 	type ArrCustomFormat,
 	type ArrCustomFormatSpecification
-} from '$sync/customFormats/transformer.ts';
+} from '#server/sync/customFormats/transformer.ts';
 import { stringifyCanonical } from './hash.ts';
 
 export interface DriftFieldDiff {

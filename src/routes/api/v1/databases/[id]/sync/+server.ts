@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import type { components } from '$api/v1';
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
-import { enqueueJob } from '#lib/server/jobs/queueService.ts';
+import type { components } from '#api/v1.d.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
+import { enqueueJob } from '#server/jobs/queueService.ts';
 
 type SyncTriggerResponse = components['schemas']['SyncTriggerResponse'];
 type ErrorResponse = components['schemas']['ErrorResponse'];

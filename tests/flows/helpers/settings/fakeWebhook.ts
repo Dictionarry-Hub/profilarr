@@ -9,7 +9,7 @@
  */
 
 import { createServer, type IncomingHttpHeaders, type IncomingMessage } from 'node:http';
-import { freePort } from '$flows/harness/ports.ts';
+import { freePort } from '#flows/harness/ports.ts';
 
 /** One request the receiver got */
 export interface WebhookRequest {

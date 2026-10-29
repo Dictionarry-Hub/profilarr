@@ -2,8 +2,8 @@
  * Create test release operations
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
 
 interface CreateReleaseInput {
 	entityType: 'movie' | 'series';

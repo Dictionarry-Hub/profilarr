@@ -2,10 +2,10 @@
  * Create a custom format operation
  */
 
-import type { PCDCache } from '$pcd/index.ts';
-import { writeOperation, type OperationLayer } from '$pcd/index.ts';
-import { logger } from '$logger/logger.ts';
-import { uuid } from '$shared/utils/uuid.ts';
+import type { PCDCache } from '#pcd/index.ts';
+import { writeOperation, type OperationLayer } from '#pcd/index.ts';
+import { logger } from '#logger/logger.ts';
+import { uuid } from '#shared/utils/uuid.ts';
 
 interface CreateCustomFormatInput {
 	name: string;

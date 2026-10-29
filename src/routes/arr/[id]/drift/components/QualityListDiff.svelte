@@ -1,9 +1,9 @@
 <script lang="ts">
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Table from '$ui/table/Table.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import type { Column } from '$ui/table/types';
-	import type { DriftDisplayQualityItem } from '$shared/drift.ts';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Table from '#ui/table/Table.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import type { Column } from '#ui/table/types.ts';
+	import type { DriftDisplayQualityItem } from '#shared/drift.ts';
 
 	export let items: DriftDisplayQualityItem[] = [];
 

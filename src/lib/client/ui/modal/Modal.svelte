@@ -9,7 +9,7 @@
 	import X from '@lucide/svelte/icons/x';
 	import Check from '@lucide/svelte/icons/check';
 	import Loader2 from '@lucide/svelte/icons/loader-circle';
-	import Button from '$ui/button/Button.svelte';
+	import Button from '#ui/button/Button.svelte';
 
 	// Props
 	export let open = false;

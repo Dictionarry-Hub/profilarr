@@ -1,6 +1,6 @@
-import type { Database } from '$db/sqlite.ts';
-import type { AutoAlignEntity } from '$pcd/entities/registry.ts';
-import { AUTO_ALIGN_ENTITIES } from '$pcd/entities/registry.ts';
+import type { Database } from '#db/sqlite.ts';
+import type { AutoAlignEntity } from '#entities/registry.ts';
+import { AUTO_ALIGN_ENTITIES } from '#entities/registry.ts';
 import type { ParsedOpMetadata } from './types.ts';
 
 export function isFromTo(value: unknown): value is { to: unknown } {

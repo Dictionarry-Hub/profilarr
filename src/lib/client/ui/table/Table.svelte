@@ -1,7 +1,7 @@
 <script lang="ts" generics="T extends Record<string, any>">
 	import { onMount, onDestroy } from 'svelte';
-	import type { Column, SortDirection, SortState } from './types';
-	import { createProgressiveList } from '#lib/client/utils/progressiveList.js';
+	import type { Column, SortDirection, SortState } from './types.ts';
+	import { createProgressiveList } from '#client/utils/progressiveList.ts';
 
 	/**
 	 * Props

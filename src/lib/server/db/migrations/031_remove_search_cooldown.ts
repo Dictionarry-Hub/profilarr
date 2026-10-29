@@ -1,5 +1,5 @@
-import type { Migration } from '../migrations.ts';
-import { db } from '../db.ts';
+import type { Migration } from '#db/migrations.ts';
+import { db } from '#db/db.ts';
 
 /**
  * Migration 031: Remove searchCooldown from filter configs

@@ -6,12 +6,12 @@
  * - Authelia and the proxies run in containers, so these tests need the
  *   Docker socket.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { signInWithSso, signOut } from '$flows/helpers/auth/accounts.ts';
-import { createApiKey, lapseConfirmation, securityPages } from '$flows/helpers/auth/security.ts';
-import { ssoProvider } from '$flows/helpers/auth/sso/providers.ts';
-import { skipWithoutDocker, tagsFor } from '$flows/helpers/core/realServices.ts';
-import { proxySetups } from '$flows/helpers/proxy/proxies.ts';
+import { test, expect } from '#flows/helpers/core/test.ts';
+import { signInWithSso, signOut } from '#flows/helpers/auth/accounts.ts';
+import { createApiKey, lapseConfirmation, securityPages } from '#flows/helpers/auth/security.ts';
+import { ssoProvider } from '#flows/helpers/sso/providers.ts';
+import { skipWithoutDocker, tagsFor } from '#flows/helpers/core/realServices.ts';
+import { proxySetups } from '#flows/helpers/proxy/proxies.ts';
 
 const AUTHELIA = ssoProvider('authelia');
 

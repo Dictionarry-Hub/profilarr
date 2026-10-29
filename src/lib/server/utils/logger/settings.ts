@@ -1,5 +1,5 @@
-import { logSettingsQueries } from '$db/queries/logSettings.ts';
-import type { LogSettings } from '$db/queries/logSettings.ts';
+import { logSettingsQueries } from '#db/queries/logSettings.ts';
+import type { LogSettings } from '#db/queries/logSettings.ts';
 
 /**
  * Log settings manager

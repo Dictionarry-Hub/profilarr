@@ -5,7 +5,7 @@
  */
 
 import { test, type Page } from '@playwright/test';
-import { pageData } from '$flows/helpers/core/pageData.ts';
+import { pageData } from './pageData.ts';
 
 /** One line of the app's log */
 export interface LogEntry {

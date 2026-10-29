@@ -5,7 +5,7 @@
  * the intended directory.
  */
 
-import { runCommand } from '../command.ts';
+import { runCommand } from '#utils/command.ts';
 
 /**
  * Validate that a tar.gz archive contains no dangerous paths.

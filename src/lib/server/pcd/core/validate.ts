@@ -1,8 +1,8 @@
-import { databaseInstancesQueries } from '$db/queries/databaseInstances.ts';
+import { databaseInstancesQueries } from '#db/queries/databaseInstances.ts';
 import type {
 	UpdateDatabaseInstanceInput,
 	ConflictStrategy
-} from '$db/queries/databaseInstances.ts';
+} from '#db/queries/databaseInstances.ts';
 import type { LinkOptions } from './types.ts';
 
 type ValidatedLinkInput = Omit<LinkOptions, 'conflictStrategy' | 'syncStrategy'> & {

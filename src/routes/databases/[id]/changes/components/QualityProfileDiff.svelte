@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DraftEntitySection, OperationType } from './types';
+	import type { DraftEntitySection, OperationType } from './types.ts';
 	import SectionRenderer from './SectionRenderer.svelte';
 
 	export let sections: DraftEntitySection[] = [];

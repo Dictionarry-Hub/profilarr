@@ -3,7 +3,7 @@
 	import ChevronUp from '@lucide/svelte/icons/chevron-up';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import CircleAlert from '@lucide/svelte/icons/circle-alert';
-	import Tooltip from '$ui/tooltip/Tooltip.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 
 	type CorrectionReason = 'min' | 'max';
 	type StepDirection = 'increment' | 'decrement';

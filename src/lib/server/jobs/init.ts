@@ -1,5 +1,5 @@
-import { jobQueueQueries } from '$db/queries/jobQueue.ts';
-import { logger } from '$logger/logger.ts';
+import { jobQueueQueries } from '#db/queries/jobQueue.ts';
+import { logger } from '#logger/logger.ts';
 import { jobDispatcher } from './dispatcher.ts';
 import { scheduleAllJobs } from './schedule.ts';
 

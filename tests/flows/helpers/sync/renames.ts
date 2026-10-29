@@ -19,19 +19,13 @@ import {
 	saveForm,
 	setSwitch,
 	waitForAction
-} from '$flows/helpers/core/forms.ts';
-import { latestJobRunId, waitForNextJobRun, type JobRun } from '$flows/helpers/core/jobs.ts';
-import { openTab, waitForHydration } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import { openArr } from '$flows/helpers/sync/arrs.ts';
-import type { ArrType } from '$flows/helpers/sync/fakeArr.ts';
-import {
-	episodeFile,
-	movieFile,
-	radarrMovie,
-	sonarrSeries,
-	type Library
-} from '$flows/helpers/sync/library.ts';
+} from '#flows/helpers/core/forms.ts';
+import { latestJobRunId, waitForNextJobRun, type JobRun } from '#flows/helpers/core/jobs.ts';
+import { openTab, waitForHydration } from '#flows/helpers/core/nav.ts';
+import { pageData } from '#flows/helpers/core/pageData.ts';
+import { openArr } from './arrs.ts';
+import type { ArrType } from './fakeArr.ts';
+import { episodeFile, movieFile, radarrMovie, sonarrSeries, type Library } from './library.ts';
 
 /** An instance's stored rename settings */
 export interface RenameSettings {

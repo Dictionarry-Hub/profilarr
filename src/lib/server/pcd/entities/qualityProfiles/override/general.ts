@@ -1,15 +1,15 @@
-import { getCache } from '$pcd/index.ts';
-import type { WriteResult } from '$pcd/index.ts';
-import { general as readProfileGeneral } from '../general/read.ts';
-import { updateGeneral } from '../general/update.ts';
-import { create as createQualityProfile } from '../create.ts';
-import type { StoredOpMetadata, StoredDesiredState } from '$pcd/conflicts/overrideUtils.ts';
+import { getCache } from '#pcd/index.ts';
+import type { WriteResult } from '#pcd/index.ts';
+import { general as readProfileGeneral } from '#entities/qualityProfiles/general/read.ts';
+import { updateGeneral } from '#entities/qualityProfiles/general/update.ts';
+import { create as createQualityProfile } from '#entities/qualityProfiles/create.ts';
+import type { StoredOpMetadata, StoredDesiredState } from '#pcd/conflicts/overrideUtils.ts';
 import {
 	getDesiredTo,
 	normalizeTags,
 	normalizeText,
 	tagsEqual
-} from '$pcd/conflicts/overrideUtils.ts';
+} from '#pcd/conflicts/overrideUtils.ts';
 import { resolveProfileName } from './resolve.ts';
 
 function resolveTags(current: string[], desiredState: StoredDesiredState): string[] {

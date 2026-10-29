@@ -1,5 +1,5 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { validateRegex } from '#lib/server/utils/arr/parser/index.ts';
+import { validateRegex } from '#arr/parser/index.ts';
 
 interface ValidateRegexResponse {
 	valid: boolean;

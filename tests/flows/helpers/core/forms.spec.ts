@@ -1,16 +1,10 @@
-import { test, expect } from '$flows/helpers/core/test.ts';
-import { fixture } from '$flows/helpers/core/fixtureData.ts';
-import { newEntity, openEntity, openPage, openSidebarPage } from '$flows/helpers/core/nav.ts';
-import { pageData } from '$flows/helpers/core/pageData.ts';
-import {
-	chooseOption,
-	confirmDialog,
-	deleteEntity,
-	fillField,
-	saveForm
-} from '$flows/helpers/core/forms.ts';
-import { delayProfilePages } from '$flows/helpers/entities/delayProfiles.ts';
-import { regularExpressionPages } from '$flows/helpers/entities/regularExpressions.ts';
+import { test, expect } from './test.ts';
+import { fixture } from './fixtureData.ts';
+import { newEntity, openEntity, openPage, openSidebarPage } from './nav.ts';
+import { pageData } from './pageData.ts';
+import { chooseOption, confirmDialog, deleteEntity, fillField, saveForm } from './forms.ts';
+import { delayProfilePages } from '#flows/helpers/entities/delayProfiles.ts';
+import { regularExpressionPages } from '#flows/helpers/entities/regularExpressions.ts';
 import type { Page } from '@playwright/test';
 
 interface RegexPage {

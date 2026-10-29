@@ -7,12 +7,12 @@
  * - The fixture to Arr API maps live in helpers/sync/expected.ts.
  */
 import type { Page } from '@playwright/test';
-import { test, expect, FIXTURES_NAME } from '$flows/helpers/core/test.ts';
-import { fixture, fixtures, type ArrType } from '$flows/helpers/core/fixtureData.ts';
-import { chooseOption, saveForm } from '$flows/helpers/core/forms.ts';
-import { scheduledJobs, waitForJobRun } from '$flows/helpers/core/jobs.ts';
-import { waitForHydration } from '$flows/helpers/core/nav.ts';
-import { arrInstance, openArr } from '$flows/helpers/sync/arrs.ts';
+import { test, expect, FIXTURES_NAME } from '#flows/helpers/core/test.ts';
+import { fixture, fixtures, type ArrType } from '#flows/helpers/core/fixtureData.ts';
+import { chooseOption, saveForm } from '#flows/helpers/core/forms.ts';
+import { scheduledJobs, waitForJobRun } from '#flows/helpers/core/jobs.ts';
+import { waitForHydration } from '#flows/helpers/core/nav.ts';
+import { arrInstance, openArr } from '#flows/helpers/sync/arrs.ts';
 import {
 	expectedDelayProfile,
 	expectedMediaSettings,
@@ -20,8 +20,8 @@ import {
 	expectedProfileSettings,
 	expectedQualitySizes,
 	expectedScores
-} from '$flows/helpers/sync/expected.ts';
-import type { FakeArr, Resource } from '$flows/helpers/sync/fakeArr.ts';
+} from '#flows/helpers/sync/expected.ts';
+import type { FakeArr, Resource } from '#flows/helpers/sync/fakeArr.ts';
 import {
 	addArrAndOpenSync,
 	arrSyncStatus,
@@ -33,8 +33,8 @@ import {
 	syncConfig,
 	syncRegion,
 	syncSection
-} from '$flows/helpers/sync/sync.ts';
-import { TARGETS, targetsWith, hasCapability, type Target } from '$flows/helpers/sync/targets.ts';
+} from '#flows/helpers/sync/sync.ts';
+import { TARGETS, targetsWith, hasCapability, type Target } from '#flows/helpers/sync/targets.ts';
 
 /** The fixtures profile written for a target's app, e.g. "Sonarr Profile" */
 const profileFor = (target: Target) => fixture.qualityProfile(`${target.label} Profile`);

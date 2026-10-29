@@ -1,9 +1,9 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import { arrInstancesQueries } from '$db/queries/arrInstances.ts';
-import { arrClientOptionsFromInstance, createArrClient } from '$utils/arr/factory.ts';
-import { scanForStaleItems, type CleanupScanResult } from '#lib/server/sync/cleanup.ts';
-import { scanForRemovedEntities, type EntityScanResult } from '#lib/server/sync/entityCleanup.ts';
-import type { ArrType } from '$utils/arr/types.ts';
+import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
+import { arrClientOptionsFromInstance, createArrClient } from '#arr/factory.ts';
+import { scanForStaleItems, type CleanupScanResult } from '#server/sync/cleanup.ts';
+import { scanForRemovedEntities, type EntityScanResult } from '#server/sync/entityCleanup.ts';
+import type { ArrType } from '#arr/types.ts';
 
 type PreviewSection<T> = { ok: true; data: T } | { ok: false; error: string };
 

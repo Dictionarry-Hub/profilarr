@@ -8,8 +8,8 @@
  */
 
 import { expect, test, type Browser, type Page } from '@playwright/test';
-import type { RunningSso, SsoUser } from '$flows/helpers/auth/sso/providers.ts';
-import { openPage, sidebar, waitForHydration } from '$flows/helpers/core/nav.ts';
+import type { RunningSso, SsoUser } from '#flows/helpers/sso/providers.ts';
+import { openPage, sidebar, waitForHydration } from '#flows/helpers/core/nav.ts';
 
 export interface LocalUser {
 	username: string;

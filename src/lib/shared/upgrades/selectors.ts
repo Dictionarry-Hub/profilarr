@@ -3,7 +3,7 @@
  * Defines all available selectors for upgrade item selection
  */
 
-import { sortTitle } from '$shared/utils/sort.ts';
+import { sortTitle } from '#shared/utils/sort.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- selectors apply to items of any shape
 export interface Selector<T = any> {

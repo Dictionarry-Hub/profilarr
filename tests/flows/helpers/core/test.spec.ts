@@ -3,7 +3,7 @@
  * - Each option changes how the test's app starts; these tests check the
  *   change reached the app.
  */
-import { test, expect } from '$flows/helpers/core/test.ts';
+import { test, expect } from './test.ts';
 
 test.describe('appEnv', () => {
 	test.use({ appEnv: { AUTH: 'on' } });

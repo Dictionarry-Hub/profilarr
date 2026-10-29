@@ -27,7 +27,7 @@ import {
 import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import process from 'node:process';
-import { dealSpecFiles } from '$flows/harness/specFiles.ts';
+import { dealSpecFiles } from '#flows/harness/specFiles.ts';
 
 const FLOWS_DIR = 'tests/flows';
 const TIMINGS = `${FLOWS_DIR}/harness/timings.json`;

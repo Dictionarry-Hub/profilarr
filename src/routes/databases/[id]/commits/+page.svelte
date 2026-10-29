@@ -1,17 +1,17 @@
 <script lang="ts">
-	import ExpandableTable from '$ui/table/ExpandableTable.svelte';
-	import Label from '$ui/label/Label.svelte';
-	import Pagination from '$ui/navigation/pagination/Pagination.svelte';
-	import PageMeta from '$ui/meta/PageMeta.svelte';
-	import type { Column } from '$ui/table/types';
+	import ExpandableTable from '#ui/table/ExpandableTable.svelte';
+	import Label from '#ui/label/Label.svelte';
+	import Pagination from '#ui/navigation/pagination/Pagination.svelte';
+	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import type { Column } from '#ui/table/types.ts';
 	import { afterNavigate } from '$app/navigation';
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import type { PageData } from './$types';
-	import type { Commit } from '$utils/git/types';
-	import { parseUTC, formatDate } from '$shared/utils/dates';
-	import { dateFormat } from '#lib/client/stores/dateFormat.ts';
-	import { serverTimezone } from '#lib/client/stores/timezone.ts';
+	import type { Commit } from '#utils/git/types.ts';
+	import { parseUTC, formatDate } from '#shared/utils/dates.ts';
+	import { dateFormat } from '#stores/dateFormat.ts';
+	import { serverTimezone } from '#stores/timezone.ts';
 
 	export let data: PageData;
 
