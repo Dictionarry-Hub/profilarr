@@ -10,9 +10,9 @@ const IMAGES = ['profilarr:alpine', 'profilarr-parser:alpine'];
 
 function usage(): never {
 	console.error('Usage:');
-	console.error('  deno task release:dry v2.6.0 [notes.md]');
-	console.error('  deno task release:scan');
-	console.error('  deno task release v2.6.0 [notes.md]');
+	console.error('  pnpm release:dry v2.6.0 [notes.md]');
+	console.error('  pnpm release:scan');
+	console.error('  pnpm release v2.6.0 [notes.md]');
 	process.exit(1);
 }
 

@@ -22,7 +22,7 @@ cannot silently read arbitrary clipboard data, so use
 `#ui/modal/PasteModal.svelte` and let the user paste into a textarea.
 
 Two ESLint rules enforce both, in client code and non-server routes
-(`deno task lint:eslint`):
+(`pnpm lint:eslint`):
 
 - `profilarr/no-direct-clipboard-copy` catches direct writes and `execCommand('copy')`.
 - `profilarr/no-direct-clipboard-paste` catches direct reads.

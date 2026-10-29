@@ -2,7 +2,7 @@
  * Every API the flow suite can fake, described as data. A target is one app
  * at one API version: what to record from a real container, how each path
  * behaves in the fake, and what the app can do. Adding a version or a new app
- * means adding a target here and recording it with `deno task fixtures:arr
+ * means adding a target here and recording it with `pnpm fixtures:arr
  * <id>`; the fake (fakeArr.ts) and the recording script read this registry.
  *
  * Helpers branch on capabilities, never on versions, so a new target with a

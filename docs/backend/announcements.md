@@ -239,7 +239,7 @@ the About page all read from it.
 | --------- | ------------------------- | ------------------------------------- | ------------------------- |
 | `stable`  | Tag `v*.*.*` on `develop` | `package.json` version (e.g. `2.3.0`) | `channels.stable.latest`  |
 | `develop` | Push to `develop`         | Short commit SHA                      | `channels.develop.latest` |
-| `dev`     | `deno task dev`           | Literal `dev`                         | Skipped                   |
+| `dev`     | `pnpm dev`                | Literal `dev`                         | Skipped                   |
 
 Version-out-of-date is derived state, not an announcement. It renders as
 a status pill next to the build info on the About page; it clears itself
@@ -252,7 +252,7 @@ the bulletin repo directly.
 
 ### Development
 
-`deno task dev` uses channel `dev` and skips the version comparison
+`pnpm dev` uses channel `dev` and skips the version comparison
 entirely. Announcement fetching still runs so the feature is testable;
 point `PROFILARR_BULLETIN_URL` at a fork or local server to exercise new
 payloads without touching the production bulletin.
@@ -312,7 +312,7 @@ Point dev at a branch of the bulletin repo, or at any static server holding
 `versions.json`, `announcements.json` and the announcement bodies:
 
 ```bash
-deno task dev --profilarr-bulletin-url https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/<branch>
+pnpm dev --profilarr-bulletin-url https://raw.githubusercontent.com/Dictionarry-Hub/bulletin/<branch>
 ```
 
 To preview the sidebar and About-page under a different channel, hand-edit

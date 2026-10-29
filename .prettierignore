@@ -8,5 +8,5 @@ bun.lockb
 # Miscellaneous
 /static/
 
-# Vendored flow test fixtures, kept byte-for-byte as upstream (deno task fixtures:update)
+# Vendored flow test fixtures, kept byte-for-byte as upstream (pnpm fixtures:update)
 /tests/flows/data/

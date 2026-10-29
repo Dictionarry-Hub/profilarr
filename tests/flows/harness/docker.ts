@@ -5,7 +5,7 @@
  * namespace. It reaches the app on 127.0.0.1, and the browser reaches it on
  * 127.0.0.1. The test container has no network, so neither does the service.
  *
- * This talks to the Docker Engine API over the socket that `deno task test:flows`
+ * This talks to the Docker Engine API over the socket that `pnpm test:flows`
  * mounts when the host has one; the image has no Docker CLI. Without the
  * socket, `dockerAvailable()` is false and specs skip real services.
  */
@@ -24,7 +24,7 @@ export const RUN_ID_ENV = 'FLOWS_RUN_ID';
 /** Where service config folders live, under the repo so the host can bind-mount them */
 const SERVICES_DIR = 'tests/flows/.services';
 
-/** True when the run can start containers: `deno task test:flows` mounted the Docker socket */
+/** True when the run can start containers: `pnpm test:flows` mounted the Docker socket */
 export function dockerAvailable(): boolean {
 	return process.env.FLOWS_DOCKER === '1';
 }
@@ -94,9 +94,7 @@ function demultiplex(raw: Buffer): string {
 export async function serviceDir(): Promise<{ path: string; hostPath: string }> {
 	const host = process.env.FLOWS_HOST_ROOT;
 	if (!host)
-		throw new Error(
-			"FLOWS_HOST_ROOT isn't set; deno task test:flows sets it with the Docker socket"
-		);
+		throw new Error("FLOWS_HOST_ROOT isn't set; pnpm test:flows sets it with the Docker socket");
 	const path = join(process.cwd(), SERVICES_DIR, runId(), randomUUID());
 	await fs.mkdir(path, { recursive: true });
 	return { path, hostPath: join(host, relative(process.cwd(), path)) };

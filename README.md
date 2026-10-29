@@ -184,13 +184,15 @@ configuration guides.
 **Prerequisites**
 
 - [Git](https://git-scm.com/) (for PCD operations)
-- [Deno](https://deno.com/) 2.x
+- [Node.js](https://nodejs.org/) 24 and [pnpm](https://pnpm.io/) 11
+- [Deno](https://deno.com/) 2.x (only for `pnpm build`, which ends with `deno compile`)
 - [.NET SDK](https://dotnet.microsoft.com/) 8.0+ (optional, for parser)
 
 ```bash
 git clone https://github.com/Dictionarry-Hub/profilarr.git
 cd profilarr
-deno task dev
+pnpm install
+pnpm dev
 ```
 
 This runs the parser service and Vite dev server concurrently.

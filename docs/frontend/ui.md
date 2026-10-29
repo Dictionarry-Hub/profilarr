@@ -35,7 +35,7 @@ It runs on `.svelte` files under `src/routes/` and `src/lib/client/`, except
 replacement. It runs as part of ESLint:
 
 ```bash
-deno task lint:eslint
+pnpm lint:eslint
 ```
 
 ### Exemptions

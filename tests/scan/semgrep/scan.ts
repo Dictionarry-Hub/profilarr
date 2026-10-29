@@ -8,8 +8,8 @@
  * Requires: semgrep CLI installed
  *
  * Usage:
- *   deno task scan:semgrep           Full scan
- *   deno task scan:semgrep --quick   Local rules only
+ *   pnpm scan:semgrep           Full scan
+ *   pnpm scan:semgrep --quick   Local rules only
  */
 
 import { spawn } from 'node:child_process';

@@ -8,8 +8,8 @@
  * tests/flows/data/fixtures.json, the snapshot scenarios read expected names
  * and values from. Run after changing the fixtures database:
  *
- *   deno task fixtures:update            latest default branch
- *   deno task fixtures:update <ref>      a branch, tag or commit
+ *   pnpm fixtures:update            latest default branch
+ *   pnpm fixtures:update <ref>      a branch, tag or commit
  */
 
 import { spawnSync } from 'node:child_process';

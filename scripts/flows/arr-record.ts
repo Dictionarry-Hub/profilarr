@@ -8,8 +8,8 @@
  * container. Nothing here touches a real Arr instance. Rerun after an app
  * changes its API, or to add a new target:
  *
- *   deno task fixtures:arr              every target
- *   deno task fixtures:arr sonarr-5     only the targets named
+ *   pnpm fixtures:arr              every target
+ *   pnpm fixtures:arr sonarr-5     only the targets named
  */
 
 import { spawnSync } from 'node:child_process';

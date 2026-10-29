@@ -5,7 +5,7 @@
  * integration runs. It needs the auth Docker stack (nginx) running and a
  * human at the terminal. Run it explicitly:
  *
- *   INTEGRATION_MANUAL=1 deno task test:integration tests/integration/specs/auth/reverseProxy502-manual.test.ts
+ *   INTEGRATION_MANUAL=1 pnpm test:integration tests/integration/specs/auth/reverseProxy502-manual.test.ts
  *
  * It starts:
  * - Profilarr preview on PORTS.auth.reverseProxy502Manual

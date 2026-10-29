@@ -469,5 +469,5 @@ and produces typed interfaces for Kysely queries and query results.
    `negate` and `required` produce `boolean` instead of `number`.
 4. **SQLite type mapping** as the fallback (INTEGER -> number, TEXT -> string).
 
-Run via `deno task generate:pcd-types` (default version) or
-`deno task generate:pcd-types --version=1.1.0` for a specific schema version.
+Run via `pnpm generate:pcd-types` (default version) or
+`pnpm generate:pcd-types --version=1.1.0` for a specific schema version.

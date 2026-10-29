@@ -7,18 +7,18 @@ import { resolve } from 'node:path';
 
 const ROOT = process.cwd();
 
-/** The compiled app, built by `deno task build` */
+/** The compiled app, built by `pnpm build` */
 export const APP_BINARY = resolve(ROOT, 'dist/build/profilarr');
 
-/** Vendored fixtures database and its pinned schema (`deno task fixtures:update`) */
+/** Vendored fixtures database and its pinned schema (`pnpm fixtures:update`) */
 export const FIXTURES_DIR = resolve(ROOT, 'tests/flows/data/fixtures');
 export const SCHEMA_DIR = resolve(ROOT, 'tests/flows/data/schema');
 export const SOURCE_FILE = resolve(ROOT, 'tests/flows/data/source.json');
 
-/** What the fixtures contain, written by `deno task fixtures:update` */
+/** What the fixtures contain, written by `pnpm fixtures:update` */
 export const FIXTURES_SNAPSHOT = resolve(ROOT, 'tests/flows/data/fixtures.json');
 
-/** Fresh Radarr and Sonarr responses for the fake Arrs (`deno task fixtures:arr`) */
+/** Fresh Radarr and Sonarr responses for the fake Arrs (`pnpm fixtures:arr`) */
 export const ARR_DATA_DIR = resolve(ROOT, 'tests/flows/data/arr');
 
 /**

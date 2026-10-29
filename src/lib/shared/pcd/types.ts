@@ -6,7 +6,7 @@
  * Generated from: https://github.com/Dictionarry-Hub/schema/blob/local/ops/0.schema.sql
  * Generated at: 2026-03-11T23:10:47.284Z
  *
- * To regenerate: deno task generate:pcd-types --version=local
+ * To regenerate: pnpm generate:pcd-types --version=local
  */
 
 import type { Generated } from 'kysely';

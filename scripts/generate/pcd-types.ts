@@ -5,9 +5,9 @@
  * Uses SQLite introspection to ensure types match the actual schema.
  *
  * Usage:
- *   deno task generate:pcd-types                    # Uses default version (1.0.0)
- *   deno task generate:pcd-types --version=1.1.0    # Uses specific version
- *   deno task generate:pcd-types --local=/path/to/schema.sql  # Uses local file
+ *   pnpm generate:pcd-types                    # Uses default version (1.0.0)
+ *   pnpm generate:pcd-types --version=1.1.0    # Uses specific version
+ *   pnpm generate:pcd-types --local=/path/to/schema.sql  # Uses local file
  */
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -77,7 +77,7 @@ PCD Type Generator
 Generates TypeScript types from the PCD schema SQL.
 
 USAGE:
-  deno task generate:pcd-types [OPTIONS]
+  pnpm generate:pcd-types [OPTIONS]
 
 OPTIONS:
   --version=<ver>    Use specific schema version/branch (default: ${DEFAULT_VERSION})
@@ -85,9 +85,9 @@ OPTIONS:
   --help, -h         Show this help message
 
 EXAMPLES:
-  deno task generate:pcd-types                      # Fetch version ${DEFAULT_VERSION}
-  deno task generate:pcd-types --version=1.1.0      # Fetch version 1.1.0
-  deno task generate:pcd-types --local=./schema.sql # Use local file
+  pnpm generate:pcd-types                      # Fetch version ${DEFAULT_VERSION}
+  pnpm generate:pcd-types --version=1.1.0      # Fetch version 1.1.0
+  pnpm generate:pcd-types --local=./schema.sql # Use local file
 
 OUTPUT:
   ${OUTPUT_PATH}
@@ -436,7 +436,7 @@ function generateTypesFile(tables: TableInfo[], version: string): string {
  * Generated from: https://github.com/${SCHEMA_REPO}/blob/${version}/${SCHEMA_PATH}
  * Generated at: ${new Date().toISOString()}
  *
- * To regenerate: deno task generate:pcd-types --version=${version}
+ * To regenerate: pnpm generate:pcd-types --version=${version}
  */
 
 import type { Generated } from 'kysely';
