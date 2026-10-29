@@ -1,4 +1,10 @@
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import process from 'node:process';
+import { test } from 'vitest';
 import { assert, assertEquals, assertStringIncludes } from '@std/assert';
+import { runCommand } from '#utils/command.ts';
 // eslint-disable-next-line profilarr/import-paths -- the review renderer lives in .github/, outside every alias
 import {
 	type Finding,
@@ -34,7 +40,7 @@ function row(comment: string, title: string): string {
 	return line;
 }
 
-Deno.test('clean reviews render as one table with N/A findings', () => {
+test('clean reviews render as one table with N/A findings', () => {
 	const comment = render(passing);
 	const lines = comment.split('\n');
 
@@ -48,7 +54,7 @@ Deno.test('clean reviews render as one table with N/A findings', () => {
 	assert(!comment.includes('###'));
 });
 
-Deno.test('statuses map to Passed, Warning, or Failed', () => {
+test('statuses map to Passed, Warning, or Failed', () => {
 	const comment = render({
 		'user-docs': { status: 'could_not_check', findings: [] },
 		'technical-docs': { status: 'needs_update', findings: [finding()] },
@@ -62,7 +68,7 @@ Deno.test('statuses map to Passed, Warning, or Failed', () => {
 	assertStringIncludes(row(comment, 'Code'), '| Failed |');
 });
 
-Deno.test('missing or unknown results render as failed reviews', () => {
+test('missing or unknown results render as failed reviews', () => {
 	const comment = render({ ...passing, tests: undefined, code: { status: 'maybe', findings: [] } });
 
 	for (const title of ['Tests', 'Code']) {
@@ -72,7 +78,7 @@ Deno.test('missing or unknown results render as failed reviews', () => {
 	}
 });
 
-Deno.test('findings render as bullets with a category and one trailing period', () => {
+test('findings render as bullets with a category and one trailing period', () => {
 	const comment = render({
 		...passing,
 		code: {
@@ -87,14 +93,14 @@ Deno.test('findings render as bullets with a category and one trailing period', 
 	);
 });
 
-Deno.test('findings are capped at five', () => {
+test('findings are capped at five', () => {
 	const findings = Array.from({ length: 7 }, (_, i) => finding({ title: `Finding ${i}` }));
 	const comment = render({ ...passing, code: { status: 'issues', findings } });
 
 	assertEquals(row(comment, 'Code').match(/<li>/g)?.length, 5);
 });
 
-Deno.test('model text cannot add HTML, table cells, line breaks, or mentions', () => {
+test('model text cannot add HTML, table cells, line breaks, or mentions', () => {
 	const comment = render({
 		...passing,
 		code: {
@@ -108,7 +114,7 @@ Deno.test('model text cannot add HTML, table cells, line breaks, or mentions', (
 	assertEquals(comment.split('\n').length, 9);
 });
 
-Deno.test('links point at the PR head or the reviewed website commit', () => {
+test('links point at the PR head or the reviewed website commit', () => {
 	const comment = render(
 		{
 			...passing,
@@ -131,13 +137,13 @@ Deno.test('links point at the PR head or the reviewed website commit', () => {
 	);
 });
 
-Deno.test('CLI reads result files and environment, and fails rows it cannot read', async () => {
-	const directory = await Deno.makeTempDir();
+test('CLI reads result files and environment, and fails rows it cannot read', async () => {
+	const directory = await mkdtemp(join(tmpdir(), 'claude-review-'));
 	const decode = (bytes: Uint8Array) => new TextDecoder().decode(bytes);
 	try {
 		const write = async (review: string, file: string, content: string) => {
-			await Deno.mkdir(`${directory}/claude-review-${review}`, { recursive: true });
-			await Deno.writeTextFile(`${directory}/claude-review-${review}/${file}`, content);
+			await mkdir(`${directory}/claude-review-${review}`, { recursive: true });
+			await writeFile(`${directory}/claude-review-${review}/${file}`, content);
 		};
 		await write(
 			'user-docs',
@@ -149,20 +155,13 @@ Deno.test('CLI reads result files and environment, and fails rows it cannot read
 		await write('tests', 'result.json', '{ not json');
 		// No result directory for code: its job didn't upload anything.
 
-		const run = (args: string[]) =>
-			new Deno.Command(Deno.execPath(), {
-				args: [
-					'run',
-					'--no-config',
-					`--allow-read=${directory}`,
-					'--allow-env=REPO,HEAD_SHA,RUN_URL',
-					'.github/claude-review/render.ts',
-					...args
-				],
-				env: { REPO: env.repo, HEAD_SHA: env.headSha, RUN_URL: env.runUrl },
-				stdout: 'piped',
-				stderr: 'piped'
-			}).output();
+		// Run the renderer the way the Claude Review workflow does
+		const run = (args: string[], allowed = directory) =>
+			runCommand(
+				process.execPath,
+				['--permission', `--allow-fs-read=${allowed}`, '.github/claude-review/render.ts', ...args],
+				{ env: { REPO: env.repo, HEAD_SHA: env.headSha, RUN_URL: env.runUrl } }
+			);
 
 		const output = await run([directory]);
 		assertEquals(output.code, 0, decode(output.stderr));
@@ -181,7 +180,13 @@ Deno.test('CLI reads result files and environment, and fails rows it cannot read
 		const usage = await run([]);
 		assertEquals(usage.code, 1);
 		assertStringIncludes(decode(usage.stderr), 'Usage: render.ts <results-dir>');
+
+		// The sandbox only lets it read the results: outside them every row fails
+		const denied = decode((await run([directory], `${directory}/missing`)).stdout);
+		for (const title of ['User-facing docs', 'Technical docs']) {
+			assertStringIncludes(row(denied, title), '| Failed |');
+		}
 	} finally {
-		await Deno.remove(directory, { recursive: true });
+		await rm(directory, { recursive: true, force: true });
 	}
 });

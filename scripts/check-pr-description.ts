@@ -1,5 +1,8 @@
 /** PR description rules. No GitHub access or application dependencies are needed. */
 
+import { readFile } from 'node:fs/promises';
+import process from 'node:process';
+
 const REQUIRED_SECTIONS = [
 	'Description',
 	'User-facing docs',
@@ -205,14 +208,14 @@ export function validatePrDescription(body: string | null): ValidationResult {
 }
 
 if (import.meta.main) {
-	const path = Deno.args[0];
+	const path = process.argv[2];
 	if (!path) {
 		console.error('Usage: deno run --allow-read scripts/check-pr-description.ts <body.md>');
-		Deno.exit(1);
+		process.exit(1);
 	}
-	const result = validatePrDescription(await Deno.readTextFile(path));
+	const result = validatePrDescription(await readFile(path, 'utf8'));
 	for (const message of result.errors) console.log(`::error title=PR description::${message}`);
 	for (const message of result.warnings) console.log(`::warning title=PR description::${message}`);
 	if (!result.errors.length) console.log('PR description meets the template requirements.');
-	Deno.exit(result.errors.length ? 1 : 0);
+	process.exit(result.errors.length ? 1 : 0);
 }

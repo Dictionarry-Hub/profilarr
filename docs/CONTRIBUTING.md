@@ -39,6 +39,9 @@ cd profilarr
 deno task dev
 ```
 
+Flags after `deno task dev` set environment variables for the app, for
+example `deno task dev --auth off` or `deno task dev --origin http://192.168.1.10:6969`.
+
 ## Making a Change
 
 ### Starting Your Branch
@@ -378,4 +381,3 @@ when `develop` is free.
 
 - `docs/ARCHITECTURE.md` - full codebase encyclopedia (modules, data flow, PCD)
 - `docs/DEVELOPMENT.md` - branching model, release process, versioning
-- `deno task stats` - per-module code stats (TS/JS/Svelte/CSS/SQL/C#)

@@ -117,7 +117,7 @@ COPY --from=builder /build/dist/build/server.js /app/server.js
 COPY --from=builder /build/dist/build/static /app/static
 
 # Copy entrypoint script
-COPY scripts/entrypoint.sh /entrypoint.sh
+COPY scripts/docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 # Create a fixed profilarr user/group (UID/GID 1000).

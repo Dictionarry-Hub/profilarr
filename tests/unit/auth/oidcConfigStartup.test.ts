@@ -14,8 +14,8 @@ function importConfig(env: Record<string, string>): CommandResult {
 	// runCommand adds to the parent environment and can't unset variables, so
 	// spawn directly with the full environment
 	const child = spawnSync(
-		'deno',
-		['eval', "await import('./src/lib/server/utils/config/config.ts');"],
+		process.execPath,
+		['--input-type=module', '-e', "await import('./src/lib/server/utils/config/config.ts');"],
 		{ env: { ...base, ...env } }
 	);
 	if (child.error) throw child.error;
@@ -35,7 +35,7 @@ test('partial OIDC settings fail config import and name the missing settings', a
 	// Printed as a log line, not an uncaught error with a stack trace
 	assertStringIncludes(stderr, 'ERROR');
 	assertStringIncludes(stderr, '[Config]');
-	assert(!stderr.includes('Uncaught'), stderr);
+	assert(!/\n\s+at /.test(stderr), stderr);
 });
 
 test('partial OIDC settings with AUTH=off do not fail config import', async () => {

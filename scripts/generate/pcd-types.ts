@@ -10,6 +10,8 @@
  *   deno task generate:pcd-types --local=/path/to/schema.sql  # Uses local file
  */
 
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import process from 'node:process';
 import { Database } from '#db/sqlite.ts';
 
 // ============================================================================
@@ -55,7 +57,7 @@ function parseArgs(): CliArgs {
 		help: false
 	};
 
-	for (const arg of Deno.args) {
+	for (const arg of process.argv.slice(2)) {
 		if (arg === '--help' || arg === '-h') {
 			args.help = true;
 		} else if (arg.startsWith('--version=')) {
@@ -110,7 +112,7 @@ async function fetchSchemaFromGitHub(version: string): Promise<string> {
 
 async function loadSchemaFromFile(path: string): Promise<string> {
 	console.log(`Loading schema from: ${path}`);
-	return await Deno.readTextFile(path);
+	return await readFile(path, 'utf8');
 }
 
 // ============================================================================
@@ -638,7 +640,7 @@ async function main(): Promise<void> {
 
 	if (args.help) {
 		printHelp();
-		Deno.exit(0);
+		process.exit(0);
 	}
 
 	try {
@@ -663,7 +665,7 @@ async function main(): Promise<void> {
 			db.exec(schemaSql);
 		} catch (error) {
 			console.error('Failed to execute schema SQL:', error);
-			Deno.exit(1);
+			process.exit(1);
 		}
 
 		// Introspect database
@@ -676,10 +678,10 @@ async function main(): Promise<void> {
 		const typesContent = generateTypesFile(tables, sourceVersion);
 
 		// Ensure output directory exists
-		await Deno.mkdir(OUTPUT_DIR, { recursive: true });
+		await mkdir(OUTPUT_DIR, { recursive: true });
 
 		// Write output
-		await Deno.writeTextFile(OUTPUT_PATH, typesContent);
+		await writeFile(OUTPUT_PATH, typesContent);
 		console.log(`\nTypes written to: ${OUTPUT_PATH}`);
 
 		// Summary
@@ -691,7 +693,7 @@ async function main(): Promise<void> {
 		db.close();
 	} catch (error) {
 		console.error('Error:', error);
-		Deno.exit(1);
+		process.exit(1);
 	}
 }
 

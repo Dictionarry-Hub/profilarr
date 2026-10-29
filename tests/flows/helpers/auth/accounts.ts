@@ -3,8 +3,7 @@
  * (`test.use({ appEnv: { AUTH: 'on' } })`).
  *
  * Accounts are made through the first-run setup form, the way a user makes
- * one. The harness can't write one into the database itself: password hashes
- * use the app's bcrypt library, which only runs in Deno.
+ * one.
  */
 
 import { expect, test, type Browser, type Page } from '@playwright/test';

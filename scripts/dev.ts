@@ -1,16 +1,22 @@
 /**
- * Dev script that runs parser and server concurrently with labeled output
+ * Dev script that runs parser and server concurrently with labeled output.
+ *
+ * Flags set environment variables for the app server: `--name value` or
+ * `--name=value` sets NAME, with dashes as underscores.
+ *
+ *   deno task dev --auth off
+ *   deno task dev --origin http://192.168.1.10:6969
+ *   deno task dev --profilarr-bulletin-url http://localhost:6970
  */
 
-// Auto-detect platform from Deno.build
+import { spawn } from 'node:child_process';
+import process from 'node:process';
+import type { Readable } from 'node:stream';
+
+// Auto-detect platform, in the os/arch form the app's VITE_PLATFORM uses
 function getPlatform(): string {
-	const os = Deno.build.os === 'darwin' ? 'darwin' : Deno.build.os;
-	const arch =
-		Deno.build.arch === 'x86_64'
-			? 'amd64'
-			: Deno.build.arch === 'aarch64'
-				? 'arm64'
-				: Deno.build.arch;
+	const os = process.platform === 'win32' ? 'windows' : process.platform;
+	const arch = process.arch === 'x64' ? 'amd64' : process.arch;
 	return `${os}/${arch}`;
 }
 
@@ -20,19 +26,43 @@ const colors = {
 	reset: '\x1b[0m'
 };
 
-const SERVER_PORT = 6969;
 const WARM_UP_TIMEOUT_MS = 5 * 60_000;
 
-async function streamOutput(
-	reader: ReadableStreamDefaultReader<Uint8Array>,
-	label: string,
-	color: string
-) {
+/** `--auth off` and `--auth=off` both become { AUTH: 'off' }. */
+function parseEnvFlags(argv: string[]): Record<string, string> {
+	const env: Record<string, string> = {};
+	for (let i = 0; i < argv.length; i++) {
+		const match = /^--([a-z][a-z0-9-]*)(?:=(.*))?$/i.exec(argv[i]);
+		const value = match?.[2] ?? argv[i + 1];
+		if (!match || value === undefined || (match[2] === undefined && value.startsWith('--'))) {
+			console.error(`Expected --name value or --name=value, got: ${argv[i]}`);
+			process.exit(1);
+		}
+		if (match[2] === undefined) i++;
+		env[match[1].toUpperCase().replaceAll('-', '_')] = value;
+	}
+	return env;
+}
+
+const overrides = parseEnvFlags(process.argv.slice(2));
+const serverEnv: NodeJS.ProcessEnv = {
+	...process.env,
+	DENO_ENV: 'development',
+	PORT: '6969',
+	HOST: '0.0.0.0',
+	APP_BASE_PATH: './dist/dev',
+	PARSER_HOST: 'localhost',
+	PARSER_PORT: '5000',
+	VITE_PLATFORM: getPlatform(),
+	VITE_CHANNEL: 'dev',
+	...overrides
+};
+const SERVER_PORT = Number(serverEnv.PORT);
+
+async function streamOutput(stream: Readable, label: string, color: string) {
 	const decoder = new TextDecoder();
-	while (true) {
-		const { done, value } = await reader.read();
-		if (done) break;
-		const text = decoder.decode(value);
+	for await (const chunk of stream) {
+		const text = decoder.decode(chunk, { stream: true });
 		for (const line of text.split('\n')) {
 			if (line.trim()) {
 				console.log(`${color}[${label}]${colors.reset} ${line}`);
@@ -41,50 +71,32 @@ async function streamOutput(
 	}
 }
 
-async function runParser() {
-	const cmd = new Deno.Command('dotnet', {
-		args: ['watch', 'run', '--urls', 'http://localhost:5000'],
-		cwd: 'src/services/parser',
-		stdout: 'piped',
-		stderr: 'piped'
-	});
-
-	const process = cmd.spawn();
+/** Starts a child with stdin from this terminal and labelled output; resolves with its exit code. */
+async function runLabelled(
+	command: string,
+	args: string[],
+	label: 'parser' | 'server',
+	options: { cwd?: string; env?: NodeJS.ProcessEnv } = {}
+) {
+	const child = spawn(command, args, { ...options, stdio: ['inherit', 'pipe', 'pipe'] });
+	const exit = new Promise<number | null>((resolve) => child.on('close', resolve));
 
 	await Promise.all([
-		streamOutput(process.stdout.getReader(), 'parser', colors.parser),
-		streamOutput(process.stderr.getReader(), 'parser', colors.parser)
+		streamOutput(child.stdout, label, colors[label]),
+		streamOutput(child.stderr, label, colors[label])
 	]);
 
-	return process.status;
+	return exit;
 }
 
-async function runServer() {
-	const cmd = new Deno.Command('deno', {
-		args: ['run', '-A', 'vite', 'dev'],
-		env: {
-			...Deno.env.toObject(),
-			DENO_ENV: 'development',
-			PORT: String(SERVER_PORT),
-			HOST: '0.0.0.0',
-			APP_BASE_PATH: './dist/dev',
-			PARSER_HOST: 'localhost',
-			PARSER_PORT: '5000',
-			VITE_PLATFORM: getPlatform(),
-			VITE_CHANNEL: 'dev'
-		},
-		stdout: 'piped',
-		stderr: 'piped'
+function runParser() {
+	return runLabelled('dotnet', ['watch', 'run', '--urls', 'http://localhost:5000'], 'parser', {
+		cwd: 'src/services/parser'
 	});
+}
 
-	const process = cmd.spawn();
-
-	await Promise.all([
-		streamOutput(process.stdout.getReader(), 'server', colors.server),
-		streamOutput(process.stderr.getReader(), 'server', colors.server)
-	]);
-
-	return process.status;
+function runServer() {
+	return runLabelled('deno', ['run', '-A', 'vite', 'dev'], 'server', { env: serverEnv });
 }
 
 /**
@@ -115,6 +127,9 @@ async function warmUp() {
 
 console.log(`${colors.parser}[parser]${colors.reset} Starting .NET parser service...`);
 console.log(`${colors.server}[server]${colors.reset} Starting Vite dev server...`);
+for (const [name, value] of Object.entries(overrides)) {
+	console.log(`${colors.server}[server]${colors.reset} ${name}=${value}`);
+}
 console.log('');
 
 await Promise.all([runParser(), runServer(), warmUp()]);

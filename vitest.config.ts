@@ -13,8 +13,6 @@ export default defineConfig({
 	},
 	test: {
 		include: ['tests/unit/**/*.test.ts'],
-		// Tests of Deno scripts stay on `deno test` until the scripts move off Deno
-		exclude: ['tests/unit/pr/**', 'tests/unit/release/**'],
 		environment: 'node',
 		env: { APP_BASE_PATH: './dist/test' }
 	}

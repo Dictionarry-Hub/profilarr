@@ -23,6 +23,8 @@
  *   deno task lint:api-permissions
  */
 
+import { readdir, readFile } from 'node:fs/promises';
+import process from 'node:process';
 import { getApiRequirement } from '#utils/auth/apiPermissions.ts';
 import { isPublicPath } from '#utils/auth/publicPaths.ts';
 
@@ -45,7 +47,7 @@ interface Spec {
 	paths: Record<string, Record<string, SpecOperation>>;
 }
 
-const spec = JSON.parse(await Deno.readTextFile(SPEC_PATH)) as Spec;
+const spec = JSON.parse(await readFile(SPEC_PATH, 'utf8')) as Spec;
 const declaredTags = new Set((spec.tags ?? []).map((tag) => tag.name));
 const violations: string[] = [];
 
@@ -74,9 +76,9 @@ for (const [path, item] of Object.entries(spec.paths)) {
 
 async function collectServerFiles(dir: string): Promise<string[]> {
 	const files: string[] = [];
-	for await (const entry of Deno.readDir(dir)) {
+	for (const entry of await readdir(dir, { withFileTypes: true })) {
 		const path = `${dir}/${entry.name}`;
-		if (entry.isDirectory) files.push(...(await collectServerFiles(path)));
+		if (entry.isDirectory()) files.push(...(await collectServerFiles(path)));
 		else if (entry.name === '+server.ts') files.push(path);
 	}
 	return files;
@@ -86,7 +88,7 @@ for (const file of (await collectServerFiles(API_V1_ROUTES)).sort()) {
 	const routeId = file.slice(ROUTES_ROOT.length, -'/+server.ts'.length);
 	if (isPublicPath(routeId)) continue;
 
-	const source = await Deno.readTextFile(file);
+	const source = await readFile(file, 'utf8');
 	for (const match of source.matchAll(EXPORTED_METHOD_RE)) {
 		if (!getApiRequirement(routeId, match[1])) {
 			violations.push(`${match[1]} ${routeId}: no labelled operation in the spec`);
@@ -101,5 +103,5 @@ if (violations.length > 0) {
 	}
 	console.error('\nAdd or fix the operation in docs/api/v1/paths/, then regenerate the spec:');
 	console.error('  deno task generate:api-types');
-	Deno.exit(1);
+	process.exit(1);
 }

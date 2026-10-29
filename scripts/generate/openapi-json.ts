@@ -1,7 +1,8 @@
+import { readFile, writeFile } from 'node:fs/promises';
 import { load as parse } from 'js-yaml';
 
-const OPENAPI_ROOT_URL = new URL('../docs/api/v1/openapi.yaml', import.meta.url);
-const OUTPUT_URL = new URL('../src/lib/api/v1.openapi.json', import.meta.url);
+const OPENAPI_ROOT_URL = new URL('../../docs/api/v1/openapi.yaml', import.meta.url);
+const OUTPUT_URL = new URL('../../src/lib/api/v1.openapi.json', import.meta.url);
 
 const parsedDocumentCache = new Map<string, unknown>();
 
@@ -9,7 +10,7 @@ async function main(): Promise<void> {
 	const rootDocument = await loadDocument(OPENAPI_ROOT_URL);
 	const bundledSpec = await resolveNode(rootDocument, OPENAPI_ROOT_URL, new Set<string>());
 
-	await Deno.writeTextFile(OUTPUT_URL, `${JSON.stringify(bundledSpec, null, 2)}\n`);
+	await writeFile(OUTPUT_URL, `${JSON.stringify(bundledSpec, null, 2)}\n`);
 }
 
 async function loadDocument(fileUrl: URL): Promise<unknown> {
@@ -19,7 +20,7 @@ async function loadDocument(fileUrl: URL): Promise<unknown> {
 		return cachedDocument;
 	}
 
-	const fileContent = await Deno.readTextFile(fileUrl);
+	const fileContent = await readFile(fileUrl, 'utf8');
 	const parsedDocument = parse(fileContent);
 	parsedDocumentCache.set(cacheKey, parsedDocument);
 	return parsedDocument;

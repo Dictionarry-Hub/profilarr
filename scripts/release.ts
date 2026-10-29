@@ -1,3 +1,9 @@
+import { spawn } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
+import process from 'node:process';
+import { createInterface } from 'node:readline/promises';
+import { isNotFound } from '#utils/fs.ts';
+
 const versionPattern = /^v\d+\.\d+\.\d+$/;
 
 const IMAGES = ['profilarr:alpine', 'profilarr-parser:alpine'];
@@ -7,7 +13,7 @@ function usage(): never {
 	console.error('  deno task release:dry v2.6.0 [notes.md]');
 	console.error('  deno task release:scan');
 	console.error('  deno task release v2.6.0 [notes.md]');
-	Deno.exit(1);
+	process.exit(1);
 }
 
 function assertVersion(value: string | undefined): string {
@@ -30,9 +36,9 @@ export async function readNotes(path: string | undefined): Promise<string | null
 
 	let text: string;
 	try {
-		text = (await Deno.readTextFile(path)).trim();
+		text = (await readFile(path, 'utf8')).trim();
 	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
+		if (isNotFound(error)) {
 			// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 			throw new Error(`Release notes file ${path} was not found.`);
 		}
@@ -62,28 +68,41 @@ async function readNotesOrExit(path: string | undefined): Promise<string | null>
 		return await readNotes(path);
 	} catch (error) {
 		console.error(error instanceof Error ? error.message : error);
-		Deno.exit(1);
+		process.exit(1);
 	}
 }
 
-async function run(command: string, args: string[]) {
+function run(command: string, args: string[]): Promise<void> {
+	return new Promise((resolve, reject) => {
+		const child = spawn(command, args, { stdio: 'inherit' });
+
+		child.on('error', (error) => {
+			if (isNotFound(error)) {
+				console.error(`${command} was not found on PATH. Install it before running a release.`);
+				process.exit(127);
+			}
+
+			reject(error);
+		});
+
+		child.on('close', (code) => {
+			if (code !== 0) {
+				process.exit(code ?? 1);
+			}
+
+			resolve();
+		});
+	});
+}
+
+/** Asks on the terminal; null when stdin closes without an answer. */
+async function ask(question: string): Promise<string | null> {
+	const terminal = createInterface({ input: process.stdin, output: process.stdout });
+	const closed = new Promise<null>((resolve) => terminal.once('close', () => resolve(null)));
 	try {
-		const status = await new Deno.Command(command, {
-			args,
-			stdout: 'inherit',
-			stderr: 'inherit'
-		}).output();
-
-		if (!status.success) {
-			Deno.exit(status.code);
-		}
-	} catch (error) {
-		if (error instanceof Deno.errors.NotFound) {
-			console.error(`${command} was not found on PATH. Install it before running a release.`);
-			Deno.exit(127);
-		}
-
-		throw error;
+		return await Promise.race([terminal.question(`${question} `), closed]);
+	} finally {
+		terminal.close();
 	}
 }
 
@@ -102,7 +121,7 @@ async function scanImages() {
 }
 
 if (import.meta.main) {
-	const [mode, version, notesPath] = Deno.args;
+	const [mode, version, notesPath] = process.argv.slice(2);
 
 	if (mode === 'scan') {
 		await buildImages();
@@ -122,11 +141,11 @@ if (import.meta.main) {
 		const kind = notes
 			? `annotated tag ${tag} with notes from ${notesPath}`
 			: `plain tag ${tag} (no release notes)`;
-		const answer = prompt(`Create and push ${kind}? Type ${tag} to confirm:`);
+		const answer = await ask(`Create and push ${kind}? Type ${tag} to confirm:`);
 
 		if (answer !== tag) {
 			console.error('Release cancelled.');
-			Deno.exit(1);
+			process.exit(1);
 		}
 
 		await run('git', tagArgs(tag, notes));
