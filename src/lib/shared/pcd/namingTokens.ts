@@ -51,6 +51,7 @@ interface ParsedNamingToken {
 	canonicalName: string;
 }
 
+// eslint-disable-next-line no-useless-escape -- FIXME: drop the unneeded escape
 const TOKEN_PREFIX_REGEX = /^[-\[( ._]*/;
 const TOKEN_SUFFIX_REGEX = /[-\]) ._]*$/;
 
@@ -913,6 +914,7 @@ function filterLanguageValue(value: string, parameter: string): string {
 	const bracketed = value.match(/^\[([^\]]*)\]$/);
 	const languageText = bracketed ? bracketed[1] : value;
 	const languages = languageText.split('+').filter(Boolean);
+	// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 	let filtered = languages;
 
 	if (parameter.startsWith('-')) {

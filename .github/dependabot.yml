@@ -36,6 +36,15 @@ updates:
           - 'playwright'
           - '@playwright/test'
         update-types: ['major']
+      # @eslint/js and the plugins list the ESLint majors they support.
+      eslint-major:
+        patterns:
+          - 'eslint'
+          - '@eslint/js'
+          - 'typescript-eslint'
+          - 'eslint-plugin-svelte'
+          - 'svelte-eslint-parser'
+        update-types: ['major']
       prettier-major:
         patterns:
           - 'prettier'

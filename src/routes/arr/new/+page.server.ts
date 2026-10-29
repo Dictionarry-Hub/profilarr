@@ -1,4 +1,4 @@
-// lint-disable-file secret-destination -- create only: there is no stored key to re-point
+/* eslint-disable profilarr/secret-destination -- create only: there is no stored key to re-point */
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '$db/queries/arrInstances.ts';

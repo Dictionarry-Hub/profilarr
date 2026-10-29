@@ -1,4 +1,4 @@
-// lint-disable-file secret-destination -- create only: there is no stored secret to re-point
+/* eslint-disable profilarr/secret-destination -- create only: there is no stored secret to re-point */
 import type { Actions, RequestEvent } from '@sveltejs/kit';
 import { fail, redirect } from '@sveltejs/kit';
 import { logger } from '$logger/logger.ts';

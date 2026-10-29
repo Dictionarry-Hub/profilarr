@@ -33,9 +33,7 @@
 	export let instance: DatabaseInstancePublic | undefined = undefined;
 	export let repoInfo: RepoInfo | null = null;
 	export let currentBranch: string = '';
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let data: any = undefined;
 
 	// Initialize dirty tracking on mount

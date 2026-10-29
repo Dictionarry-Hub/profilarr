@@ -1,6 +1,6 @@
 export type FilterFieldType = 'text' | 'number';
 
-// deno-lint-ignore no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- field defs describe items of any shape
 export interface FilterFieldDef<T = any> {
 	key: string;
 	label: string;

@@ -173,11 +173,8 @@ UTC, so they are timezone-agnostic and do not need the store.
 
 ## Lint Enforcement
 
-```
-scripts/lint/datetime.ts
-```
-
-A standalone lint script with two scopes:
+The ESLint rule `profilarr/no-raw-dates`
+(`scripts/lint/rules/no-raw-dates.ts`) has two scopes:
 
 **Query layer** (`src/lib/server/db/queries/*.ts`). Every timestamp column
 in the schema follows the `_at` suffix convention (see `schema.sql`). The
@@ -196,8 +193,8 @@ fractional seconds; compare with `julianday()` instead.
    string and immediately rendering it (e.g. `{new Date(row.timestamp)}`)
    bypasses timezone conversion. Use `formatDateTime()` or `formatDate()`.
 
-All rules can be suppressed with the standard escape hatch:
+Any of these can be switched off for one line with a reason:
 
 ```svelte
-<!-- lint-disable-next-line no-raw-dates -- reason -->
+<!-- eslint-disable-next-line profilarr/no-raw-dates -- reason -->
 ```

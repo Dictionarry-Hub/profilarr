@@ -35,6 +35,7 @@ function copyWithTextarea(text: string): boolean {
 	textArea.select();
 	textArea.setSelectionRange(0, textArea.value.length);
 
+	// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 	let copied = false;
 	try {
 		copied = document.execCommand('copy');

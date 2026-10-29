@@ -41,6 +41,7 @@
 
 		// Tooling
 		"@deno/vite-plugin": "npm:@deno/vite-plugin@^2.0.4",
+		"@eslint/js": "npm:@eslint/js@^10.0.1",
 		"@playwright/test": "npm:@playwright/test@^1.64.1",
 		"@std/assert": "npm:@jsr/std__assert@^1.0.19",
 		"@sveltejs/vite-plugin-svelte": "npm:@sveltejs/vite-plugin-svelte@^7.3.1",
@@ -48,14 +49,18 @@
 		"@types/deno": "npm:@types/deno@^2.7.0",
 		"@types/node": "npm:@types/node@^22.20.5",
 		"esbuild": "npm:esbuild@^0.28.2",
+		"eslint": "npm:eslint@^10.13.0",
+		"eslint-plugin-svelte": "npm:eslint-plugin-svelte@^3.23.1",
 		"openapi-typescript": "npm:openapi-typescript@^7.13.0",
 		"playwright": "npm:playwright@^1.64.1",
 		"prettier": "npm:prettier@3.9.10",
 		"prettier-plugin-svelte": "npm:prettier-plugin-svelte@^4.1.1",
 		"prettier-plugin-tailwindcss": "npm:prettier-plugin-tailwindcss@^0.8.1",
+		"svelte-eslint-parser": "npm:svelte-eslint-parser@^1.9.0",
 		"svelte-check": "npm:svelte-check@^4.7.6",
 		"tailwindcss": "npm:tailwindcss@^4.3.3",
 		"typescript": "npm:typescript@6.0.3",
+		"typescript-eslint": "npm:typescript-eslint@^8.72.0",
 		"vite": "npm:vite@^8.3.4",
 		"vitest": "npm:vitest@^5.0.5"
 	},
@@ -72,16 +77,10 @@
 		"preview": "PORT=6869 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 ./dist/build/profilarr",
 		"clean:dev": "rm -rf dist/dev",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && deno lint && deno task lint:toolchain && deno task lint:ui && deno task lint:crypto && deno task lint:datetime && deno task lint:clipboard && deno task lint:page-meta && deno task lint:api-permissions && deno task lint:secret-destination && deno task lint:lucide",
+		"lint": "prettier --check . && deno task lint:eslint && deno task lint:toolchain && deno task lint:api-permissions",
+		"lint:eslint": "node node_modules/eslint/bin/eslint.js .",
 		"lint:toolchain": "deno run --allow-read scripts/lint/toolchain.ts",
-		"lint:ui": "deno run --allow-read --allow-env scripts/lint/ui.ts",
-		"lint:crypto": "deno run --allow-read --allow-env scripts/lint/crypto.ts",
-		"lint:datetime": "deno run --allow-read --allow-env scripts/lint/datetime.ts",
-		"lint:clipboard": "deno run --allow-read --allow-env scripts/lint/clipboard.ts",
-		"lint:page-meta": "deno run --allow-read --allow-env scripts/lint/pageMeta.ts",
 		"lint:api-permissions": "deno run --allow-read=src/lib/api/v1.openapi.json,src/routes/api/v1 scripts/lint/apiPermissions.ts",
-		"lint:secret-destination": "deno run --allow-read --allow-env scripts/lint/secretDestination.ts",
-		"lint:lucide": "deno run --allow-read --allow-env scripts/lint/lucideImports.ts",
 		"check": "deno task check:client && deno task check:tests",
 		"check:client": "NODE_ENV=development deno run -A svelte-check --tsconfig ./tsconfig.json",
 		"check:tests": "node node_modules/typescript/bin/tsc -p tests/unit/tsconfig.json",
@@ -110,12 +109,5 @@
 		"exclude": ["dist/", "node_modules/"],
 		"indentWidth": 2,
 		"useTabs": false
-	},
-	"lint": {
-		"exclude": ["dist/", "node_modules/", "tests/", ".svelte-kit/", "src/adapter/"],
-		"rules": {
-			"include": ["no-eval", "no-throw-literal"],
-			"exclude": ["no-window", "no-window-prefix", "require-await"]
-		}
 	}
 }

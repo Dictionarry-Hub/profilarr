@@ -430,11 +430,13 @@ function classifyLine(line: string, rule: CommentRule, state: CounterState): key
 		if (state.inBlock) {
 			hadComment = true;
 			if (rule.blockEnd === null) {
+				// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 				i = len;
 				break;
 			}
 			const endAt = line.indexOf(rule.blockEnd, i);
 			if (endAt === -1) {
+				// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 				i = len;
 				break;
 			}
@@ -451,6 +453,7 @@ function classifyLine(line: string, rule: CommentRule, state: CounterState): key
 
 		if (rule.line !== null && line.startsWith(rule.line, i)) {
 			hadComment = true;
+			// eslint-disable-next-line no-useless-assignment -- FIXME: remove the unused assignment
 			i = len;
 			break;
 		}

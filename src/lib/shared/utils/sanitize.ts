@@ -51,7 +51,7 @@ function decodeEntities(str: string): string {
  */
 export function isSafeUrl(raw: string): boolean {
 	const decoded = decodeEntities(raw)
-		// deno-lint-ignore no-control-regex
+		// eslint-disable-next-line no-control-regex -- strips control characters on purpose
 		.replace(/[\s\x00-\x1f]+/g, '')
 		.toLowerCase();
 	// Relative URLs and fragment-only URLs are safe

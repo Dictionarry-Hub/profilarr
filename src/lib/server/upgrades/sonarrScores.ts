@@ -53,6 +53,7 @@ export async function loadSonarrEpisodeFiles(
 					return [series.id, await client.getEpisodeFiles(series.id)] as const;
 				} catch (error) {
 					const message = error instanceof Error ? error.message : String(error);
+					// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 					throw new Error(`Failed to fetch episode files for "${series.title}": ${message}`);
 				}
 			})

@@ -2,14 +2,13 @@
 
 **Source:** `src/lib/client/ui/`
 **Import alias:** `$ui/*` (maps to `src/lib/client/ui/`)
-**Lint rule:** `scripts/lint/ui.ts` (`deno task lint:ui`)
+**Lint rule:** `profilarr/no-raw-ui` (`scripts/lint/rules/no-raw-ui.ts`)
 
 Profilarr ships a small in-house component library that wraps the raw HTML
 primitives the app needs: buttons, inputs, selects, textareas, dialogs, and
 tables. Every page in `src/routes/` is expected to consume these wrappers
-instead of raw elements. Compliance is enforced by a custom Deno lint script
-(`no-raw-ui`) that parses every `.svelte` file with the Svelte 5 compiler and
-flags banned tags.
+instead of raw elements. Compliance is enforced by a project ESLint rule
+(`profilarr/no-raw-ui`) that flags banned tags in `.svelte` files.
 
 ## Table of Contents
 
@@ -30,13 +29,13 @@ flags banned tags.
 
 ## The `no-raw-ui` Lint Rule
 
-`scripts/lint/ui.ts` is a script that enforces the "wrappers
-only" convention. It walks the Svelte 5 AST produced by
-`npm:svelte/compiler`, reports each banned tag with a suggested replacement,
-and exits non-zero on any violation.
+`scripts/lint/rules/no-raw-ui.ts` enforces the "wrappers only" convention.
+It runs on `.svelte` files under `src/routes/` and `src/lib/client/`, except
+`src/lib/client/ui/`, and reports each banned tag with a suggested
+replacement. It runs as part of ESLint:
 
 ```bash
-deno task lint:ui           # run the no-raw-ui rule alone
+deno task lint:eslint
 ```
 
 ### Exemptions
@@ -48,23 +47,16 @@ is a static string literal equal to `"hidden"`. Dynamic `type={foo}`
 expressions are flagged.
 
 **Escape-hatch comment.** For the rare case where a wrapper is genuinely
-wrong (or doesn't exist yet), an HTML comment placed immediately before the
-element disables the rule for that line:
+wrong (or doesn't exist yet), an ESLint disable comment placed immediately
+before the element switches the rule off for that line:
 
 ```svelte
-<!-- lint-disable-next-line no-raw-ui -- svelte-dnd-action needs a real <button> host -->
+<!-- eslint-disable-next-line profilarr/no-raw-ui -- svelte-dnd-action needs a real <button> host -->
 <button use:dragHandle>...</button>
 ```
 
-The directive format is strict:
-
-```
-<!-- lint-disable-next-line no-raw-ui -- <non-empty reason> -->
-```
-
-A **malformed** directive (missing `--`, empty reason, wrong rule name) is
-itself reported as a violation, so you cannot accidentally "pass" the linter
-by writing a broken directive.
+The reason after `--` is required. `profilarr/disable-comments` reports any
+disable comment without one, in code and in templates.
 
 ## Icons
 
@@ -78,8 +70,9 @@ Icons come from Lucide. Import each icon from its own module:
 
 Root imports (`'@lucide/svelte'` or `'@lucide/svelte/icons'`) re-export every
 icon. The Vite dev server doesn't tree-shake, so a single root import makes the
-first page load compile every icon. `scripts/lint/lucideImports.ts`
-(`deno task lint:lucide`) rejects them; `import type` is allowed. Aliases such
+first page load compile every icon. ESLint rejects them
+(`no-restricted-imports` in `eslint.config.js`); `import type` is
+allowed. Aliases such
 as `Loader2` should use the icon's canonical file (`loader-circle`), because
 alias modules ship no Svelte type declarations.
 

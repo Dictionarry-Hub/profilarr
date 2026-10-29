@@ -34,7 +34,6 @@
 		link: string;
 		body: string;
 	};
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	export let form: any = undefined;
 
 	const severityOptions = [

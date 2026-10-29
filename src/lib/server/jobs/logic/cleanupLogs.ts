@@ -59,6 +59,7 @@ export async function cleanupLogs(
 		}
 	} catch (error) {
 		// If we can't read the directory at all, that's a critical error
+		// eslint-disable-next-line preserve-caught-error -- FIXME: pass the caught error as `cause`
 		throw new Error(
 			`Failed to read logs directory: ${error instanceof Error ? error.message : String(error)}`
 		);
