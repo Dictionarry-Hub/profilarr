@@ -4,7 +4,7 @@ dist/
 
 # Dependencies
 node_modules/
-deno.lock
+pnpm-lock.yaml
 package-lock.json
 
 # .NET build artifacts
