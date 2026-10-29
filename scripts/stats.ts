@@ -37,6 +37,9 @@
  *     DEBUG=1 deno task stats     # per-stage timing to stderr
  */
 
+import { readdir, readFile, stat } from 'node:fs/promises';
+import process from 'node:process';
+
 // ============================================================================
 // TYPES
 // ============================================================================
@@ -109,10 +112,21 @@ interface Aggregated {
 }
 
 // Injected so the pure stages can be tested against an in-memory filesystem.
+interface DirEntry {
+	readonly name: string;
+	readonly isFile: boolean;
+	readonly isDirectory: boolean;
+}
+
+interface FileInfo {
+	readonly isFile: boolean;
+	readonly isDirectory: boolean;
+}
+
 interface Fs {
 	readonly readTextFile: (path: string) => Promise<string>;
-	readonly readDir: (path: string) => AsyncIterable<Deno.DirEntry>;
-	readonly stat: (path: string) => Promise<Deno.FileInfo>;
+	readonly readDir: (path: string) => AsyncIterable<DirEntry>;
+	readonly stat: (path: string) => Promise<FileInfo>;
 }
 
 // ============================================================================
@@ -258,12 +272,16 @@ function extractSourcePaths(docSource: string): string[] {
 	return [...out];
 }
 
+function isNotFound(err: unknown): boolean {
+	return err instanceof Error && 'code' in err && err.code === 'ENOENT';
+}
+
 async function pathExists(path: string, fs: Fs): Promise<boolean> {
 	try {
 		await fs.stat(path);
 		return true;
 	} catch (err) {
-		if (err instanceof Deno.errors.NotFound) return false;
+		if (isNotFound(err)) return false;
 		throw err;
 	}
 }
@@ -317,11 +335,11 @@ async function walkFiles(absRoot: string, fs: Fs): Promise<AbsPath[]> {
 	const out: AbsPath[] = [];
 
 	async function walk(dir: string): Promise<void> {
-		let entries: AsyncIterable<Deno.DirEntry>;
+		let entries: AsyncIterable<DirEntry>;
 		try {
 			entries = fs.readDir(dir);
 		} catch (err) {
-			if (err instanceof Deno.errors.NotFound) return;
+			if (isNotFound(err)) return;
 			throw err;
 		}
 		for await (const entry of entries) {
@@ -338,11 +356,11 @@ async function walkFiles(absRoot: string, fs: Fs): Promise<AbsPath[]> {
 		}
 	}
 
-	let info: Deno.FileInfo;
+	let info: FileInfo;
 	try {
 		info = await fs.stat(absRoot);
 	} catch (err) {
-		if (err instanceof Deno.errors.NotFound) return out;
+		if (isNotFound(err)) return out;
 		throw err;
 	}
 
@@ -784,11 +802,11 @@ const noColor: Colorizer = {
 };
 
 function shouldUseColor(): boolean {
-	if (Deno.env.get('NO_COLOR') !== undefined) return false;
-	const force = Deno.env.get('FORCE_COLOR');
+	if (process.env.NO_COLOR !== undefined) return false;
+	const force = process.env.FORCE_COLOR;
 	if (force !== undefined && force !== '0' && force !== 'false') return true;
 	try {
-		return Deno.stdout.isTerminal();
+		return process.stdout.isTTY === true;
 	} catch {
 		return false;
 	}
@@ -1067,14 +1085,22 @@ function makeTimer(debug: boolean): (label: string) => void {
 // ============================================================================
 
 const realFs: Fs = {
-	readTextFile: (p) => Deno.readTextFile(p),
-	readDir: (p) => Deno.readDir(p),
-	stat: (p) => Deno.stat(p)
+	readTextFile: (p) => readFile(p, 'utf8'),
+	// Lazy: errors surface on first iteration, not on call, matching the old behaviour.
+	readDir: async function* (p) {
+		for (const entry of await readdir(p, { withFileTypes: true })) {
+			yield { name: entry.name, isFile: entry.isFile(), isDirectory: entry.isDirectory() };
+		}
+	},
+	stat: async (p) => {
+		const info = await stat(p);
+		return { isFile: info.isFile(), isDirectory: info.isDirectory() };
+	}
 };
 
 async function main(): Promise<number> {
-	const root = Deno.cwd();
-	const debug = Deno.env.get('DEBUG') === '1';
+	const root = process.cwd();
+	const debug = process.env.DEBUG === '1';
 
 	let agg: Aggregated;
 	try {
@@ -1096,5 +1122,5 @@ async function main(): Promise<number> {
 }
 
 if (import.meta.main) {
-	Deno.exit(await main());
+	process.exit(await main());
 }

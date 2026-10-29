@@ -9,6 +9,9 @@
  *   deno task lint:toolchain
  */
 
+import { readFile } from 'node:fs/promises';
+import process from 'node:process';
+
 const TOOL_VERSIONS_PATH = '.tool-versions';
 const DOCKERFILE_PATH = 'Dockerfile';
 const CI_PATH = '.github/workflows/ci.yml';
@@ -109,9 +112,9 @@ function checkCi(source: string, violations: string[]): void {
 }
 
 const [toolVersionsSource, dockerfileSource, ciSource] = await Promise.all([
-	Deno.readTextFile(TOOL_VERSIONS_PATH),
-	Deno.readTextFile(DOCKERFILE_PATH),
-	Deno.readTextFile(CI_PATH)
+	readFile(TOOL_VERSIONS_PATH, 'utf8'),
+	readFile(DOCKERFILE_PATH, 'utf8'),
+	readFile(CI_PATH, 'utf8')
 ]);
 
 const violations: string[] = [];
@@ -131,5 +134,5 @@ if (violations.length > 0) {
 	for (const violation of violations) {
 		console.error(`- ${violation}`);
 	}
-	Deno.exit(1);
+	process.exit(1);
 }
