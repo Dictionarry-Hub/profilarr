@@ -12,6 +12,8 @@
  *   deno task scan:semgrep --quick   Local rules only
  */
 
+import { spawn } from 'node:child_process';
+
 const LOCAL_CONFIG = 'tests/scan/semgrep/';
 
 const COMMUNITY_CONFIGS = [
@@ -24,18 +26,25 @@ const COMMUNITY_CONFIGS = [
 	'p/csharp'
 ];
 
-const quick = Deno.args.includes('--quick');
+/**
+ * Run a command to completion and resolve with its exit code. A process killed
+ * by a signal resolves as 1. Rejects if the command cannot be spawned.
+ */
+function run(command: string, args: string[], stdio: 'ignore' | 'inherit'): Promise<number> {
+	return new Promise((resolve, reject) => {
+		const child = spawn(command, args, { stdio });
+		child.on('error', reject);
+		child.on('close', (code) => resolve(code ?? 1));
+	});
+}
+
+const quick = process.argv.slice(2).includes('--quick');
 
 // Check semgrep is installed
-const check = new Deno.Command('semgrep', {
-	args: ['--version'],
-	stdout: 'null',
-	stderr: 'null'
-});
-const { code: checkCode } = await check.output();
+const checkCode = await run('semgrep', ['--version'], 'ignore').catch(() => 1);
 if (checkCode !== 0) {
 	console.error('semgrep is not installed. See https://semgrep.dev/docs/getting-started/');
-	Deno.exit(1);
+	process.exit(1);
 }
 
 const configs = quick ? [LOCAL_CONFIG] : [LOCAL_CONFIG, ...COMMUNITY_CONFIGS];
@@ -45,11 +54,5 @@ console.log(`Running semgrep scan: ${mode}\n`);
 
 const args = ['scan', ...configs.flatMap((c) => ['--config', c]), '--error', '--verbose'];
 
-const cmd = new Deno.Command('semgrep', {
-	args,
-	stdout: 'inherit',
-	stderr: 'inherit'
-});
-
-const { code } = await cmd.output();
-Deno.exit(code);
+const code = await run('semgrep', args, 'inherit');
+process.exit(code);
