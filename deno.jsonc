@@ -41,7 +41,6 @@
 	},
 	"tasks": {
 		"dev": "node scripts/dev.ts",
-		"dev:no-auth": "AUTH=off node scripts/dev.ts",
 		"build": "APP_BASE_PATH=./dist/build deno run -A vite build && deno compile --node-modules-dir=none --exclude-unused-npm --no-check --allow-all --target x86_64-unknown-linux-gnu --output dist/build/profilarr dist/build/mod.ts",
 		"preview": "PORT=6869 HOST=0.0.0.0 APP_BASE_PATH=./dist/dev PARSER_HOST=localhost PARSER_PORT=5000 ./dist/build/profilarr",
 		"clean:dev": "rm -rf dist/dev",

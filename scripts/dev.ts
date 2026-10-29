@@ -1,5 +1,12 @@
 /**
- * Dev script that runs parser and server concurrently with labeled output
+ * Dev script that runs parser and server concurrently with labeled output.
+ *
+ * Flags set environment variables for the app server: `--name value` or
+ * `--name=value` sets NAME, with dashes as underscores.
+ *
+ *   deno task dev --auth off
+ *   deno task dev --origin http://192.168.1.10:6969
+ *   deno task dev --profilarr-bulletin-url http://localhost:6970
  */
 
 import { spawn } from 'node:child_process';
@@ -21,6 +28,23 @@ const colors = {
 
 const WARM_UP_TIMEOUT_MS = 5 * 60_000;
 
+/** `--auth off` and `--auth=off` both become { AUTH: 'off' }. */
+function parseEnvFlags(argv: string[]): Record<string, string> {
+	const env: Record<string, string> = {};
+	for (let i = 0; i < argv.length; i++) {
+		const match = /^--([a-z][a-z0-9-]*)(?:=(.*))?$/i.exec(argv[i]);
+		const value = match?.[2] ?? argv[i + 1];
+		if (!match || value === undefined || (match[2] === undefined && value.startsWith('--'))) {
+			console.error(`Expected --name value or --name=value, got: ${argv[i]}`);
+			process.exit(1);
+		}
+		if (match[2] === undefined) i++;
+		env[match[1].toUpperCase().replaceAll('-', '_')] = value;
+	}
+	return env;
+}
+
+const overrides = parseEnvFlags(process.argv.slice(2));
 const serverEnv: NodeJS.ProcessEnv = {
 	...process.env,
 	DENO_ENV: 'development',
@@ -30,7 +54,8 @@ const serverEnv: NodeJS.ProcessEnv = {
 	PARSER_HOST: 'localhost',
 	PARSER_PORT: '5000',
 	VITE_PLATFORM: getPlatform(),
-	VITE_CHANNEL: 'dev'
+	VITE_CHANNEL: 'dev',
+	...overrides
 };
 const SERVER_PORT = Number(serverEnv.PORT);
 
@@ -102,6 +127,9 @@ async function warmUp() {
 
 console.log(`${colors.parser}[parser]${colors.reset} Starting .NET parser service...`);
 console.log(`${colors.server}[server]${colors.reset} Starting Vite dev server...`);
+for (const [name, value] of Object.entries(overrides)) {
+	console.log(`${colors.server}[server]${colors.reset} ${name}=${value}`);
+}
 console.log('');
 
 await Promise.all([runParser(), runServer(), warmUp()]);

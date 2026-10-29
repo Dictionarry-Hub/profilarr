@@ -39,6 +39,9 @@ cd profilarr
 deno task dev
 ```
 
+Flags after `deno task dev` set environment variables for the app, for
+example `deno task dev --auth off` or `deno task dev --origin http://192.168.1.10:6969`.
+
 ## Making a Change
 
 ### Starting Your Branch
