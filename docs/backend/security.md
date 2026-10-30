@@ -717,7 +717,7 @@ in parallel under Vitest via `pnpm test:integration`.
 | File                             | Port                  | Tests                                                                                                                                     |
 | -------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `health.test.ts`                 | 7006                  | Public health vs authenticated diagnostics, no info disclosure                                                                            |
-| `csrf.test.ts`                   | 7003, 7004, 7005      | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                                                              |
+| `csrf.test.ts`                   | 7003, 7004, 7005      | Origin checking, no-origin fallback, reverse proxy CSRF with `ORIGIN`                                                                     |
 | `cookie.test.ts`                 | 7001, 7002            | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                                                         |
 | `apiKey.test.ts`                 | 7000                  | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management                                                  |
 | `apiKeyPermissions.test.ts`      | 7020                  | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                                                     |
