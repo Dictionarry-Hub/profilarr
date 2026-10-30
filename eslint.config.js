@@ -62,7 +62,6 @@ export default defineConfig(
 			'tests/flows/playwright-report/',
 			'tests/flows/test-results/',
 			'tests/flows/test-results-ui/',
-			'src/adapter/',
 			'src/services/'
 		]
 	},

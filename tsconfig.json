@@ -9,6 +9,6 @@
 		"noImplicitReturns": true,
 		"noImplicitOverride": true
 	},
-	"exclude": ["tests/**", "src/adapter/**", "research/**"],
+	"exclude": ["tests/**", "research/**"],
 	"include": ["src", "src/**/*.svelte", "vite.config.ts", "tests", "scripts/lint/rules"]
 }

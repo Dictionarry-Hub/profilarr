@@ -1,4 +1,4 @@
-import adapter from './src/adapter/index.js';
+import adapter from '@sveltejs/adapter-node';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
@@ -26,18 +26,10 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit({
 			preprocess: vitePreprocess({ script: true }),
-			adapter: adapter({
-				usage: 'deno-compile',
-				out: 'dist/build',
-				buildOptions: { logOverride: { 'ignored-bare-import': 'silent' } }
-			})
+			adapter: adapter({ out: 'dist/build' })
 		})
 	],
-	ssr: {
-		// Compile @lucide/svelte (ships raw .svelte icons) into the SSR bundle so
-		// the deno-compile adapter's esbuild step never sees uncompiled .svelte.
-		noExternal: ['@lucide/svelte']
-	},
+	ssr: { noExternal: ['@lucide/svelte'] },
 	server: {
 		port: 6969,
 		host: true,

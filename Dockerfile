@@ -73,6 +73,7 @@ EOF
 
 ENV APP_BASE_PATH=/build/dist/build
 RUN pnpm exec vite build
+RUN cp src/runtime/server.js src/runtime/origins.js dist/build/
 # --node-modules-dir=none + --exclude-unused-npm embed only what the server
 # reaches instead of the whole node_modules tree (build tooling included).
 # See docs/ARCHITECTURE.md#runtime-and-memory.
@@ -87,8 +88,9 @@ RUN DENO_TARGET=$(case "${TARGETARCH}" in \
     --no-check \
     --allow-all \
     --target "$DENO_TARGET" \
+    --include dist/build/client \
     --output dist/build/profilarr \
-    dist/build/mod.ts
+    dist/build/server.js
 
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime
@@ -126,8 +128,6 @@ WORKDIR /app
 
 # Copy built application from builder stage
 COPY --from=builder /build/dist/build/profilarr /app/profilarr
-COPY --from=builder /build/dist/build/server.js /app/server.js
-COPY --from=builder /build/dist/build/static /app/static
 
 # Copy entrypoint script
 COPY scripts/docker/entrypoint.sh /entrypoint.sh
