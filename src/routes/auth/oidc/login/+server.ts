@@ -41,16 +41,20 @@ export const GET: RequestHandler = async (event) => {
 	const state = generateState();
 	const nonce = crypto.randomUUID();
 
-	// Store state and nonce in cookies (10 minute expiry)
+	// Store state, nonce and the origin that started the flow in cookies (10
+	// minute expiry). The callback must arrive on the same origin: cookies are
+	// shared across schemes and ports of one hostname, so state alone can't tell
+	// http://host from https://host when both are configured origins.
 	const cookieOpts = {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'lax' as const,
-		secure: config.origin.startsWith('https://'),
+		secure: url.protocol === 'https:',
 		maxAge: 60 * 10
 	};
 	cookies.set('oidc_state', state, cookieOpts);
 	cookies.set('oidc_nonce', nonce, cookieOpts);
+	cookies.set('oidc_origin', url.origin, cookieOpts);
 	if (reauth) {
 		// When we asked, so the callback can check the provider authenticated after this
 		cookies.set('oidc_reauth', String(Date.now()), cookieOpts);
@@ -61,7 +65,7 @@ export const GET: RequestHandler = async (event) => {
 	// Build authorization URL and redirect
 	const authUrl = buildAuthorizationUrl(discovery.authorization_endpoint, {
 		clientId: config.oidc.clientId,
-		redirectUri: `${config.origin}/auth/oidc/callback`,
+		redirectUri: `${url.origin}/auth/oidc/callback`,
 		state,
 		nonce,
 		reauth

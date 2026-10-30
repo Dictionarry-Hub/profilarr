@@ -44,11 +44,25 @@ export const GET: RequestHandler = async (event) => {
 		throw error(400, 'Invalid state parameter');
 	}
 	const savedNonce = cookies.get('oidc_nonce');
+	const savedOrigin = cookies.get('oidc_origin');
 	// Only a value set by /auth/oidc/login?reauth=1 counts; a cleared cookie is not a re-auth
 	const reauthStartedAt = cookies.get('oidc_reauth') || undefined;
 	cookies.delete('oidc_state', { path: '/' });
 	cookies.delete('oidc_nonce', { path: '/' });
+	cookies.delete('oidc_origin', { path: '/' });
 	cookies.delete('oidc_reauth', { path: '/' });
+
+	// The callback must land on the origin that started the flow, so the token
+	// exchange repeats the redirect URI the provider was given and the session
+	// cookie gets that origin's Secure flag
+	if (savedOrigin !== url.origin) {
+		const ip = getClientIp(event, false);
+		await logger.warn('OIDC callback arrived on a different origin than the one that started it', {
+			source: 'Auth:OIDC',
+			meta: { ip, started: savedOrigin ?? null, callback: url.origin }
+		});
+		throw error(400, 'OIDC callback origin mismatch');
+	}
 
 	// Verify we have a code
 	if (!code) {
@@ -70,7 +84,7 @@ export const GET: RequestHandler = async (event) => {
 		tokens = await exchangeCode(discovery.token_endpoint, code, {
 			clientId: config.oidc.clientId,
 			clientSecret: config.oidc.clientSecret,
-			redirectUri: `${config.origin}/auth/oidc/callback`
+			redirectUri: `${url.origin}/auth/oidc/callback`
 		});
 	} catch (err) {
 		await logger.warn('OIDC token exchange failed', {
@@ -175,7 +189,7 @@ export const GET: RequestHandler = async (event) => {
 		path: '/',
 		httpOnly: true,
 		sameSite: 'lax',
-		secure: config.origin.startsWith('https://'),
+		secure: url.protocol === 'https:',
 		expires
 	});
 

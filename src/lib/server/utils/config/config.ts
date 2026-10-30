@@ -31,7 +31,6 @@ class Config {
 	public readonly parserUrl: string;
 	public readonly port: number;
 	public readonly host: string;
-	public readonly origin: string;
 	public readonly authMode: AuthMode;
 	public readonly deprecatedOidcMode: boolean;
 	public readonly oidcEnabled: boolean;
@@ -66,11 +65,6 @@ class Config {
 		// Server bind configuration
 		this.port = parseInt(process.env.PORT || '6868', 10);
 		this.host = process.env.HOST || '0.0.0.0';
-
-		// External origin (scheme + host) for OIDC redirects and cookie security.
-		// Falls back to the local server URL when unset. Trailing slashes are
-		// stripped so downstream concatenation (`${origin}/path`) doesn't double up.
-		this.origin = (process.env.ORIGIN || this.serverUrl).replace(/\/+$/, '');
 
 		// Auth mode ('on' default, 'off') and SSO, enabled by the OIDC_* settings
 		let auth: ReturnType<typeof parseAuthConfig>;
