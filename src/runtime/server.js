@@ -39,6 +39,7 @@ process.once('sveltekit:shutdown', () => process.exit(0));
 
 /** Hosts already reported, so a misconfigured proxy doesn't flood the log */
 const reportedHosts = new Set();
+const listed = new Set(origins.map((origin) => origin.origin));
 
 // Resolve each request's browser-facing origin before adapter-node's handler
 // builds SvelteKit's Request from the private headers set above.
@@ -58,22 +59,20 @@ server.on(
 			true;
 		const origin = resolveOrigin(request.headers, encrypted, origins);
 		if (!origin) {
-			const host = String(request.headers['x-forwarded-host'] ?? request.headers.host ?? '');
-			if (!reportedHosts.has(host)) {
-				reportedHosts.add(host);
-				console.warn(
-					`Rejected a request for "${host}": it matches no origin in ORIGIN. ` +
-						'Add the browser-facing origin to ORIGIN, or make the proxy forward the original Host.'
-				);
-			}
-			response
-				.writeHead(400, { 'content-type': 'text/plain' })
-				.end(
-					'Bad Request: Profilarr is not configured to serve this address. ' +
-						'Add it to ORIGIN, or make the reverse proxy forward the original Host. ' +
-						'See https://profilarr.com/installation#authentication'
-				);
+			// HTTP/1.1 requires a Host; adapter-node would reject this too
+			response.writeHead(400, { 'content-type': 'text/plain' }).end('Bad Request');
 			return;
+		}
+		// Several origins are listed and this request matched none, so it is
+		// served as if ORIGIN were unset. Say so once, in case a browser was meant
+		// to use this address and its forms fail the CSRF check.
+		if (origins.length > 1 && !listed.has(origin) && !reportedHosts.has(origin)) {
+			reportedHosts.add(origin);
+			console.warn(
+				`Serving ${origin}, which is not in ORIGIN. If browsers use this address, ` +
+					'add it to ORIGIN or make the reverse proxy forward the original Host. ' +
+					'See https://profilarr.com/installation#authentication'
+			);
 		}
 		const url = new URL(origin);
 		request.headers[PROTOCOL_HEADER] = url.protocol.slice(0, -1);

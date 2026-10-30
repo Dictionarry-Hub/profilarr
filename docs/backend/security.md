@@ -470,16 +470,19 @@ browser used, not the address the container listens on. The production entry
 `@sveltejs/adapter-node` builds the SvelteKit `Request`, using the rules in
 `src/runtime/origins.js`:
 
-| `ORIGIN`         | Request origin                                                                                                                                                                                        |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unset            | The socket's scheme and the `Host` header. Direct access over HTTP works without configuration.                                                                                                       |
-| One value        | Always that origin, whatever the proxy sends.                                                                                                                                                         |
-| Several (commas) | The listed origin whose host matches `Host`, or `X-Forwarded-Host` when a proxy rewrote `Host`. `X-Forwarded-Proto` only picks between listed origins that share a host. No match: `400 Bad Request`. |
+| `ORIGIN`         | Request origin                                                                                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unset            | The socket's scheme and the `Host` header. Direct access over HTTP works without configuration.                                                                                                                             |
+| One value        | Always that origin, whatever the proxy sends.                                                                                                                                                                               |
+| Several (commas) | The listed origin whose host matches `Host`, or `X-Forwarded-Host` when a proxy rewrote `Host`. `X-Forwarded-Proto` only picks between listed origins that share a host. No match: the same as unset, logged once per host. |
 
 Forwarded headers can only select an origin that is already listed; they can't
 add one. Each listed origin is a separate origin to SvelteKit, so a form loaded
-on one can't post to another. Values must be scheme, host and optional port
-only. Startup fails on anything else.
+on one can't post to another. An address that matches nothing is served from
+its own `Host`, so the image's health check on `localhost`, probes on the
+container name and API clients keep working; only a browser behind an HTTPS
+proxy on such an address has its forms refused by the CSRF check. Values must
+be scheme, host and optional port only. Startup fails on anything else.
 
 Everything that depends on the origin reads it from the request
 (`event.url`): the session, OIDC state and nonce cookies get `secure` on

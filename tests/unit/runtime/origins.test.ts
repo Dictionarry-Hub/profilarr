@@ -95,21 +95,42 @@ describe('resolveOrigin', () => {
 		).toBe('http://192.168.1.10:6868');
 	});
 
-	test('rejects unknown and malformed origin metadata', () => {
+	test('falls back to the socket and Host for an unlisted host', () => {
 		const origins = parseOrigins('http://192.168.1.10:6868,https://profilarr.example.com');
-		expect(resolveOrigin({ host: 'unknown.internal' }, false, origins)).toBeUndefined();
+		// The image's health check, curl on localhost inside the container
+		expect(resolveOrigin({ host: 'localhost:6868' }, false, origins)).toBe('http://localhost:6868');
+		// A probe or API client on the container's name
+		expect(resolveOrigin({ host: 'profilarr:6868' }, false, origins)).toBe('http://profilarr:6868');
+		expect(resolveOrigin({ host: 'unknown.internal' }, true, origins)).toBe(
+			'https://unknown.internal'
+		);
+	});
+
+	test('ignores malformed forwarded scheme and port', () => {
+		const origins = parseOrigins('http://192.168.1.10:6868,https://profilarr.example.com:8443');
+		// The listed forwarded host still selects its origin; the bad values add nothing
 		expect(
 			resolveOrigin(
 				{
-					host: 'unknown.internal',
-					'x-forwarded-host': 'profilarr.example.com',
+					host: '192.168.1.10:6868',
+					'x-forwarded-host': 'profilarr.example.com:8443',
 					'x-forwarded-proto': 'https:',
 					'x-forwarded-port': 'not-a-port'
 				},
 				false,
 				origins
 			)
-		).toBeUndefined();
+		).toBe('https://profilarr.example.com:8443');
+		// With nothing listed to match, the request's own Host wins
+		expect(
+			resolveOrigin({ host: '192.168.1.10:6868', 'x-forwarded-proto': 'https:' }, false, origins)
+		).toBe('http://192.168.1.10:6868');
+	});
+
+	test('answers nothing for a request without a usable Host', () => {
+		const origins = parseOrigins('http://192.168.1.10:6868,https://profilarr.example.com');
+		expect(resolveOrigin({}, false, origins)).toBeUndefined();
+		expect(resolveOrigin({ host: 'not a host' }, false, origins)).toBeUndefined();
 	});
 
 	test('uses the forwarded scheme to disambiguate one authority', () => {

@@ -1,7 +1,9 @@
 /**
- * Parse the deployment's allowed origins and select one for a request. This
+ * Parse the deployment's configured origins and select one for a request. This
  * runs before SvelteKit so its request URL, CSRF check, cookies and OIDC all
- * agree on the browser-facing origin.
+ * agree on the browser-facing origin. A host that matches none of them is
+ * served from the request itself, so health probes and API clients on
+ * internal names keep working whatever ORIGIN holds.
  */
 
 const DEFAULT_PORT = { 'http:': '80', 'https:': '443' };
@@ -135,23 +137,34 @@ function select(candidates, forwardedProtocol, socketProtocol) {
 export function resolveOrigin(headers, encrypted, origins) {
 	const socketProtocol = encrypted ? 'https' : 'http';
 	const rawHost = lastHeader(headers.host);
-	if (origins.length === 0) {
-		if (!rawHost) return undefined;
-		try {
-			return new URL(`${socketProtocol}://${rawHost}`).origin;
-		} catch {
-			return undefined;
-		}
-	}
 	if (origins.length === 1) return origins[0].origin;
+	if (origins.length > 1) {
+		const listed = selectListed(headers, rawHost, socketProtocol, origins);
+		if (listed) return listed;
+	}
+	// No list, or nothing in it matched: the request's own scheme and Host
+	if (!rawHost) return undefined;
+	try {
+		return new URL(`${socketProtocol}://${rawHost}`).origin;
+	} catch {
+		return undefined;
+	}
+}
 
+/**
+ * The listed origin a request belongs to, matched on Host, or on
+ * X-Forwarded-Host when a proxy rewrote Host. Malformed forwarded values are
+ * ignored rather than trusted.
+ * @param {Record<string, string | string[] | undefined>} headers
+ * @param {string | undefined} rawHost
+ * @param {'http' | 'https'} socketProtocol
+ * @param {AllowedOrigin[]} origins
+ * @returns {string | undefined}
+ */
+function selectListed(headers, rawHost, socketProtocol, origins) {
 	const forwardedHost = lastHeader(headers['x-forwarded-host']);
-	const forwardedProtocolValue = lastHeader(headers['x-forwarded-proto']);
-	const forwardedPortValue = lastHeader(headers['x-forwarded-port']);
-	const forwardedProtocol = protocol(forwardedProtocolValue);
-	const forwardedPort = port(forwardedPortValue);
-	if (forwardedProtocolValue !== undefined && !forwardedProtocol) return undefined;
-	if (forwardedPortValue !== undefined && !forwardedPort) return undefined;
+	const forwardedProtocol = protocol(lastHeader(headers['x-forwarded-proto']));
+	const forwardedPort = port(lastHeader(headers['x-forwarded-port']));
 
 	if (forwardedHost) {
 		const forwarded = select(
