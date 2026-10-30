@@ -8,6 +8,7 @@ const isReload = (globalThis as Record<string, unknown>).__profilarr_initialized
 
 import { config } from '#utils/config/config.ts';
 import { printBanner, getServerInfo, logContainerConfig, logProxyConfig } from '#logger/startup.ts';
+import { getSocksProxyError } from '#utils/http/proxy.ts';
 import { logSettings } from '#logger/settings.ts';
 import { logger } from '#logger/logger.ts';
 import { db } from '#db/db.ts';
@@ -66,6 +67,14 @@ if (!isReload) {
 
 	// Log outbound proxy settings (if any are set)
 	await logProxyConfig();
+
+	// Refuse to start with a SOCKS proxy, which Bun's fetch can't use. It would
+	// fail every request, or with ALL_PROXY skip the proxy without a warning.
+	const proxyError = getSocksProxyError();
+	if (proxyError) {
+		await logger.error(proxyError, { source: 'Proxy' });
+		process.exit(1);
+	}
 
 	// Initialize PCD caches (must be after migrations and log settings)
 	await pcdManager.initialize();
