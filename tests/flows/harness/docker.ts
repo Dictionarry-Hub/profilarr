@@ -103,6 +103,7 @@ export async function serviceDir(): Promise<{ path: string; hostPath: string }> 
 export interface ServiceSpec {
 	/** A pinned image, from serviceImage() in harness/images.ts */
 	image: string;
+	entrypoint?: string[];
 	cmd?: string[];
 	env?: Record<string, string>;
 	/** `<host path>:<container path>[:ro]` */
@@ -126,6 +127,7 @@ const READY_TIMEOUT_MS = 30_000;
 export async function startService(spec: ServiceSpec): Promise<Service> {
 	const created = await api('POST', '/containers/create', {
 		Image: spec.image,
+		Entrypoint: spec.entrypoint,
 		Cmd: spec.cmd,
 		Env: Object.entries(spec.env ?? {}).map(([name, value]) => `${name}=${value}`),
 		User: spec.user,

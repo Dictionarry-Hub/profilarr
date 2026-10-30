@@ -9,6 +9,8 @@
  */
 
 import { fakeProxy } from './fakeProxy.ts';
+import { nginxProxyManager } from './nginxProxyManager.ts';
+import { swag } from './swag.ts';
 import { traefik } from './traefik.ts';
 
 export interface ProxyOptions {
@@ -16,6 +18,13 @@ export interface ProxyOptions {
 	id?: string;
 	/** Serve HTTPS with the run's self-signed certificate */
 	tls?: boolean;
+	/**
+	 * Hostname in the browser-facing URL; the listener still binds to
+	 * 127.0.0.1. `profilarr.test` resolves there inside the test container
+	 * (scripts/flows/run.ts) for proxies that reserve `localhost`, such as
+	 * Nginx Proxy Manager's default server on port 443.
+	 */
+	publicHost?: '127.0.0.1' | 'localhost' | 'profilarr.test';
 	/** Request headers to set on the way to the app; null strips one */
 	headers?: Record<string, string | null>;
 	/**
@@ -63,13 +72,24 @@ export interface ReverseProxy {
 	label: string;
 	/** True for proxies that run in a container, which needs the Docker socket */
 	needsDocker: boolean;
+	/** Only run in the focused origin matrix, not every existing proxy scenario */
+	originOnly?: boolean;
 	/** The options this proxy can honour; specs skip an option's tests on the others */
 	supports: ProxyFeature[];
 	/** `forwardAuthUrl` is the SSO provider's forward-auth endpoint, set with `forwardAuth` */
 	start(options: ProxyOptions, forwardAuthUrl?: string): Promise<RunningProxy>;
 }
 
-export const PROXIES: ReverseProxy[] = [fakeProxy, traefik];
+/**
+ * Whether a health request through a proxy reached the app: 200, or the 303
+ * to first-run setup the app sends for every path while auth is on and no
+ * account exists yet.
+ */
+export function answeredByApp(status: number): boolean {
+	return status === 200 || status === 303;
+}
+
+export const PROXIES: ReverseProxy[] = [fakeProxy, traefik, nginxProxyManager, swag];
 
 /** A proxy by id; an unknown id fails with the ids that exist */
 export function reverseProxy(id: string): ReverseProxy {
@@ -97,7 +117,7 @@ export interface ProxySetup {
 export function proxySetups(): ProxySetup[] {
 	return [
 		{ label: 'no proxy', appProxy: undefined, proxy: undefined },
-		...PROXIES.filter((proxy) => proxy.needsDocker).map((proxy) => ({
+		...PROXIES.filter((proxy) => proxy.needsDocker && !proxy.originOnly).map((proxy) => ({
 			label: proxy.label,
 			appProxy: { id: proxy.id, tls: true },
 			proxy

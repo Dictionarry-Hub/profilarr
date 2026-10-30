@@ -85,6 +85,9 @@ const docker = [
 	'--rm',
 	'--init',
 	'--ipc=host',
+	// A hostname for proxied origins besides localhost, which some proxies
+	// reserve for themselves (helpers/proxy/proxies.ts, publicHost)
+	'--add-host=profilarr.test:127.0.0.1',
 	// Run as the host user so test-results/ isn't owned by root
 	'--user',
 	`${process.getuid?.() ?? 1000}:${process.getgid?.() ?? 1000}`,

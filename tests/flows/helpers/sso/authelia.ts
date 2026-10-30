@@ -55,10 +55,10 @@ async function startAuthelia(): Promise<RunningSso> {
 	const clientSecret = secret();
 	const users: SsoUser[] = [DEFAULT_USER];
 	let service: Service | null = null;
-	let targetOrigin: string | null = null;
+	let targetOrigins: string[] | null = null;
 
-	/** Write the config for `origin` and start Authelia on it */
-	async function launch(origin: string): Promise<void> {
+	/** Write the config for the app origins and start Authelia */
+	async function launch(origins: string[]): Promise<void> {
 		const dir = await serviceDir();
 		const tls = certificatePaths();
 		await fs.copyFile(tls.cert, join(dir.path, 'cert.pem'));
@@ -101,7 +101,7 @@ async function startAuthelia(): Promise<RunningSso> {
 							authorization_policy: 'one_factor',
 							// Consent keeps Authelia's default, so each sign-in asks the user to
 							// accept Profilarr's request
-							redirect_uris: [`${origin}/auth/oidc/callback`],
+							redirect_uris: origins.map((origin) => `${origin}/auth/oidc/callback`),
 							// What src/lib/server/utils/auth/oidc.ts asks for and how it sends the secret
 							scopes: ['openid', 'email', 'profile'],
 							response_types: ['code'],
@@ -152,13 +152,15 @@ async function startAuthelia(): Promise<RunningSso> {
 			NODE_EXTRA_CA_CERTS: certificatePaths().cert
 		},
 		users,
-		target: async (origin) => {
-			if (targetOrigin === origin) return;
-			if (targetOrigin !== null) {
-				throw new Error(`Authelia already serves ${targetOrigin}; it takes one app per test`);
+		target: async (origins) => {
+			if (targetOrigins?.join('\n') === origins.join('\n')) return;
+			if (targetOrigins !== null) {
+				throw new Error(
+					`Authelia already serves ${targetOrigins.join(', ')}; it takes one app per test`
+				);
 			}
-			targetOrigin = origin;
-			await launch(origin);
+			targetOrigins = origins;
+			await launch(origins);
 		},
 		signIn: async (page: Page, user: SsoUser = DEFAULT_USER) => {
 			await test.step(
