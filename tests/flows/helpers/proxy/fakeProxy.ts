@@ -27,7 +27,7 @@ function headerBytes(response: IncomingMessage): number {
 async function startFakeProxy(options: ProxyOptions): Promise<RunningProxy> {
 	const port = await freePort();
 	const scheme = options.tls ? 'https' : 'http';
-	const url = `${scheme}://127.0.0.1:${port}`;
+	const url = `${scheme}://${options.publicHost ?? '127.0.0.1'}:${port}`;
 	const requests: ProxiedRequest[] = [];
 	let appUrl: URL | null = null;
 	let failure: number | null = null;

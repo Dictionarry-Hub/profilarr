@@ -10,6 +10,8 @@
  *
  * Options a spec sets with `test.use()`:
  * - `appEnv`: environment applied over the defaults, e.g. `{ AUTH: 'on' }`
+ * - `appOrigins`: whether `ORIGIN` holds the usual browser address, is unset,
+ *   or lists both the direct app and its proxy
  * - `ssoProvider`: an SSO provider id (helpers/sso/providers.ts). The
  *   provider starts first, and its OIDC settings go into the app's env. The
  *   test reaches it as the `sso` fixture.
@@ -36,6 +38,24 @@ import { startFakeArr, type FakeArr, type FakeArrOptions } from '#flows/helpers/
 import { defaultTarget } from '#flows/helpers/sync/targets.ts';
 import { startFakeWebhook, type FakeWebhook } from '#flows/helpers/settings/fakeWebhook.ts';
 
+export type AppOrigins = 'default' | 'unset' | 'direct-and-proxy';
+
+function configuredOrigin(
+	mode: AppOrigins,
+	appUrl: string,
+	proxyUrl: string | undefined,
+	appEnv: Record<string, string>
+): string {
+	if (appEnv.ORIGIN !== undefined) return appEnv.ORIGIN;
+	if (mode === 'unset') return '';
+	if (mode === 'direct-and-proxy') {
+		return [
+			...new Set([appUrl, proxyUrl].filter((origin): origin is string => origin !== undefined))
+		].join(',');
+	}
+	return proxyUrl ?? appUrl;
+}
+
 /** Attach a service's logs to a test that didn't end as expected */
 async function attachServiceLogs(
 	testInfo: TestInfo,
@@ -52,6 +72,7 @@ async function attachServiceLogs(
 
 export const test = base.extend<{
 	appEnv: Record<string, string>;
+	appOrigins: AppOrigins;
 	ssoProvider: string | undefined;
 	appProxy: ProxyOptions | undefined;
 	/** The running provider when `ssoProvider` is set, else null */
@@ -75,6 +96,7 @@ export const test = base.extend<{
 	fakeWebhook: FakeWebhook;
 }>({
 	appEnv: [{}, { option: true }],
+	appOrigins: ['default', { option: true }],
 	ssoProvider: [undefined, { option: true }],
 	appProxy: [undefined, { option: true }],
 	ssoServer: async ({ ssoProvider }, use, testInfo) => {
@@ -116,16 +138,21 @@ export const test = base.extend<{
 	// Order: the provider and proxy have their addresses, so the app starts
 	// with them. The provider then accepts sign-ins for the app's origin, and
 	// the proxy forwards to the app.
-	app: async ({ appEnv, ssoServer, proxyServer }, use, testInfo) => {
-		const env = {
-			...(ssoServer?.env ?? {}),
-			...(proxyServer ? { ORIGIN: proxyServer.url } : {}),
-			...appEnv
-		};
-		const app = await startApp(undefined, { env });
+	app: async ({ appEnv, appOrigins, ssoServer, proxyServer }, use, testInfo) => {
+		const app = await startApp(undefined, {
+			env: (appUrl) => ({
+				...(ssoServer?.env ?? {}),
+				...appEnv,
+				ORIGIN: configuredOrigin(appOrigins, appUrl, proxyServer?.url, appEnv)
+			})
+		});
 		try {
+			const origins = configuredOrigin(appOrigins, app.url, proxyServer?.url, appEnv)
+				.split(',')
+				.map((origin) => origin.trim())
+				.filter(Boolean);
 			await Promise.all([
-				ssoServer?.target(proxyServer?.url ?? app.url),
+				ssoServer?.target(origins.length > 0 ? origins : [proxyServer?.url ?? app.url]),
 				proxyServer?.target(app.url)
 			]);
 		} catch (error) {

@@ -52,11 +52,11 @@ export interface RunningSso {
 	/** Accounts the provider accepts */
 	users: SsoUser[];
 	/**
-	 * Accept sign-ins for the app at `appOrigin`, the app's `ORIGIN`. The app
+	 * Accept sign-ins for the app at each configured origin. The app
 	 * fixture calls it once the app has started, because the address is only
 	 * known then.
 	 */
-	target(appOrigin: string): Promise<void>;
+	target(appOrigins: string[]): Promise<void>;
 	/**
 	 * Sign `user` in on the provider's own login page, which the app or a
 	 * forward-auth proxy has just sent the browser to. Returns once the

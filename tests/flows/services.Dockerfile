@@ -11,3 +11,9 @@ FROM authelia/authelia:4.39.28 AS authelia
 
 # A reverse proxy (helpers/proxy/traefik.ts)
 FROM traefik:v3.7.16 AS traefik
+
+# SWAG's nginx and shipped proxy include (helpers/proxy/swag.ts)
+FROM lscr.io/linuxserver/swag:5.8.0-ls494 AS swag
+
+# Nginx Proxy Manager, configured through its API (helpers/proxy/nginxProxyManager.ts)
+FROM jc21/nginx-proxy-manager:2.16.0 AS nginxProxyManager

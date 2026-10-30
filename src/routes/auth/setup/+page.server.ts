@@ -30,7 +30,7 @@ export const load: ServerLoad = () => {
 
 export const actions: Actions = {
 	default: async (event) => {
-		const { request, cookies } = event;
+		const { request, cookies, url } = event;
 
 		// Re-check inside the action (race condition protection)
 		if (!setupOpen()) {
@@ -95,7 +95,7 @@ export const actions: Actions = {
 				path: '/',
 				httpOnly: true,
 				sameSite: 'lax',
-				secure: config.origin.startsWith('https://'),
+				secure: url.protocol === 'https:',
 				expires
 			});
 

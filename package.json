@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"dev": "node scripts/dev.ts",
-		"build": "APP_BASE_PATH=./dist/build vite build && deno compile --no-lock --node-modules-dir=none --exclude-unused-npm --no-check --allow-all --target x86_64-unknown-linux-gnu --output dist/build/profilarr dist/build/mod.ts",
+		"build": "APP_BASE_PATH=./dist/build vite build && cp src/runtime/server.js src/runtime/origins.js dist/build/ && deno compile --no-lock --node-modules-dir=none --exclude-unused-npm --no-check --allow-all --target x86_64-unknown-linux-gnu --include dist/build/client --output dist/build/profilarr dist/build/server.js",
 		"sync": "svelte-kit sync",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && pnpm run lint:eslint && pnpm run lint:toolchain && pnpm run lint:api-permissions",
@@ -47,6 +47,7 @@
 		"#shared/*": "./src/lib/shared/*",
 		"#api/*": "./src/lib/api/*",
 		"#routes/*": "./src/routes/*",
+		"#runtime/*": "./src/runtime/*",
 		"#tests/*": "./tests/*",
 		"#flows/*": "./tests/flows/*",
 		"#integration/*": "./tests/integration/*",
@@ -67,6 +68,7 @@
 	"devDependencies": {
 		"@eslint/js": "10.0.1",
 		"@playwright/test": "1.64.1",
+		"@sveltejs/adapter-node": "6.0.0",
 		"@sveltejs/vite-plugin-svelte": "7.3.1",
 		"@tailwindcss/vite": "4.3.3",
 		"@types/node": "24.19.2",

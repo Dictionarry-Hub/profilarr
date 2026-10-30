@@ -22,7 +22,13 @@ import { serviceDir, startService, waitForService, type Service } from '#flows/h
 import { serviceImage } from '#flows/harness/images.ts';
 import { freePort } from '#flows/harness/ports.ts';
 import { certificatePaths, httpsGet } from '#flows/harness/tls.ts';
-import type { ProxiedRequest, ProxyOptions, ReverseProxy, RunningProxy } from './proxies.ts';
+import {
+	answeredByApp,
+	type ProxiedRequest,
+	type ProxyOptions,
+	type ReverseProxy,
+	type RunningProxy
+} from './proxies.ts';
 
 /** One line of Traefik's JSON access log, the fields read here */
 interface AccessLogEntry {
@@ -67,7 +73,7 @@ async function startTraefik(options: ProxyOptions, forwardAuthUrl?: string): Pro
 	}
 
 	const port = await freePort();
-	const url = `${options.tls ? 'https' : 'http'}://127.0.0.1:${port}`;
+	const url = `${options.tls ? 'https' : 'http'}://${options.publicHost ?? '127.0.0.1'}:${port}`;
 	let service: Service | null = null;
 	let accessLog: string | null = null;
 
@@ -147,7 +153,7 @@ async function startTraefik(options: ProxyOptions, forwardAuthUrl?: string): Pro
 				: (await fetch(health, { redirect: 'manual' })).status;
 			// With forward auth, a signed-out request gets the provider's answer, a
 			// redirect or 401, once Traefik and the provider are both up
-			return options.forwardAuth ? status !== 404 && status < 500 : status === 200;
+			return options.forwardAuth ? status !== 404 && status < 500 : answeredByApp(status);
 		});
 	}
 

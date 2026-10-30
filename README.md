@@ -100,6 +100,7 @@ services:
       - PGID=1000
       - TZ=Etc/UTC
       # Uncomment ORIGIN if you use a reverse proxy to access your containers.
+      # List several, separated by commas, to allow more than one address.
       #- ORIGIN=https://profilarr.yourdomain.com
       - PARSER_HOST=parser
       - PARSER_PORT=5000
@@ -149,7 +150,7 @@ them on the same channel.
 | `OIDC_CLIENT_SECRET`     | -                                                                 | OIDC client secret (set all three OIDC values to enable SSO)                          |
 | `OIDC_CLIENT_ID`         | -                                                                 | OIDC client ID (set all three OIDC values to enable SSO)                              |
 | `OIDC_DISCOVERY_URL`     | -                                                                 | OIDC discovery URL (set all three OIDC values to enable SSO)                          |
-| `ORIGIN`                 | -                                                                 | Public URL when running behind a reverse proxy (e.g. `https://profilarr.example.com`) |
+| `ORIGIN`                 | -                                                                 | Public URLs behind a reverse proxy, comma-separated (`https://profilarr.example.com`) |
 | `PARSER_HOST`            | `localhost`                                                       | Parser service host                                                                   |
 | `PARSER_PORT`            | `5000`                                                            | Parser service port                                                                   |
 | `PROFILARR_API_KEY`      | -                                                                 | Plaintext runtime secret for `X-Api-Key` auth                                         |
@@ -165,10 +166,11 @@ SQLite or bcrypt-hashed. It always has full access and works alongside any keys
 created in Settings > Security.
 
 > [!NOTE]
-> When using OIDC `ORIGIN=` _must_ be set to your Profilarr URL, and Profilarr
-> expects `{ORIGIN}/auth/oidc/callback` for the redirect URL
-> (e.g. `https://profilarr.example.com/auth/oidc/callback`). Many
-> IdPs will infer this automatically.
+> When using OIDC behind a reverse proxy, `ORIGIN=` _must_ be set to your
+> Profilarr URL, and Profilarr expects `{ORIGIN}/auth/oidc/callback` for the
+> redirect URL (e.g. `https://profilarr.example.com/auth/oidc/callback`).
+> Register one redirect URL per listed origin. Many IdPs will infer this
+> automatically.
 
 To route outbound requests through an HTTP or SOCKS5 proxy, see
 [Outbound Proxy](docs/backend/utilities.md#outbound-proxy).

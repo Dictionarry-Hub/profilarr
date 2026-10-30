@@ -5,6 +5,7 @@
 import * as fs from 'node:fs/promises';
 import process from 'node:process';
 import { parseAuthConfig, type AuthMode, type OidcSettings } from './auth.ts';
+import { parseOrigins } from '#runtime/origins.js';
 import { colors } from '#logger/colors.ts';
 
 export type { AuthMode };
@@ -31,7 +32,8 @@ class Config {
 	public readonly parserUrl: string;
 	public readonly port: number;
 	public readonly host: string;
-	public readonly origin: string;
+	/** The browser-facing origins in ORIGIN, as the runtime entry resolves them */
+	public readonly origins: string[];
 	public readonly authMode: AuthMode;
 	public readonly deprecatedOidcMode: boolean;
 	public readonly oidcEnabled: boolean;
@@ -67,10 +69,13 @@ class Config {
 		this.port = parseInt(process.env.PORT || '6868', 10);
 		this.host = process.env.HOST || '0.0.0.0';
 
-		// External origin (scheme + host) for OIDC redirects and cookie security.
-		// Falls back to the local server URL when unset. Trailing slashes are
-		// stripped so downstream concatenation (`${origin}/path`) doesn't double up.
-		this.origin = (process.env.ORIGIN || this.serverUrl).replace(/\/+$/, '');
+		// The runtime entry (src/runtime/server.js) picks each request's origin
+		// from this list; the app only needs it to notice an address outside it
+		try {
+			this.origins = parseOrigins(process.env.ORIGIN).map((origin) => origin.origin);
+		} catch (err) {
+			failStartup(err instanceof Error ? err.message : String(err));
+		}
 
 		// Auth mode ('on' default, 'off') and SSO, enabled by the OIDC_* settings
 		let auth: ReturnType<typeof parseAuthConfig>;

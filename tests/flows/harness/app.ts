@@ -53,7 +53,7 @@ export interface StartOptions {
 	 * Environment applied over the defaults, e.g. `AUTH: 'on'`, SSO settings,
 	 * or an `ORIGIN` for a reverse proxy in front of the app. Kept on restart.
 	 */
-	env?: Record<string, string>;
+	env?: Record<string, string> | ((appUrl: string) => Record<string, string>);
 }
 
 /**
@@ -76,6 +76,7 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 
 	// Spawn the app on `port` and wait until it answers. Kills it if it never does.
 	const launch = async (): Promise<ChildProcess> => {
+		const optionEnv = typeof options.env === 'function' ? options.env(url) : options.env;
 		const child = spawn(APP_BINARY, [], {
 			env: {
 				...process.env,
@@ -85,15 +86,21 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 				ORIGIN: url,
 				// Sends the fixtures GitHub URL to the local upstream (harness/seed.ts)
 				GIT_CONFIG_GLOBAL: gitConfigPath(dir),
-				...options.env
+				...optionEnv
 			},
 			stdio: ['ignore', 'pipe', 'pipe']
 		});
 		const from = output.length;
 		child.stdout?.on('data', (chunk) => output.push(String(chunk)));
 		child.stderr?.on('data', (chunk) => output.push(String(chunk)));
-		// Deno prints this once the app holds its port
-		const listening = () => output.slice(from).join('').includes(`Listening on ${url}/`);
+		// adapter-node prints this once the app holds its port. Match the whole
+		// line so a shorter port can't match the start of a longer one
+		const listening = () =>
+			output
+				.slice(from)
+				.join('')
+				.split('\n')
+				.some((line) => line.trim() === `Listening on ${url}`);
 		try {
 			await waitForHealth(url, child, logs, listening);
 		} catch (error) {
@@ -116,7 +123,7 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 			try {
 				return await launch();
 			} catch (error) {
-				const portTaken = output.slice(from).join('').includes('AddrInUse');
+				const portTaken = /AddrInUse|EADDRINUSE/.test(output.slice(from).join(''));
 				if (!portTaken || attempt >= START_ATTEMPTS) throw error;
 				output.push(`\n--- port ${port} was taken, trying another ---\n`);
 			}

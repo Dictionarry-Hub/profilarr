@@ -77,8 +77,6 @@ jobs:
           name: profilarr-build
           path: |
             dist/build/profilarr
-            dist/build/server.js
-            dist/build/static/
           retention-days: 1
 
   # ─── Quality gates (all run in parallel with build) ─────────────────────

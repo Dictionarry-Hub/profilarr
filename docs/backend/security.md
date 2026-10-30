@@ -71,7 +71,7 @@ work through the `X-Api-Key` header.
 | Variable             | Default | Description                                                   | Example                                                      |
 | -------------------- | ------- | ------------------------------------------------------------- | ------------------------------------------------------------ |
 | `AUTH`               | `on`    | Login: `on` or `off`. `oidc` is a deprecated alias for `on`   | `on`                                                         |
-| `ORIGIN`             | -       | Scheme + host for reverse proxy (CSRF, cookies, OIDC)         | `https://profilarr.mydomain.com`                             |
+| `ORIGIN`             | -       | Browser-facing origins, comma-separated (CSRF, cookies, OIDC) | `http://192.168.1.10:6868,https://profilarr.mydomain.com`    |
 | `OIDC_DISCOVERY_URL` | -       | OIDC provider discovery endpoint. Set all three to enable SSO | `https://auth.mydomain.com/.well-known/openid-configuration` |
 | `OIDC_CLIENT_ID`     | -       | OIDC client ID. Set all three to enable SSO                   | `profilarr`                                                  |
 | `OIDC_CLIENT_SECRET` | -       | OIDC client secret. Set all three to enable SSO               | `your-secret`                                                |
@@ -128,7 +128,7 @@ Cookie properties:
 | ---------- | ------------------------------------------- |
 | `httpOnly` | `true`                                      |
 | `sameSite` | `lax`                                       |
-| `secure`   | `true` when `ORIGIN` starts with `https://` |
+| `secure`   | `true` when the request's origin is `https` |
 | `path`     | `/`                                         |
 
 ### SSO (OIDC)
@@ -464,8 +464,36 @@ purposes.
 ### CSRF & Reverse Proxies
 
 SvelteKit's CSRF check compares the `Origin` request header against
-`new URL(request.url).origin`. The official `@sveltejs/adapter-node` rewrites
-`request.url` using the `ORIGIN` env var, so this works behind reverse proxies.
+`new URL(request.url).origin`, so the request URL must carry the origin the
+browser used, not the address the container listens on. The production entry
+(`src/runtime/server.js`) resolves that origin for every request before
+`@sveltejs/adapter-node` builds the SvelteKit `Request`, using the rules in
+`src/runtime/origins.js`:
+
+| `ORIGIN`         | Request origin                                                                                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unset            | The socket's scheme and the `Host` header. Direct access over HTTP works without configuration.                                                                                                                             |
+| One value        | Always that origin, whatever the proxy sends.                                                                                                                                                                               |
+| Several (commas) | The listed origin whose host matches `Host`, or `X-Forwarded-Host` when a proxy rewrote `Host`. `X-Forwarded-Proto` only picks between listed origins that share a host. No match: the same as unset, logged once per host. |
+
+Forwarded headers can only select an origin that is already listed; they can't
+add one. Each listed origin is a separate origin to SvelteKit, so a form loaded
+on one can't post to another. An address that matches nothing is served from
+its own `Host`, so the image's health check on `localhost`, probes on the
+container name and API clients keep working; only a browser behind an HTTPS
+proxy on such an address has its forms refused by the CSRF check. Values must
+be scheme, host and optional port only. Startup fails on anything else. List
+one scheme per hostname: browsers won't replace a `Secure` session cookie with
+a plain one of the same name, so `http://` and `https://` on one host would
+fight over it and the HTTP login would loop.
+
+Everything that depends on the origin reads it from the request
+(`event.url`): the session, OIDC state and nonce cookies get `secure` on
+`https` origins, and the OIDC redirect URI is `${event.url.origin}/auth/oidc/callback`,
+so each listed origin must be registered with the provider. The callback also
+checks it arrived on the origin that started the flow and answers `400`
+otherwise; cookies are shared across the schemes and ports of one hostname, so
+the state cookie alone can't tell `http://host` from `https://host`.
 
 The check covers `POST`, `PUT`, `PATCH`, and `DELETE` requests whose
 `Content-Type` is a form type (`application/x-www-form-urlencoded`,
@@ -473,41 +501,6 @@ The check covers `POST`, `PUT`, `PATCH`, and `DELETE` requests whose
 builds. API clients that don't send an `Origin` header must send a non-form
 `Content-Type` such as `application/json`; multipart uploads still need a
 matching `Origin`.
-
-The Deno adapter (`sveltekit-adapter-deno`) does **not** do this. It passes
-`request.url` straight from `Deno.serve`, which is always the internal server
-URL (e.g. `http://localhost:6868`). Behind a reverse proxy:
-
-```
-Browser: POST /auth/login
-  Origin: https://profilarr.mydomain.com     <- from address bar
-
-SvelteKit sees:
-  request.url.origin = http://localhost:6868  <- actual server URL
-  Origin header      = https://profilarr.mydomain.com
-
-Mismatch -> 403 "Cross-site POST form submissions are forbidden"
-```
-
-**The fix** (`src/adapter/files/mod.ts`): rewrites `request.url` when `ORIGIN`
-is set, matching `adapter-node` behaviour:
-
-```ts
-let req = request;
-const origin = Deno.env.get('ORIGIN');
-if (origin) {
-	const url = new URL(request.url);
-	req = new Request(`${origin}${url.pathname}${url.search}`, request);
-}
-return server.respond(req, { getClientAddress: () => clientAddress });
-```
-
-Notes:
-
-- `adapter-node` isn't an option - it outputs JS for Node.js. Profilarr compiles
-  to a single Deno binary via `deno compile`.
-- `csrf.trustedOrigins` isn't an option - it's build-time config in
-  `vite.config.ts`, so users can't set their own domain at deploy time.
 
 ### Protected Paths
 
@@ -730,7 +723,7 @@ in parallel under Vitest via `pnpm test:integration`.
 | File                             | Port                  | Tests                                                                                                                                     |
 | -------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `health.test.ts`                 | 7006                  | Public health vs authenticated diagnostics, no info disclosure                                                                            |
-| `csrf.test.ts`                   | 7003, 7004, 7005      | Origin checking, no-origin fallback, reverse proxy CSRF with adapter rewrite                                                              |
+| `csrf.test.ts`                   | 7003, 7004, 7005      | Origin checking, no-origin fallback, reverse proxy CSRF with `ORIGIN`                                                                     |
 | `cookie.test.ts`                 | 7001, 7002            | Secure flag (HTTPS vs HTTP), httpOnly, SameSite, path, expiration                                                                         |
 | `apiKey.test.ts`                 | 7000                  | Valid/invalid key, header-only, 401 on missing, 403 for non-API paths and key management                                                  |
 | `apiKeyPermissions.test.ts`      | 7020                  | Read vs write, other areas, unknown access values, expiry 401, deletion, last_used_at                                                     |

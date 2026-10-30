@@ -78,6 +78,7 @@ async function startFakeOidc(): Promise<RunningSso> {
 	const users: SsoUser[] = [DEFAULT_USER];
 	const requests: SsoRequest[] = [];
 	const codes = new Map<string, PendingCode>();
+	const redirectUris = new Set<string>();
 	let misbehaviour: Misbehaviour | null = null;
 
 	async function idToken(pending: PendingCode): Promise<string> {
@@ -120,6 +121,9 @@ async function startFakeOidc(): Promise<RunningSso> {
 		if (method === 'GET' && url.pathname === '/authorize') {
 			if (url.searchParams.get('client_id') !== CLIENT_ID) {
 				return send(res, 400, { error: 'invalid_client' });
+			}
+			if (!redirectUris.has(url.searchParams.get('redirect_uri') ?? '')) {
+				return send(res, 400, { error: 'invalid_redirect_uri' });
 			}
 			return send(res, 200, loginPage(url.searchParams), 'text/html');
 		}
@@ -182,8 +186,9 @@ async function startFakeOidc(): Promise<RunningSso> {
 		},
 		users,
 		requests,
-		target: async () => {
-			// Accepts any redirect URI, so there's nothing to set up
+		target: async (origins) => {
+			redirectUris.clear();
+			for (const origin of origins) redirectUris.add(`${origin}/auth/oidc/callback`);
 		},
 		misbehave: (kind) => {
 			misbehaviour = kind;

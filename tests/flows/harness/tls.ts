@@ -28,7 +28,7 @@ CN = 127.0.0.1
 basicConstraints = critical, CA:FALSE
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth
-subjectAltName = IP:127.0.0.1, DNS:localhost
+subjectAltName = IP:127.0.0.1, DNS:localhost, DNS:profilarr.test
 `;
 
 /** Make a self-signed leaf certificate for 127.0.0.1 in `dir` */

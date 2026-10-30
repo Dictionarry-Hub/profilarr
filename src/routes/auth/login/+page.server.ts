@@ -34,7 +34,7 @@ export const load: ServerLoad = () => {
 
 export const actions: Actions = {
 	default: async (event) => {
-		const { request, cookies } = event;
+		const { request, cookies, url } = event;
 		const ip = getClientIp(event, false);
 		const displayIp = getClientIp(event);
 
@@ -114,7 +114,7 @@ export const actions: Actions = {
 			path: '/',
 			httpOnly: true,
 			sameSite: 'lax',
-			secure: config.origin.startsWith('https://'),
+			secure: url.protocol === 'https:',
 			expires
 		});
 
