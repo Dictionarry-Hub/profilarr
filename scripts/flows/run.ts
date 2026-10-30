@@ -20,7 +20,7 @@ import process from 'node:process';
 import { SERVICE_IMAGES } from '#flows/harness/images.ts';
 import { dealSpecFiles, listSpecFiles } from '#flows/harness/specFiles.ts';
 
-const APP_BINARY = 'dist/build/profilarr';
+const APP_ENTRY = 'dist/build/server.js';
 const FLOWS_DIR = 'tests/flows';
 const CONFIG = `${FLOWS_DIR}/playwright.config.ts`;
 const TIMINGS = `${FLOWS_DIR}/harness/timings.json`;
@@ -70,11 +70,21 @@ if (deal) {
 	playwrightArgs.push(...files.map((file) => `${FLOWS_DIR}/${file}`));
 }
 
-if (rebuild || !existsSync(APP_BINARY)) {
-	console.log(rebuild ? 'Rebuilding the app...' : `${APP_BINARY} not found, building...`);
+if (rebuild || !existsSync(APP_ENTRY)) {
+	console.log(rebuild ? 'Rebuilding the app...' : `${APP_ENTRY} not found, building...`);
 	const code = run('pnpm', ['build']);
 	if (code !== 0) process.exit(code);
 }
+
+// The app runs on Bun, which the Playwright image doesn't ship, so the host's
+// Bun binary is mounted into the container. Bun reports its real path, not a
+// version manager's shim. Host and container must share a CPU architecture.
+const bun = spawnSync('bun', ['-e', 'console.log(process.execPath)'], { encoding: 'utf8' });
+if (bun.error || bun.status !== 0) {
+	console.error('Bun not found. Run `mise install` to get the version in .tool-versions.');
+	process.exit(1);
+}
+const BUN_PATH = bun.stdout.trim();
 
 // The image's browsers must match the installed Playwright exactly
 const { version } = JSON.parse(readFileSync('node_modules/@playwright/test/package.json', 'utf8'));
@@ -105,6 +115,8 @@ const docker = [
 	'FLOWS_QUIET',
 	'-v',
 	`${process.cwd()}:/work`,
+	'-v',
+	`${BUN_PATH}:/usr/local/bin/bun:ro`,
 	'-w',
 	'/work'
 ];

@@ -4,7 +4,7 @@
  *
  * Supports two modes:
  *   - 'dev' (default): spawns the Vite dev server on Node
- *   - 'preview': runs the compiled production binary (requires pnpm build first)
+ *   - 'preview': runs the production build on Bun (requires pnpm build first)
  */
 
 import { spawn } from 'node:child_process';
@@ -105,8 +105,8 @@ export async function startServer(
 	let args: string[];
 
 	if (mode === 'preview') {
-		command = './dist/build/profilarr';
-		args = [];
+		command = 'bun';
+		args = ['dist/build/server.js'];
 	} else {
 		env.NODE_ENV = 'development';
 		env.VITE_PLATFORM = 'linux-amd64';
@@ -123,7 +123,7 @@ export async function startServer(
 	const url = `http://localhost:${port}`;
 
 	// Track exit so waitForReady can detect early death. A spawn failure
-	// (e.g. missing binary) emits 'error' and may never emit 'exit'.
+	// (e.g. Bun not installed) emits 'error' and may never emit 'exit'.
 	let resolveExited: () => void = () => {};
 	const exited = new Promise<void>((resolve) => {
 		resolveExited = resolve;
