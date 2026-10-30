@@ -1,11 +1,11 @@
 /**
- * Record how long each flow spec file takes, so `deno task test:flows --deal`
+ * Record how long each flow spec file takes, so `pnpm test:flows --deal`
  * splits the files into shards that take about as long as each other.
  *
- *   deno task flows:timings [dir]
+ *   pnpm flows:timings [dir]
  *
  * `dir` holds Playwright blob reports: `blob-report` after a local
- * `deno task test:flows --reporter=blob`, or CI's `flow-blob-*` artifacts from
+ * `pnpm test:flows --reporter=blob`, or CI's `flow-blob-*` artifacts from
  * `gh run download <run> --pattern 'flow-blob-*'`. Every `.zip` under it is
  * read. A test that ran several times, e.g. with `--repeat-each`, counts once
  * at its average. The result goes to tests/flows/harness/timings.json.

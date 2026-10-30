@@ -4,9 +4,9 @@
  * Flags set environment variables for the app server: `--name value` or
  * `--name=value` sets NAME, with dashes as underscores.
  *
- *   deno task dev --auth off
- *   deno task dev --origin http://192.168.1.10:6969
- *   deno task dev --profilarr-bulletin-url http://localhost:6970
+ *   pnpm dev --auth off
+ *   pnpm dev --origin http://192.168.1.10:6969
+ *   pnpm dev --profilarr-bulletin-url http://localhost:6970
  */
 
 import { spawn } from 'node:child_process';
@@ -47,7 +47,7 @@ function parseEnvFlags(argv: string[]): Record<string, string> {
 const overrides = parseEnvFlags(process.argv.slice(2));
 const serverEnv: NodeJS.ProcessEnv = {
 	...process.env,
-	DENO_ENV: 'development',
+	NODE_ENV: 'development',
 	PORT: '6969',
 	HOST: '0.0.0.0',
 	APP_BASE_PATH: './dist/dev',
@@ -96,7 +96,9 @@ function runParser() {
 }
 
 function runServer() {
-	return runLabelled('deno', ['run', '-A', 'vite', 'dev'], 'server', { env: serverEnv });
+	return runLabelled(process.execPath, ['node_modules/vite/bin/vite.js', 'dev'], 'server', {
+		env: serverEnv
+	});
 }
 
 /**

@@ -80,7 +80,7 @@ x-permission: write
 Use `read` for operations that only return data, including POSTs that compute
 something without changing state, and `write` for anything that changes state.
 Document a `403` response alongside the `401`. Operations without a label are
-denied to scoped keys. `deno task lint:api-permissions` fails CI until every
+denied to scoped keys. `pnpm lint:api-permissions` fails CI until every
 operation has one, and until every handler under `src/routes/api/v1` matches a
 labelled operation. Sessions are unaffected by permissions.
 
@@ -112,7 +112,7 @@ be edited independently.
 After modifying the OpenAPI spec, regenerate the committed API artifacts:
 
 ```bash
-deno task generate:api-types
+pnpm generate:api-types
 ```
 
 This bundles `docs/api/v1/openapi.yaml` into `src/lib/api/v1.openapi.json`,

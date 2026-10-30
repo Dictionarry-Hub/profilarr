@@ -20,7 +20,7 @@
  * Public operations (`security: []`) and public paths are skipped.
  *
  * Usage:
- *   deno task lint:api-permissions
+ *   pnpm lint:api-permissions
  */
 
 import { readdir, readFile } from 'node:fs/promises';
@@ -102,6 +102,6 @@ if (violations.length > 0) {
 		console.error(`- ${violation}`);
 	}
 	console.error('\nAdd or fix the operation in docs/api/v1/paths/, then regenerate the spec:');
-	console.error('  deno task generate:api-types');
+	console.error('  pnpm generate:api-types');
 	process.exit(1);
 }

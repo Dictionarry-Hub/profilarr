@@ -1,5 +1,5 @@
 /**
- * What the fixtures database contains, from the snapshot `deno task
+ * What the fixtures database contains, from the snapshot `pnpm
  * fixtures:update` writes (tests/flows/data/fixtures.json, built by
  * tests/flows/harness/fixtureSnapshot.ts). Scenarios read names and expected values from
  * here instead of typing them, so a fixtures change only needs the update task.

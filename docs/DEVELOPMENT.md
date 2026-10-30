@@ -138,8 +138,8 @@ Every release opens with a short intro, written as markdown in
 `.release-notes.md` (ignored by git) and passed to both release tasks:
 
 ```bash
-deno task release:dry v2.3.0 .release-notes.md
-deno task release v2.3.0 .release-notes.md
+pnpm release:dry v2.3.0 .release-notes.md
+pnpm release v2.3.0 .release-notes.md
 ```
 
 The intro always starts with a summary; the other two parts are only included

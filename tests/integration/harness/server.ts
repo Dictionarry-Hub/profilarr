@@ -4,7 +4,7 @@
  *
  * Supports two modes:
  *   - 'dev' (default): spawns the Vite dev server on Node
- *   - 'preview': runs the compiled production binary (requires deno task build first)
+ *   - 'preview': runs the compiled production binary (requires pnpm build first)
  */
 
 import { spawn } from 'node:child_process';
@@ -108,7 +108,7 @@ export async function startServer(
 		command = './dist/build/profilarr';
 		args = [];
 	} else {
-		env.DENO_ENV = 'development';
+		env.NODE_ENV = 'development';
 		env.VITE_PLATFORM = 'linux-amd64';
 		env.VITE_CHANNEL = 'test';
 		command = process.execPath;

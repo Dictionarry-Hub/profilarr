@@ -3,7 +3,7 @@
  * such as Radarr 6 or Sonarr 5.
  *
  * It starts from a fresh install's state, recorded from the real app by
- * `deno task fixtures:arr` (tests/flows/data/arr/<target id>), keeps changes
+ * `pnpm fixtures:arr` (tests/flows/data/arr/<target id>), keeps changes
  * in memory like the real app, and records every request so a test can check
  * what Profilarr sent. Each path behaves as its target's resources describe.
  * Anything else answers 404 and is listed in `unhandled`, so a test can catch

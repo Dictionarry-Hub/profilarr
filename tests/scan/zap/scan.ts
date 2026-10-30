@@ -10,11 +10,11 @@
  *   1. Unauthenticated (AUTH=on, port 7090) -- tests the auth boundary
  *   2. Full crawl (AUTH=off, port 7091) -- all routes reachable
  *
- * Requires: compiled binary (deno task build), Docker
+ * Requires: compiled binary (pnpm build), Docker
  *
  * Usage:
- *   deno task scan:zap --baseline
- *   deno task scan:zap --full
+ *   pnpm scan:zap --baseline
+ *   pnpm scan:zap --full
  */
 
 import { spawn } from 'node:child_process';
@@ -55,7 +55,7 @@ function parseScanMode(): ScanMode {
 	if (args.includes('--full')) return 'full';
 	if (args.includes('--api')) return 'api';
 
-	console.error('Usage: deno task scan:zap <mode>\n');
+	console.error('Usage: pnpm scan:zap <mode>\n');
 	console.error('Modes:');
 	console.error('  --baseline   Passive scan only (spider + check responses)');
 	console.error('  --full       Passive + active attacks (SQLi, XSS, etc.)');
@@ -67,7 +67,7 @@ async function checkPrereqs(): Promise<void> {
 	try {
 		await stat(BINARY);
 	} catch {
-		console.error(`Build not found at ${BINARY}. Run "deno task build" first.`);
+		console.error(`Build not found at ${BINARY}. Run "pnpm build" first.`);
 		process.exit(1);
 	}
 

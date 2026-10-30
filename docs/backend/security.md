@@ -725,7 +725,7 @@ needed.
 Each spec boots an isolated server instance and tests a specific auth behaviour
 end-to-end over HTTP. Uses the shared harness with `TestClient` (cookie jar),
 server lifecycle helpers, and Docker Compose for OIDC/TLS scenarios. Specs run
-in parallel under Vitest via `deno task test:integration`.
+in parallel under Vitest via `pnpm test:integration`.
 
 | File                             | Port                  | Tests                                                                                                                                     |
 | -------------------------------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -761,7 +761,7 @@ never runs, server-rendered and client-rendered.
 
 ### Security Scans (`tests/scan/`)
 
-Security scans run via `deno task scan:*`. Semgrep is intended to run in CI/CD as a
+Security scans run via `pnpm scan:*`. Semgrep is intended to run in CI/CD as a
 blocking check. ZAP is manual-only, run periodically for spot checks.
 
 #### SAST - Semgrep
@@ -770,8 +770,8 @@ Static Application Security Testing. Scans source code for vulnerabilities
 without running the application.
 
 ```bash
-deno task scan:semgrep          # full scan: custom rules + community rulesets
-deno task scan:semgrep --quick  # custom rules only (faster, for iteration)
+pnpm scan:semgrep          # full scan: custom rules + community rulesets
+pnpm scan:semgrep --quick  # custom rules only (faster, for iteration)
 ```
 
 The full scan uses `--error` so it exits non-zero on any finding. The goal is
@@ -832,7 +832,7 @@ availability.
   unit tests, and semgrep. It builds both Docker images (`profilarr` and
   `profilarr-parser`) from their Dockerfiles and scans them. PRs with
   CRITICAL or HIGH CVEs fail the check.
-- **Release script** (`deno task release`): builds and scans both images
+- **Release script** (`pnpm release`): builds and scans both images
   before prompting for the version tag. If either scan fails, the release
   aborts before tagging. Requires `trivy` on PATH.
 
@@ -852,12 +852,12 @@ the value over CI + release gating is low.
 
 Dynamic Application Security Testing. Runs a live scan against compiled
 Profilarr instances to find runtime vulnerabilities (missing headers, cookie
-issues, information disclosure, etc.). Requires `deno task build` and Docker.
+issues, information disclosure, etc.). Requires `pnpm build` and Docker.
 
 ```bash
-deno task scan:zap --baseline  # passive scan (spider + check responses)
-deno task scan:zap --full      # passive + active attacks (SQLi, XSS, etc.)
-deno task scan:zap --api       # API scan against OpenAPI spec (not yet implemented)
+pnpm scan:zap --baseline  # passive scan (spider + check responses)
+pnpm scan:zap --full      # passive + active attacks (SQLi, XSS, etc.)
+pnpm scan:zap --api       # API scan against OpenAPI spec (not yet implemented)
 ```
 
 Each mode starts two servers and runs ZAP against both:
@@ -878,5 +878,5 @@ scan - only errors do.
 - **Docker Compose**: mock-oauth2-server (port 9090) + Caddy (TLS termination)
   for OIDC and proxy tests, started once per run by Vitest's global setup
   (`INTEGRATION_DOCKER=0` skips it)
-- **Tasks**: `deno task test:unit` and `deno task test:integration` run the
-  Vitest suites; `deno task scan:semgrep` and `deno task scan:zap` run the scans
+- **Tasks**: `pnpm test:unit` and `pnpm test:integration` run the
+  Vitest suites; `pnpm scan:semgrep` and `pnpm scan:zap` run the scans

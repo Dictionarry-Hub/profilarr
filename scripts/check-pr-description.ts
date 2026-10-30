@@ -210,7 +210,9 @@ export function validatePrDescription(body: string | null): ValidationResult {
 if (import.meta.main) {
 	const path = process.argv[2];
 	if (!path) {
-		console.error('Usage: deno run --allow-read scripts/check-pr-description.ts <body.md>');
+		console.error(
+			'Usage: node --permission --allow-fs-read=<body.md> scripts/check-pr-description.ts <body.md>'
+		);
 		process.exit(1);
 	}
 	const result = validatePrDescription(await readFile(path, 'utf8'));

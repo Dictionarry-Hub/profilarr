@@ -250,9 +250,9 @@ output, rendering for all notifiers (Discord, Ntfy, Webhook, Telegram) via
 mock server, and optionally real sends.
 
 ```bash
-deno task test:integration tests/integration/specs/notifications                  # all
-deno task test:integration tests/integration/specs/notifications/test.test.ts     # test event only
-deno task test:integration tests/integration/specs/notifications/upgrade.test.ts  # upgrade only
+pnpm test:integration tests/integration/specs/notifications                  # all
+pnpm test:integration tests/integration/specs/notifications/test.test.ts     # test event only
+pnpm test:integration tests/integration/specs/notifications/upgrade.test.ts  # upgrade only
 ```
 
 Telegram has no standalone spec; its tests are in each event spec.

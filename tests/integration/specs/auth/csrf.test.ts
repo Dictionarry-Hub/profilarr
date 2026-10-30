@@ -5,7 +5,7 @@
  * the expected origin. The adapter rewrites request.url using the ORIGIN
  * env var so CSRF works behind reverse proxies.
  *
- * NOTE: Requires production build (deno task build) — SvelteKit skips
+ * NOTE: Requires production build (pnpm build) — SvelteKit skips
  * CSRF checks in dev mode.
  *
  * Tests:

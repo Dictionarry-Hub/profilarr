@@ -22,13 +22,13 @@ see [pcd-tests.md](./pcd-tests.md).
 ## Running
 
 ```bash
-deno task test:flows                    # every test
-deno task test:flows --grep "score"     # matching tests; any Playwright flag works
-deno task test:flows --ui               # Playwright UI mode at http://localhost:8080
-deno task test:flows --build            # rebuild the app first
-deno task test:flows --online           # give the container network, so @online tests run too
-deno task test:flows --quiet            # print only the end-of-run summary, no line per test
-deno task test:flows --deal=2/4         # the 2nd of 4 sets of spec files, as CI shard 2 runs
+pnpm test:flows                    # every test
+pnpm test:flows --grep "score"     # matching tests; any Playwright flag works
+pnpm test:flows --ui               # Playwright UI mode at http://localhost:8080
+pnpm test:flows --build            # rebuild the app first
+pnpm test:flows --online           # give the container network, so @online tests run too
+pnpm test:flows --quiet            # print only the end-of-run summary, no line per test
+pnpm test:flows --deal=2/4         # the 2nd of 4 sets of spec files, as CI shard 2 runs
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are
@@ -47,12 +47,12 @@ with no recorded time counts as the average one. Playwright's `--shard` cuts
 even blocks by count instead. The deal and the Playwright config skip the same
 folders (`harness/specFiles.ts`).
 
-`deno task flows:timings [dir]` rewrites the timings from Playwright blob
+`pnpm flows:timings [dir]` rewrites the timings from Playwright blob
 reports. CI's are the `flow-blob-*` artifacts of a run, kept for a day:
 `gh run download <run> --pattern 'flow-blob-*' --dir <dir>`. Refresh them when
 the shards drift apart, e.g. after a big new area. An empty deal is an error, because
-Playwright given no file runs the whole suite. The first shard also
-type-checks the suite with `deno check tests/flows`. On CI the config adds
+Playwright given no file runs the whole suite. `pnpm check` type-checks the
+suite along with the unit tests. On CI the config adds
 Playwright's blob reporter. Each shard uploads its blob report. The `Flow Tests`
 job merges them and prints every result in one list. If any shard failed, the
 job uploads the merged HTML report with traces. Then it fails. The `develop`
@@ -133,7 +133,7 @@ test.use({
   the browser ignores certificate errors.
 - **Real services.** Entries marked `needsDocker` run in a container that
   shares the test container's network namespace. They stay offline and reach
-  the app on `127.0.0.1` (`harness/docker.ts`). `deno task test:flows` mounts
+  the app on `127.0.0.1` (`harness/docker.ts`). `pnpm test:flows` mounts
   the Docker socket and pulls any missing images pinned in
   `tests/flows/services.Dockerfile`, which Dependabot keeps current. Their
   tests carry the `@docker` tag, and they're skipped when the host has no
@@ -224,7 +224,7 @@ recorded endpoints, how each path behaves, and capabilities. Add an entry,
 then record it:
 
 ```bash
-deno task fixtures:arr sonarr-6
+pnpm fixtures:arr sonarr-6
 ```
 
 The recording starts a throwaway container. It fails if the container reports
@@ -235,7 +235,7 @@ other changes.
 ## Updating the Fixtures
 
 ```bash
-deno task fixtures:update [ref]
+pnpm fixtures:update [ref]
 ```
 
 This replaces `data/fixtures` and `data/schema` from Dictionarry-Hub/fixtures

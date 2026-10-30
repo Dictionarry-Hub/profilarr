@@ -1,5 +1,5 @@
 /**
- * The spec files the suite runs, and how `deno task test:flows --deal` splits them
+ * The spec files the suite runs, and how `pnpm test:flows --deal` splits them
  * between CI shards.
  *
  * The Playwright config and the deal read the same ignore list, so a folder

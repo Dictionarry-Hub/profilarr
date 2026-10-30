@@ -3,7 +3,6 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
-import deno from '@deno/vite-plugin';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,7 +23,6 @@ function isUnwatched(file: string): boolean {
 
 export default defineConfig({
 	plugins: [
-		deno(),
 		tailwindcss(),
 		sveltekit({
 			preprocess: vitePreprocess({ script: true }),

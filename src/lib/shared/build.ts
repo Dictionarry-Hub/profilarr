@@ -1,7 +1,7 @@
 /**
  * Build metadata stamped at Docker image build time.
  *
- * This file is committed with dev-fallback values so `deno task dev` and
+ * This file is committed with dev-fallback values so `pnpm dev` and
  * fresh clones work out of the box. During `docker build`, the ARGs
  * PROFILARR_VERSION / VITE_CHANNEL / PROFILARR_COMMIT are written into
  * this file by the Dockerfile before `vite build` runs, so the stamped
