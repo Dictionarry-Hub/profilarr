@@ -117,9 +117,7 @@ function checkCi(source: string, violations: string[]): void {
 	// The integration and flow jobs run the build on Bun
 	const bunSetups = actionUseCount(source, 'oven-sh/setup-bun', 'v2');
 	if (bunSetups !== 2) {
-		violations.push(
-			`${CI_PATH} has ${bunSetups} Bun setup steps, expected 2 (integration, flows)`
-		);
+		violations.push(`${CI_PATH} has ${bunSetups} Bun setup steps, expected 2 (integration, flows)`);
 	}
 
 	const bunVersionFiles = matchCount(source, /bun-version-file:\s+\.tool-versions/g);

@@ -101,4 +101,3 @@ test('getSocksProxyError: names every variable that sets a SOCKS proxy', () => {
 		expect(error?.includes(secret), `Error leaked "${secret}": ${error}`).toStrictEqual(false);
 	}
 });
-
