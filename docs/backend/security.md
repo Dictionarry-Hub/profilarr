@@ -482,7 +482,10 @@ on one can't post to another. An address that matches nothing is served from
 its own `Host`, so the image's health check on `localhost`, probes on the
 container name and API clients keep working; only a browser behind an HTTPS
 proxy on such an address has its forms refused by the CSRF check. Values must
-be scheme, host and optional port only. Startup fails on anything else.
+be scheme, host and optional port only. Startup fails on anything else. List
+one scheme per hostname: browsers won't replace a `Secure` session cookie with
+a plain one of the same name, so `http://` and `https://` on one host would
+fight over it and the HTTP login would loop.
 
 Everything that depends on the origin reads it from the request
 (`event.url`): the session, OIDC state and nonce cookies get `secure` on

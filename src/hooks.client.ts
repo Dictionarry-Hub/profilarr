@@ -7,7 +7,7 @@ import { alertStore } from '#client/alerts/store.ts';
 // resolves each request's origin in src/runtime/server.js.
 
 const CSRF_ALERT_MESSAGE =
-	'Request blocked: origin mismatch. If running behind a reverse proxy, ensure the ORIGIN env var matches the external URL (scheme + host + port). See server logs for details.';
+	'Request blocked: origin mismatch. If running behind a reverse proxy, add the address in your address bar to the ORIGIN env var (scheme + host + port). See https://profilarr.com/installation#authentication';
 
 const originalFetch = window.fetch;
 window.fetch = async function patchedFetch(...args) {

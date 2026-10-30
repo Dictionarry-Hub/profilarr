@@ -123,7 +123,7 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 			try {
 				return await launch();
 			} catch (error) {
-				const portTaken = output.slice(from).join('').includes('AddrInUse');
+				const portTaken = /AddrInUse|EADDRINUSE/.test(output.slice(from).join(''));
 				if (!portTaken || attempt >= START_ATTEMPTS) throw error;
 				output.push(`\n--- port ${port} was taken, trying another ---\n`);
 			}

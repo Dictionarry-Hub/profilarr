@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { parseOrigins, resolveOrigin } from '#runtime/origins.js';
+import { firstSightings, parseOrigins, resolveOrigin } from '#runtime/origins.js';
 
 describe('parseOrigins', () => {
 	test('accepts no configured origin', () => {
@@ -145,5 +145,18 @@ describe('resolveOrigin', () => {
 				origins
 			)
 		).toBe('https://profilarr.example.com');
+	});
+});
+
+describe('firstSightings', () => {
+	test('reports a value once and stops at the limit', () => {
+		const first = firstSightings(2);
+		expect(first('http://localhost:6868')).toBe(true);
+		expect(first('http://localhost:6868')).toBe(false);
+		expect(first('http://profilarr:6868')).toBe(true);
+		expect(first('http://evil-3.example')).toBe(false);
+		expect(first('http://evil-4.example')).toBe(false);
+		// The limit also stops remembering, so memory stays bounded
+		expect(first('http://localhost:6868')).toBe(false);
 	});
 });

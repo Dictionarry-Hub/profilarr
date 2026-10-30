@@ -27,6 +27,7 @@ import { checkApiKeyAccess } from '#utils/auth/apiPermissions.ts';
 import { getStartupAuthError } from '#utils/auth/loginOptions.ts';
 import { setupStateQueries } from '#db/queries/setupState.ts';
 import { usersQueries } from '#db/queries/users.ts';
+import { firstSightings } from '#runtime/origins.js';
 
 if (!isReload) {
 	// Initialize configuration on server startup
@@ -143,7 +144,25 @@ if (!isReload) {
  * Auth middleware
  * Handles authentication, authorization, and session management
  */
+// With several origins in ORIGIN, a request on an address outside the list is
+// served from its own Host. Say so once per address, up to a few, in case a
+// browser was meant to use it and its forms fail the CSRF check.
+const unlistedOrigin = firstSightings(10);
+
 export const handle: Handle = async ({ event, resolve }) => {
+	if (
+		config.origins.length > 1 &&
+		!config.origins.includes(event.url.origin) &&
+		unlistedOrigin(event.url.origin)
+	) {
+		await logger.warn(`Serving ${event.url.origin}, which is not in ORIGIN`, {
+			source: 'Auth:Origin',
+			meta: {
+				origins: config.origins,
+				hint: 'If browsers use this address, add it to ORIGIN or make the reverse proxy forward the original Host. See https://profilarr.com/installation#authentication'
+			}
+		});
+	}
 	// Strip Link preload headers from all responses to keep response headers
 	// small enough for reverse proxies with default buffer sizes.
 	async function resolveAndStrip(): Promise<Response> {

@@ -49,6 +49,24 @@ export function parseOrigins(raw) {
 }
 
 /**
+ * Remember values as they are first seen, up to `limit` of them. Returns true
+ * for a value's first sighting while under the limit, so a caller can log it
+ * once, and never for a repeat or once the limit is reached. The limit stops a
+ * client from growing memory or the log with made-up values.
+ * @param {number} limit
+ * @returns {(value: string) => boolean}
+ */
+export function firstSightings(limit) {
+	/** @type {Set<string>} */
+	const seen = new Set();
+	return (value) => {
+		if (seen.has(value) || seen.size >= limit) return false;
+		seen.add(value);
+		return true;
+	};
+}
+
+/**
  * @param {string | string[] | undefined} value
  * @returns {string | undefined}
  */
