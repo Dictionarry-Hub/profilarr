@@ -151,12 +151,54 @@ jobs:
       - name: Build images
         run: docker compose -f compose.yml -f compose.dev.yml build
 
-      - name: Scan profilarr
+      # OS packages from Alpine and the Bun base image block the merge
+      - name: Scan profilarr OS packages
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'profilarr:alpine'
+          vuln-type: 'os'
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
+
+      # npm packages are bundled into the server, so Trivy reads them from the
+      # image's SBOM. Dependabot alerts track them from the lockfile, so this
+      # scan only reports.
+      - name: Scan profilarr npm packages
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: 'profilarr:alpine'
+          vuln-type: 'library'
+          list-all-pkgs: 'true'
+          format: 'json'
+          output: 'trivy-npm.json'
+
+      # Trivy skips an SBOM it can't read without a warning, which would leave
+      # the npm scan empty, so an empty package list fails the job.
+      - name: Report npm findings
+        run: |
+          packages=$(jq '[.Results[]? | select(.Type == "node-pkg") | .Packages[]?] | length' trivy-npm.json)
+          if [ "$packages" -eq 0 ]; then
+            echo "::error::Trivy found no npm packages in profilarr:alpine. Check that the image still ships a CycloneDX SBOM Trivy can read."
+            exit 1
+          fi
+          findings=$(jq -r '.Results[]? | select(.Type == "node-pkg") | .Vulnerabilities[]? | "| \(.PkgName) | \(.InstalledVersion) | \(.VulnerabilityID) | \(.Severity) | \(.FixedVersion // "none") |"' trivy-npm.json)
+          serious=$(jq '[.Results[]? | select(.Type == "node-pkg") | .Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-npm.json)
+          if [ "$serious" -gt 0 ]; then
+            echo "::warning::$serious high or critical npm findings in profilarr:alpine. See the Trivy job summary."
+          fi
+          {
+            echo "### npm packages in profilarr:alpine"
+            echo
+            echo "Trivy read $packages npm packages from the image SBOM. These findings don't fail CI."
+            echo
+            if [ -n "$findings" ]; then
+              echo "| Package | Version | Vulnerability | Severity | Fixed in |"
+              echo "| --- | --- | --- | --- | --- |"
+              echo "$findings"
+            else
+              echo "No known vulnerabilities."
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Scan parser
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
