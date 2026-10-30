@@ -112,18 +112,30 @@ test.use({
 - **Start order.** The provider and the proxy start first. The app then gets
   the provider's `OIDC_*` settings, and the proxy's address as `ORIGIN` and
   `baseURL`. Once the app is up, both get its address through `target`. The
-  provider then accepts sign-ins that return to the app, and the proxy
-  forwards to it.
+  provider then accepts sign-ins that return to each of the app's origins, and
+  the proxy forwards to it.
+- **Origins.** `appOrigins` chooses what `ORIGIN` holds: `default` is the
+  browser-facing address (the proxy's, else the app's), `unset` leaves it
+  empty, and `direct-and-proxy` lists both the app's direct address and the
+  proxy's, so one app answers on two origins. `appEnv.ORIGIN` overrides all
+  three. A proxy's `publicHost` of `localhost` or `profilarr.test` gives it a
+  different hostname from the app's `127.0.0.1`, so the two origins keep
+  separate cookies. `profilarr.test` resolves to `127.0.0.1` inside the test
+  container; use it for proxies that reserve `localhost` themselves.
 - **Accounts.** `createAccount` makes the first account through the setup
   form. `signIn`, `signInWithSso` and `signOut` cover the rest
   (`helpers/auth/accounts.ts`).
 - **SSO providers.** `helpers/sso/providers.ts` lists them. `fake` runs
-  in the test process and can misbehave on purpose. `authelia` runs Authelia
-  in a container. Each entry lists the features it `supports`.
+  in the test process, registers only the app's exact callback URLs, and can
+  misbehave on purpose. `authelia` runs Authelia in a container. Each entry
+  lists the features it `supports`.
 - **Reverse proxies.** `helpers/proxy/proxies.ts` lists them. `fake` can
   serve HTTPS, change request headers, cap response header size, or fail.
-  `traefik` runs Traefik in a container. Each entry lists the options it
-  `supports`.
+  `traefik`, `nginx-proxy-manager` and `swag` run the real proxy in a
+  container. Each entry lists the options it `supports`. Entries marked
+  `originOnly` only run in the origin scenarios, not in every proxied
+  scenario through `proxySetups()`. A proxy readiness check accepts the app's
+  `303` to first-run setup as well as `200` (`answeredByApp`).
 - **Forward auth.** With `appProxy: { forwardAuth: true }`, the proxy asks
   the SSO provider before it forwards each request, and sends a signed-out
   browser to the provider's login page. Traefik and Authelia support it.
