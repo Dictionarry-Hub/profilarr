@@ -9,19 +9,15 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Build
 # -----------------------------------------------------------------------------
-ARG DENO_VERSION=2.9.8
 ARG NODE_VERSION=24.22.1
 ARG PNPM_VERSION=11.28.9
-
-# COPY --from does not expand variables, so the Deno binary comes from a stage
-FROM denoland/deno:bin-${DENO_VERSION} AS deno
+ARG BUN_VERSION=1.4.4
 
 FROM node:${NODE_VERSION}-bookworm-slim AS builder
 ARG PNPM_VERSION
 
-# pnpm installs dependencies and runs Vite; Deno only compiles the binary
+# pnpm installs dependencies and runs Vite; Bun only runs the built server
 RUN npm install -g pnpm@${PNPM_VERSION}
-COPY --from=deno /deno /usr/local/bin/deno
 
 WORKDIR /build
 
@@ -32,12 +28,20 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile --store-dir /pnpm/store
 
+# Vite bundles every runtime package into the server, so the image has no
+# node_modules for `trivy image` to read. Trivy reads SBOM files instead, so this
+# writes a CycloneDX SBOM of the production packages. Trivy 0.70 silently skips
+# CycloneDX 1.7, pnpm's default, so pin 1.6. Reading package details from the
+# store keeps platform packages that weren't installed out of the list.
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm sbom --sbom-format cyclonedx --sbom-spec-version 1.6 \
+    --sbom-type application --prod --store-dir /pnpm/store \
+    --out /build/sbom.cdx.json
+
 # Copy everything else
 COPY . .
 
-# Build the application
-# 1. Vite builds SvelteKit to dist/build/
-# 2. Deno compiles to standalone binary
+# Build the application: Vite builds SvelteKit to dist/build/
 
 # Build-time variables for version card
 # TARGETARCH is automatically set by Docker buildx (amd64 or arm64)
@@ -74,28 +78,11 @@ EOF
 ENV APP_BASE_PATH=/build/dist/build
 RUN pnpm exec vite build
 RUN cp src/runtime/server.js src/runtime/origins.js dist/build/
-# --node-modules-dir=none + --exclude-unused-npm embed only what the server
-# reaches instead of the whole node_modules tree (build tooling included).
-# See docs/ARCHITECTURE.md#runtime-and-memory.
-RUN DENO_TARGET=$(case "${TARGETARCH}" in \
-        arm64) echo "aarch64-unknown-linux-gnu" ;; \
-        *)     echo "x86_64-unknown-linux-gnu" ;; \
-    esac) && \
-    deno compile \
-    --no-lock \
-    --node-modules-dir=none \
-    --exclude-unused-npm \
-    --no-check \
-    --allow-all \
-    --target "$DENO_TARGET" \
-    --include dist/build/client \
-    --output dist/build/profilarr \
-    dist/build/server.js
 
 # -----------------------------------------------------------------------------
 # Stage 2: Runtime
 # -----------------------------------------------------------------------------
-FROM denoland/deno:alpine-${DENO_VERSION}
+FROM oven/bun:${BUN_VERSION}-alpine
 
 # Labels for container metadata
 LABEL org.opencontainers.image.title="Profilarr"
@@ -126,8 +113,12 @@ RUN apk add --no-cache \
 # Create application directory
 WORKDIR /app
 
-# Copy built application from builder stage
-COPY --from=builder /build/dist/build/profilarr /app/profilarr
+# Copy the built server, client assets and runtime entry from the builder stage.
+# Vite bundled every npm package into these files; the image has no node_modules.
+COPY --from=builder /build/dist/build /app
+
+# SBOM of the bundled npm packages, so `trivy image` can report them
+COPY --from=builder /build/sbom.cdx.json /app/sbom.cdx.json
 
 # Copy entrypoint script
 COPY scripts/docker/entrypoint.sh /entrypoint.sh
@@ -137,8 +128,9 @@ RUN chmod +x /entrypoint.sh
 # - Root/PUID mode: entrypoint may reassign UID/GID at runtime via usermod.
 # - Non-root mode: set runAsUser: 1000 (K8s) or --user 1000 (Docker) to skip
 #   all privilege operations and run directly as this user.
-RUN deluser deno 2>/dev/null || true && \
-    delgroup deno 2>/dev/null || true && \
+# The Bun image ships a bun user and group on 1000; remove them first.
+RUN deluser bun 2>/dev/null || true && \
+    delgroup bun 2>/dev/null || true && \
     addgroup -g 1000 profilarr && \
     adduser -u 1000 -G profilarr -D -h /config -s /sbin/nologin profilarr
 
@@ -150,7 +142,6 @@ ENV PORT=6868
 ENV HOST=0.0.0.0
 ENV APP_BASE_PATH=/config
 ENV TZ=UTC
-ENV LD_LIBRARY_PATH=/usr/local/lib/glibc
 
 # Expose port
 EXPOSE 6868

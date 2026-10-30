@@ -41,7 +41,7 @@ done
 if [ "$(id -u)" != "0" ]; then
     umask "${UMASK:-022}"
     mkdir -p /config/data /config/logs /config/backups /config/databases
-    exec /app/profilarr
+    exec /usr/local/bin/bun /app/server.js
 fi
 
 # Handles PUID/PGID/UMASK setup for proper file permissions
@@ -100,4 +100,4 @@ chown -R "${PUID}:${PGID}" /config
 # -----------------------------------------------------------------------------
 # Drop privileges and run
 # -----------------------------------------------------------------------------
-exec su-exec "${APP_USER}" /app/profilarr
+exec su-exec "${APP_USER}" /usr/local/bin/bun /app/server.js
