@@ -64,10 +64,6 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
-        with:
-          deno-version-file: .tool-versions
-
       - name: Build
         run: pnpm build
 
@@ -75,8 +71,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: profilarr-build
-          path: |
-            dist/build/profilarr
+          path: dist/build
           retention-days: 1
 
   # ─── Quality gates (all run in parallel with build) ─────────────────────
@@ -170,7 +165,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
 
-  # ─── Tests that need the binary ─────────────────────────────────────────
+  # ─── Tests that run the build on Bun ────────────────────────────────────
 
   integration:
     name: Integration Tests
@@ -182,14 +177,15 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .tool-versions
+
       - name: Download build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: profilarr-build
           path: dist/build
-
-      - name: Make binary executable
-        run: chmod +x dist/build/profilarr
 
       - name: Cache Docker images
         id: docker-cache
@@ -229,14 +225,15 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .tool-versions
+
       - name: Download build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: profilarr-build
           path: dist/build
-
-      - name: Make binary executable
-        run: chmod +x dist/build/profilarr
 
       # The images real-service tests run, pinned in tests/flows/services.Dockerfile.
       # scripts/flows/run.ts only pulls images missing from the host.
