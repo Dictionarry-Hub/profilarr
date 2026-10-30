@@ -51,8 +51,8 @@ folders (`harness/specFiles.ts`).
 reports. CI's are the `flow-blob-*` artifacts of a run, kept for a day:
 `gh run download <run> --pattern 'flow-blob-*' --dir <dir>`. Refresh them when
 the shards drift apart, e.g. after a big new area. An empty deal is an error, because
-Playwright given no file runs the whole suite. The first shard also
-type-checks the suite with `pnpm check:flows`. On CI the config adds
+Playwright given no file runs the whole suite. `pnpm check` type-checks the
+suite along with the unit tests. On CI the config adds
 Playwright's blob reporter. Each shard uploads its blob report. The `Flow Tests`
 job merges them and prints every result in one list. If any shard failed, the
 job uploads the merged HTML report with traces. Then it fails. The `develop`
