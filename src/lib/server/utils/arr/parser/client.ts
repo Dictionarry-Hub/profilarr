@@ -395,7 +395,7 @@ export async function matchPatterns(
 
 /**
  * Compute a hash of patterns for cache invalidation
- * Uses Web Crypto API (built into Deno)
+ * Uses the Web Crypto API, which Bun and Node provide
  */
 async function hashPatterns(patterns: string[]): Promise<string> {
 	const sorted = [...patterns].sort();

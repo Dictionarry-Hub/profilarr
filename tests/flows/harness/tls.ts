@@ -4,9 +4,8 @@
  * openssl, which the Playwright image includes; browsers accept it because
  * HTTPS tests set `ignoreHTTPSErrors`.
  *
- * The certificate is a leaf (`CA:FALSE`), so the app trusts it through
- * `NODE_EXTRA_CA_CERTS`. Deno rejects a self-signed certificate marked as a
- * CA, which is the `openssl req -x509` default.
+ * The certificate is a leaf (`CA:FALSE`), and the app trusts it through
+ * `NODE_EXTRA_CA_CERTS`.
  */
 
 import { spawnSync } from 'node:child_process';

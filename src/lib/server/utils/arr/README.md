@@ -41,7 +41,7 @@ Base HTTP client with generic request capabilities.
 
 **Features:**
 
-- Connection pooling (using Deno's built-in `fetch` with keep-alive)
+- Connection pooling (using the runtime's built-in `fetch` with keep-alive)
 - Basic HTTP methods: `get()`, `post()`, `put()`, `delete()`, `patch()`
 - Request/response handling
 - Error handling

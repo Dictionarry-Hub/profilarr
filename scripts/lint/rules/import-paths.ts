@@ -10,7 +10,7 @@
  *   other copy. The most specific alias wins (`#db/...`, not `#server/db/...`).
  * - Inside one alias, files in the importer's folder or below are imported
  *   with `./`. `../` is never allowed.
- * - The path names the real file with its real extension. Node, Deno and
+ * - The path names the real file with its real extension. Node and
  *   Playwright don't guess extensions or folder indexes, so `#db/db`,
  *   `#db/db.js` (for `db.ts`) and `#ui/table` fail there.
  * - At most `maxDepth` folders sit between an alias and the file, except for
