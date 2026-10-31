@@ -738,6 +738,12 @@ top of a list page:
   `#stores/dataPage.ts`; saved preferences win, mobile falls back to
   cards, and the default no-preference view is cards unless the page opts into
   `defaultView: 'table'`.
+- **`CardRowsToggle.svelte`**: picks which rows the cards show, with one
+  checked item per row. Pages render it only in card view. The rows and their
+  defaults come from a `CardRowOption[]` list, such as `ARR_CARD_ROWS` in
+  `routes/arr/views/cardLines.ts`. `createCardRowsStore` from
+  `#stores/dataPage.ts` saves only the rows a user changed, per browser, so a
+  row added later starts at its default.
 
 ### Arr-Specific
 
