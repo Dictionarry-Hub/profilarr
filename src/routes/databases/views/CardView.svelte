@@ -3,11 +3,6 @@
 	import Unlink from '@lucide/svelte/icons/unlink';
 	import Lock from '@lucide/svelte/icons/lock';
 	import Code from '@lucide/svelte/icons/code';
-	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
-	import GitPullRequest from '@lucide/svelte/icons/git-pull-request';
-	import Sliders from '@lucide/svelte/icons/sliders-vertical';
-	import Palette from '@lucide/svelte/icons/palette';
-	import Clock from '@lucide/svelte/icons/clock';
 	import type { Component } from 'svelte';
 	import Button from '#ui/button/Button.svelte';
 	import Tooltip from '#ui/tooltip/Tooltip.svelte';
@@ -17,14 +12,18 @@
 	import { formatRelative } from '#shared/utils/dates.ts';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '#routes/databases/components/DatabaseAvatar.svelte';
+	import { DATABASE_CARD_ROWS, type DatabaseRowKey } from './cardRows.ts';
 
 	export let databases: DatabaseInstanceSummary[];
+	/** Row keys to show, from the card rows picker. */
+	export let visibleRows: readonly string[];
 
 	const dispatch = createEventDispatcher<{
 		unlink: DatabaseInstanceSummary;
 	}>();
 
 	interface InfoRow {
+		key: string;
 		label: string;
 		icon: Component;
 		value: string;
@@ -50,25 +49,34 @@
 		return slug;
 	}
 
-	function getRows(database: DatabaseInstanceSummary): InfoRow[] {
-		return [
-			{
-				label: 'Sync',
-				icon: RefreshCw,
-				value: formatSyncStrategy(database.sync_strategy),
-				detail: database.last_synced_at ? formatRelative(database.last_synced_at) : 'Never',
-				detailMuted: !database.last_synced_at
-			},
-			{
-				label: 'Auto Pull',
-				icon: GitPullRequest,
-				value: database.auto_pull ? 'On' : 'Off',
-				muted: !database.auto_pull
-			},
-			{ label: 'Quality Profiles', icon: Sliders, value: String(database.qualityProfileCount) },
-			{ label: 'Custom Formats', icon: Palette, value: String(database.customFormatCount) },
-			{ label: 'Delay Profiles', icon: Clock, value: String(database.delayProfileCount) }
-		];
+	type RowValue = Pick<InfoRow, 'value' | 'muted' | 'detail' | 'detailMuted'>;
+
+	function rowValue(key: DatabaseRowKey, database: DatabaseInstanceSummary): RowValue {
+		switch (key) {
+			case 'sync':
+				return {
+					value: formatSyncStrategy(database.sync_strategy),
+					detail: database.last_synced_at ? formatRelative(database.last_synced_at) : 'Never',
+					detailMuted: !database.last_synced_at
+				};
+			case 'autoPull':
+				return { value: database.auto_pull ? 'On' : 'Off', muted: !database.auto_pull };
+			case 'qualityProfiles':
+				return { value: String(database.qualityProfileCount) };
+			case 'customFormats':
+				return { value: String(database.customFormatCount) };
+			case 'delayProfiles':
+				return { value: String(database.delayProfileCount) };
+		}
+	}
+
+	function getRows(database: DatabaseInstanceSummary, visible: readonly string[]): InfoRow[] {
+		return DATABASE_CARD_ROWS.filter((row) => visible.includes(row.key)).map((row) => ({
+			key: row.key,
+			label: row.label,
+			icon: row.icon,
+			...rowValue(row.key, database)
+		}));
 	}
 
 	function handleUnlinkClick(e: MouseEvent, database: DatabaseInstanceSummary) {
@@ -144,7 +152,7 @@
 			</svelte:fragment>
 
 			<div class="space-y-1">
-				{#each getRows(database) as row}
+				{#each getRows(database, visibleRows) as row (row.key)}
 					<div class="flex items-center justify-between gap-3 text-xs">
 						<span class="flex shrink-0 items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
 							<svelte:component this={row.icon} size={11} />{row.label}

@@ -11,10 +11,12 @@
 	import ActionButton from '#ui/actions/ActionButton.svelte';
 	import SearchAction from '#ui/actions/SearchAction.svelte';
 	import ViewToggle from '#ui/actions/ViewToggle.svelte';
+	import CardRowsToggle from '#ui/actions/CardRowsToggle.svelte';
 	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '#stores/dataPage.ts';
+	import { createDataPageStore, createCardRowsStore } from '#stores/dataPage.ts';
+	import { ARR_CARD_ROWS } from './views/cardLines.ts';
 	import { alertStore } from '#client/alerts/store.ts';
 	import type { PageData } from './$types';
 	import type { ArrInstanceSummary } from './+page.server.ts';
@@ -26,6 +28,9 @@
 		storageKey: 'arrInstancesView',
 		searchKeys: ['name', 'url', 'type']
 	});
+
+	// Which rows the cards show, saved per browser
+	const cardRows = createCardRowsStore('arrInstancesCardRows', ARR_CARD_ROWS);
 
 	// Update items when data changes
 	$: setItems(data.instances);
@@ -73,6 +78,9 @@
 				tooltipAlign="right"
 				on:click={() => (showInfoModal = true)}
 			/>
+			{#if $view === 'cards'}
+				<CardRowsToggle rows={ARR_CARD_ROWS} store={cardRows} />
+			{/if}
 			<ViewToggle bind:value={$view} />
 		</ActionsBar>
 
@@ -87,7 +95,7 @@
 			{:else if $view === 'table'}
 				<TableView instances={$filtered} on:delete={handleDelete} />
 			{:else}
-				<CardView instances={$filtered} on:delete={handleDelete} />
+				<CardView instances={$filtered} visibleRows={$cardRows} on:delete={handleDelete} />
 			{/if}
 		</div>
 	</div>
