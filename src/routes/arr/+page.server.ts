@@ -14,6 +14,7 @@ import { jobRunHistoryQueries } from '#db/queries/jobRunHistory.ts';
 import { upgradeRunsQueries } from '#db/queries/upgradeRuns.ts';
 import { renameRunsQueries } from '#db/queries/renameRuns.ts';
 import { parseCleanupRemoved } from '#server/sync/cleanupSummary.ts';
+import { parseLibraryCount } from '#server/jobs/librarySummary.ts';
 import type { DriftRunStatus } from '#shared/drift.ts';
 import { logger } from '#logger/logger.ts';
 
@@ -40,9 +41,9 @@ export interface ArrActivity {
 		nextAt: string | null;
 	};
 	upgrades: { nextAt: string | null; lastSearched: number | null; lastFailed: boolean };
-	renames: { nextAt: string | null; lastRenamed: number | null };
+	renames: { nextAt: string | null; lastRenamed: number | null; lastFailed: boolean };
 	cleanup: { nextAt: string | null; lastRemoved: number | null; lastFailed: boolean };
-	library: { total: number | null; nextAt: string | null };
+	library: { enabled: boolean; nextAt: string | null; total: number | null; lastFailed: boolean };
 }
 
 export interface ArrInstanceSummary extends ArrInstancePublic {
@@ -93,20 +94,32 @@ function sectionActivity(
 	};
 }
 
+/**
+ * Last library refresh that ran. Runs skipped as "not due" are ignored, so they
+ * can't hide the last real result.
+ */
+function lastLibraryRefresh(instanceId: number): { total: number | null; failed: boolean } {
+	const job = jobQueueQueries.getByDedupeKey(`arr.library.refresh:${instanceId}`);
+	const runs = job ? jobRunHistoryQueries.getByQueueId(job.id, 20) : [];
+	const run = runs.find(
+		(candidate) => candidate.status === 'success' || candidate.status === 'failure'
+	);
+	if (!run) return { total: null, failed: false };
+	if (run.status === 'failure') return { total: null, failed: true };
+	return { total: parseLibraryCount(run.output), failed: false };
+}
+
 function getActivity(
 	instanceId: number,
 	syncStatus: SyncConfigStatus,
-	configured: { qualityProfiles: boolean; delayProfiles: boolean; mediaManagement: boolean }
+	configured: { qualityProfiles: boolean; delayProfiles: boolean; mediaManagement: boolean },
+	libraryEnabled: boolean
 ): ArrActivity {
 	const drift = arrDriftStatusQueries.getByInstanceId(instanceId);
 	const lastUpgrade = upgradeRunsQueries.getByInstanceId(instanceId, 1)[0];
 	const lastRename = renameRunsQueries.getByInstanceId(instanceId, 1)[0];
 	const cleanup = lastCleanupRun(instanceId);
-
-	// Upgrade and rename runs both record the library size; use the newest.
-	const lastLibraryRun = [lastUpgrade, lastRename]
-		.filter((run) => run !== undefined)
-		.sort((a, b) => b.completedAt.localeCompare(a.completedAt))[0];
+	const library = lastLibraryRefresh(instanceId);
 
 	return {
 		sync: {
@@ -126,7 +139,8 @@ function getActivity(
 		},
 		renames: {
 			nextAt: nextQueuedAt(`arr.rename:${instanceId}`),
-			lastRenamed: lastRename?.results.filesRenamed ?? null
+			lastRenamed: lastRename?.results.filesRenamed ?? null,
+			lastFailed: lastRename?.status === 'failed'
 		},
 		cleanup: {
 			nextAt: nextQueuedAt(`arr.cleanup:${instanceId}`),
@@ -134,8 +148,10 @@ function getActivity(
 			lastFailed: cleanup.failed
 		},
 		library: {
-			total: lastLibraryRun?.library.totalItems ?? null,
-			nextAt: nextQueuedAt(`arr.library.refresh:${instanceId}`)
+			enabled: libraryEnabled,
+			nextAt: nextQueuedAt(`arr.library.refresh:${instanceId}`),
+			total: library.total,
+			lastFailed: library.failed
 		}
 	};
 }
@@ -183,7 +199,12 @@ export const load: ServerLoad = () => {
 			upgradeEnabled: upgradeConfig?.enabled ?? false,
 			renameEnabled: renameConfig?.enabled ?? false,
 			cleanupEnabled: cleanupConfig?.enabled ?? false,
-			activity: getActivity(safe.id, syncStatus, configured)
+			activity: getActivity(
+				safe.id,
+				syncStatus,
+				configured,
+				safe.enabled === 1 && safe.library_refresh_interval > 0
+			)
 		};
 	});
 
