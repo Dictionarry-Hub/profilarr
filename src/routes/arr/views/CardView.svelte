@@ -17,6 +17,8 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let instances: ArrInstanceSummary[];
+	/** Row keys to show, from the card rows picker. */
+	export let visibleRows: readonly string[];
 
 	const dispatch = createEventDispatcher<{
 		delete: ArrInstanceSummary;
@@ -130,7 +132,7 @@
 			<!-- Label | value | "· next run". The shared third column lines the dots up;
 			     a row without a next run lets its value span to the card edge. -->
 			<div class="grid grid-cols-[auto_1fr_auto] items-center gap-y-1 text-xs">
-				{#each getCardLines(instance) as line}
+				{#each getCardLines(instance, visibleRows) as line (line.key)}
 					<span class="flex items-center gap-1.5 pr-3 text-neutral-500 dark:text-neutral-400">
 						<svelte:component this={line.icon} size={11} />{line.label}
 					</span>

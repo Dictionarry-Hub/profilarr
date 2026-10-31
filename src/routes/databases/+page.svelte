@@ -12,10 +12,12 @@
 	import ActionButton from '#ui/actions/ActionButton.svelte';
 	import SearchAction from '#ui/actions/SearchAction.svelte';
 	import ViewToggle from '#ui/actions/ViewToggle.svelte';
+	import CardRowsToggle from '#ui/actions/CardRowsToggle.svelte';
 	import PageMeta from '#ui/meta/PageMeta.svelte';
 	import TableView from './views/TableView.svelte';
 	import CardView from './views/CardView.svelte';
-	import { createDataPageStore } from '#stores/dataPage.ts';
+	import { createDataPageStore, createCardRowsStore } from '#stores/dataPage.ts';
+	import { DATABASE_CARD_ROWS } from './views/cardRows.ts';
 	import { alertStore } from '#client/alerts/store.ts';
 	import { jobStatus } from '#stores/jobStatus.ts';
 	import type { PageData } from './$types';
@@ -24,6 +26,9 @@
 	export let data: PageData;
 
 	// Initialize data page store
+	// Which rows the cards show, saved per browser
+	const cardRows = createCardRowsStore('databasesCardRows', DATABASE_CARD_ROWS);
+
 	const { search, view, filtered, setItems } = createDataPageStore(data.databases, {
 		storageKey: 'databasesView',
 		searchKeys: ['name', 'repository_url']
@@ -90,6 +95,9 @@
 				tooltipAlign="right"
 				on:click={() => (showInfoModal = true)}
 			/>
+			{#if $view === 'cards'}
+				<CardRowsToggle rows={DATABASE_CARD_ROWS} store={cardRows} />
+			{/if}
 			<ViewToggle bind:value={$view} />
 		</ActionsBar>
 
@@ -104,7 +112,7 @@
 			{:else if $view === 'table'}
 				<TableView databases={$filtered} on:unlink={handleUnlink} />
 			{:else}
-				<CardView databases={$filtered} on:unlink={handleUnlink} />
+				<CardView databases={$filtered} visibleRows={$cardRows} on:unlink={handleUnlink} />
 			{/if}
 		</div>
 	</div>

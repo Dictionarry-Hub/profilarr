@@ -3,7 +3,8 @@
  * Combines search functionality with view state persistence
  */
 
-import { writable, derived } from 'svelte/store';
+import { writable, derived, type Readable } from 'svelte/store';
+import type { Component } from 'svelte';
 
 import { browser } from '$app/env';
 
@@ -83,6 +84,66 @@ export function createViewModeStore(config: ViewModeConfig) {
 	}
 
 	return view;
+}
+
+/** A row a card can show; the card rows picker lists these. */
+export interface CardRowOption {
+	key: string;
+	label: string;
+	icon: Component;
+	/** Optional line under the label in the card rows picker. */
+	description?: string;
+	/** Whether the row shows before the user has chosen. */
+	defaultVisible: boolean;
+}
+
+export interface CardRowsStore extends Readable<string[]> {
+	toggle(key: string): void;
+}
+
+/**
+ * Which card rows are visible, saved per browser. Only the user's choices are
+ * stored, so a row added later starts at its default.
+ */
+export function createCardRowsStore(
+	storageKey: string,
+	rows: readonly CardRowOption[]
+): CardRowsStore {
+	let choices: Record<string, boolean> = {};
+
+	if (browser) {
+		try {
+			const stored: unknown = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+			if (stored && typeof stored === 'object' && !Array.isArray(stored)) {
+				for (const [key, value] of Object.entries(stored)) {
+					if (typeof value === 'boolean') choices[key] = value;
+				}
+			}
+		} catch {
+			choices = {};
+		}
+	}
+
+	const visibleKeys = () =>
+		rows.filter((row) => choices[row.key] ?? row.defaultVisible).map((row) => row.key);
+	const { subscribe, set } = writable<string[]>(visibleKeys());
+
+	return {
+		subscribe,
+		toggle(key: string) {
+			const row = rows.find((candidate) => candidate.key === key);
+			if (!row) return;
+			choices = { ...choices, [key]: !(choices[key] ?? row.defaultVisible) };
+			set(visibleKeys());
+			if (browser) {
+				try {
+					localStorage.setItem(storageKey, JSON.stringify(choices));
+				} catch {
+					// Some browsers can deny storage access.
+				}
+			}
+		}
+	};
 }
 
 /**
