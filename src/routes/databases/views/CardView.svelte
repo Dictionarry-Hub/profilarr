@@ -4,16 +4,17 @@
 	import Lock from '@lucide/svelte/icons/lock';
 	import Code from '@lucide/svelte/icons/code';
 	import RefreshCw from '@lucide/svelte/icons/refresh-cw';
-	import Clock from '@lucide/svelte/icons/clock';
 	import GitPullRequest from '@lucide/svelte/icons/git-pull-request';
+	import Sliders from '@lucide/svelte/icons/sliders-vertical';
+	import Palette from '@lucide/svelte/icons/palette';
+	import Clock from '@lucide/svelte/icons/clock';
+	import type { Component } from 'svelte';
 	import Button from '#ui/button/Button.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 	import Card from '#ui/card/Card.svelte';
 	import CardGrid from '#ui/card/CardGrid.svelte';
-	import Label from '#ui/label/Label.svelte';
 	import type { DatabaseInstanceSummary } from '#routes/databases/+page.server.ts';
-	import { formatDateTime } from '#shared/utils/dates.ts';
-	import { dateFormat } from '#stores/dateFormat.ts';
-	import { serverTimezone } from '#stores/timezone.ts';
+	import { formatRelative } from '#shared/utils/dates.ts';
 	import { createEventDispatcher } from 'svelte';
 	import DatabaseAvatar from '#routes/databases/components/DatabaseAvatar.svelte';
 
@@ -23,6 +24,16 @@
 		unlink: DatabaseInstanceSummary;
 	}>();
 
+	interface InfoRow {
+		label: string;
+		icon: Component;
+		value: string;
+		muted?: boolean;
+		/** Trailing text after a dot separator, e.g. the time since the last sync. */
+		detail?: string;
+		detailMuted?: boolean;
+	}
+
 	function formatSyncStrategy(minutes: number): string {
 		if (minutes === 0) return 'Manual';
 		if (minutes < 60) return `Every ${minutes} min`;
@@ -31,14 +42,33 @@
 		return `Every ${minutes / 1440}d`;
 	}
 
-	function formatLastSynced(date: string | null): string {
-		if (!date) return 'Never';
-		return formatDateTime(date, $serverTimezone, $dateFormat, {
-			month: 'short',
-			day: 'numeric',
-			hour: 'numeric',
-			minute: '2-digit'
-		});
+	/** owner/repo for display; the official organisation shows as "profilarr". */
+	function formatRepository(url: string): string {
+		const slug = url.replace('https://github.com/', '');
+		const [owner, ...rest] = slug.split('/');
+		if (owner.toLowerCase() === 'dictionarry-hub') return ['profilarr', ...rest].join('/');
+		return slug;
+	}
+
+	function getRows(database: DatabaseInstanceSummary): InfoRow[] {
+		return [
+			{
+				label: 'Sync',
+				icon: RefreshCw,
+				value: formatSyncStrategy(database.sync_strategy),
+				detail: database.last_synced_at ? formatRelative(database.last_synced_at) : 'Never',
+				detailMuted: !database.last_synced_at
+			},
+			{
+				label: 'Auto Pull',
+				icon: GitPullRequest,
+				value: database.auto_pull ? 'On' : 'Off',
+				muted: !database.auto_pull
+			},
+			{ label: 'Quality Profiles', icon: Sliders, value: String(database.qualityProfileCount) },
+			{ label: 'Custom Formats', icon: Palette, value: String(database.customFormatCount) },
+			{ label: 'Delay Profiles', icon: Clock, value: String(database.delayProfileCount) }
+		];
 	}
 
 	function handleUnlinkClick(e: MouseEvent, database: DatabaseInstanceSummary) {
@@ -54,31 +84,46 @@
 	}
 </script>
 
-<CardGrid columns={1} className="xl:grid-cols-2 2xl:grid-cols-3" flush>
+<CardGrid columns={1} className="md:grid-cols-2 xl:grid-cols-4" flush>
 	{#each databases as database}
 		<Card href="/databases/{database.id}" hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between gap-2">
-					<div class="flex min-w-0 items-center gap-2">
+					<div class="flex min-w-0 items-center gap-2.5">
 						<DatabaseAvatar name={database.name} repoUrl={database.repository_url} size="sm" />
-						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-							{database.name}
-						</h3>
-						{#if database.is_private}
-							<Label variant="secondary" size="sm" rounded="md" mono>
-								<Lock size={12} />
-								Private
-							</Label>
-						{/if}
-						{#if database.hasPat}
-							<Label variant="info" size="sm" rounded="md" mono>
-								<Code size={12} />
-								Dev
-							</Label>
-						{/if}
+						<div class="min-w-0">
+							<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+								{database.name}
+							</h3>
+							<p class="truncate font-mono text-xs text-neutral-500 dark:text-neutral-400">
+								{formatRepository(database.repository_url)}
+							</p>
+						</div>
 					</div>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
+						{#if database.is_private}
+							<Tooltip text="Private repository">
+								<span
+									role="img"
+									aria-label="Private repository"
+									class="flex p-1.5 text-neutral-500 dark:text-neutral-400"
+								>
+									<Lock size={12} />
+								</span>
+							</Tooltip>
+						{/if}
+						{#if database.hasPat}
+							<Tooltip text="Dev mode">
+								<span
+									role="img"
+									aria-label="Dev mode"
+									class="flex p-1.5 text-blue-600 dark:text-blue-400"
+								>
+									<Code size={12} />
+								</span>
+							</Tooltip>
+						{/if}
 						<Button
 							icon={ExternalLink}
 							size="xs"
@@ -98,41 +143,28 @@
 				</div>
 			</svelte:fragment>
 
-			<div class="flex flex-wrap gap-1">
-				<Label variant="secondary" size="sm" rounded="md" mono>
-					{database.repository_url.replace('https://github.com/', '')}
-				</Label>
-				<Label variant="secondary" size="sm" rounded="md"
-					>{database.qualityProfileCount} Quality Profiles</Label
-				>
-				<Label variant="secondary" size="sm" rounded="md"
-					>{database.customFormatCount} Custom Formats</Label
-				>
-				<Label variant="secondary" size="sm" rounded="md"
-					>{database.delayProfileCount} Delay Profiles</Label
-				>
+			<div class="space-y-1">
+				{#each getRows(database) as row}
+					<div class="flex items-center justify-between gap-3 text-xs">
+						<span class="flex shrink-0 items-center gap-1.5 text-neutral-500 dark:text-neutral-400">
+							<svelte:component this={row.icon} size={11} />{row.label}
+						</span>
+						<span
+							class="min-w-0 truncate text-right font-mono {row.muted
+								? 'text-neutral-400 dark:text-neutral-500'
+								: 'text-neutral-900 dark:text-neutral-100'}"
+						>
+							{row.value}
+							{#if row.detail}
+								<span class="text-neutral-400 dark:text-neutral-500">·</span>
+								<span class={row.detailMuted ? 'text-neutral-400 dark:text-neutral-500' : ''}>
+									{row.detail}
+								</span>
+							{/if}
+						</span>
+					</div>
+				{/each}
 			</div>
-
-			<svelte:fragment slot="footer">
-				<div
-					class="flex flex-col items-start gap-1.5 text-xs text-neutral-600 sm:flex-row sm:items-center sm:gap-3 dark:text-neutral-400"
-				>
-					<div class="flex items-center gap-1">
-						<RefreshCw size={12} class="text-blue-500 dark:text-blue-400" />
-						<span>Sync Strategy: {formatSyncStrategy(database.sync_strategy)}</span>
-					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
-					<div class="flex items-center gap-1">
-						<Clock size={12} class="text-amber-500 dark:text-amber-400" />
-						<span>Last Synced: {formatLastSynced(database.last_synced_at)}</span>
-					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
-					<div class="flex items-center gap-1">
-						<GitPullRequest size={12} class="text-violet-500 dark:text-violet-400" />
-						<span>Auto Pull: {database.auto_pull ? 'On' : 'Off'}</span>
-					</div>
-				</div>
-			</svelte:fragment>
 		</Card>
 	{/each}
 </CardGrid>
