@@ -1,17 +1,17 @@
 <script lang="ts">
 	import ExternalLink from '@lucide/svelte/icons/external-link';
 	import Unlink from '@lucide/svelte/icons/unlink';
-	import ArrowUpCircle from '@lucide/svelte/icons/circle-arrow-up';
-	import Type from '@lucide/svelte/icons/type';
-	import Trash2 from '@lucide/svelte/icons/trash';
+	import TestTubeDiagonal from '@lucide/svelte/icons/test-tube-diagonal';
+	import Check from '@lucide/svelte/icons/check';
 	import Button from '#ui/button/Button.svelte';
 	import Card from '#ui/card/Card.svelte';
 	import CardGrid from '#ui/card/CardGrid.svelte';
-	import Label from '#ui/label/Label.svelte';
 	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 	import { isExperimentalVersion } from '#shared/arr/capabilities.ts';
+	import { formatRelative } from '#shared/utils/dates.ts';
 	import { getDisplayUrl } from '#client/utils/arrDisplayUrl.ts';
 	import type { ArrInstanceSummary } from '#routes/arr/+page.server.ts';
+	import { getCardLines, lineToneClass } from './cardLines.ts';
 	import radarrLogo from '#client/assets/Radarr.svg';
 	import sonarrLogo from '#client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
@@ -46,6 +46,11 @@
 		return type.charAt(0).toUpperCase() + type.slice(1);
 	}
 
+	/** host[:port][/path] without the scheme, for the line under the name. */
+	function formatAddress(instance: ArrInstanceSummary): string {
+		return getDisplayUrl(instance).replace(/^https?:\/\//, '');
+	}
+
 	function handleDeleteClick(e: MouseEvent, instance: ArrInstanceSummary) {
 		e.stopPropagation();
 		e.preventDefault();
@@ -59,14 +64,14 @@
 	}
 </script>
 
-<CardGrid columns={1} className="lg:grid-cols-2 2xl:grid-cols-3" flush>
+<CardGrid columns={1} className="md:grid-cols-2 xl:grid-cols-4" flush>
 	{#each instances as instance}
 		<Card href="/arr/{instance.id}" hoverable>
 			<svelte:fragment slot="header">
 				<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 				<div class="flex items-center justify-between gap-2">
-					<div class="flex min-w-0 items-center gap-2">
-						<div class="relative h-6 w-6 flex-shrink-0">
+					<div class="flex min-w-0 items-center gap-2.5">
+						<div class="relative h-8 w-8 flex-shrink-0">
 							{#if !loadedImages.has(instance.id)}
 								<div
 									class="absolute inset-0 animate-pulse rounded bg-neutral-200 dark:bg-neutral-700"
@@ -75,23 +80,34 @@
 							<img
 								src={getLogoPath(instance.type)}
 								alt={`${instance.type} logo`}
-								class="h-6 w-6 rounded {loadedImages.has(instance.id)
+								class="h-8 w-8 rounded {loadedImages.has(instance.id)
 									? 'opacity-100'
 									: 'opacity-0'}"
 								on:load={() => handleImageLoad(instance.id)}
 								use:checkLoaded={instance.id}
 							/>
 						</div>
-						<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-							{instance.name}
-						</h3>
-						{#if isExperimentalVersion(instance)}
-							<Tooltip text="Sonarr v5 support is experimental" position="top">
-								<Label variant="info" size="sm" rounded="md">Experimental</Label>
-							</Tooltip>
-						{/if}
+						<div class="min-w-0">
+							<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
+								{instance.name}
+							</h3>
+							<p class="truncate text-xs text-neutral-500 dark:text-neutral-400">
+								{formatAddress(instance)}
+							</p>
+						</div>
 					</div>
 					<div class="flex shrink-0 items-center gap-0.5" on:click|stopPropagation|preventDefault>
+						{#if isExperimentalVersion(instance)}
+							<Tooltip text="Experimental">
+								<span
+									role="img"
+									aria-label="Experimental"
+									class="flex p-1.5 text-blue-600 dark:text-blue-400"
+								>
+									<TestTubeDiagonal size={12} />
+								</span>
+							</Tooltip>
+						{/if}
 						<Button
 							icon={ExternalLink}
 							size="xs"
@@ -111,82 +127,28 @@
 				</div>
 			</svelte:fragment>
 
-			<div class="flex flex-1 flex-col gap-2">
-				<div>
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-						>Quality Profiles:</span
+			<!-- Label | value | "· next run". The shared third column lines the dots up;
+			     a row without a next run lets its value span to the card edge. -->
+			<div class="grid grid-cols-[auto_1fr_auto] items-center gap-y-1 text-xs">
+				{#each getCardLines(instance) as line}
+					<span class="flex items-center gap-1.5 pr-3 text-neutral-500 dark:text-neutral-400">
+						<svelte:component this={line.icon} size={11} />{line.label}
+					</span>
+					<span
+						class="flex min-w-0 items-center justify-end gap-1 truncate font-mono {line.nextAt
+							? ''
+							: 'col-span-2'}"
 					>
-					{#if instance.syncedProfileNames.length > 0}
-						<div class="mt-1 flex flex-wrap gap-1">
-							{#each instance.syncedProfileNames as name}
-								<Label variant="secondary" size="sm" rounded="md">{name}</Label>
-							{/each}
-						</div>
-					{:else}
-						<span class="ml-1 text-xs text-neutral-400 dark:text-neutral-500">None</span>
+						{#if line.check}<Check size={12} class={lineToneClass.ok} />{/if}
+						<span class={lineToneClass[line.tone]}>{line.value}</span>
+					</span>
+					{#if line.nextAt}
+						<span class="font-mono whitespace-nowrap text-neutral-400 dark:text-neutral-500">
+							<span class="px-1">·</span>{formatRelative(line.nextAt)}
+						</span>
 					{/if}
-				</div>
-				<div>
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-						>Delay Profile:</span
-					>
-					{#if instance.delayProfileName}
-						<span class="ml-1"
-							><Label variant="secondary" size="sm" rounded="md">{instance.delayProfileName}</Label
-							></span
-						>
-					{:else}
-						<span class="ml-1 text-xs text-neutral-400 dark:text-neutral-500">None</span>
-					{/if}
-				</div>
-				<div>
-					<span class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
-						>Media Management:</span
-					>
-					{#if instance.namingConfigName || instance.qualityDefinitionsConfigName || instance.mediaSettingsConfigName}
-						<div class="mt-1 flex flex-wrap gap-1">
-							{#if instance.namingConfigName}
-								<Label variant="secondary" size="sm" rounded="md"
-									>Naming: {instance.namingConfigName}</Label
-								>
-							{/if}
-							{#if instance.qualityDefinitionsConfigName}
-								<Label variant="secondary" size="sm" rounded="md"
-									>Quality Definitions: {instance.qualityDefinitionsConfigName}</Label
-								>
-							{/if}
-							{#if instance.mediaSettingsConfigName}
-								<Label variant="secondary" size="sm" rounded="md"
-									>Media Settings: {instance.mediaSettingsConfigName}</Label
-								>
-							{/if}
-						</div>
-					{:else}
-						<span class="ml-1 text-xs text-neutral-400 dark:text-neutral-500">None</span>
-					{/if}
-				</div>
+				{/each}
 			</div>
-
-			<svelte:fragment slot="footer">
-				<div
-					class="flex flex-col items-start gap-1.5 text-xs text-neutral-600 sm:flex-row sm:items-center sm:gap-3 dark:text-neutral-400"
-				>
-					<div class="flex items-center gap-1">
-						<ArrowUpCircle size={12} class="text-amber-500 dark:text-amber-400" />
-						<span>Upgrades: {instance.upgradeEnabled ? 'On' : 'Off'}</span>
-					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
-					<div class="flex items-center gap-1">
-						<Type size={12} class="text-blue-500 dark:text-blue-400" />
-						<span>Renames: {instance.renameEnabled ? 'On' : 'Off'}</span>
-					</div>
-					<span class="hidden text-neutral-300 sm:inline dark:text-neutral-600">&middot;</span>
-					<div class="flex items-center gap-1">
-						<Trash2 size={12} class="text-rose-500 dark:text-rose-400" />
-						<span>Cleanup: {instance.cleanupEnabled ? 'On' : 'Off'}</span>
-					</div>
-				</div>
-			</svelte:fragment>
 		</Card>
 	{/each}
 </CardGrid>

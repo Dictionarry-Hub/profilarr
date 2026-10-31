@@ -96,7 +96,7 @@
 							<h3 class="truncate text-sm font-semibold text-neutral-900 dark:text-neutral-100">
 								{database.name}
 							</h3>
-							<p class="truncate font-mono text-xs text-neutral-500 dark:text-neutral-400">
+							<p class="truncate text-xs text-neutral-500 dark:text-neutral-400">
 								{formatRepository(database.repository_url)}
 							</p>
 						</div>
