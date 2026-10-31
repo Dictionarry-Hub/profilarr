@@ -11,7 +11,7 @@
 	import { formatRelative } from '#shared/utils/dates.ts';
 	import { getDisplayUrl } from '#client/utils/arrDisplayUrl.ts';
 	import type { ArrInstanceSummary } from '#routes/arr/+page.server.ts';
-	import { getCardLines, lineToneClass } from '#routes/arr/views/cardLines.ts';
+	import { getCardLines, lineToneClass } from './cardLines.ts';
 	import radarrLogo from '#client/assets/Radarr.svg';
 	import sonarrLogo from '#client/assets/Sonarr.svg';
 	import { createEventDispatcher } from 'svelte';
