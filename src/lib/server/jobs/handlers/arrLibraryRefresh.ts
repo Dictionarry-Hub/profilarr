@@ -8,6 +8,7 @@ import { arrClientOptionsFromInstance } from '#arr/factory.ts';
 import { LIBRARY_REQUEST_TIMEOUT_MS } from '#arr/base.ts';
 import { getProfilarrProfileNames } from '#server/sync/libraryHelpers.ts';
 import { calculateNextRunFromMinutes } from '#server/jobs/scheduleUtils.ts';
+import { formatLibrarySummary } from '#server/jobs/librarySummary.ts';
 import { logger } from '#logger/logger.ts';
 
 const libraryRefreshHandler: JobHandler = async (job) => {
@@ -74,7 +75,7 @@ const libraryRefreshHandler: JobHandler = async (job) => {
 
 		return {
 			status: 'success',
-			output: `Cached ${items.length} item(s)`,
+			output: formatLibrarySummary(items.length),
 			rescheduleAt
 		};
 	} catch (error) {

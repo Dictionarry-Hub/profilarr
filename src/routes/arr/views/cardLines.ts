@@ -154,7 +154,7 @@ function rowValue(key: ArrRowKey, instance: ArrInstanceSummary): LineValue {
 				renames.lastRenamed !== null
 					? count(renames.lastRenamed, 'File Renamed', 'Files Renamed')
 					: null,
-				false
+				renames.lastFailed
 			);
 		case 'cleanup':
 			return jobValue(
@@ -164,9 +164,12 @@ function rowValue(key: ArrRowKey, instance: ArrInstanceSummary): LineValue {
 				cleanup.lastFailed
 			);
 		case 'library':
-			return library.total === null
-				? { value: 'Not Counted', tone: 'muted', nextAt: library.nextAt }
-				: { value: count(library.total, 'Item', 'Items'), tone: 'default', nextAt: library.nextAt };
+			return jobValue(
+				library.enabled,
+				library.nextAt,
+				library.total !== null ? count(library.total, 'Item', 'Items') : null,
+				library.lastFailed
+			);
 	}
 }
 
