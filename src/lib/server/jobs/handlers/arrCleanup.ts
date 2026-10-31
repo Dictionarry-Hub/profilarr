@@ -15,6 +15,7 @@ import {
 	type EntityScanResult
 } from '#server/sync/entityCleanup.ts';
 import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
+import { formatCleanupSummary } from '#server/sync/cleanupSummary.ts';
 import { logger } from '#logger/logger.ts';
 import { notifications } from '#notifications/definitions/index.ts';
 import { notificationManager } from '#notifications/NotificationManager.ts';
@@ -145,10 +146,7 @@ const cleanupHandler: JobHandler = async (job) => {
 			}
 		}
 
-		const output =
-			total === 0
-				? 'Nothing to clean up'
-				: `Deleted ${deletedConfigs} stale config(s), ${deletedEntitiesCount} removed entit${deletedEntitiesCount === 1 ? 'y' : 'ies'}`;
+		const output = formatCleanupSummary(deletedConfigs, deletedEntitiesCount);
 
 		return {
 			status: total === 0 ? 'skipped' : 'success',
