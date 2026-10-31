@@ -15,8 +15,10 @@ import { db } from '#db/db.ts';
 import { runMigrations } from '#db/migrations.ts';
 import { applyPendingRestore } from '#utils/backup/applyPending.ts';
 import { initializeJobs } from '#server/jobs/init.ts';
+import { jobDispatcher } from '#server/jobs/dispatcher.ts';
 import { recoverInterruptedSyncs } from '#server/sync/utils.ts';
 import { pcdManager } from '#pcd/core/manager.ts';
+import { clearAllCaches } from '#pcd/database/registry.ts';
 import {
 	getAuthState,
 	isPublicPath,
@@ -29,6 +31,18 @@ import { getStartupAuthError } from '#utils/auth/loginOptions.ts';
 import { setupStateQueries } from '#db/queries/setupState.ts';
 import { usersQueries } from '#db/queries/users.ts';
 import { firstSightings } from '#runtime/origins.js';
+
+// In dev, a full reload makes Vite's module runner evaluate every server module
+// again, so this file gets fresh, uninitialized singletons. Shut the old ones
+// down and clear the guard, so the next evaluation runs startup again.
+if (import.meta.hot) {
+	import.meta.hot.on('vite:beforeFullReload', () => {
+		jobDispatcher.stop();
+		clearAllCaches();
+		db.close();
+		(globalThis as Record<string, unknown>).__profilarr_initialized__ = false;
+	});
+}
 
 if (!isReload) {
 	// Initialize configuration on server startup
