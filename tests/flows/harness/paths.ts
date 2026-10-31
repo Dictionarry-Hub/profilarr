@@ -7,8 +7,8 @@ import { resolve } from 'node:path';
 
 const ROOT = process.cwd();
 
-/** The compiled app, built by `pnpm build` */
-export const APP_BINARY = resolve(ROOT, 'dist/build/profilarr');
+/** The built server's entry file, built by `pnpm build` and run with Bun */
+export const APP_ENTRY = resolve(ROOT, 'dist/build/server.js');
 
 /** Vendored fixtures database and its pinned schema (`pnpm fixtures:update`) */
 export const FIXTURES_DIR = resolve(ROOT, 'tests/flows/data/fixtures');

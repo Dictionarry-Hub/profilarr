@@ -11,7 +11,7 @@ import * as fs from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gitConfigPath } from './git.ts';
-import { APP_BINARY, goldenDir } from './paths.ts';
+import { APP_ENTRY, goldenDir } from './paths.ts';
 import { freePort } from './ports.ts';
 import { relinkDatabases } from './seed.ts';
 
@@ -77,7 +77,7 @@ export async function startApp(dataDir?: string, options: StartOptions = {}): Pr
 	// Spawn the app on `port` and wait until it answers. Kills it if it never does.
 	const launch = async (): Promise<ChildProcess> => {
 		const optionEnv = typeof options.env === 'function' ? options.env(url) : options.env;
-		const child = spawn(APP_BINARY, [], {
+		const child = spawn('bun', [APP_ENTRY], {
 			env: {
 				...process.env,
 				...BASE_ENV,

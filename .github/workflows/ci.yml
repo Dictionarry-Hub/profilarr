@@ -64,10 +64,6 @@ jobs:
 
       - uses: ./.github/actions/setup
 
-      - uses: denoland/setup-deno@22d081ff2d3a40755e97629de92e3bcbfa7cf2ed # v2.0.5
-        with:
-          deno-version-file: .tool-versions
-
       - name: Build
         run: pnpm build
 
@@ -75,8 +71,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: profilarr-build
-          path: |
-            dist/build/profilarr
+          path: dist/build
           retention-days: 1
 
   # ─── Quality gates (all run in parallel with build) ─────────────────────
@@ -156,12 +151,54 @@ jobs:
       - name: Build images
         run: docker compose -f compose.yml -f compose.dev.yml build
 
-      - name: Scan profilarr
+      # OS packages from Alpine and the Bun base image block the merge
+      - name: Scan profilarr OS packages
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: 'profilarr:alpine'
+          vuln-type: 'os'
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
+
+      # npm packages are bundled into the server, so Trivy reads them from the
+      # image's SBOM. Dependabot alerts track them from the lockfile, so this
+      # scan only reports.
+      - name: Scan profilarr npm packages
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: 'profilarr:alpine'
+          vuln-type: 'library'
+          list-all-pkgs: 'true'
+          format: 'json'
+          output: 'trivy-npm.json'
+
+      # Trivy skips an SBOM it can't read without a warning, which would leave
+      # the npm scan empty, so an empty package list fails the job.
+      - name: Report npm findings
+        run: |
+          packages=$(jq '[.Results[]? | select(.Type == "node-pkg") | .Packages[]?] | length' trivy-npm.json)
+          if [ "$packages" -eq 0 ]; then
+            echo "::error::Trivy found no npm packages in profilarr:alpine. Check that the image still ships a CycloneDX SBOM Trivy can read."
+            exit 1
+          fi
+          findings=$(jq -r '.Results[]? | select(.Type == "node-pkg") | .Vulnerabilities[]? | "| \(.PkgName) | \(.InstalledVersion) | \(.VulnerabilityID) | \(.Severity) | \(.FixedVersion // "none") |"' trivy-npm.json)
+          serious=$(jq '[.Results[]? | select(.Type == "node-pkg") | .Vulnerabilities[]? | select(.Severity == "HIGH" or .Severity == "CRITICAL")] | length' trivy-npm.json)
+          if [ "$serious" -gt 0 ]; then
+            echo "::warning::$serious high or critical npm findings in profilarr:alpine. See the Trivy job summary."
+          fi
+          {
+            echo "### npm packages in profilarr:alpine"
+            echo
+            echo "Trivy read $packages npm packages from the image SBOM. These findings don't fail CI."
+            echo
+            if [ -n "$findings" ]; then
+              echo "| Package | Version | Vulnerability | Severity | Fixed in |"
+              echo "| --- | --- | --- | --- | --- |"
+              echo "$findings"
+            else
+              echo "No known vulnerabilities."
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Scan parser
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
@@ -170,7 +207,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
 
-  # ─── Tests that need the binary ─────────────────────────────────────────
+  # ─── Tests that run the build on Bun ────────────────────────────────────
 
   integration:
     name: Integration Tests
@@ -182,14 +219,15 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .tool-versions
+
       - name: Download build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: profilarr-build
           path: dist/build
-
-      - name: Make binary executable
-        run: chmod +x dist/build/profilarr
 
       - name: Cache Docker images
         id: docker-cache
@@ -229,14 +267,15 @@ jobs:
 
       - uses: ./.github/actions/setup
 
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version-file: .tool-versions
+
       - name: Download build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: profilarr-build
           path: dist/build
-
-      - name: Make binary executable
-        run: chmod +x dist/build/profilarr
 
       # The images real-service tests run, pinned in tests/flows/services.Dockerfile.
       # scripts/flows/run.ts only pulls images missing from the host.

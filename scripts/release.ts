@@ -1,12 +1,32 @@
 import { spawn } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import process from 'node:process';
 import { createInterface } from 'node:readline/promises';
 import { isNotFound } from '#utils/fs.ts';
 
 const versionPattern = /^v\d+\.\d+\.\d+$/;
 
-const IMAGES = ['profilarr:alpine', 'profilarr-parser:alpine'];
+const APP_IMAGE = 'profilarr:alpine';
+const IMAGES = [APP_IMAGE, 'profilarr-parser:alpine'];
+
+/** The parts of Trivy's JSON report the npm summary reads */
+interface TrivyVulnerability {
+	VulnerabilityID: string;
+	PkgName: string;
+	InstalledVersion: string;
+	FixedVersion?: string;
+	Severity: string;
+}
+
+interface TrivyReport {
+	Results?: {
+		Type?: string;
+		Packages?: unknown[];
+		Vulnerabilities?: TrivyVulnerability[];
+	}[];
+}
 
 function usage(): never {
 	console.error('Usage:');
@@ -111,12 +131,78 @@ async function buildImages() {
 	await run('docker', ['compose', '-f', 'compose.yml', '-f', 'compose.dev.yml', 'build']);
 }
 
+/** Runs Trivy on an image's language packages and returns its JSON report */
+async function scanLibraries(image: string): Promise<TrivyReport> {
+	const dir = await mkdtemp(join(tmpdir(), 'profilarr-trivy-'));
+	const output = join(dir, 'libraries.json');
+	try {
+		await run('trivy', [
+			'image',
+			'--quiet',
+			'--pkg-types',
+			'library',
+			'--list-all-pkgs',
+			'--format',
+			'json',
+			'--output',
+			output,
+			image
+		]);
+		return JSON.parse(await readFile(output, 'utf8')) as TrivyReport;
+	} finally {
+		await rm(dir, { recursive: true, force: true });
+	}
+}
+
+/**
+ * Lists the npm findings in the app image without blocking the release.
+ * Vite bundles the npm packages into the server, so Trivy reads them from the
+ * image's SBOM, and Dependabot alerts track them from the lockfile. Trivy skips
+ * an SBOM it can't read without a warning, so an empty package list stops the
+ * release.
+ */
+async function reportNpmPackages(image: string): Promise<void> {
+	const report = await scanLibraries(image);
+	const npm = (report.Results ?? []).filter((result) => result.Type === 'node-pkg');
+	const packages = npm.reduce((count, result) => count + (result.Packages?.length ?? 0), 0);
+	if (packages === 0) {
+		console.error(
+			`Trivy found no npm packages in ${image}. Check that the image still ships a CycloneDX SBOM Trivy can read.`
+		);
+		process.exit(1);
+	}
+
+	const findings = npm.flatMap((result) => result.Vulnerabilities ?? []);
+	console.log(`${image}: ${packages} npm packages, ${findings.length} known vulnerabilities`);
+	for (const finding of findings) {
+		const fixed = finding.FixedVersion || 'no fix';
+		console.log(
+			`  ${finding.Severity.padEnd(8)} ${finding.PkgName}@${finding.InstalledVersion} ${finding.VulnerabilityID} (${fixed})`
+		);
+	}
+}
+
 async function scanImages() {
 	console.log('\nScanning images for CVEs...\n');
 	for (const image of IMAGES) {
 		console.log(`Scanning ${image}...`);
-		await run('trivy', ['image', '--severity', 'CRITICAL,HIGH', '--exit-code', '1', image]);
-		console.log(`${image}: clean\n`);
+		if (image === APP_IMAGE) {
+			// OS packages block the release; npm findings are only listed
+			await run('trivy', [
+				'image',
+				'--pkg-types',
+				'os',
+				'--severity',
+				'CRITICAL,HIGH',
+				'--exit-code',
+				'1',
+				image
+			]);
+			await reportNpmPackages(image);
+		} else {
+			await run('trivy', ['image', '--severity', 'CRITICAL,HIGH', '--exit-code', '1', image]);
+		}
+		console.log(`${image}: passed\n`);
 	}
 }
 
@@ -126,7 +212,7 @@ if (import.meta.main) {
 	if (mode === 'scan') {
 		await buildImages();
 		await scanImages();
-		console.log('All images clean.');
+		console.log('All image scans passed.');
 	} else if (mode === 'dry') {
 		const tag = assertVersion(version);
 		const notes = await readNotesOrExit(notesPath);

@@ -109,7 +109,7 @@ later).
 
 **Source:** `utils/http/proxy.ts`, `utils/logger/startup.ts`
 
-Profilarr has no proxy setting of its own. Deno applies the standard
+Profilarr has no proxy setting of its own. Bun applies the standard
 `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, and `NO_PROXY` variables to every
 fetch, and git reads them too. That
 covers GitHub, PCD operations, notifications, and TMDB.
@@ -120,9 +120,14 @@ environment:
   - NO_PROXY=localhost,127.0.0.1,parser,radarr,sonarr
 ```
 
-- Proxy URLs take the form `scheme://user:pass@host:port`, where the scheme is
-  `http`, `socks5`, or `socks5h`. `socks5h` sends DNS lookups through the
-  proxy too.
+- Proxy URLs take the form `http://user:pass@host:port`. Bun treats a URL
+  without a scheme as `http://`.
+- Bun can't use SOCKS proxies. Through `HTTP_PROXY` or `HTTPS_PROXY` every
+  request fails, and through `ALL_PROXY` requests skip the proxy without a
+  warning. At startup, `getSocksProxyError()` finds any proxy variable, in
+  either case, set to a SOCKS URL, and the server logs the error and exits.
+- When both cases of a variable are set, such as `HTTPS_PROXY` and
+  `https_proxy`, Bun uses the lowercase one.
 - Special characters in the username and password must be URL-encoded (`@` as
   `%40`, `:` as `%3A`).
 - `NO_PROXY` takes host names, IPs, and ranges (e.g. `192.168.1.0/24`). Arr
@@ -130,8 +135,8 @@ environment:
   which usually can't reach them. `HTTP_PROXY` and `ALL_PROXY` also cover
   `http://` addresses, so this matters most when either is set.
 
-`getProxyEnv()` reads the same variables (uppercase first, then lowercase, like
-Deno) and reduces each proxy URL to `scheme://host:port`, masking any login as
+`getProxyEnv()` reads the same variables (lowercase first, then uppercase, like
+Bun) and reduces each proxy URL to `scheme://host:port`, masking any login as
 `***@`. At startup,
 `logProxyConfig()` logs the result and warns when a URL can't be parsed or
 `NO_PROXY` is empty. Credentials are never logged.
@@ -158,10 +163,8 @@ volumes:
   Profilarr starts without the extra certificates.
 - The entrypoint isn't involved, so root and non-root containers behave the
   same.
-- Deno rejects a self-signed certificate marked as a CA (`CA:TRUE`, the
-  `openssl req -x509` default) with `CaUsedAsEndEntity`, even when
-  `NODE_EXTRA_CA_CERTS` includes it. Node and OpenSSL clients such as curl
-  accept it. Users have to recreate the certificate with `CA:FALSE`.
+- Self-signed certificates marked as a CA (`CA:TRUE`, the `openssl req -x509`
+  default) work as well as leaf certificates.
 - Git doesn't read the variable. PCD repositories must be on GitHub, which uses
   a public CA.
 - There is no option to skip certificate verification. Skipping it would send

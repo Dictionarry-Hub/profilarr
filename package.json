@@ -8,7 +8,7 @@
 	},
 	"scripts": {
 		"dev": "node scripts/dev.ts",
-		"build": "APP_BASE_PATH=./dist/build vite build && cp src/runtime/server.js src/runtime/origins.js dist/build/ && deno compile --no-lock --node-modules-dir=none --exclude-unused-npm --no-check --allow-all --target x86_64-unknown-linux-gnu --include dist/build/client --output dist/build/profilarr dist/build/server.js",
+		"build": "APP_BASE_PATH=./dist/build vite build && cp src/runtime/server.js src/runtime/origins.js dist/build/",
 		"sync": "svelte-kit sync",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && pnpm run lint:eslint && pnpm run lint:toolchain && pnpm run lint:api-permissions",

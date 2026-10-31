@@ -187,7 +187,7 @@ configuration guides.
 
 - [Git](https://git-scm.com/) (for PCD operations)
 - [Node.js](https://nodejs.org/) 24 and [pnpm](https://pnpm.io/) 11
-- [Deno](https://deno.com/) 2.x (only for `pnpm build`, which ends with `deno compile`)
+- [Bun](https://bun.com/) 1.4 (runs the production build for integration and flow tests)
 - [.NET SDK](https://dotnet.microsoft.com/) 8.0+ (optional, for parser)
 
 ```bash

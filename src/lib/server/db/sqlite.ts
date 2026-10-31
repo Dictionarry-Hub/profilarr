@@ -1,7 +1,7 @@
 /**
  * SQLite driver on top of `node:sqlite`.
  *
- * `node:sqlite` ships with Deno, Node and Bun with the same API, so no native
+ * `node:sqlite` ships with Node and Bun with the same API, so no native
  * library or FFI is needed. This module keeps the subset of the old
  * `@db/sqlite` surface the app uses, so call sites stay unchanged:
  *

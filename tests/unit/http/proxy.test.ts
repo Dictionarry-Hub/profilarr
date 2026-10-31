@@ -4,7 +4,7 @@
  */
 
 import { expect, test } from 'vitest';
-import { getProxyEnv } from '#utils/http/proxy.ts';
+import { getProxyEnv, getSocksProxyError } from '#utils/http/proxy.ts';
 
 const envOf = (vars: Record<string, string>) => (name: string) => vars[name];
 
@@ -41,18 +41,18 @@ test('getProxyEnv: assumes http:// when the scheme is missing', () => {
 	expect(result.proxies).toStrictEqual({ HTTPS_PROXY: 'http://***@proxy:8080' });
 });
 
-test('getProxyEnv: prefers uppercase and falls back to lowercase', () => {
+test('getProxyEnv: prefers lowercase and falls back to uppercase, as Bun does', () => {
 	const result = getProxyEnv(
 		envOf({
 			HTTPS_PROXY: 'http://upper:8080',
 			https_proxy: 'http://lower:8080',
-			http_proxy: 'http://lower:3128'
+			HTTP_PROXY: 'http://upper:3128'
 		})
 	);
 
 	expect(result.proxies).toStrictEqual({
-		HTTPS_PROXY: 'http://upper:8080',
-		http_proxy: 'http://lower:3128'
+		https_proxy: 'http://lower:8080',
+		HTTP_PROXY: 'http://upper:3128'
 	});
 });
 
@@ -72,4 +72,32 @@ test('getProxyEnv: splits and trims NO_PROXY', () => {
 	);
 
 	expect(result.noProxy).toStrictEqual(['localhost', '127.0.0.1', 'parser', '192.168.0.0/16']);
+});
+
+test('getSocksProxyError: allows HTTP proxies', () => {
+	expect(
+		getSocksProxyError(
+			envOf({
+				HTTPS_PROXY: 'http://user:pass@gluetun:8888',
+				all_proxy: 'proxy:3128',
+				NO_PROXY: 'socks.internal'
+			})
+		)
+	).toStrictEqual(null);
+});
+
+test('getSocksProxyError: names every variable that sets a SOCKS proxy', () => {
+	const error = getSocksProxyError(
+		envOf({
+			ALL_PROXY: 'socks5h://user:secret@proxy:1080',
+			https_proxy: ' SOCKS5://proxy:1080 ',
+			HTTPS_PROXY: 'http://proxy:8888',
+			HTTP_PROXY: 'socks4://proxy:1080'
+		})
+	);
+
+	expect(error).toMatch(/^https_proxy, HTTP_PROXY, ALL_PROXY set a SOCKS proxy/);
+	for (const secret of ['user', 'secret', 'proxy:1080']) {
+		expect(error?.includes(secret), `Error leaked "${secret}": ${error}`).toStrictEqual(false);
+	}
 });

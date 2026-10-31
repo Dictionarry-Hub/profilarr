@@ -809,32 +809,42 @@ same line as the `{@html}`:
 - Svelte files use generic/regex matching, not AST. Rules can't trace data flow
   through function calls, so sanitised-but-flagged code needs `nosemgrep`
 - No dependency vulnerability scanning (Semgrep Supply Chain requires login).
-  Trivy partially covers this gap for OS-level packages in the container image
-  (see below).
+  Dependabot alerts and Trivy's scan of the image SBOM cover npm packages
+  instead (see below).
 
 #### Container Scanning - Trivy
 
-Scans Docker images for known vulnerabilities in OS packages. Trivy pulls apart
-image layers, checks every installed package against vulnerability databases
-(NVD, distro advisories), and reports each CVE with severity and fix
-availability.
+Scans Docker images for known vulnerabilities. Trivy pulls apart image layers,
+checks every installed package against vulnerability databases (NVD, distro
+advisories), and reports each CVE with severity and fix availability.
+
+Vite bundles every npm package into the server, so the profilarr image has no
+`node_modules` for Trivy to read. The Dockerfile writes a CycloneDX 1.6 SBOM of
+the production packages with `pnpm sbom` and ships it as `/app/sbom.cdx.json`,
+which `trivy image` reads instead. Trivy 0.70 silently skips CycloneDX 1.7,
+pnpm's default, so the version is pinned. The SBOM comes from the lockfile, so
+it also lists build tools that the bundle doesn't contain.
 
 **Where it runs:**
 
 - **CI** (`ci.yml`): a `trivy` job runs in parallel with lint, type-check,
   unit tests, and semgrep. It builds both Docker images (`profilarr` and
-  `profilarr-parser`) from their Dockerfiles and scans them. PRs with
-  CRITICAL or HIGH CVEs fail the check.
+  `profilarr-parser`) from their Dockerfiles and scans them.
 - **Release script** (`pnpm release`): builds and scans both images
-  before prompting for the version tag. If either scan fails, the release
-  aborts before tagging. Requires `trivy` on PATH.
+  before prompting for the version tag. Requires `trivy` on PATH.
 
-**Configuration:**
+**Rules:**
 
-- Severity threshold: `CRITICAL,HIGH`
-- Exit code 1 on findings (blocking in both CI and release)
-- CI uses the `aquasecurity/trivy-action` GitHub Action
-- Release script uses the `trivy` CLI directly
+- CRITICAL or HIGH findings in the profilarr image's OS packages, or in any
+  package in the parser image, fail CI and abort the release.
+- npm findings in the profilarr image never block. CI writes them to the job
+  summary and raises one warning when any are CRITICAL or HIGH, and the
+  release script lists them. Dependabot alerts track the same packages from
+  `pnpm-lock.yaml`.
+- CI and the release script both fail when Trivy finds no npm packages in the
+  profilarr image, because that means it couldn't read the SBOM.
+- CI uses the `aquasecurity/trivy-action` GitHub Action. The release script
+  uses the `trivy` CLI directly.
 
 **Future considerations:** scheduled scanning (weekly cron against `:latest`
 and `:develop` on GHCR) would catch new CVE advisories published after a
@@ -843,9 +853,9 @@ the value over CI + release gating is low.
 
 #### DAST - OWASP ZAP
 
-Dynamic Application Security Testing. Runs a live scan against compiled
+Dynamic Application Security Testing. Runs a live scan against built
 Profilarr instances to find runtime vulnerabilities (missing headers, cookie
-issues, information disclosure, etc.). Requires `pnpm build` and Docker.
+issues, information disclosure, etc.). Requires `pnpm build`, Bun, and Docker.
 
 ```bash
 pnpm scan:zap --baseline  # passive scan (spider + check responses)

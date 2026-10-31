@@ -1,6 +1,6 @@
 /**
  * Vitest config for the unit suite (tests/unit). Kept apart from vite.config.ts
- * so tests don't load the SvelteKit, Deno and Tailwind plugins.
+ * so tests don't load the SvelteKit and Tailwind plugins.
  */
 import { defineConfig } from 'vitest/config';
 

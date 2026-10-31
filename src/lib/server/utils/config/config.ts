@@ -44,15 +44,16 @@ class Config {
 	constructor() {
 		// Default base path logic:
 		// 1. Check environment variable
-		// 2. Fall back to directory containing the executable
+		// 2. Fall back to the directory containing the entry script, so a local
+		//    build keeps its data in dist/build. The runtime's own directory would
+		//    be wherever Bun is installed.
 		const envPath = process.env.APP_BASE_PATH;
 		if (envPath) {
 			this.basePath = envPath;
 		} else {
-			// Use the directory where the executable is located
-			const execPath = process.execPath;
-			const lastSlash = Math.max(execPath.lastIndexOf('/'), execPath.lastIndexOf('\\'));
-			this.basePath = lastSlash > 0 ? execPath.substring(0, lastSlash) : '.';
+			const entry = process.argv[1] ?? '';
+			const lastSlash = Math.max(entry.lastIndexOf('/'), entry.lastIndexOf('\\'));
+			this.basePath = lastSlash > 0 ? entry.substring(0, lastSlash) : '.';
 		}
 
 		// Timezone configuration:

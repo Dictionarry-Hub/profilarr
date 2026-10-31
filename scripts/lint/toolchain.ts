@@ -18,7 +18,7 @@ const CI_PATH = '.github/workflows/ci.yml';
 const SETUP_ACTION_PATH = '.github/actions/setup/action.yml';
 
 interface ToolVersions {
-	deno?: string;
+	bun?: string;
 	nodejs?: string;
 	pnpm?: string;
 }
@@ -31,7 +31,7 @@ function parseToolVersions(source: string): ToolVersions {
 		if (!line || line.startsWith('#')) continue;
 
 		const [tool, version] = line.split(/\s+/, 2);
-		if (tool === 'deno') versions.deno = version;
+		if (tool === 'bun') versions.bun = version;
 		if (tool === 'nodejs') versions.nodejs = version;
 		if (tool === 'pnpm') versions.pnpm = version;
 	}
@@ -86,7 +86,7 @@ function checkDockerArg(
 }
 
 function checkDockerfile(source: string, versions: ToolVersions, violations: string[]): void {
-	checkDockerArg(source, 'DENO_VERSION', versions.deno ?? '', violations);
+	checkDockerArg(source, 'BUN_VERSION', versions.bun ?? '', violations);
 	checkDockerArg(source, 'NODE_VERSION', versions.nodejs ?? '', violations);
 	checkDockerArg(source, 'PNPM_VERSION', versions.pnpm ?? '', violations);
 
@@ -94,12 +94,8 @@ function checkDockerfile(source: string, versions: ToolVersions, violations: str
 		violations.push(`${DOCKERFILE_PATH} builder image must use NODE_VERSION`);
 	}
 
-	if (!source.includes('FROM denoland/deno:bin-${DENO_VERSION} AS deno')) {
-		violations.push(`${DOCKERFILE_PATH} Deno binary stage must use DENO_VERSION`);
-	}
-
-	if (!source.includes('FROM denoland/deno:alpine-${DENO_VERSION}')) {
-		violations.push(`${DOCKERFILE_PATH} runtime image must use DENO_VERSION`);
+	if (!source.includes('FROM oven/bun:${BUN_VERSION}-alpine')) {
+		violations.push(`${DOCKERFILE_PATH} runtime image must use BUN_VERSION`);
 	}
 }
 
@@ -118,21 +114,21 @@ function checkNodeSetup(source: string, path: string, violations: string[]): voi
 }
 
 function checkCi(source: string, violations: string[]): void {
-	// Only the build job needs Deno, to compile the binary
-	const denoSetups = actionUseCount(source, 'denoland/setup-deno', 'v2');
-	if (denoSetups !== 1) {
-		violations.push(`${CI_PATH} has ${denoSetups} Deno setup steps, expected 1 (build)`);
+	// The integration and flow jobs run the build on Bun
+	const bunSetups = actionUseCount(source, 'oven-sh/setup-bun', 'v2');
+	if (bunSetups !== 2) {
+		violations.push(`${CI_PATH} has ${bunSetups} Bun setup steps, expected 2 (integration, flows)`);
 	}
 
-	const denoVersionFiles = matchCount(source, /deno-version-file:\s+\.tool-versions/g);
-	if (denoSetups !== denoVersionFiles) {
+	const bunVersionFiles = matchCount(source, /bun-version-file:\s+\.tool-versions/g);
+	if (bunSetups !== bunVersionFiles) {
 		violations.push(
-			`${CI_PATH} has ${denoSetups} Deno setup steps but ${denoVersionFiles} use .tool-versions`
+			`${CI_PATH} has ${bunSetups} Bun setup steps but ${bunVersionFiles} use .tool-versions`
 		);
 	}
 
-	if (/\bdeno-version:\s/.test(source)) {
-		violations.push(`${CI_PATH} must use deno-version-file, not deno-version`);
+	if (/\bbun-version:\s/.test(source)) {
+		violations.push(`${CI_PATH} must use bun-version-file, not bun-version`);
 	}
 
 	checkNodeSetup(source, CI_PATH, violations);
@@ -164,7 +160,7 @@ const [toolVersionsSource, dockerfileSource, ciSource, setupActionSource] = awai
 
 const violations: string[] = [];
 const versions = parseToolVersions(toolVersionsSource);
-for (const tool of ['deno', 'nodejs', 'pnpm'] as const) {
+for (const tool of ['bun', 'nodejs', 'pnpm'] as const) {
 	const version = requireTool(versions, tool, violations);
 	if (version && !/^\d+\.\d+\.\d+$/.test(version)) {
 		violations.push(`${TOOL_VERSIONS_PATH} ${tool} must be an exact version`);

@@ -147,7 +147,9 @@ export const PORTS = {
 		securityAttach: 7800
 	},
 	settings: {
-		landingPage: 7900
+		landingPage: 7900,
+		outboundProxySocks: 7901,
+		outboundProxyHttp: 7902
 	}
 } as const;
 

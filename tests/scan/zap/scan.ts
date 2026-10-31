@@ -10,7 +10,7 @@
  *   1. Unauthenticated (AUTH=on, port 7090) -- tests the auth boundary
  *   2. Full crawl (AUTH=off, port 7091) -- all routes reachable
  *
- * Requires: compiled binary (pnpm build), Docker
+ * Requires: a production build (pnpm build), Bun, Docker
  *
  * Usage:
  *   pnpm scan:zap --baseline
@@ -23,7 +23,7 @@ import { chmod, mkdir, mkdtemp, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const BINARY = './dist/build/profilarr';
+const ENTRY = './dist/build/server.js';
 const ZAP_IMAGE = 'zaproxy/zap-stable';
 
 type ScanMode = 'baseline' | 'full' | 'api';
@@ -65,9 +65,9 @@ function parseScanMode(): ScanMode {
 
 async function checkPrereqs(): Promise<void> {
 	try {
-		await stat(BINARY);
+		await stat(ENTRY);
 	} catch {
-		console.error(`Build not found at ${BINARY}. Run "pnpm build" first.`);
+		console.error(`Build not found at ${ENTRY}. Run "pnpm build" first.`);
 		process.exit(1);
 	}
 
@@ -88,7 +88,7 @@ async function startServer(port: number, envOverrides: Record<string, string>): 
 	console.log(`Starting server on port ${port}...`);
 
 	// Server output is discarded
-	const child = spawn(BINARY, [], {
+	const child = spawn('bun', [ENTRY], {
 		env: {
 			...process.env,
 			PORT: String(port),

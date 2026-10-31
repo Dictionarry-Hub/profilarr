@@ -32,7 +32,7 @@ publishes a release.
 | Layer          | Choice                            |
 | -------------- | --------------------------------- |
 | Language       | TypeScript                        |
-| Runtime        | Deno 2                            |
+| Runtime        | Bun 1.4 (Node 24 for tooling)     |
 | Web framework  | SvelteKit (Svelte 5)              |
 | Styling        | Tailwind CSS 4                    |
 | Database       | SQLite (WAL)                      |
@@ -41,19 +41,21 @@ publishes a release.
 
 ## Runtime and Memory
 
-Profilarr ships as a `deno compile` binary. The compile step passes
-`--node-modules-dir=none --exclude-unused-npm`, so Deno embeds only the packages
-the server imports rather than the whole `node_modules` folder, which also
-contains build tooling. A package loaded through a computed `import()` can't be
-detected at compile time and would be missing from the binary.
+Profilarr ships as a Docker image that runs the built server on Bun. Vite and
+adapter-node build the server into `dist/build`, and the Vite config inlines
+every package listed under `dependencies`, so the image needs no
+`node_modules`. A package with native code can't be inlined and would need an
+install step in the image. Because the packages are inlined, the image carries
+a CycloneDX SBOM of them for scanners (see
+[security.md](./backend/security.md#container-scanning--trivy)).
 
 Where memory goes at idle:
 
-| Component         | Approximate size            | Notes                                               |
-| ----------------- | --------------------------- | --------------------------------------------------- |
-| Runtime and app   | ~85 MB                      | Deno/V8, loaded code, app DB, ~20-25 MB of V8 heap  |
-| PCD cache         | ~30-50 MB per database      | In-memory SQLite, native memory, grows with content |
-| Arr library cache | ~10-15 MB per large library | V8 heap, `src/lib/server/utils/cache/cache.ts`      |
+| Component         | Approximate size            | Notes                                                  |
+| ----------------- | --------------------------- | ------------------------------------------------------ |
+| Runtime and app   | ~50 MB                      | Bun, loaded code, and the app DB in a fresh container  |
+| PCD cache         | ~30-50 MB per database      | In-memory SQLite, native memory, grows with content    |
+| Arr library cache | ~10-15 MB per large library | JavaScript heap, `src/lib/server/utils/cache/cache.ts` |
 
 Known improvement areas:
 

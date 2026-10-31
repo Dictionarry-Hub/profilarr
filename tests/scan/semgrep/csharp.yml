@@ -27,7 +27,7 @@ rules:
           - pattern: 'new Process()'
     message: >
       Process execution in the parser service. The parser should not
-      spawn external processes. Command execution belongs in the Deno
+      spawn external processes. Command execution belongs in the TypeScript
       server layer.
     languages: [csharp]
     severity: ERROR

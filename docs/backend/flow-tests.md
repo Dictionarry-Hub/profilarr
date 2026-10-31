@@ -32,8 +32,10 @@ pnpm test:flows --deal=2/4         # the 2nd of 4 sets of spec files, as CI shar
 ```
 
 The suite runs in the official Playwright Docker image, so no browsers are
-installed locally. The app binary is built only when it's missing. App changes
-need `--build`, and test changes don't. `FLOWS_WORKERS` overrides the worker
+installed locally. The app runs on Bun, so the runner mounts the host's Bun
+binary into the container; install it with `mise install`. The app is built
+only when `dist/build/server.js` is missing. App changes need `--build`, and
+test changes don't. `FLOWS_WORKERS` overrides the worker
 count. By default it is half the CPU cores locally and 4 on CI. `FLOWS_VIDEO=1`
 records a full-size video of each test. The trace viewer then plays the video
 in place of its small screencast frames. Recording slows runs, so leave it off
@@ -139,10 +141,9 @@ test.use({
 - **Forward auth.** With `appProxy: { forwardAuth: true }`, the proxy asks
   the SSO provider before it forwards each request, and sends a signed-out
   browser to the provider's login page. Traefik and Authelia support it.
-- **HTTPS.** HTTPS services serve the run's self-signed certificate
-  (`harness/tls.ts`). It's a leaf certificate, because Deno rejects a
-  self-signed CA. A provider gives it to the app as `NODE_EXTRA_CA_CERTS`, and
-  the browser ignores certificate errors.
+- **HTTPS.** HTTPS services serve the run's self-signed leaf certificate
+  (`harness/tls.ts`). A provider gives it to the app as `NODE_EXTRA_CA_CERTS`,
+  and the browser ignores certificate errors.
 - **Real services.** Entries marked `needsDocker` run in a container that
   shares the test container's network namespace. They stay offline and reach
   the app on `127.0.0.1` (`harness/docker.ts`). `pnpm test:flows` mounts

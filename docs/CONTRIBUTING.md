@@ -31,7 +31,7 @@ For the branching model, release process, and versioning, see
 | [Git](https://git-scm.com/)               | 2.x+                 | Yes      | Version control; also used at runtime for PCD operations   |
 | [Node.js](https://nodejs.org/)            | See `.tool-versions` | Yes      | Runs the dev server, scripts, lint, type checks, and tests |
 | [pnpm](https://pnpm.io/)                  | See `.tool-versions` | Yes      | Package manager and task runner                            |
-| [Deno](https://deno.com/)                 | See `.tool-versions` | Yes      | Only used by `deno compile` at the end of `pnpm build`     |
+| [Bun](https://bun.com/)                   | See `.tool-versions` | Yes      | Runs the production build for integration and flow tests   |
 | [.NET SDK](https://dotnet.microsoft.com/) | See `.tool-versions` | No       | Only needed for the parser service (CF/QP testing)         |
 
 ```bash
@@ -208,7 +208,7 @@ feat: add regex filter type
 fix: sync status not updating after save
 docs: update contributing guide
 refactor: extract profile compilation logic
-chore: update Deno to 2.x
+chore: update Bun to 1.x
 ```
 
 The message after the colon is imperative: what the commit does when applied,
