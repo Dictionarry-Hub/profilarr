@@ -98,7 +98,6 @@ function getActivity(
 	syncStatus: SyncConfigStatus,
 	configured: { qualityProfiles: boolean; delayProfiles: boolean; mediaManagement: boolean }
 ): ArrActivity {
-
 	const drift = arrDriftStatusQueries.getByInstanceId(instanceId);
 	const lastUpgrade = upgradeRunsQueries.getByInstanceId(instanceId, 1)[0];
 	const lastRename = renameRunsQueries.getByInstanceId(instanceId, 1)[0];

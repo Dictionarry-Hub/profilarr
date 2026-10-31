@@ -113,7 +113,13 @@ export function getCardLines(instance: ArrInstanceSummary): CardLine[] {
 			cleanup.lastFailed
 		),
 		library.total === null
-			? { label: 'Library', icon: Library, value: 'Not Counted', tone: 'muted', nextAt: library.nextAt }
+			? {
+					label: 'Library',
+					icon: Library,
+					value: 'Not Counted',
+					tone: 'muted',
+					nextAt: library.nextAt
+				}
 			: {
 					label: 'Library',
 					icon: Library,
