@@ -40,6 +40,12 @@ The manager includes **HMR recovery** for development: `isHealthy()` runs
 initialization (common after Vite hot reloads), the manager closes and
 reinitializes the connection.
 
+A full reload in dev evaluates every server module again, which creates a new,
+uninitialized manager. `hooks.server.ts` listens for Vite's
+`vite:beforeFullReload` event: it stops the job dispatcher, closes the PCD
+caches and the database, and clears the startup guard. The next evaluation then
+runs the whole startup sequence, including pending migrations.
+
 **Transaction support** is available via `transaction<T>(fn)`, an async wrapper
 that auto-commits on success and auto-rollbacks on error. Raw
 `beginTransaction()`, `commit()`, and `rollback()` methods are also exposed.
