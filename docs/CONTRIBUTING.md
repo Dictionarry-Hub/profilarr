@@ -34,9 +34,17 @@ For the branching model, release process, and versioning, see
 | [Bun](https://bun.com/)                   | See `.tool-versions` | Yes      | Runs the production build for integration and flow tests   |
 | [.NET SDK](https://dotnet.microsoft.com/) | See `.tool-versions` | No       | Only needed for the parser service (CF/QP testing)         |
 
+`.tool-versions` pins Node, pnpm, Bun and .NET. The simplest way to get those
+versions is [mise](https://mise.jdx.dev/getting-started.html): install it, add
+`mise activate` to your shell, and run `mise install` in the repo. mise then
+switches to the pinned versions whenever you enter the repo. Run `mise install`
+again after `.tool-versions` changes. You can also install the versions by hand
+or with asdf, which reads the same file.
+
 ```bash
 git clone https://github.com/Dictionarry-Hub/profilarr.git
 cd profilarr
+mise install
 pnpm install
 pnpm dev
 ```
