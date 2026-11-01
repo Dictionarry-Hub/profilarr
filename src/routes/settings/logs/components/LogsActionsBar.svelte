@@ -22,24 +22,21 @@
 	export let searchStore: SearchStore;
 	export let logFiles: LogFile[];
 	export let selectedFile: string;
-	type LogLevel = 'ALL' | 'DEBUG' | 'INFO' | 'WARN' | 'ERROR';
-	export let selectedLevel: LogLevel;
+	export let logLevels: string[];
+	export let selectedLevels: string[];
 	export let selectedSources: Set<string>;
 	export let uniqueSources: string[];
 
 	export let isRefreshing: boolean = false;
 
 	export let onChangeFile: (filename: string) => void;
-	export let onChangeLevel: (level: LogLevel) => void;
+	export let onToggleLevel: (level: string) => void;
 	export let onToggleSource: (source: string) => void;
 	export let onRefresh: () => void;
 	export let onDownload: () => void;
 	export let onCleanup: (() => void) | undefined = undefined;
 
-	const logLevels = ['ALL', 'DEBUG', 'INFO', 'WARN', 'ERROR'] as const;
-
 	const levelColors: Record<string, string> = {
-		ALL: 'text-neutral-600 dark:text-neutral-400',
 		DEBUG: 'text-cyan-600 dark:text-cyan-400',
 		INFO: 'text-green-600 dark:text-green-400',
 		WARN: 'text-yellow-600 dark:text-yellow-400',
@@ -86,9 +83,9 @@
 				{#each logLevels as level}
 					<DropdownItem
 						label={level}
-						selected={selectedLevel === level}
-						labelClass="font-mono {levelColors[level]}"
-						on:click={() => onChangeLevel(level)}
+						selected={selectedLevels.includes(level)}
+						labelClass="font-mono {levelColors[level] ?? ''}"
+						on:click={() => onToggleLevel(level)}
 					/>
 				{/each}
 			</Dropdown>

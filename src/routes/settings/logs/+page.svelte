@@ -15,6 +15,7 @@
 	import type { Column, SortDirection, SortState } from '#ui/table/types.ts';
 	import LogsActionsBar from './components/LogsActionsBar.svelte';
 	import { getPersistentSearchStore } from '#stores/search.ts';
+	import { createCardRowsStore } from '#stores/dataPage.ts';
 	import { formatDateTime } from '#shared/utils/dates.ts';
 	import { dateFormat } from '#stores/dateFormat.ts';
 	import { serverTimezone } from '#stores/timezone.ts';
@@ -53,8 +54,14 @@
 	// Initialize search store
 	const searchStore = getPersistentSearchStore('settingsLogsSearch', { debounceMs: 300 });
 
-	// Filter state
-	let selectedLevel: 'ALL' | 'DEBUG' | 'INFO' | 'WARN' | 'ERROR' = 'ALL';
+	// Filter state. The shown levels are saved per browser; DEBUG starts hidden.
+	const LOG_LEVELS = [
+		{ key: 'DEBUG', defaultVisible: false },
+		{ key: 'INFO', defaultVisible: true },
+		{ key: 'WARN', defaultVisible: true },
+		{ key: 'ERROR', defaultVisible: true }
+	];
+	const levelsStore = createCardRowsStore('settingsLogsLevels', LOG_LEVELS);
 	let selectedSources: Set<string> = new Set();
 	let isRefreshing = false;
 	let cleanupFormRef: HTMLFormElement | null = null;
@@ -177,7 +184,7 @@
 	// Reactive filtering
 	$: filteredLogs = data.logs.filter((log) => {
 		// Level filter
-		if (selectedLevel !== 'ALL' && log.level !== selectedLevel) {
+		if (!$levelsStore.includes(log.level)) {
 			return false;
 		}
 
@@ -271,7 +278,7 @@
 	$: sortedLogs = sortLogs(filteredLogs, sortState, defaultSortDirection);
 
 	// Reset to page 1 when filters change
-	$: if (selectedLevel || selectedSources || $searchStore.query) {
+	$: if ($levelsStore || selectedSources || $searchStore.query) {
 		currentPage = 1;
 	}
 
@@ -313,12 +320,13 @@
 			{searchStore}
 			logFiles={data.logFiles}
 			selectedFile={data.selectedFile}
-			{selectedLevel}
+			logLevels={LOG_LEVELS.map((level) => level.key)}
+			selectedLevels={$levelsStore}
 			{selectedSources}
 			{uniqueSources}
 			{isRefreshing}
 			onChangeFile={changeLogFile}
-			onChangeLevel={(level) => (selectedLevel = level)}
+			onToggleLevel={(level) => levelsStore.toggle(level)}
 			onToggleSource={toggleSource}
 			onRefresh={refreshLogs}
 			onDownload={downloadLogs}

@@ -103,11 +103,12 @@ export interface CardRowsStore extends Readable<string[]> {
 
 /**
  * Which card rows are visible, saved per browser. Only the user's choices are
- * stored, so a row added later starts at its default.
+ * stored, so a row added later starts at its default. Any list of toggles with
+ * defaults can use it, such as the log levels on Settings › Logs.
  */
 export function createCardRowsStore(
 	storageKey: string,
-	rows: readonly CardRowOption[]
+	rows: readonly Pick<CardRowOption, 'key' | 'defaultVisible'>[]
 ): CardRowsStore {
 	let choices: Record<string, boolean> = {};
 
