@@ -149,7 +149,8 @@ export const PORTS = {
 	settings: {
 		landingPage: 7900,
 		outboundProxySocks: 7901,
-		outboundProxyHttp: 7902
+		outboundProxyHttp: 7902,
+		logEvents: 7903
 	}
 } as const;
 
