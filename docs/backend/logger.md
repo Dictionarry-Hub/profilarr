@@ -9,6 +9,7 @@
 - [Output Formats](#output-formats)
 - [Usage](#usage)
 - [Source Names](#source-names)
+- [Live View](#live-view)
 - [Open Work](#open-work)
 
 The logger is a singleton class that writes to two outputs simultaneously:
@@ -126,6 +127,25 @@ segments. Drop the file segment when it duplicates the parent directory.
 Good: source: 'sync.qualityProfiles'     // action goes in the message
 Bad:  source: 'transform.qualityProfile' // breaks grep "sync\."
 ```
+
+## Live View
+
+The Logs page streams new entries while it shows the newest log file. The
+logger emits every entry that passes the `enabled` and `min_level` checks to
+`logEvents` (`events.ts`), whether or not file logging is on.
+`/settings/logs/events` subscribes and sends each entry as an SSE `log` event,
+with a keepalive comment every 30 seconds. It opens with a `retry: 3000` line,
+because the browser only reports the stream open once bytes arrive. The route is outside `/api/v1`, so
+only a session can open it. Nothing on the stream's path may log, because each
+log line would emit another one.
+
+Streamed entries wait in a queue and join the table at a steady pace: one every
+50 ms, or two while more than 20 are waiting. If the oldest waiting entry is
+more than 10 seconds old, the whole queue joins at once. The page keeps up to
+5,000 streamed entries, dropping the oldest. A refresh drops streamed entries
+the reloaded file already holds. A dot before the log count shows the
+connection: pulsing green while live, red while reconnecting. If the stream
+closes, the page reconnects after 3 seconds.
 
 ## Open Work
 

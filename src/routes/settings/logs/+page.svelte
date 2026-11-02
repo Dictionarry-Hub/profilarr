@@ -10,6 +10,7 @@
 	import NumberInput from '#ui/form/NumberInput.svelte';
 	import Pagination from '#ui/navigation/pagination/Pagination.svelte';
 	import PageMeta from '#ui/meta/PageMeta.svelte';
+	import Tooltip from '#ui/tooltip/Tooltip.svelte';
 	import LogLevelCell from '#ui/table/LogLevelCell.svelte';
 	import LogSourceCell from '#ui/table/LogSourceCell.svelte';
 	import type { Column, SortDirection, SortState } from '#ui/table/types.ts';
@@ -71,8 +72,105 @@
 	let itemsPerPage = 100;
 	let sortState: SortState | null = { key: 'timestamp', direction: 'desc' };
 
+	// Live view: while the newest file is open, new entries stream in from
+	// /settings/logs/events and join the table, dropping the oldest at the cap.
+	const LIVE_CAP = 5_000;
+	const LIVE_RETRY_MS = 3_000;
+	// New rows wait in a queue and leave it at a steady pace: one per tick, two
+	// while a backlog builds. A queue that falls too far behind joins at once.
+	const TRICKLE_MS = 50;
+	const TRICKLE_BACKLOG = 20;
+	const TRICKLE_MAX_LAG_MS = 10_000;
+
+	let liveLogs: LogEntry[] = [];
+	let incomingLogs: { log: LogEntry; queuedAt: number }[] = [];
+	let liveConnected = false;
+	let eventSource: EventSource | null = null;
+	let trickleTimer: ReturnType<typeof setInterval> | null = null;
+	let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
+	// No file yet (file logging off) also counts as the newest log
+	const liveAvailable = !data.selectedFile || data.selectedFile === data.logFiles[0]?.filename;
+
+	// A refresh reloads the file, which already holds the earlier live entries
+	let loadedLogs = data.logs;
+	$: if (data.logs !== loadedLogs) {
+		loadedLogs = data.logs;
+		dropLoadedLiveLogs();
+	}
+
+	function dropLoadedLiveLogs() {
+		let newest = '';
+		for (const log of loadedLogs) {
+			if (log.timestamp > newest) newest = log.timestamp;
+		}
+		liveLogs = liveLogs.filter((log) => log.timestamp > newest);
+		incomingLogs = incomingLogs.filter((item) => item.log.timestamp > newest);
+	}
+
+	function trickle() {
+		if (incomingLogs.length === 0) {
+			stopTrickle();
+			return;
+		}
+		const behind = Date.now() - incomingLogs[0].queuedAt > TRICKLE_MAX_LAG_MS;
+		const count = behind ? incomingLogs.length : incomingLogs.length > TRICKLE_BACKLOG ? 2 : 1;
+		const joined = incomingLogs.splice(0, count).map((item) => item.log);
+		liveLogs = [...liveLogs, ...joined].slice(-LIVE_CAP);
+	}
+
+	function stopTrickle() {
+		if (trickleTimer) clearInterval(trickleTimer);
+		trickleTimer = null;
+	}
+
+	function connectLive() {
+		retryTimer = null;
+		eventSource = new EventSource('/settings/logs/events');
+		eventSource.onopen = () => {
+			liveConnected = true;
+		};
+		eventSource.addEventListener('log', (event) => {
+			try {
+				const log = JSON.parse((event as MessageEvent<string>).data) as LogEntry;
+				incomingLogs.push({ log, queuedAt: Date.now() });
+			} catch {
+				return;
+			}
+			trickleTimer ??= setInterval(trickle, TRICKLE_MS);
+		});
+		eventSource.onerror = () => {
+			liveConnected = false;
+			// The browser retries on its own unless it gave up, e.g. after a redirect
+			if (eventSource?.readyState === EventSource.CLOSED) {
+				eventSource = null;
+				retryTimer = setTimeout(connectLive, LIVE_RETRY_MS);
+			}
+		};
+	}
+
+	function disconnectLive() {
+		eventSource?.close();
+		eventSource = null;
+		stopTrickle();
+		if (retryTimer) clearTimeout(retryTimer);
+	}
+
+	onMount(() => {
+		if (liveAvailable) connectLive();
+		return disconnectLive;
+	});
+
+	$: liveTooltip = !liveAvailable
+		? ''
+		: liveConnected
+			? 'Live: new logs appear as they are written.'
+			: 'Disconnected. Reconnecting...';
+
+	$: allLogs = liveLogs.length > 0 ? [...data.logs, ...liveLogs] : data.logs;
+
 	// Extract unique sources from logs (excluding 'ALL' since empty set means all)
-	$: uniqueSources = [...new Set(data.logs.map((log) => log.source).filter(Boolean))] as string[];
+	$: uniqueSources = [...new Set(allLogs.map((log) => log.source).filter(Boolean))] as string[];
 
 	function toggleSource(source: string) {
 		selectedSources = new Set(selectedSources);
@@ -182,7 +280,7 @@
 	}
 
 	// Reactive filtering
-	$: filteredLogs = data.logs.filter((log) => {
+	$: filteredLogs = allLogs.filter((log) => {
 		// Level filter
 		if (!$levelsStore.includes(log.level)) {
 			return false;
@@ -351,12 +449,25 @@
 	<div
 		class="mt-6 mb-4 flex items-center justify-between text-sm text-neutral-600 dark:text-neutral-400"
 	>
-		<span>
-			Showing {startIndex + 1}-{endIndex} of {filteredLogs.length} logs
-			{#if filteredLogs.length !== data.logs.length}
-				(filtered from {data.logs.length})
-			{/if}
-		</span>
+		<!-- Empty tooltip text, as for an older log file, disables the tooltip -->
+		<Tooltip text={liveTooltip} position="top" align="left">
+			<span class="flex items-center gap-2">
+				{#if liveAvailable}
+					<span
+						class="h-2 w-2 shrink-0 rounded-full"
+						class:animate-pulse={liveConnected}
+						class:bg-green-500={liveConnected}
+						class:bg-red-500={!liveConnected}
+					></span>
+				{/if}
+				<span>
+					Showing {startIndex + 1}-{endIndex} of {filteredLogs.length} logs
+					{#if filteredLogs.length !== allLogs.length}
+						(filtered from {allLogs.length})
+					{/if}
+				</span>
+			</span>
+		</Tooltip>
 
 		<!-- Pagination -->
 		{#if totalPages > 1}

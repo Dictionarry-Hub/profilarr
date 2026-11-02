@@ -7,6 +7,7 @@
 import * as fs from 'node:fs/promises';
 import { config } from '#utils/config/config.ts';
 import { colors } from './colors.ts';
+import { logEvents } from './events.ts';
 import { logSettings } from './settings.ts';
 import type { LogEntry, LoggerConfig, LogLevel, LogOptions } from './types.ts';
 
@@ -106,6 +107,16 @@ class Logger {
 		}
 
 		const timestamp = new Date().toISOString();
+		const logEntry: LogEntry = {
+			timestamp,
+			level,
+			message,
+			...(options?.source ? { source: options.source } : {}),
+			...(options?.meta ? { meta: options.meta } : {})
+		};
+
+		// Live view on the Logs page, whether or not file logging is on
+		logEvents.emit(logEntry);
 
 		// Console output (colored)
 		if (this.isConsoleLoggingEnabled()) {
@@ -122,14 +133,6 @@ class Logger {
 
 		// File output (JSON)
 		if (this.isFileLoggingEnabled()) {
-			const logEntry: LogEntry = {
-				timestamp,
-				level,
-				message,
-				...(options?.source ? { source: options.source } : {}),
-				...(options?.meta ? { meta: options.meta } : {})
-			};
-
 			try {
 				const filePath = this.getLogFilePath();
 
@@ -173,15 +176,21 @@ class Logger {
 			console.log(`${colors.grey}${error.stack}${colors.reset}`);
 		}
 
-		// Write stack trace to file
-		if (error?.stack && this.isFileLoggingEnabled()) {
-			const traceEntry: LogEntry = {
-				timestamp: new Date().toISOString(),
-				level: 'ERROR',
-				message: 'Stack trace',
-				meta: { stack: error.stack }
-			};
+		if (!error?.stack) return;
 
+		const traceEntry: LogEntry = {
+			timestamp: new Date().toISOString(),
+			level: 'ERROR',
+			message: 'Stack trace',
+			meta: { stack: error.stack }
+		};
+
+		if (this.shouldLog('ERROR')) {
+			logEvents.emit(traceEntry);
+		}
+
+		// Write stack trace to file
+		if (this.isFileLoggingEnabled()) {
 			try {
 				const filePath = this.getLogFilePath();
 				await fs.appendFile(filePath, JSON.stringify(traceEntry) + '\n');
