@@ -47,12 +47,7 @@ export interface ProxyOptions {
 
 /** An option, or `fail`, that a proxy may or may not support */
 export type ProxyFeature =
-	| 'tls'
-	| 'headers'
-	| 'maxResponseHeaderBytes'
-	| 'fail'
-	| 'normalizeEncodedSlashes'
-	| 'forwardAuth';
+	'tls' | 'headers' | 'maxResponseHeaderBytes' | 'fail' | 'normalizeEncodedSlashes' | 'forwardAuth';
 
 export interface ProxiedRequest {
 	method: string;
