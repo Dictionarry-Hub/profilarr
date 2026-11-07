@@ -54,9 +54,13 @@ async function startFakeProxy(options: ProxyOptions): Promise<RunningProxy> {
 			else headers[name.toLowerCase()] = value;
 		}
 
+		const forwardPath = options.normalizeEncodedSlashes
+			? (req.url ?? '/').replace(/%2[fF]/g, '/')
+			: (req.url ?? '/');
+
 		const entry: ProxiedRequest = {
 			method: req.method ?? 'GET',
-			path: req.url ?? '/',
+			path: forwardPath,
 			headers,
 			status: 0
 		};
@@ -70,7 +74,7 @@ async function startFakeProxy(options: ProxyOptions): Promise<RunningProxy> {
 				host: appUrl.hostname,
 				port: appUrl.port,
 				method: req.method,
-				path: req.url,
+				path: forwardPath,
 				headers
 			},
 			(response) => {
@@ -115,6 +119,6 @@ export const fakeProxy: ReverseProxy = {
 	id: 'fake',
 	label: 'Fake reverse proxy',
 	needsDocker: false,
-	supports: ['tls', 'headers', 'maxResponseHeaderBytes', 'fail'],
+	supports: ['tls', 'headers', 'maxResponseHeaderBytes', 'fail', 'normalizeEncodedSlashes'],
 	start: startFakeProxy
 };
