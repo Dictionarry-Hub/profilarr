@@ -33,6 +33,11 @@ export interface ProxyOptions {
 	 */
 	maxResponseHeaderBytes?: number;
 	/**
+	 * Decode `%2F` to `/` in the forwarded path, simulating proxies like
+	 * Envoy Gateway that normalize encoded slashes by default.
+	 */
+	normalizeEncodedSlashes?: boolean;
+	/**
 	 * Ask the SSO provider before forwarding each request, and send the
 	 * browser to its login page when it says no (forward auth). Needs
 	 * `test.use({ ssoProvider })` with a provider that supports it.
@@ -41,7 +46,13 @@ export interface ProxyOptions {
 }
 
 /** An option, or `fail`, that a proxy may or may not support */
-export type ProxyFeature = 'tls' | 'headers' | 'maxResponseHeaderBytes' | 'fail' | 'forwardAuth';
+export type ProxyFeature =
+	| 'tls'
+	| 'headers'
+	| 'maxResponseHeaderBytes'
+	| 'fail'
+	| 'normalizeEncodedSlashes'
+	| 'forwardAuth';
 
 export interface ProxiedRequest {
 	method: string;
