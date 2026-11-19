@@ -2,20 +2,22 @@ import { redirect, fail } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
 import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
 import { arrCleanupSettingsQueries } from '#db/queries/arrCleanupSettings.ts';
-import { cleanupJobsForArrInstance } from '#server/jobs/cleanup.ts';
-import {
-	scheduleCleanupForInstance,
-	scheduleLibraryRefreshForInstance
-} from '#server/jobs/init.ts';
+import { scheduleCleanupForInstance } from '#server/jobs/init.ts';
 import { calculateNextRun } from '#server/jobs/scheduleUtils.ts';
 import { enqueueJob } from '#server/jobs/queueService.ts';
 import { logger } from '#logger/logger.ts';
-import { requireSecretForDestinationChange } from '#utils/secretDestination.ts';
-import { normalizeArrInstanceUrl } from '#shared/utils/arrUrl.ts';
-import { basicAuthPairError } from '#shared/arr/basicAuth.ts';
-import { createArrClient } from '#arr/factory.ts';
-import { probeAndRecordVersion } from '#arr/version.ts';
-import type { ArrType } from '#arr/types.ts';
+import { deleteArrInstance, updateArrInstance } from '#server/arr_instances/service.ts';
+
+function parseTags(json: string | undefined): string[] {
+	if (!json) return [];
+
+	try {
+		const parsed = JSON.parse(json);
+		return Array.isArray(parsed) ? parsed : [];
+	} catch {
+		return [];
+	}
+}
 
 export const load = ({ params }) => {
 	const id = parseInt(params.id || '', 10);
@@ -31,154 +33,38 @@ export const load = ({ params }) => {
 export const actions: Actions = {
 	update: async ({ params, request }) => {
 		const id = parseInt(params.id || '', 10);
-
-		// Validate ID
 		if (isNaN(id)) {
 			return fail(400, { error: 'Invalid instance ID' });
 		}
 
-		// Fetch the instance to verify it exists
-		const instance = arrInstancesQueries.getById(id);
-
-		if (!instance) {
-			return fail(404, { error: 'Instance not found' });
-		}
-
 		const formData = await request.formData();
-		const name = formData.get('name')?.toString().trim();
-		const url = formData.get('url')?.toString().trim();
-		const externalUrlRaw = formData.get('external_url')?.toString().trim() ?? '';
-		const externalUrl = externalUrlRaw === '' ? null : externalUrlRaw;
-		const apiKey = formData.get('api_key')?.toString().trim() || instance.api_key;
-		const basicAuthUsernameRaw = formData.get('basic_auth_username')?.toString().trim();
-		const basicAuthPasswordRaw = formData.get('basic_auth_password')?.toString();
-		const basicAuthUsernameTouched =
-			formData.get('basic_auth_username_touched')?.toString() === '1';
-		const basicAuthPasswordTouched =
-			formData.get('basic_auth_password_touched')?.toString() === '1';
-		// Saved Basic Auth is sent to the URL, so a new URL drops it unless it is re-entered
-		const urlChanged =
-			!!url && normalizeArrInstanceUrl(url) !== normalizeArrInstanceUrl(instance.url);
-		const basicAuthUsername =
-			basicAuthUsernameTouched && basicAuthUsernameRaw !== undefined
-				? basicAuthUsernameRaw === ''
-					? null
-					: basicAuthUsernameRaw
-				: urlChanged
-					? null
-					: instance.basic_auth_username;
-		const basicAuthPassword =
-			basicAuthPasswordTouched && basicAuthPasswordRaw !== undefined
-				? basicAuthPasswordRaw === ''
-					? null
-					: basicAuthPasswordRaw
-				: urlChanged
-					? null
-					: instance.basic_auth_password;
-		const basicAuthCleared =
-			!!(instance.basic_auth_username || instance.basic_auth_password) &&
-			!basicAuthUsername &&
-			!basicAuthPassword;
-		const tagsJson = formData.get('tags')?.toString() || '';
-		const libraryRefreshInterval =
-			parseInt(formData.get('library_refresh_interval')?.toString() || '0', 10) || 0;
+		const text = (key: string) => formData.get(key)?.toString();
 
-		// Validate required fields
-		if (!name) {
-			return fail(400, { error: 'Name is required' });
+		// A blank API key keeps the stored one. Basic Auth only counts when the form says it
+		// was touched, since the form never receives the stored values.
+		const raw: Record<string, unknown> = {
+			name: text('name'),
+			url: text('url'),
+			external_url: text('external_url') ?? '',
+			tags: parseTags(text('tags')),
+			library_refresh_interval: parseInt(text('library_refresh_interval') || '0', 10) || 0
+		};
+		if (text('api_key')?.trim()) raw.api_key = text('api_key');
+		if (text('basic_auth_username_touched') === '1') {
+			raw.basic_auth_username = text('basic_auth_username') ?? '';
+		}
+		if (text('basic_auth_password_touched') === '1') {
+			raw.basic_auth_password = text('basic_auth_password') ?? '';
 		}
 
-		if (!url) {
-			return fail(400, { error: 'URL is required' });
-		}
-
-		const basicAuthError = basicAuthPairError(!!basicAuthUsername, !!basicAuthPassword);
-		if (basicAuthError) {
-			return fail(400, { error: basicAuthError });
-		}
-
-		// The stored key is sent to the URL, so a new URL needs the key re-entered
-		const guardError = requireSecretForDestinationChange({
-			destinationChanged: urlChanged,
-			storedSecret: instance.api_key,
-			submittedSecret: formData.get('api_key')?.toString(),
-			secretLabel: 'API key',
-			destinationLabel: 'URL'
-		});
-		if (guardError) {
-			return fail(400, { error: guardError });
-		}
-
-		// Check for duplicate name
-		if (arrInstancesQueries.nameExists(name, id)) {
-			return fail(400, { error: 'An instance with this name already exists' });
-		}
-
-		// Check if target already exists
-		if (arrInstancesQueries.targetExists(instance.type, url, id)) {
-			return fail(400, { error: 'This instance target is already configured' });
-		}
-
-		// Parse tags
-		let tags: string[] = [];
-		if (tagsJson) {
-			try {
-				tags = JSON.parse(tagsJson);
-			} catch {
-				// Ignore parse errors, use empty array
-			}
-		}
-
-		try {
-			arrInstancesQueries.update(id, {
-				name,
-				url,
-				externalUrl,
-				apiKey,
-				basicAuthUsername,
-				basicAuthPassword,
-				tags,
-				libraryRefreshInterval
+		const result = await updateArrInstance(id, raw);
+		if (!result.ok) {
+			return fail(result.kind === 'not_found' ? 404 : result.kind === 'failed' ? 500 : 400, {
+				error: result.message
 			});
-
-			scheduleLibraryRefreshForInstance(id);
-
-			// A new URL or key may point at a different server, so re-check what it runs
-			const keySubmitted = !!formData.get('api_key')?.toString().trim();
-			if (urlChanged || keySubmitted) {
-				const probeClient = createArrClient(instance.type as ArrType, url, apiKey, {
-					timeout: 5000,
-					retries: 0,
-					basicAuthUsername,
-					basicAuthPassword
-				});
-				await probeAndRecordVersion({ ...instance, name }, probeClient, 'arr/[id]/settings');
-			}
-
-			const cleanup = arrCleanupSettingsQueries.getByInstanceId(id);
-			await logger.info(`Updated arr instance: ${name}`, {
-				source: 'arr/[id]/settings',
-				meta: {
-					id,
-					name,
-					type: instance.type,
-					url,
-					externalUrl,
-					libraryRefreshInterval,
-					cleanup: cleanup ? { enabled: cleanup.enabled, cron: cleanup.cron } : null,
-					basicAuthCleared
-				}
-			});
-
-			return { success: true, basicAuthCleared };
-		} catch (err) {
-			await logger.error('Failed to update arr instance', {
-				source: 'arr/[id]/settings',
-				meta: { error: err instanceof Error ? err.message : String(err) }
-			});
-
-			return fail(500, { error: 'Failed to update instance' });
 		}
+
+		return { success: true, basicAuthCleared: result.basicAuthCleared };
 	},
 
 	updateCleanup: async ({ params, request }) => {
@@ -260,46 +146,15 @@ export const actions: Actions = {
 
 	delete: async ({ params }) => {
 		const id = parseInt(params.id || '', 10);
-
-		// Validate ID
 		if (isNaN(id)) {
-			await logger.warn('Delete failed: Invalid instance ID', {
-				source: 'arr/[id]/settings',
-				meta: { id: params.id }
-			});
 			return fail(400, { error: 'Invalid instance ID' });
 		}
 
-		// Fetch the instance to verify it exists
-		const instance = arrInstancesQueries.getById(id);
-
-		if (!instance) {
-			await logger.warn('Delete failed: Instance not found', {
-				source: 'arr/[id]/settings',
-				meta: { id }
-			});
-			return fail(404, { error: 'Instance not found' });
+		const result = await deleteArrInstance(id);
+		if (!result.ok) {
+			return fail(result.kind === 'not_found' ? 404 : 500, { error: result.message });
 		}
 
-		cleanupJobsForArrInstance(id);
-
-		// Delete the instance
-		const deleted = arrInstancesQueries.delete(id);
-
-		if (!deleted) {
-			await logger.error('Failed to delete instance', {
-				source: 'arr/[id]/settings',
-				meta: { id, name: instance.name, type: instance.type }
-			});
-			return fail(500, { error: 'Failed to delete instance' });
-		}
-
-		await logger.info(`Deleted ${instance.type} instance: ${instance.name}`, {
-			source: 'arr/[id]/settings',
-			meta: { id, name: instance.name, type: instance.type, url: instance.url }
-		});
-
-		// Redirect to the arr landing page
 		redirect(303, '/arr');
 	}
 };

@@ -12,7 +12,7 @@ instances:
 
       **Behavior:**
       - Returns an empty array if no instances are connected
-      - The `api_key`, `basic_auth_username`, and `basic_auth_password` fields are never included
+      - Credentials are never included
     tags:
       - Arr
     x-permission: read
@@ -35,3 +35,141 @@ instances:
               $ref: '../schemas/common.yaml#/ErrorResponse'
             example:
               error: API key does not have read access to Arr
+  post:
+    operationId: createArrInstance
+    summary: Create Arr Instance
+    description: |
+      Connects a Radarr or Sonarr instance.
+
+      **Behavior:**
+      - `name` must be unique, and `(type, url)` must not already be connected (answered with `400`)
+      - Credentials are never returned
+    tags:
+      - Arr
+    x-permission: write
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/arr.yaml#/CreateArrInstanceInput'
+    responses:
+      '201':
+        description: Instance created
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/arr.yaml#/ArrInstance'
+      '400':
+        description: Validation error
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Name, type, URL, and API key are required
+      '401':
+        description: Not authenticated
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Arr
+
+instance:
+  parameters:
+    - name: id
+      in: path
+      required: true
+      description: Arr instance ID
+      schema:
+        type: integer
+  patch:
+    operationId: updateArrInstance
+    summary: Update Arr Instance
+    description: |
+      Partial update: fields that are left out are kept. `external_url`,
+      `basic_auth_username` and `basic_auth_password` are cleared by sending
+      `null` or an empty string. The instance type cannot be changed.
+
+      **A stored secret follows its destination.** Changing `url` requires
+      `api_key` in the same request, since the stored key would otherwise be sent
+      to the new host. Saved Basic Auth is dropped when `url` changes unless both
+      fields are sent again.
+
+      Profilarr probes the instance for its version again when `url` or
+      `api_key` is sent.
+    tags:
+      - Arr
+    x-permission: write
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/arr.yaml#/UpdateArrInstanceInput'
+    responses:
+      '200':
+        description: Instance updated
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/arr.yaml#/ArrInstance'
+      '400':
+        description: Validation error, or `url` changed without `api_key`
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Enter the API key to change the URL.
+      '401':
+        description: Not authenticated
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Arr
+      '404':
+        description: Instance not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Instance not found
+  delete:
+    operationId: deleteArrInstance
+    summary: Delete Arr Instance
+    description: |
+      Removes the instance
+    tags:
+      - Arr
+    x-permission: write
+    responses:
+      '204':
+        description: Instance deleted
+      '401':
+        description: Not authenticated
+      '403':
+        description: API key does not have the required permission
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: API key does not have write access to Arr
+      '404':
+        description: Instance not found
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/common.yaml#/ErrorResponse'
+            example:
+              error: Instance not found

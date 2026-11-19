@@ -26,11 +26,64 @@ export interface paths {
 		 */
 		get: operations['listArrInstances'];
 		put?: never;
-		post?: never;
+		/**
+		 * Create Arr Instance
+		 * @description Connects a Radarr or Sonarr instance. After saving, Profilarr probes the
+		 *     instance for its version; a failed probe is logged and does not fail the
+		 *     request, so an instance that is still starting can be created.
+		 *
+		 *     Does the same as the web UI's "Add instance" form, including applying the
+		 *     default delay profile to the Arr when that setting is enabled.
+		 *
+		 *     **Behavior:**
+		 *     - `name` must be unique, and `(type, url)` must not already be connected (answered with `400`)
+		 *     - Credentials are never returned
+		 *     - A missing `Content-Type: application/json` is rejected with `403`
+		 */
+		post: operations['createArrInstance'];
 		delete?: never;
 		options?: never;
 		head?: never;
 		patch?: never;
+		trace?: never;
+	};
+	'/arr/{id}': {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Arr instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		get?: never;
+		put?: never;
+		post?: never;
+		/**
+		 * Delete Arr Instance
+		 * @description Removes the instance and its Profilarr-side state (sync selections,
+		 *     cleanup and drift settings) and cancels its scheduled jobs. Nothing is
+		 *     removed from the Arr itself.
+		 */
+		delete: operations['deleteArrInstance'];
+		options?: never;
+		head?: never;
+		/**
+		 * Update Arr Instance
+		 * @description Partial update: fields that are left out are kept. `external_url`,
+		 *     `basic_auth_username` and `basic_auth_password` are cleared by sending
+		 *     `null` or an empty string. The instance type cannot be changed.
+		 *
+		 *     **A stored secret follows its destination.** Changing `url` requires
+		 *     `api_key` in the same request, since the stored key would otherwise be sent
+		 *     to the new host. Saved Basic Auth is dropped when `url` changes unless both
+		 *     fields are sent again.
+		 *
+		 *     Profilarr probes the instance for its version again when `url` or
+		 *     `api_key` is sent.
+		 */
+		patch: operations['updateArrInstance'];
 		trace?: never;
 	};
 	'/databases': {
@@ -834,6 +887,39 @@ export interface components {
 			retentionDays?: number;
 			enabled?: boolean;
 		};
+		CreateArrInstanceInput: {
+			/** @description Display name (must be unique) */
+			name: string;
+			type: components['schemas']['ArrType'];
+			/**
+			 * @description Instance URL used by Profilarr's backend for API calls
+			 * @example http://127.0.0.1:7878
+			 */
+			url: string;
+			/** @description Optional browser-facing URL, used for "Open in" links only */
+			external_url?: string | null;
+			/** @description The instance's API key. Write-only; never returned. */
+			api_key: string;
+			/** @description Basic Auth for a reverse proxy in front of the instance. Needs a password. */
+			basic_auth_username?: string | null;
+			/** @description Basic Auth password. Write-only; never returned. */
+			basic_auth_password?: string | null;
+			tags?: string[];
+		};
+		UpdateArrInstanceInput: {
+			name?: string;
+			/** @description Requires `api_key` in the same request */
+			url?: string;
+			external_url?: string | null;
+			/** @description Write-only; never returned. */
+			api_key?: string;
+			basic_auth_username?: string | null;
+			/** @description Write-only; never returned. */
+			basic_auth_password?: string | null;
+			tags?: string[];
+			/** @description Library cache refresh interval in minutes (0 = manual) */
+			library_refresh_interval?: number;
+		};
 		SuccessResponse: {
 			/** @example true */
 			success: boolean;
@@ -881,6 +967,197 @@ export interface operations {
 					/**
 					 * @example {
 					 *       "error": "API key does not have read access to Arr"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	createArrInstance: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path?: never;
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['CreateArrInstanceInput'];
+			};
+		};
+		responses: {
+			/** @description Instance created */
+			201: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ArrInstance'];
+				};
+			};
+			/** @description Validation error */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Name, type, URL, and API key are required"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Arr"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	deleteArrInstance: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Arr instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody?: never;
+		responses: {
+			/** @description Instance deleted */
+			204: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Arr"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Instance not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Instance not found"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+		};
+	};
+	updateArrInstance: {
+		parameters: {
+			query?: never;
+			header?: never;
+			path: {
+				/** @description Arr instance ID */
+				id: number;
+			};
+			cookie?: never;
+		};
+		requestBody: {
+			content: {
+				'application/json': components['schemas']['UpdateArrInstanceInput'];
+			};
+		};
+		responses: {
+			/** @description Instance updated */
+			200: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					'application/json': components['schemas']['ArrInstance'];
+				};
+			};
+			/** @description Validation error, or `url` changed without `api_key` */
+			400: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Enter the API key to change the URL."
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Not authenticated */
+			401: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content?: never;
+			};
+			/** @description API key does not have the required permission */
+			403: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "API key does not have write access to Arr"
+					 *     }
+					 */
+					'application/json': components['schemas']['ErrorResponse'];
+				};
+			};
+			/** @description Instance not found */
+			404: {
+				headers: {
+					[name: string]: unknown;
+				};
+				content: {
+					/**
+					 * @example {
+					 *       "error": "Instance not found"
 					 *     }
 					 */
 					'application/json': components['schemas']['ErrorResponse'];
