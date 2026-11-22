@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------
 ARG NODE_VERSION=24.22.1
 ARG PNPM_VERSION=11.28.9
-ARG BUN_VERSION=1.4.4
+ARG BUN_VERSION=1.4.5
 
 FROM node:${NODE_VERSION}-bookworm-slim AS builder
 ARG PNPM_VERSION
