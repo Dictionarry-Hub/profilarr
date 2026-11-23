@@ -85,7 +85,8 @@ export const PORTS = {
 		versionDetection: 7301,
 		versionDetectionFakeArr: 7302,
 		basicAuth: 7303,
-		basicAuthFakeArr: 7304
+		basicAuthFakeArr: 7304,
+		delete: 7305
 	},
 	notifications: {
 		announcement: 7400,

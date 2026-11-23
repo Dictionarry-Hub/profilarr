@@ -112,7 +112,7 @@ test('API_AREAS: one area per spec tag, writable only where a write exists', () 
 		system: false,
 		jobs: false,
 		backups: true,
-		arr: false,
+		arr: true,
 		databases: true,
 		announcements: false
 	});

@@ -7,7 +7,7 @@ import type { SyncTrigger } from '#db/queries/arrSync.ts';
 import { upgradeConfigsQueries } from '#db/queries/upgradeConfigs.ts';
 import { arrRenameSettingsQueries } from '#db/queries/arrRenameSettings.ts';
 import { arrCleanupSettingsQueries } from '#db/queries/arrCleanupSettings.ts';
-import { cleanupJobsForArrInstance } from '#server/jobs/cleanup.ts';
+import { deleteArrInstance } from '#server/arr_instances/service.ts';
 import { arrDriftStatusQueries } from '#db/queries/arrDriftStatus.ts';
 import { jobQueueQueries } from '#db/queries/jobQueue.ts';
 import { jobRunHistoryQueries } from '#db/queries/jobRunHistory.ts';
@@ -217,45 +217,14 @@ export const actions = {
 		const id = parseInt(formData.get('id')?.toString() || '0', 10);
 
 		if (!id) {
-			await logger.warn('Attempted to delete arr instance without ID', {
-				source: 'arr'
-			});
-
-			return fail(400, {
-				error: 'Instance ID is required'
-			});
+			return fail(400, { error: 'Instance ID is required' });
 		}
 
-		try {
-			cleanupJobsForArrInstance(id);
-			const deleted = arrInstancesQueries.delete(id);
-
-			if (!deleted) {
-				return fail(404, {
-					error: 'Instance not found'
-				});
-			}
-
-			await logger.info(`Deleted arr instance: ${id}`, {
-				source: 'arr',
-				meta: { id }
-			});
-
-			redirect(303, '/arr');
-		} catch (error) {
-			// Re-throw redirect errors (they're not actual errors)
-			if (error && typeof error === 'object' && 'status' in error && 'location' in error) {
-				throw error;
-			}
-
-			await logger.error('Failed to delete arr instance', {
-				source: 'arr',
-				meta: { error: error instanceof Error ? error.message : String(error) }
-			});
-
-			return fail(500, {
-				error: error instanceof Error ? error.message : 'Failed to delete instance'
-			});
+		const result = await deleteArrInstance(id);
+		if (!result.ok) {
+			return fail(result.kind === 'not_found' ? 404 : 500, { error: result.message });
 		}
+
+		redirect(303, '/arr');
 	}
 } satisfies Actions;

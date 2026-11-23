@@ -41,6 +41,8 @@ security:
 paths:
   /arr:
     $ref: './paths/arr.yaml#/instances'
+  /arr/{id}:
+    $ref: './paths/arr.yaml#/instance'
   /databases:
     $ref: './paths/databases.yaml#/databases'
   /databases/{id}:

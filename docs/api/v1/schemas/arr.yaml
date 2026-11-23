@@ -70,6 +70,85 @@ ArrInstance:
       type: string
       description: Last update timestamp
 
+CreateArrInstanceInput:
+  type: object
+  required:
+    - name
+    - type
+    - url
+    - api_key
+  properties:
+    name:
+      type: string
+      description: Display name (must be unique)
+    type:
+      $ref: '#/ArrType'
+    url:
+      type: string
+      description: Instance URL used by Profilarr's backend for API calls
+    external_url:
+      type: string
+      nullable: true
+      description:
+        Optional external/browser-facing URL. When set, the UI uses this for
+        "Open in Radarr/Sonarr" browser links while Profilarr's backend continues
+        to call the instance using `url`. Useful for reverse-proxied deployments
+        where the internal and external hostnames differ.
+      example: https://radarr.example.com
+    api_key:
+      type: string
+      description: The instance's API key. Write-only; never returned.
+    basic_auth_username:
+      type: string
+      nullable: true
+      description: Basic Auth for a reverse proxy in front of the instance. Needs a password.
+    basic_auth_password:
+      type: string
+      nullable: true
+      description: Basic Auth password. Write-only; never returned.
+    tags:
+      type: array
+      items:
+        type: string
+
+UpdateArrInstanceInput:
+  type: object
+  minProperties: 1
+  properties:
+    name:
+      type: string
+    url:
+      type: string
+      description: Instance URL used by Profilarr's backend for API calls
+    external_url:
+      type: string
+      nullable: true
+      description: |
+        Optional external/browser-facing URL. When set, the UI uses this for
+        "Open in Radarr/Sonarr" browser links while Profilarr's backend continues
+        to call the instance using `url`. Useful for reverse-proxied deployments
+        where the internal and external hostnames differ.
+      example: https://radarr.example.com
+    api_key:
+      type: string
+      description: The instance's API key. Write-only; never returned.
+    basic_auth_username:
+      type: string
+      nullable: true
+      description: Basic Auth for a reverse proxy in front of the instance. Needs a password.
+    basic_auth_password:
+      type: string
+      nullable: true
+      description: Basic Auth password. Write-only; never returned.
+    tags:
+      type: array
+      items:
+        type: string
+    library_refresh_interval:
+      type: integer
+      minimum: 0
+      description: Library cache refresh interval in minutes (0 = manual)
+
 ArrType:
   type: string
   enum:

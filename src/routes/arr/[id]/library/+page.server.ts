@@ -1,17 +1,19 @@
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from '@sveltejs/kit';
-import { arrInstancesQueries } from '#db/queries/arrInstances.ts';
-import { cache } from '#utils/cache/cache.ts';
-import { cleanupJobsForArrInstance } from '#server/jobs/cleanup.ts';
+import { deleteArrInstance } from '#server/arr_instances/service.ts';
 
 export const actions: Actions = {
-	delete: ({ params }) => {
+	delete: async ({ params }) => {
 		const id = parseInt(params.id || '', 10);
+
+		// An id that is not there is not an error on this page: it leads back to the list
 		if (!isNaN(id)) {
-			cleanupJobsForArrInstance(id);
-			arrInstancesQueries.delete(id);
-			cache.delete(`library:${id}`);
+			const result = await deleteArrInstance(id);
+			if (!result.ok && result.kind !== 'not_found') {
+				return fail(500, { error: result.message });
+			}
 		}
+
 		redirect(303, '/arr');
 	}
 };
